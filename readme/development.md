@@ -37,7 +37,12 @@ uv run pytest tests/integration/runtime/test_core_runtime.py::test_resolved_run_
 trackmaniarl/              published library
   core/                    stable contracts, data, replay, spec and runtime
   algorithms/              learners and optimization utilities
+    value_based/            unified scalar/quantile learner, targets and losses
   models/                  reusable neural-network building blocks
+    encoders/               frame-only MLP/CNN encoders
+    temporal/               Identity, GRU and portable Mamba cores
+    heads/                  scalar, quantile, actor and critic heads
+    strategies/             scalar/fixed/random/learned value support
   builtins/                supported component catalogue
   distributed/             actor/learner protocol and durability
   trackmania/              game-only adapter
@@ -46,7 +51,7 @@ trackmaniarl/              published library
   project/                 `trackmaniarl init` templates
 tests/                     deterministic unit and integration tests
 readme/                    user and developer guides
-docs/                      audit and research records
+docs/diagrams/             reproducible architecture diagrams and previews
 ```
 
 `trackmaniarl init <project-name>` creates an application project outside the
@@ -54,6 +59,13 @@ library boundary. Generated projects and their artifacts are ignored source-tree
 state, not release contents.
 
 ## Change workflow
+
+<p align="center">
+  <img src="../docs/diagrams/extension-workflow-preview.svg" alt="TrackmaniaRL extension ownership, contract and promotion gates" width="900">
+</p>
+
+[Editable diagram](../docs/diagrams/extension-workflow.excalidraw) ·
+[local preview](../docs/diagrams/extension-workflow-preview.html)
 
 1. Decide whether the behavior is reusable library code or application-specific
    experiment code. Prefer the generated agent project for the latter.
@@ -64,7 +76,12 @@ state, not release contents.
    requirements in the core path.
 5. Add a deterministic test beside the nearest existing contract tests.
 6. Run formatting, strict typing and the full test suite.
-7. For game changes, run `trackmaniarl track check` and the bounded smoke test
+7. Update user/developer documentation and editable diagram sources whenever a
+   public flow, ownership boundary or checkpoint contract changes.
+8. Regenerate each changed diagram from its `.spec.json`, validate the
+   `.excalidraw` scene and visually inspect its SVG/PNG preview at documentation
+   width.
+9. For game changes, run `trackmaniarl track check` and the bounded smoke test
    on Windows with Trackmania before release.
 
 ## Adding a dependency
@@ -92,6 +109,16 @@ A public component should have:
 - no hidden global configuration or mandatory network tracker;
 - checkpoint state for everything required to resume correctly.
 
+Value-model additions must also declare their representation contract, validate
+encoder/temporal/head/strategy dimensions, cover `[B,...]` and `[B,T,...]`, and
+prove that selected-action paths do not materialize unnecessary all-action
+tensors. A learned value strategy needs optimizer-isolation and finite-difference
+gradient tests.
+
+Temporal-core additions need `unroll`, `step`, initial-state and burn-in tests.
+Backend substitutions may change kernels but must not silently change model
+parameters or architecture fingerprints.
+
 Add experimental algorithms or encoders as importable, opt-in blocks. Compare
 one variable at a time against an identical seeded baseline before promoting a
 new default.
@@ -105,6 +132,10 @@ new default.
 | game connection | `uv run trackmaniarl track check` | verifies one compatible OpenPlanet telemetry frame |
 | bounded live gate | `uv run trackmaniarl smoke run.yaml --transitions 100` | real actor/learner path, policy refresh and checkpoint |
 | training | `uv run trackmaniarl train run.yaml` | full configured run |
+
+For behavior cloning, `validate` uses the offline-supervised validation hook.
+The bounded workflow additionally includes deterministic split tests, exact
+`bc-latest.pt` resume and a real `bc-benchmark` closed-loop release gate.
 
 `validate` imports configured Python components, so it is safe for the game but
 not a sandbox for untrusted projects.

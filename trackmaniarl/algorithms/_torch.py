@@ -53,9 +53,11 @@ class TorchPolicy:
             raise TypeError(
                 "Bundled torch policies require a tensor observation from the feature pipeline"
             )
+        batched = prepared.unsqueeze(0) if prepared.ndim == 1 else prepared
         with torch.no_grad():
-            output = self.actor(prepared, deterministic=deterministic)
+            output = self.actor(batched, deterministic=deterministic)
         action = output[0] if isinstance(output, tuple) else output
+        action = action[0] if prepared.ndim == 1 else action
         return action.detach().cpu().numpy()
 
     def export_state(self) -> Mapping[str, Any]:
@@ -105,6 +107,10 @@ class TorchLearnerBase:
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
+        torch.use_deterministic_algorithms(self.execution.deterministic)
+        if torch.cuda.is_available():
+            torch.backends.cudnn.deterministic = self.execution.deterministic
+            torch.backends.cudnn.benchmark = not self.execution.deterministic
         if self.model is None:
             factory = self.model_factory or context.get("model_factory")
             if factory is None:
@@ -147,6 +153,7 @@ class TorchLearnerBase:
                 "requested_device": self.execution.device,
                 "requested_precision": self.execution.precision,
                 "compile_requested": self.execution.compile,
+                "deterministic": self.execution.deterministic,
                 "compile_mode": self.execution.compile_mode,
                 "resolved": False,
             }
@@ -174,15 +181,16 @@ class TorchLearnerBase:
         event = batch.metadata.get("_trackmaniarl_transfer_event")
         if event is not None:
             torch.cuda.current_stream(self.device).wait_event(event)
-            event.synchronize()
-            started = batch.metadata.get("_trackmaniarl_transfer_started")
-            if started is None:
-                raise RuntimeError("Prepared CUDA batch is missing its transfer start event")
             return replace(
                 batch,
                 metadata={
-                    **batch.metadata,
-                    "_trackmaniarl_host_to_device_s": float(started.elapsed_time(event)) / 1_000.0,
+                    key: value
+                    for key, value in batch.metadata.items()
+                    if key
+                    not in {
+                        "_trackmaniarl_transfer_event",
+                        "_trackmaniarl_transfer_started",
+                    }
                 },
             )
         return self._move_batch(batch, non_blocking=False)
