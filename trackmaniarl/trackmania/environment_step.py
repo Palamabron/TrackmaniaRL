@@ -139,7 +139,8 @@ def _score_step(
 ) -> _RewardedStep:
     position = frame.values[list(environment.config.position_indices)]
     race_time_ms = float(frame.values[3])
-    step_race_time_ms = max(0.0, race_time_ms - _last_race_time_ms(environment))
+    # Preserve regressions for diagnostics; do not disguise them as a zero-time finish.
+    step_race_time_ms = race_time_ms - _last_race_time_ms(environment)
     environment._last_race_time_ms = race_time_ms
     brake_tap = float(control[1]) == BRAKE_TAP_SENTINEL
     applied_brake = _applied_brake(control, step_race_time_ms)

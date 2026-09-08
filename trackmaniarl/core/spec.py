@@ -202,6 +202,9 @@ class EvaluationSuiteSpec(BaseModel):
     trials_per_map: PositiveInt = 1
     time_buckets_s: tuple[float, ...] = DEFAULT_EVALUATION_TIME_BUCKETS_S
     target_median_s: float | None = None
+    target_mean_s: float | None = None
+    max_step_race_time_ms: float | None = None
+    reject_telemetry_skips: bool = False
     min_finish_rate: float = 0.9
 
     @field_validator("maps")
@@ -223,6 +226,20 @@ class EvaluationSuiteSpec(BaseModel):
     def _positive_target_median(cls, value: float | None) -> float | None:
         if value is not None and value <= 0.0:
             raise ValueError("target_median_s must be positive")
+        return value
+
+    @field_validator("target_mean_s")
+    @classmethod
+    def _positive_target_mean(cls, value: float | None) -> float | None:
+        if value is not None and value <= 0.0:
+            raise ValueError("target_mean_s must be positive")
+        return value
+
+    @field_validator("max_step_race_time_ms")
+    @classmethod
+    def _positive_max_step_race_time(cls, value: float | None) -> float | None:
+        if value is not None and value <= 0.0:
+            raise ValueError("max_step_race_time_ms must be positive")
         return value
 
     @field_validator("min_finish_rate")

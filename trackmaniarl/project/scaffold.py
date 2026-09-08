@@ -74,9 +74,9 @@ def _write_trackmania_assets(target: Path) -> None:
     (target / "maps").mkdir()
     boundary = np.asarray([[0, 0, -5], [5, 0, -5], [10, 0, -5]], dtype=np.float32)
     np.savez_compressed(
-        assets / "trackmaniarl-test.geometry.npz",
+        assets / "my-map.geometry.npz",
         version=np.asarray("1"),
-        map_uid=np.asarray("REPLACE_WITH_TEST_3_UID"),
+        map_uid=np.asarray("REPLACE_WITH_YOUR_MAP_UID"),
         map_sha256=np.asarray(""),
         left=boundary,
         center=boundary + np.asarray([0, 0, 5], dtype=np.float32),

@@ -36,8 +36,22 @@ def _register_benchmark(commands: CommandParsers) -> None:
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("--trials", type=int)
     parser.add_argument("--target-median", type=float)
+    parser.add_argument("--target-mean", type=float)
+    parser.add_argument("--max-step-race-time-ms", type=float)
     parser.add_argument("--min-finish-rate", type=float)
+    _add_recording_options(parser)
+    parser.add_argument(
+        "--reject-telemetry-skips",
+        action="store_true",
+        help="reject the benchmark when any trial reports skipped telemetry frames",
+    )
     parser.set_defaults(handler=_benchmark)
+
+
+def _add_recording_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--record", type=Path, help="record every trial to a new .mkv (Windows)")
+    parser.add_argument("--window-title", default="Trackmania")
+    parser.add_argument("--ffmpeg", default="ffmpeg", help="FFmpeg executable or full path")
 
 
 def _register_demo_benchmark(commands: CommandParsers) -> None:

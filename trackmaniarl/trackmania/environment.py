@@ -186,17 +186,24 @@ class OpenPlanetEnvironment:
             frame = self.client.read()
             race_time_ms = float(frame.values[3])
             restart_observed = restart_observed or race_time_ms < previous_race_time_ms
-            if restart_observed and race_time_ms > 0.0:
+            if (
+                restart_observed
+                and race_time_ms > 0.0
+                and race_time_ms >= self.config.start_race_time_ms
+            ):
                 return frame
             if monotonic() >= deadline:
-                raise TimeoutError(
-                    "Trackmania did not confirm a new race after reset within "
-                    f"{self.config.start_timeout_s:g}s. Check that the configured "
-                    f"{self.config.control_backend} restart input resets the race timer, "
-                    "then restart the loaded map."
-                )
+                self._raise_start_timeout()
             if self.config.start_poll_s:
                 sleep(self.config.start_poll_s)
+
+    def _raise_start_timeout(self) -> None:
+        raise TimeoutError(
+            "Trackmania did not confirm a new race after reset within "
+            f"{self.config.start_timeout_s:g}s. Check that the configured "
+            f"{self.config.control_backend} restart input resets the race timer, "
+            "then restart the loaded map."
+        )
 
     def step(self, action: Any) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         return environment_step.step(self, action, perf_counter)

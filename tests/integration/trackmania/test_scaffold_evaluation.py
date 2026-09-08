@@ -39,6 +39,8 @@ class _SuccessfulEnvironment:
             "race_time_ms": 12_345.0,
             "controller_apply_ms": 1.5,
             "telemetry_wait_ms": 7.5,
+            "control_brake_tap": 1.0,
+            "step_race_time_ms": 55.0,
             "telemetry_skipped_frames": 2.0,
         }
         return 1.0, 2.0, True, False, info
@@ -227,7 +229,7 @@ def _assert_openplanet_plugin(target: Path) -> None:
 def _assert_project_files(target: Path) -> None:
     assets = target / "assets"
     assert not (assets / "trajectory.csv").exists()
-    with np.load(assets / "trackmaniarl-test.geometry.npz", allow_pickle=False) as geometry:
+    with np.load(assets / "my-map.geometry.npz", allow_pickle=False) as geometry:
         assert "recorded_count" in geometry.files
     assert (target / "maps").is_dir()
     env_example = (target / ".env-example").read_text()
@@ -241,7 +243,13 @@ def _assert_project_metadata(target: Path) -> None:
     pyproject = tomllib.loads((target / "pyproject.toml").read_text(encoding="utf-8"))
     assert pyproject["tool"]["poe"]["tasks"]["record-left"]
     assert pyproject["tool"]["uv"]["sources"]["torch"]
-    assert pyproject["tool"]["uv"]["sources"]["vgamepad"]
+    assert pyproject["tool"]["uv"]["sources"]["vgamepad"] == {
+        "git": "https://github.com/Palamabron/vgamepad",
+        "rev": "5f3435df3f8a0e658feb58b207d9137cdb5183cd",
+    }
+    assert any(
+        dependency.startswith("vgamepad>=") for dependency in pyproject["project"]["dependencies"]
+    )
     assert "wandb" not in pyproject["project"]["dependencies"][0]
     readme = (target / "README.md").read_text(encoding="utf-8")
     assert "Plugin Manager" in readme
@@ -263,6 +271,12 @@ def _assert_success_metrics(metrics: dict[str, float]) -> None:
     assert metrics["eval/finish_time_s"] == pytest.approx(12.345)
     assert metrics["eval/controller_apply_ms"] == pytest.approx(1.5)
     assert metrics["eval/telemetry_wait_ms"] == pytest.approx(7.5)
+    assert metrics["eval/control_brake_tap_fraction"] == 1.0
+    assert metrics["eval/step_race_time_ms_p99"] == 55.0
+    assert metrics["eval/step_race_time_ms_max"] == 55.0
+    assert metrics["eval/step_race_time_measurement_count"] == 4.0
+    assert metrics["eval/step_race_time_expected_measurement_count"] == 4.0
+    assert metrics["eval/step_race_time_measurements_valid"] == 1.0
     assert metrics["eval/telemetry_skipped_frames_total"] == 8.0
     assert metrics["eval/telemetry_skipped_frames_mean"] == 2.0
     assert metrics["eval/telemetry_skipped_frames_max"] == 2.0
@@ -281,6 +295,17 @@ def test_trackmania_evaluator_runs_every_declared_trial(
     _assert_success_metrics(metrics)
     artifact = json.loads((tmp_path / "evaluation.json").read_text(encoding="utf-8"))
     assert [trial["steps"] for trial in artifact["trials"]] == [1, 1, 1, 1]
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "evaluation-timeline.jsonl").read_text().splitlines()
+    ]
+    assert [event["event"] for event in events] == ["start", "end"] * 4
+    assert sum(event["result"] is not None for event in events) == 4
+    assert [trial["step_race_time_ms_max"] for trial in artifact["trials"]] == [55.0] * 4
+    assert [trial["step_race_time_measurement_count"] for trial in artifact["trials"]] == [1] * 4
+    assert [trial["step_race_time_measurements_valid"] for trial in artifact["trials"]] == [
+        True
+    ] * 4
 
 
 def test_trackmania_evaluator_passes_raw_observation_to_opt_in_policy(

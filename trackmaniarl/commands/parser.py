@@ -4,6 +4,7 @@ import argparse
 from collections.abc import Callable
 from typing import Any
 
+from trackmaniarl._version import __version__
 from trackmaniarl.commands.parser_assets import register_asset_commands
 from trackmaniarl.commands.parser_trackmania import register_trackmania_commands
 from trackmaniarl.commands.parser_training import register_training_commands
@@ -13,6 +14,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="trackmaniarl", description="TrackmaniaRL project tooling"
     )
+    parser.add_argument("--version", action="version", version=f"TrackmaniaRL {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
     register_training_commands(commands)
     register_trackmania_commands(commands)

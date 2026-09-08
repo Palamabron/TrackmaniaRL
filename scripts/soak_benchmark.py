@@ -1,51 +1,33 @@
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from statistics import median
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING or __package__:
+    from scripts.soak_benchmark_acceptance import TrialAcceptance, _trial_acceptance
     from scripts.soak_evidence import checkpoint_file
     from scripts.soak_types import (
         Check,
         Checkpoint,
         VerificationInputError,
         add_check,
-        integer,
         mapping,
-        number,
         sha256,
         string,
     )
 else:
+    from soak_benchmark_acceptance import TrialAcceptance, _trial_acceptance
     from soak_evidence import checkpoint_file
     from soak_types import (
         Check,
         Checkpoint,
         VerificationInputError,
         add_check,
-        integer,
         mapping,
-        number,
         sha256,
         string,
     )
-
-
-@dataclass(frozen=True, slots=True)
-class AcceptanceThresholds:
-    trials_per_map: int
-    minimum_finish_rate: float
-    target_median_s: float
-
-
-@dataclass(frozen=True, slots=True)
-class TrialAcceptance:
-    passed: bool
-    finished: int
-    median_s: float | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,52 +76,6 @@ def _benchmark_trials(evaluation: dict[str, object]) -> list[dict[str, object]]:
     if not isinstance(value, list) or not value:
         raise VerificationInputError("evaluation.json.trials must be a non-empty list")
     return [mapping(item, f"evaluation.json.trials[{index}]") for index, item in enumerate(value)]
-
-
-def _trial_acceptance(
-    trials: list[dict[str, object]],
-    suite: dict[str, object],
-    assets: list[dict[str, object]],
-) -> TrialAcceptance:
-    thresholds = _acceptance_thresholds(suite)
-    expected = _expected_trials(assets, thresholds.trials_per_map)
-    observed = _observed_trials(trials)
-    finished_times = _finished_times(trials)
-    finish_rate = len(finished_times) / sum(expected.values()) if expected else 0.0
-    median_s = median(finished_times) if finished_times else None
-    passed = (
-        observed == expected
-        and finish_rate >= thresholds.minimum_finish_rate
-        and median_s is not None
-        and median_s < thresholds.target_median_s
-    )
-    return TrialAcceptance(passed, len(finished_times), median_s)
-
-
-def _finished_times(trials: list[dict[str, object]]) -> list[float]:
-    return [
-        number(trial.get("finish_time_s"), "finished trial finish_time_s")
-        for trial in trials
-        if trial.get("finished") is True
-    ]
-
-
-def _acceptance_thresholds(suite: dict[str, object]) -> AcceptanceThresholds:
-    return AcceptanceThresholds(
-        integer(suite.get("trials_per_map"), "evaluation trials_per_map"),
-        number(suite.get("min_finish_rate"), "evaluation min_finish_rate"),
-        number(suite.get("target_median_s"), "evaluation target_median_s"),
-    )
-
-
-def _expected_trials(assets: list[dict[str, object]], trials_per_map: int) -> Counter[str]:
-    return Counter(
-        {string(asset.get("map_id"), "evaluation asset map_id"): trials_per_map for asset in assets}
-    )
-
-
-def _observed_trials(trials: list[dict[str, object]]) -> Counter[str]:
-    return Counter(string(trial.get("map_id"), "benchmark trial map_id") for trial in trials)
 
 
 def _benchmark_structure(
@@ -234,7 +170,12 @@ def _benchmark_detail(analysis: BenchmarkAnalysis) -> str:
     acceptance = analysis.acceptance
     return (
         f"trials={len(analysis.trials)}, finished={acceptance.finished}, "
-        f"median_s={acceptance.median_s}"
+        f"median_s={acceptance.median_s}, mean_s={acceptance.mean_s}, "
+        f"max_step_race_time_ms={acceptance.max_step_race_time_ms}, "
+        f"step_race_time_measurements_valid="
+        f"{acceptance.step_race_time_measurements_valid}, "
+        f"step_race_time_measurement_count={acceptance.step_race_time_measurement_count}/"
+        f"{acceptance.step_race_time_expected_measurement_count}"
     )
 
 
@@ -293,18 +234,36 @@ def _checkpoint_fields(
 def _benchmark_report(
     evaluation: dict[str, object], data: BenchmarkReportData
 ) -> dict[str, object]:
-    checkpoint_path, checkpoint_digest = _checkpoint_fields(data.final_checkpoint, data.run_dir)
     evaluation_path = data.run_dir / "evaluation.json"
-    acceptance = data.analysis.acceptance
+    return _benchmark_file_fields(evaluation, evaluation_path) | _benchmark_result_fields(data)
+
+
+def _benchmark_file_fields(
+    evaluation: dict[str, object], evaluation_path: Path
+) -> dict[str, object]:
     return {
         "present": True,
         "path": "evaluation.json",
         "sha256": sha256(evaluation_path),
         "size_bytes": evaluation_path.stat().st_size,
         "schema_version": evaluation.get("schema_version"),
+    }
+
+
+def _benchmark_result_fields(data: BenchmarkReportData) -> dict[str, object]:
+    checkpoint_path, checkpoint_digest = _checkpoint_fields(data.final_checkpoint, data.run_dir)
+    acceptance = data.analysis.acceptance
+    return {
         "trial_count": len(data.analysis.trials),
         "finished_trials": acceptance.finished,
         "median_finish_time_s": acceptance.median_s,
+        "mean_finish_time_s": acceptance.mean_s,
+        "max_step_race_time_ms": acceptance.max_step_race_time_ms,
+        "step_race_time_measurements_valid": (acceptance.step_race_time_measurements_valid),
+        "step_race_time_measurement_count": acceptance.step_race_time_measurement_count,
+        "step_race_time_expected_measurement_count": (
+            acceptance.step_race_time_expected_measurement_count
+        ),
         "error_trial_indices": data.analysis.error_indices,
         "checkpoint": checkpoint_path,
         "checkpoint_sha256": checkpoint_digest,

@@ -5,7 +5,7 @@ from __future__ import annotations
 from inspect import Parameter, Signature
 from threading import RLock
 from time import sleep
-from typing import ClassVar, Literal, Protocol, runtime_checkable
+from typing import Any, ClassVar, Literal, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -14,7 +14,6 @@ from trackmaniarl.trackmania.keyboard_control import (
     KeyboardController as KeyboardController,
 )
 from trackmaniarl.trackmania.keyboard_control import (
-    confirm_trackmania_finish,
     restart_trackmania_editor_validation,
     restart_trackmania_race,
 )
@@ -62,9 +61,22 @@ class _VibrationCallback:
         self.controller._record_vibration(large_motor)
 
 
+def _vgamepad_module() -> Any:
+    try:
+        import vgamepad
+    except ImportError as exc:
+        raise RuntimeError(
+            "GamepadController requires the pinned vgamepad fork. Add "
+            "'vgamepad @ git+https://github.com/Palamabron/vgamepad@"
+            "5f3435df3f8a0e658feb58b207d9137cdb5183cd' to your project, then sync."
+        ) from exc
+    return vgamepad
+
+
 class GamepadController:
     """Virtual XInput controller with an explicit TrackMania restart action."""
 
+    _CONFIRM_BUTTON = 0x1000  # Xbox A; menu Select binding.
     _RESTART_BUTTON = 0x2000  # Xbox B; TrackMania's default Give Up binding.
 
     def __init__(
@@ -72,11 +84,7 @@ class GamepadController:
         *,
         restart_input: Literal["gamepad", "keyboard", "editor_validation"] = "gamepad",
     ) -> None:
-        try:
-            import vgamepad
-        except ImportError as exc:
-            raise RuntimeError("Install trackmaniarl[trackmania] to use GamepadController") from exc
-        self._gamepad = vgamepad.VX360Gamepad()
+        self._gamepad = _vgamepad_module().VX360Gamepad()
         self._tap_lock = RLock()
         self._collision_lock = RLock()
         self._collision_detected = False
@@ -140,16 +148,20 @@ class GamepadController:
         self.consume_collision()
 
     def _restart_with_gamepad(self) -> None:
-        self._gamepad.press_button(button=self._RESTART_BUTTON)
+        self._tap_button(self._RESTART_BUTTON)
+
+    def _tap_button(self, button: int) -> None:
+        self._gamepad.press_button(button=button)
         self._gamepad.update()
         sleep(0.1)
-        self._gamepad.release_button(button=self._RESTART_BUTTON)
+        self._gamepad.release_button(button=button)
         self._gamepad.update()
 
     def confirm_finish(self) -> None:
-        """Confirm TrackMania's personal-record screen with Enter."""
+        """Confirm TrackMania menus through the active virtual controller."""
 
-        confirm_trackmania_finish()
+        with self._tap_lock:
+            self._tap_button(self._CONFIRM_BUTTON)
 
     def close(self) -> None:
         with self._tap_lock:

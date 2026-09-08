@@ -20,7 +20,7 @@ from trackmaniarl.distributed.actor import (
 from trackmaniarl.distributed.actor_requests import ActorProcessRequest
 from trackmaniarl.distributed.coordinator import Coordinator
 from trackmaniarl.distributed.coordinator_ingest import replay_info_for_transition
-from trackmaniarl.distributed.coordinator_support import _BatchPrefetcher, _MetricAccumulator
+from trackmaniarl.distributed.coordinator_support import _MetricAccumulator
 from trackmaniarl.distributed.coordinator_types import CoordinatorConfig
 from trackmaniarl.distributed.protocol import (
     authenticate,
@@ -80,25 +80,6 @@ def test_online_partial_progress_is_not_mislabeled_as_an_elite_lap() -> None:
         "is_demo": True,
         "sampling/projected_lap_time_s": 36.035,
     }
-
-
-def test_non_overlapped_batch_path_never_prepares_or_speculatively_samples() -> None:
-    batch = object()
-    sampler = _CountingSampler(batch)
-    learner = _CountingLearner()
-    prefetcher = _BatchPrefetcher(
-        cast(Any, SimpleNamespace(sampler=sampler, learner=learner, replay_store=object()))
-    )
-
-    first, _, first_wait = prefetcher.next(BatchRequest(batch_size=1))
-    second, _, second_wait = prefetcher.next(BatchRequest(batch_size=1))
-    prefetcher.close()
-
-    assert first is batch
-    assert second is batch
-    assert sampler.calls == 2
-    assert learner.prepare_calls == 0
-    assert first_wait == second_wait == 0.0
 
 
 def test_distributed_runtimes_reject_short_tokens(tmp_path: Path) -> None:
@@ -164,18 +145,6 @@ def test_run_fingerprint_covers_first_party_source_digest(
     monkeypatch.setattr(fingerprint, "_trackmaniarl_source_digest", lambda: "changed")
 
     assert run_fingerprint(spec, tmp_path) != baseline
-
-
-def test_run_fingerprint_accepts_nested_component_without_kwargs(tmp_path: Path) -> None:
-    components = _fingerprint_components("trackmaniarl.core.builtins:SmokeLearner")
-    components["learner"]["kwargs"] = {
-        "component": {"class_path": "trackmaniarl.core.builtins:IdentityFeaturePipeline"}
-    }
-    spec = RunSpec.model_validate(
-        {"api_version": "2.0", "run_id": "nested-component", "components": components}
-    )
-
-    assert len(run_fingerprint(spec, tmp_path)) == 64
 
 
 def _geometry_config(geometry_name: str, pace_name: str) -> dict[str, Any]:

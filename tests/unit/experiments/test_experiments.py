@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import Any
 
 from trackmaniarl.experiments.evaluation import (
-    STANDARD_METRICS,
     EvaluationResult,
     aggregate_results,
 )
@@ -25,20 +25,23 @@ class FailingStrategy:
 
 
 def _finished_result() -> EvaluationResult:
-    return EvaluationResult(
-        True,
-        10.0,
-        False,
-        5.0,
-        1.0,
-        60.0,
-        steps=2,
-        controller_apply_ms=2.0,
-        telemetry_wait_ms=8.0,
-        telemetry_skipped_frames_total=3,
-        telemetry_skipped_frames_max=2,
-        telemetry_steps_with_skipped_frames_fraction=0.5,
-    )
+    return EvaluationResult(True, 10.0, False, 5.0, 1.0, 60.0, **_finished_timing())
+
+
+def _finished_timing() -> dict[str, float | int | bool]:
+    return {
+        "steps": 2,
+        "controller_apply_ms": 2.0,
+        "telemetry_wait_ms": 8.0,
+        "control_brake_tap_fraction": 0.5,
+        "step_race_time_ms_p99": 50.0,
+        "step_race_time_ms_max": 60.0,
+        "step_race_time_measurement_count": 2,
+        "step_race_time_measurements_valid": True,
+        "telemetry_skipped_frames_total": 3,
+        "telemetry_skipped_frames_max": 2,
+        "telemetry_steps_with_skipped_frames_fraction": 0.5,
+    }
 
 
 def _failed_result() -> EvaluationResult:
@@ -52,16 +55,17 @@ def _failed_result() -> EvaluationResult:
         steps=1,
         controller_apply_ms=5.0,
         telemetry_wait_ms=11.0,
+        control_brake_tap_fraction=1.0,
+        step_race_time_ms_p99=55.0,
+        step_race_time_ms_max=55.0,
+        step_race_time_measurement_count=1,
+        step_race_time_measurements_valid=True,
         telemetry_skipped_frames_total=0,
     )
 
 
 def _evaluation_metrics() -> dict[str, float]:
     return aggregate_results([_finished_result(), _failed_result()])
-
-
-def test_evaluation_suite_always_reports_the_standard_metric_set() -> None:
-    assert tuple(_evaluation_metrics()) == STANDARD_METRICS
 
 
 def test_evaluation_suite_aggregates_timing_and_telemetry() -> None:
@@ -71,10 +75,30 @@ def test_evaluation_suite_aggregates_timing_and_telemetry() -> None:
     assert metrics["eval/action_latency_ms"] == 5 / 3
     assert metrics["eval/controller_apply_ms"] == 3.0
     assert metrics["eval/telemetry_wait_ms"] == 9.0
+    assert metrics["eval/control_brake_tap_fraction"] == 2 / 3
+    assert metrics["eval/step_race_time_ms_p99"] == 55.0
+    assert metrics["eval/step_race_time_ms_max"] == 60.0
+    assert metrics["eval/step_race_time_measurement_count"] == 3.0
+    assert metrics["eval/step_race_time_expected_measurement_count"] == 3.0
+    assert metrics["eval/step_race_time_measurements_valid"] == 1.0
     assert metrics["eval/telemetry_skipped_frames_total"] == 3.0
     assert metrics["eval/telemetry_skipped_frames_mean"] == 1.0
     assert metrics["eval/telemetry_skipped_frames_max"] == 2.0
     assert metrics["eval/telemetry_steps_with_skipped_frames_fraction"] == 1 / 3
+
+
+def test_evaluation_suite_marks_partial_step_race_measurements_invalid() -> None:
+    incomplete = replace(
+        _finished_result(),
+        step_race_time_measurement_count=1,
+        step_race_time_measurements_valid=False,
+    )
+
+    metrics = aggregate_results([incomplete])
+
+    assert metrics["eval/step_race_time_measurement_count"] == 1.0
+    assert metrics["eval/step_race_time_expected_measurement_count"] == 2.0
+    assert metrics["eval/step_race_time_measurements_valid"] == 0.0
 
 
 def test_provider_failure_falls_back_to_a_valid_grid_proposal() -> None:

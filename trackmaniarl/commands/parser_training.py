@@ -7,6 +7,7 @@ from pathlib import Path
 from trackmaniarl.commands.common import _init, _inspect_config, _validate
 from trackmaniarl.commands.distributed import _actor, _learner
 from trackmaniarl.commands.parser_types import CommandParsers
+from trackmaniarl.commands.recovery_finetune import _recovery_finetune
 from trackmaniarl.commands.smoke import _smoke
 from trackmaniarl.commands.training import _offline_pretrain, _train
 
@@ -20,6 +21,7 @@ def register_training_commands(commands: CommandParsers) -> None:
     _register_project_commands(commands)
     _register_train(commands)
     _register_offline_pretrain(commands)
+    _register_recovery_finetune(commands)
     _register_resume(commands)
     _register_learner(commands)
     _register_actor(commands)
@@ -83,6 +85,58 @@ def _register_offline_pretrain(commands: CommandParsers) -> None:
         help="warm-start the configured learner model from this checkpoint",
     )
     parser.set_defaults(handler=_offline_pretrain)
+
+
+def _register_recovery_finetune(commands: CommandParsers) -> None:
+    parser = commands.add_parser(
+        "recovery-finetune",
+        help="fine-tune only an incident-gated adapter from human recovery episodes",
+    )
+    parser.add_argument("config", type=Path)
+    parser.add_argument(
+        "checkpoint", type=Path, help="source incident-gated graph policy checkpoint"
+    )
+    _add_recovery_finetune_options(parser)
+    parser.set_defaults(handler=_recovery_finetune)
+
+
+def _add_recovery_finetune_options(parser: argparse.ArgumentParser) -> None:
+    _add_recovery_data_source(parser)
+    _add_recovery_optimization_options(parser)
+    _add_recovery_data_gate_options(parser)
+    _add_recovery_selection_options(parser)
+    parser.add_argument("--output", type=Path)
+
+
+def _add_recovery_data_source(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--recovery",
+        action="append",
+        type=Path,
+        required=True,
+        help="human recovery .npz file or directory (repeatable)",
+    )
+
+
+def _add_recovery_optimization_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--updates", type=int, default=300)
+    parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--validation-fraction", type=float, default=0.25)
+    parser.add_argument("--minimum-gate", type=float, default=0.01)
+    parser.add_argument("--log-interval", type=int, default=25)
+
+
+def _add_recovery_data_gate_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--minimum-usable-episodes", type=int, default=24)
+    parser.add_argument("--minimum-validation-episodes", type=int, default=6)
+    parser.add_argument("--minimum-gated-samples", type=int, default=500)
+    parser.add_argument("--minimum-samples-per-episode", type=int, default=15)
+    parser.add_argument("--maximum-normalized-recovery-time", type=float, default=80.0)
+
+
+def _add_recovery_selection_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--minimum-source-disagreement", type=float, default=0.05)
+    parser.add_argument("--maximum-source-disagreement", type=float, default=0.20)
 
 
 def _register_resume(commands: CommandParsers) -> None:

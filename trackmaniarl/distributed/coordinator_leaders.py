@@ -28,6 +28,10 @@ class EvaluationCandidate:
     median_time_s: float
     mean_time_s: float
     policy_version: int
+    max_step_race_time_ms: float = 0.0
+    step_race_time_measurements_valid: bool = False
+    step_race_time_measurement_count: int = 0
+    step_race_time_expected_measurement_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +63,14 @@ def candidate_from_stats(stats: Mapping[str, float]) -> EvaluationCandidate:
         median_time_s=float(stats["finish_time_median_s"]),
         mean_time_s=float(stats["finish_time_mean_s"]),
         policy_version=int(stats["policy_version"]),
+        max_step_race_time_ms=float(stats["step_race_time_ms_max"]),
+        step_race_time_measurements_valid=(
+            float(stats.get("step_race_time_measurements_valid", 0.0)) == 1.0
+        ),
+        step_race_time_measurement_count=int(stats.get("step_race_time_measurement_count", 0.0)),
+        step_race_time_expected_measurement_count=int(
+            stats.get("step_race_time_expected_measurement_count", 0.0)
+        ),
     )
 
 
@@ -110,9 +122,9 @@ def _leader_promotions(
 ) -> _LeaderPromotions:
     if coordinator._recovering:
         return _LeaderPromotions(None, None)
-    reliable = _reliable_rank(candidate)
+    reliable = _reliable_rank(coordinator, candidate)
     fastest = _fastest_rank(candidate)
-    promote_reliable = candidate.finish_rate >= _required_finish_rate(coordinator) and _improves(
+    promote_reliable = _reliable_qualified(coordinator, candidate) and _improves(
         reliable, coordinator._best_evaluation
     )
     promote_fastest = candidate.finished_trials > 0 and _improves(
@@ -129,7 +141,35 @@ def _required_finish_rate(coordinator: Coordinator) -> float:
     return 1.0 if suite is None else suite.min_finish_rate
 
 
-def _reliable_rank(candidate: EvaluationCandidate) -> EvaluationRank:
+def _target_mean(coordinator: Coordinator) -> float | None:
+    suite = coordinator.run.spec.evaluation
+    return None if suite is None else getattr(suite, "target_mean_s", None)
+
+
+def _maximum_step_target(coordinator: Coordinator) -> float | None:
+    suite = coordinator.run.spec.evaluation
+    return None if suite is None else getattr(suite, "max_step_race_time_ms", None)
+
+
+def _reliable_qualified(coordinator: Coordinator, candidate: EvaluationCandidate) -> bool:
+    if candidate.finish_rate < _required_finish_rate(coordinator):
+        return False
+    target = _target_mean(coordinator)
+    if target is not None and candidate.mean_time_s >= target:
+        return False
+    maximum_step_target = _maximum_step_target(coordinator)
+    return maximum_step_target is None or (
+        candidate.step_race_time_measurements_valid
+        and candidate.step_race_time_measurement_count
+        == candidate.step_race_time_expected_measurement_count
+        and candidate.step_race_time_expected_measurement_count > 0
+        and 0.0 < candidate.max_step_race_time_ms <= maximum_step_target
+    )
+
+
+def _reliable_rank(coordinator: Coordinator, candidate: EvaluationCandidate) -> EvaluationRank:
+    if _target_mean(coordinator) is not None:
+        return candidate.finish_rate, -candidate.mean_time_s, -candidate.median_time_s
     return candidate.finish_rate, -candidate.median_time_s, -candidate.best_time_s
 
 
@@ -224,6 +264,12 @@ def _candidate_metrics(candidate: EvaluationCandidate) -> dict[str, float | int]
         "finish_time_median_s": candidate.median_time_s,
         "finish_time_mean_s": candidate.mean_time_s,
         "policy_version": candidate.policy_version,
+        "step_race_time_ms_max": candidate.max_step_race_time_ms,
+        "step_race_time_measurements_valid": float(candidate.step_race_time_measurements_valid),
+        "step_race_time_measurement_count": candidate.step_race_time_measurement_count,
+        "step_race_time_expected_measurement_count": (
+            candidate.step_race_time_expected_measurement_count
+        ),
     }
 
 
@@ -256,9 +302,7 @@ def _leader_payload(
     if request.kind is EvaluationCheckpointKind.RELIABLE:
         payload["release_qualified"] = 1.0
         return payload
-    payload["reliable_qualified"] = float(
-        candidate.finish_rate >= _required_finish_rate(coordinator)
-    )
+    payload["reliable_qualified"] = float(_reliable_qualified(coordinator, candidate))
     payload["shared_with_reliable"] = 0.0
     return payload
 

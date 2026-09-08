@@ -7,7 +7,7 @@ _PYPROJECT_TEMPLATE = (
     '[build-system]\nrequires = ["setuptools==83.0.0"]\n'
     'build-backend = "setuptools.build_meta"\n\n'
     '[project]\nname = "{name}"\nversion = "0.1.0"\n'
-    'requires-python = ">=3.12,<3.13"\ndependencies = ["{requirement}", "torch>=2.4"]\n\n'
+    'requires-python = ">=3.12,<3.13"\ndependencies = [{dependencies}]\n\n'
     '[dependency-groups]\ndev = ["mypy>=1.8", "poethepoet>=0.36", '
     '"pytest>=7.0", "ruff>=0.4"]\n\n'
     '[tool.setuptools.packages.find]\nwhere = ["src"]\n\n'
@@ -41,19 +41,24 @@ def _pyproject(
     template: str = "starter",
 ) -> str:
     requirement = _trackmaniarl_requirement(trackmaniarl_extras)
-    project = _PYPROJECT_TEMPLATE.format(name=name, requirement=requirement)
+    dependencies = [f'"{requirement}"', '"torch>=2.4"']
+    if template == "trackmania":
+        dependencies.append(
+            "\"vgamepad>=0.1.0; sys_platform == 'win32' or sys_platform == 'linux'\""
+        )
+    project = _PYPROJECT_TEMPLATE.format(name=name, dependencies=", ".join(dependencies))
     return project + (_trackmania_poe_tasks() if template == "trackmania" else "")
 
 
 def _trackmania_poe_tasks() -> str:
     command = "trackmaniarl track"
     return (
-        f'record-left = "{command} record-boundary left assets/trackmaniarl-test-left.npy"\n'
-        f'record-right = "{command} record-boundary right assets/trackmaniarl-test-right.npy"\n'
-        f'build-geometry = "{command} build-geometry assets/trackmaniarl-test.geometry.npz '
-        "--left assets/trackmaniarl-test-left.npy "
-        "--right assets/trackmaniarl-test-right.npy "
-        "--map-uid REPLACE_WITH_TEST_3_UID --map-path maps/trackmaniarl-test.Map.Gbx" + '"\n'
+        f'record-left = "{command} record-boundary left assets/my-map-left.npy"\n'
+        f'record-right = "{command} record-boundary right assets/my-map-right.npy"\n'
+        f'build-geometry = "{command} build-geometry assets/my-map.geometry.npz '
+        "--left assets/my-map-left.npy "
+        "--right assets/my-map-right.npy "
+        "--map-uid REPLACE_WITH_YOUR_MAP_UID --map-path maps/my-map.Map.Gbx" + '"\n'
     )
 
 
@@ -113,7 +118,7 @@ _TRACKMANIA_README = """
 1. In Openplanet's Plugin Manager, install the signed
    [**TrackmaniaRL Connect**](https://openplanet.dev/plugin/sac_getdata) plugin
    (`SAC_GetData`) version **2.4.0** and enable **School Mode**.
-2. Replace every `REPLACE_WITH_TEST_3_UID` value in `run.yaml`, record both
+2. Replace every `REPLACE_WITH_YOUR_MAP_UID` value in `run.yaml`, record both
    boundaries, and rebuild geometry with the configured local `.Map.Gbx`.
 3. Enter that map with a visible vehicle, then run:
 

@@ -16,7 +16,7 @@ uv run trackmaniarl --help
 mode. Do not activate the environment manually and do not install dependencies
 with `pip`.
 
-Run the complete local gate before and after a change:
+Run the focused local gate before and after a change:
 
 ```bash
 uv run poe fmt
@@ -24,7 +24,13 @@ uv run poe types
 uv run poe test
 ```
 
-For a quick iteration, run one file or test first, then the complete gate:
+This runs the maintained regression suite. The explicit full-suite command is:
+
+```bash
+uv run poe test-full
+```
+
+For a quick iteration, run a relevant test first, then the full gate:
 
 ```bash
 uv run pytest tests/integration/runtime/test_core_runtime.py -q
@@ -68,7 +74,7 @@ state, not release contents.
 4. Implement the component without import-time I/O or optional dependency
    requirements in the core path.
 5. Add a deterministic test beside the nearest existing contract tests.
-6. Run formatting, strict typing and the full test suite.
+6. Run formatting, strict typing and the maintained regression suite.
 7. Update user/developer documentation and editable diagram sources whenever a
    public flow, ownership boundary or checkpoint contract changes.
 8. Regenerate each changed diagram from its `.spec.json`, validate the
@@ -121,7 +127,7 @@ new default.
 | Level | Command | Purpose |
 | --- | --- | --- |
 | configuration | `uv run trackmaniarl validate run.yaml` | imports components and performs a synthetic update without the game |
-| unit/integration | `uv run poe test` | deterministic core, algorithm and fake distributed behavior |
+| unit/integration | `uv run poe test` | critical configuration, learning, runtime and distribution regression paths |
 | game connection | `uv run trackmaniarl track check --config run.yaml` | verifies three 33-field frames, session protocol, active UID and readiness |
 | bounded live gate | `uv run trackmaniarl smoke run.yaml --transitions 100` | real actor/learner path, policy refresh and checkpoint |
 | training | `uv run trackmaniarl train run.yaml` | full configured run |

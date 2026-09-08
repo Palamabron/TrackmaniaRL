@@ -15,6 +15,10 @@ uv run poe types
 uv run poe test
 ```
 
+This runs the maintained regression suite, including integration and documentation
+contracts. For iteration, select the tests relevant to the changed component;
+run the complete suite before preparing a release.
+
 Do not use another package manager or formatter. Keep `uv.lock` synchronized
 when dependencies change and describe any optional dependency or platform
 impact in the pull request.

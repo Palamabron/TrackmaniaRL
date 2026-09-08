@@ -8,7 +8,7 @@ Install the released CLI, then create the game project only on a machine that
 has Trackmania, Openplanet and a virtual gamepad driver:
 
 ```powershell
-uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.1.0"
+uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.0"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -78,12 +78,12 @@ the two map boundaries by hand and build a UID-bound asset. Do not reuse an
 asset from another map:
 
 ```powershell
-uv run trackmaniarl track record-boundary left assets/trackmaniarl-test-left.npy
-uv run trackmaniarl track record-boundary right assets/trackmaniarl-test-right.npy
-uv run trackmaniarl track build-geometry assets/trackmaniarl-test.geometry.npz --left assets/trackmaniarl-test-left.npy --right assets/trackmaniarl-test-right.npy --map-uid TRACKMANIARL_TEST_MAP_UID --map-path maps/trackmaniarl-test.Map.Gbx
+uv run trackmaniarl track record-boundary left assets/my-map-left.npy
+uv run trackmaniarl track record-boundary right assets/my-map-right.npy
+uv run trackmaniarl track build-geometry assets/my-map.geometry.npz --left assets/my-map-left.npy --right assets/my-map-right.npy --map-uid YOUR_MAP_UID --map-path maps/my-map.Map.Gbx
 ```
 
-Replace `TRACKMANIARL_TEST_MAP_UID` with the UID reported by `track check` and
+Replace `YOUR_MAP_UID` with the UID reported by `track check` and
 set that same UID in `environment.kwargs.config.expected_map_uid`,
 `feature_pipeline.kwargs.config.expected_map_uid` and
 `evaluation.maps[].expected_map_uid`. Load that local `.Map.Gbx` manually in
@@ -228,7 +228,7 @@ explicit `WandbTracker` under `components.additional_loggers`. Supply
 `WANDB_API_KEY` only through a private environment or ignored `.env` file.
 The generated project retains its vetted `vgamepad` source during this update;
 an existing project must retain the same direct source pin documented in the
-[installation guide](../README.md#install-and-create-an-agent).
+[installation guide](../README.md#install-and-create-your-project).
 
 `trackmaniarl smoke` is the required Windows preflight. It collects a bounded number of
 real actions, completes at least one update, verifies a live policy refresh,
@@ -240,13 +240,121 @@ uv run trackmaniarl smoke run.yaml --transitions 100
 
 The release benchmark is deterministic only in the sense that it repeats the
 same local map and assets. It does not claim game-engine seed control. It uses
-the `trials_per_map`, `min_finish_rate`, and `target_median_s` thresholds in
-`run.yaml`, writes `evaluation.json` with per-trial status, latency/FPS and map
-UID, and fails when any configured acceptance threshold is missed:
+the `trials_per_map`, `min_finish_rate`, `target_median_s`, and optional
+`target_mean_s` and `max_step_race_time_ms` thresholds in `run.yaml`, writes
+`evaluation.json` with
+per-trial status, latency/FPS and map UID, and fails when any configured
+acceptance threshold is missed:
 
 ```bash
 uv run trackmaniarl benchmark run.yaml artifacts/trackmania-iqn-lidar/checkpoints/distributed-update-XXXXXXXX.pt
 ```
+
+For a diagnostic run that rejects every lap containing one or more skipped
+telemetry frames, add `--reject-telemetry-skips`. This is intentionally stricter
+than the normal runtime-health gate and is useful for measuring the effect of
+telemetry delivery independently of driving quality.
+
+For a competition-oriented ten-trial gate, configure both time targets and
+require every trial to finish:
+
+```yaml
+evaluation:
+  trials_per_map: 10
+  target_median_s: 37.0
+  target_mean_s: 37.0
+  max_step_race_time_ms: 100.0
+  min_finish_rate: 1.0
+```
+
+The reliable checkpoint leader then ranks qualifying candidates by finish
+rate, mean and median. The separate fastest leader remains based on the best
+single lap, so an exploratory sub-36 result is retained without allowing one
+fast lap to hide a slow tail. When the race-clock runtime guard is configured,
+every evaluated control step must report a finite, positive measurement; a
+valid maximum cannot hide a missing or invalid step.
+
+## Human recovery fine-tuning
+
+`track record-recovery` creates targeted recovery supervision without changing
+the proven nominal policy. The checkpoint drives deterministically to a seeded
+progress point, the collector applies one short full-steer perturbation, then
+waits until the virtual input is observably neutral before sounding an alert.
+The human takes over, recovers and finishes the lap. The injected action and
+human reaction delay are retained only as causal context; the first clear
+physical input starts the expert labels. Unfinished laps, restarts and
+kinematically implausible respawn/teleport jumps are discarded. The requested
+impulse is not trusted blindly: its start, duration and control are reconstructed
+from the controls echoed by telemetry, and a missing, wrong-direction or too-short
+impulse rejects the attempt.
+
+Collect multiple completed left- and right-side recoveries from the exact
+checkpoint that will be adapted:
+
+```powershell
+$Config = (Resolve-Path 'run.yaml').Path
+$Checkpoint = (Resolve-Path 'artifacts/source/checkpoints/fastest-eval-policy.pt').Path
+$RecoveryDir = Join-Path (Get-Location) 'demos-recovery'
+
+uv run trackmaniarl track check --config "$Config"
+uv run trackmaniarl track record-recovery "$RecoveryDir" `
+  --config "$Config" `
+  --checkpoint "$Checkpoint" `
+  --count 36
+```
+
+Keep hands off the controls until the audible `TAKE OVER NOW` notification.
+The default 36-lap session balances three progress windows from 55% to 83%,
+three perturbation windows from 50 to 200 ms and both planned directions, with
+two attempts per cell. On a bend, the applied steer is chosen opposite to the
+policy's current steer to create a meaningful deviation; the actual control is
+stored. A rejected attempt is resampled inside the same coverage cell.
+Only completed laps are saved. Each archive embeds the source checkpoint's
+SHA-256; fine-tuning rejects mixed or stale policy data. It reconstructs the
+full causal feature history, selects only post-takeover samples for which the
+incident gate is active, removes episodes with too little gated supervision or
+implausibly slow normalized recovery, and derives progress, severity and direction
+strata from what actually happened rather than from the requested plan. The data
+gate requires all nine progress-by-severity cells, and the deterministic held-out
+split preserves balanced progress, severity and direction coverage. Episodes are
+sampled uniformly so a long lap cannot dominate. It optimizes only the bounded
+recovery adapter:
+
+```powershell
+$Candidate = Join-Path (Get-Location) 'artifacts/recovery-policy.pt'
+uv run trackmaniarl recovery-finetune "$Config" "$Checkpoint" `
+  --recovery "$RecoveryDir" `
+  --updates 300 `
+  --batch-size 128 `
+  --validation-fraction 0.25 `
+  --minimum-gate 0.01 `
+  --minimum-usable-episodes 24 `
+  --minimum-validation-episodes 6 `
+  --minimum-gated-samples 500 `
+  --minimum-samples-per-episode 15 `
+  --maximum-normalized-recovery-time 80 `
+  --minimum-source-disagreement 0.05 `
+  --maximum-source-disagreement 0.20 `
+  --output "$Candidate"
+
+uv run trackmaniarl benchmark "$Config" "$Candidate" `
+  --trials 10 `
+  --target-median 37 `
+  --target-mean 37 `
+  --max-step-race-time-ms 100 `
+  --min-finish-rate 1
+```
+
+The candidate is deliberately a `policy_only` checkpoint: it is valid for
+benchmarking and later warm-start initialization, but not for `trackmaniarl resume`.
+This prevents weights from the selected validation update being paired with stale
+optimizer momentum from a later update. The output path must be new; the command
+will not overwrite an existing candidate.
+
+Do not follow this phase automatically with unrestricted online TD updates.
+First compare the candidate with its unchanged source checkpoint. Promote only
+after 10/10 finishes and a mean below 37 seconds; confirm a passing screen with
+a fresh 30-trial benchmark and screen recording.
 
 For a TrackMania-facing release, run the Windows smoke preflight and the
 configured benchmark on the real game. Treat telemetry or controller errors as

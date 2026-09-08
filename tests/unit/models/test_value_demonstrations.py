@@ -10,6 +10,7 @@ from trackmaniarl.algorithms.value_based import DiscreteValueLearner
 from trackmaniarl.algorithms.value_based.objectives import (
     DemonstrationCrossEntropyObjective,
     DemonstrationMarginObjective,
+    DemonstrationProgressWindowCrossEntropyObjective,
     PolicyAnchorObjective,
     ValueObjective,
     ValueObjectiveContext,
@@ -33,6 +34,41 @@ def test_demonstration_objectives_reject_masked_expert_actions() -> None:
     objectives = (DemonstrationMarginObjective(), DemonstrationCrossEntropyObjective())
     for objective in objectives:
         _assert_rejects_masked_action(objective)
+
+
+def test_demonstration_objectives_ignore_masked_non_demo_and_padded_actions() -> None:
+    context = ValueObjectiveContext(
+        expected_values=torch.tensor([[[4.0, 0.0], [0.0, 4.0], [0.0, 4.0]]]),
+        actions=torch.tensor([[0, 1, 1]]),
+        valid=torch.tensor([[True, True, False]]),
+        metadata={"demo_flags": (True, False, True)},
+        action_mask=torch.tensor([True, False]),
+    )
+
+    for objective in (DemonstrationMarginObjective(), DemonstrationCrossEntropyObjective()):
+        loss = objective.loss(context)
+
+        assert loss is not None
+        assert torch.isfinite(loss)
+
+
+def test_progress_demo_objective_ignores_masked_rows_outside_its_windows() -> None:
+    context = ValueObjectiveContext(
+        expected_values=torch.tensor([[[4.0, 0.0], [0.0, 4.0], [0.0, 4.0]]]),
+        actions=torch.tensor([[0, 1, 1]]),
+        valid=torch.tensor([[True, True, False]]),
+        metadata={
+            "demo_flags": (True, True, True),
+            "demonstration_progress_fractions": (0.5, 0.2, 0.5),
+        },
+        action_mask=torch.tensor([True, False]),
+    )
+    objective = DemonstrationProgressWindowCrossEntropyObjective(windows=((0.4, 0.6),))
+
+    loss = objective.loss(context)
+
+    assert loss is not None
+    assert torch.isfinite(loss)
 
 
 def _switch_objective_context() -> ValueObjectiveContext:
@@ -98,6 +134,49 @@ def test_demonstration_switch_weight_can_cover_neighboring_steps() -> None:
     assert exact_loss is not None
     assert window_loss is not None
     assert window_loss > exact_loss
+
+
+def _progress_context() -> ValueObjectiveContext:
+    return ValueObjectiveContext(
+        expected_values=torch.tensor([[[4.0, 0.0], [4.0, 0.0], [0.0, 4.0]]]),
+        actions=torch.tensor([[0, 1, 1]]),
+        valid=torch.ones((1, 3), dtype=torch.bool),
+        metadata={
+            "demo_flags": (True, True, True),
+            "demonstration_progress_fractions": (0.40, 0.65, 0.85),
+        },
+    )
+
+
+def test_demonstration_progress_objective_only_trains_selected_windows() -> None:
+    context = _progress_context()
+    first = DemonstrationProgressWindowCrossEntropyObjective(windows=((0.60, 0.70),))
+    both = DemonstrationProgressWindowCrossEntropyObjective(windows=((0.60, 0.70), (0.80, 0.90)))
+
+    first_loss = first.loss(context)
+    both_loss = both.loss(context)
+    assert first_loss is not None
+    assert both_loss is not None
+    assert first_loss > both_loss
+
+
+@pytest.mark.parametrize(
+    "windows",
+    [
+        (),
+        ((0.5,),),
+        ((-0.1, 0.2),),
+        ((0.5, 0.5),),
+        ((0.7, 0.6),),
+        ((0.2, 1.1),),
+        ((0.2, 0.5), (0.4, 0.6)),
+    ],
+)
+def test_demonstration_progress_objective_rejects_invalid_windows(
+    windows: tuple[tuple[float, ...], ...],
+) -> None:
+    with pytest.raises(ValueError, match="progress window"):
+        DemonstrationProgressWindowCrossEntropyObjective(windows=windows)
 
 
 def test_demonstration_objectives_reject_negative_steering_switch_weights() -> None:

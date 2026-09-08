@@ -1,6 +1,6 @@
 # Migrating legacy projects to RunSpec 2.0
 
-TrackmaniaRL package version 1.1.0 uses the RunSpec 2.0 configuration and
+TrackmaniaRL package version 1.2.0 uses the RunSpec 2.0 configuration and
 runtime contract, which defines a breaking runtime and checkpoint boundary. Do
 not point a RunSpec 2.0 process at a legacy run directory or rollout journal.
 Create a new generated project, copy reviewed user components into it, validate

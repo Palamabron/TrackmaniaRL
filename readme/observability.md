@@ -89,6 +89,9 @@ payload, including per-progress-bin diagnostics, remains in local JSONL.
 | `evaluation/policy_version` | update index per batch | Binds results to the exact evaluated snapshot. |
 | `evaluation/action_latency_ms` | milliseconds per policy step | Measures only `policy.act`; it is not physical controller-to-engine latency. |
 | `evaluation/controller_apply_ms`, `evaluation/telemetry_wait_ms` | milliseconds per step | Splits the local controller backend call from the subsequent wait for an accepted telemetry frame. Neither is an engine acknowledgement. |
+| `evaluation/control_brake_tap_fraction` | fraction per batch | Fraction of evaluated actions that used the synchronous 10 ms brake pulse; interpret it with controller timing and recovery outcomes. |
+| `evaluation/step_race_time_ms_p99`, `evaluation/step_race_time_ms_max` | milliseconds per batch | Conservative physical race-clock cadence across trials. The optional runtime gate bounds the maximum; this, rather than discarded render packets, detects missed decision ticks. |
+| `evaluation/step_race_time_measurement_count`, `evaluation/step_race_time_measurements_valid` | count and 0/1 per batch | Timing-evidence coverage. When the runtime gate is configured, it fails closed unless every evaluated control step supplied a finite, positive race-clock measurement and `measurements_valid=1`. |
 | `evaluation/telemetry_skipped_frames_total`, `evaluation/telemetry_skipped_frames_mean`, `evaluation/telemetry_skipped_frames_max`, `evaluation/telemetry_steps_with_skipped_frames_fraction` | frames and fraction per batch | Quantifies complete OpenPlanet frames discarded by latest-frame draining; trailing packet fragments are not counted. |
 | `episode/return` | reward per episode | Training signal only; compare with evaluation rather than optimizing the chart in isolation. |
 | `episode/progress_pct`, `episode/progress_m` | percent and metres per episode | Shows whether failures move farther along the track. |
@@ -100,6 +103,7 @@ payload, including per-progress-bin diagnostics, remains in local JSONL.
 | `episode/q_margin_mean`, `episode/q_margin_min`, `episode/q_margin_start_mean` | value units per episode | Detect ambiguous action choice and collapsing value separation. |
 | `episode/velocity_ratio_mean` | ratio per episode | Compares projected velocity with the configured reference. |
 | `episode/timing_policy_inference_ms_mean`, `episode/timing_policy_inference_ms_max` | milliseconds per episode | Actor latency; sustained maxima near the environment tick budget make collection actor-bound. |
+| `episode/timing_step_race_ms_p99`, `episode/timing_step_race_ms_max` | milliseconds per episode | Physical race-clock cadence; use this to distinguish a real actor/game stall from render packets intentionally superseded by a newer frame. |
 | `episode/controller_apply_ms_mean`, `episode/controller_apply_ms_max`, `episode/telemetry_wait_ms_mean`, `episode/telemetry_wait_ms_max` | milliseconds per episode | Separates time inside the controller backend from time waiting for the accepted telemetry frame. |
 | `episode/telemetry_skipped_frames_total`, `episode/telemetry_skipped_frames_mean`, `episode/telemetry_skipped_frames_max`, `episode/telemetry_steps_with_skipped_frames_fraction` | frames and fraction per episode | Detects producer/consumer cadence mismatch without treating a partial network packet as a dropped frame. |
 | `episode/telemetry_error` | count/fraction per episode | Non-zero means integration health must be fixed before evaluating policy quality. |

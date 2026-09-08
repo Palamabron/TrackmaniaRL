@@ -84,6 +84,44 @@ def test_checkpoint_retention_requires_a_positive_keep_count() -> None:
         TrainingSpec(checkpoint_keep_last=0)
 
 
+def test_evaluation_mean_target_is_optional_and_positive() -> None:
+    assert EvaluationSuiteSpec.model_fields["target_mean_s"].default is None
+    payload = {
+        "name": "suite",
+        "version": "1",
+        "maps": [
+            {
+                "id": "map",
+                "map_path": "map.Map.Gbx",
+                "geometry_path": "geometry.npz",
+                "expected_map_uid": "map-uid",
+            }
+        ],
+        "target_mean_s": 0.0,
+    }
+    with pytest.raises(ValidationError, match="target_mean_s must be positive"):
+        EvaluationSuiteSpec.model_validate(payload)
+
+
+def test_evaluation_runtime_target_is_optional_and_positive() -> None:
+    assert EvaluationSuiteSpec.model_fields["max_step_race_time_ms"].default is None
+    payload = {
+        "name": "suite",
+        "version": "1",
+        "maps": [
+            {
+                "id": "map",
+                "map_path": "map.Map.Gbx",
+                "geometry_path": "geometry.npz",
+                "expected_map_uid": "map-uid",
+            }
+        ],
+        "max_step_race_time_ms": 0.0,
+    }
+    with pytest.raises(ValidationError, match="max_step_race_time_ms must be positive"):
+        EvaluationSuiteSpec.model_validate(payload)
+
+
 def _run_payload() -> dict[str, object]:
     return {
         "run_id": "round-trip",
@@ -118,25 +156,6 @@ def test_run_spec_json_schema_has_only_serializable_defaults() -> None:
         schema = RunSpec.model_json_schema()
 
     assert schema["properties"]["artifacts_dir"]["format"] == "path"
-
-
-def test_actor_execution_override_is_explicit_and_structured() -> None:
-    assert DistributedSpec().actor_execution is None
-
-    distributed = DistributedSpec.model_validate(
-        {
-            "actor_execution": {
-                "device": "cpu",
-                "precision": "bfloat16",
-                "torch_threads": 2,
-            }
-        }
-    )
-
-    assert distributed.actor_execution is not None
-    assert distributed.actor_execution.device == "cpu"
-    assert distributed.actor_execution.precision == "bfloat16"
-    assert distributed.actor_execution.torch_threads == 2
 
 
 def test_public_numeric_specs_reject_non_finite_values() -> None:

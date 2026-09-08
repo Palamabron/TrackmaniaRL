@@ -54,7 +54,7 @@ def _training_learner_state(checkpoint: Mapping[str, Any]) -> Mapping[str, Any]:
     missing = required - checkpoint.keys()
     if missing:
         raise ValueError(f"training checkpoint is missing keys: {sorted(missing)}")
-    if checkpoint["schema_version"] not in {"1.0", "2.0"}:
+    if checkpoint["schema_version"] != "2.0":
         raise ValueError("unsupported training checkpoint schema")
     learner = checkpoint["learner"]
     if not isinstance(learner, Mapping):

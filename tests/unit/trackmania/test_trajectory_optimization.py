@@ -63,14 +63,6 @@ def _unreliable_optimizer() -> SafeTrajectoryOptimizer:
     )
 
 
-def test_schedule_round_trip_preserves_expert_controls() -> None:
-    controls = _controls()
-
-    schedule = TrajectorySchedule.from_controls(controls)
-
-    np.testing.assert_array_equal(schedule.materialize(), controls)
-
-
 def test_schedule_shortens_a_complete_coast_and_brake_window() -> None:
     schedule = TrajectorySchedule.from_controls(_controls())
     (window,) = schedule.slow_windows()

@@ -14,55 +14,18 @@ from email.message import Message
 from pathlib import Path, PurePosixPath
 from typing import cast
 
+if __package__:
+    from .distribution_manifest import DIAGRAM_STEMS, DIAGRAM_SUFFIXES, SDIST_REQUIRED_PATHS
+else:
+    from distribution_manifest import DIAGRAM_STEMS, DIAGRAM_SUFFIXES, SDIST_REQUIRED_PATHS
+
 SBOM_NAME = "trackmaniarl-release.spdx.json"
 CHECKSUMS_NAME = "SHA256SUMS"
 SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 CORE_DEPENDENCIES = frozenset(
     {"gymnasium", "numpy", "pydantic", "pyyaml", "tensordict", "torch", "zstandard"}
 )
-DIAGRAM_STEMS = (
-    "checkpoint-resume",
-    "demonstration-timing",
-    "distributed-security",
-    "imitation-learning",
-    "model-composition",
-    "replay-sequence",
-    "reward-decomposition",
-    "runtime-architecture",
-    "trackmania-integration",
-)
-DIAGRAM_SUFFIXES = (
-    ".spec.json",
-    ".excalidraw",
-    "-preview.png",
-    "-preview.svg",
-    "-preview.html",
-)
-SDIST_REQUIRED_PATHS = frozenset(
-    {
-        "CHANGELOG.md",
-        "CONTRIBUTING.md",
-        "docs/assets/trackmaniarl-logo.png",
-        "docs/diagrams/render.py",
-        "LICENSE",
-        "NOTICE",
-        "README.md",
-        "SECURITY.md",
-        "pyproject.toml",
-        "readme/development.md",
-        "readme/trackmania.md",
-        "scripts/fetch_analysis.py",
-        "scripts/iteration_report.py",
-        "scripts/verify_soak.py",
-        "tests/unit/test_release_distribution.py",
-        "tests/unit/test_verify_soak.py",
-        "tests/unit/core/test_run_spec_serialization.py",
-        "trackmaniarl/py.typed",
-        "trackmaniarl/project/scaffold.py",
-        "trackmaniarl/project/scaffold_run_templates.py",
-        "trackmaniarl/project/scaffold_templates.py",
-    }
-)
+PUBLIC_EXTRAS = frozenset({"all", "distributed", "mamba", "orchestrator", "trackmania", "wandb"})
 
 
 def _project_version() -> str:
@@ -86,7 +49,7 @@ def _checkout_bytes(relative: PurePosixPath, archive: Path) -> bytes:
 
 
 def _normalize_checkout_line_endings(content: bytes) -> bytes:
-    """Match Git's Windows checkout conversion without touching binary assets."""
+    """Compare text independent of Git's Windows checkout conversion."""
     try:
         content.decode("utf-8")
     except UnicodeDecodeError:
@@ -99,7 +62,7 @@ def _validate_wheel_checkout_files(package: zipfile.ZipFile, archive: Path) -> N
         relative = PurePosixPath(member.filename.replace("\\", "/"))
         if member.is_dir() or not relative.parts or relative.parts[0] != "trackmaniarl":
             continue
-        packaged = package.read(member)
+        packaged = _normalize_checkout_line_endings(package.read(member))
         checkout = _normalize_checkout_line_endings(_checkout_bytes(relative, archive))
         if packaged != checkout:
             raise RuntimeError(
@@ -128,7 +91,7 @@ def _validate_sdist_checkout_files(package: tarfile.TarFile, archive: Path, root
         if packaged is None:
             raise RuntimeError(f"{archive} cannot read member {member.name!r}")
         checkout = _normalize_checkout_line_endings(_checkout_bytes(relative, archive))
-        if packaged.read() != checkout:
+        if _normalize_checkout_line_endings(packaged.read()) != checkout:
             raise RuntimeError(f"{archive} member {member.name!r} differs from the checkout")
 
 
@@ -150,15 +113,14 @@ def _wheel_required_members(version: str) -> set[str]:
     }
 
 
-def _read_wheel_metadata(archive: Path, version: str) -> Message:
-    dist_info = f"trackmaniarl-{version}.dist-info"
-    with zipfile.ZipFile(archive) as package:
-        _require_members(set(package.namelist()), _wheel_required_members(version), archive)
-        _validate_wheel_checkout_files(package, archive)
-        return email.parser.BytesParser().parsebytes(package.read(f"{dist_info}/METADATA"))
-
-
 def _validate_wheel_metadata(metadata: Message, archive: Path, version: str) -> None:
+    invalid = _wheel_identity_errors(metadata, version)
+    invalid.extend(_wheel_dependency_errors(metadata))
+    if invalid:
+        raise RuntimeError(f"{archive} has invalid metadata: {', '.join(invalid)}")
+
+
+def _wheel_identity_errors(metadata: Message, version: str) -> list[str]:
     expected = {
         "Name": "TrackmaniaRL",
         "Version": version,
@@ -172,12 +134,35 @@ def _validate_wheel_metadata(metadata: Message, archive: Path, version: str) -> 
     )
     if constraints != {">=3.12", "<3.13"}:
         invalid.append(f"Requires-Python={requires_python!r}")
-    if invalid:
-        raise RuntimeError(f"{archive} has invalid metadata: {', '.join(invalid)}")
+    return invalid
+
+
+def _wheel_dependency_errors(metadata: Message) -> list[str]:
+    requirements = metadata.get_all("Requires-Dist") or []
+    extras = frozenset(metadata.get_all("Provides-Extra") or [])
+    invalid: list[str] = []
+    if extras != PUBLIC_EXTRAS:
+        invalid.append(f"Provides-Extra={sorted(extras)!r}")
+    if any("@" in requirement for requirement in requirements):
+        invalid.append("Requires-Dist contains a direct URL")
+    if any("vgamepad" in requirement.lower() for requirement in requirements):
+        invalid.append("Requires-Dist contains vgamepad")
+    if not any(
+        "libevdev>=0.13;" in requirement.lower()
+        and "extra == 'trackmania'" in requirement.lower().replace('"', "'")
+        for requirement in requirements
+    ):
+        invalid.append("Requires-Dist is missing the Trackmania libevdev extra")
+    return invalid
 
 
 def _validate_wheel(archive: Path, version: str) -> None:
-    _validate_wheel_metadata(_read_wheel_metadata(archive, version), archive, version)
+    dist_info = f"trackmaniarl-{version}.dist-info"
+    with zipfile.ZipFile(archive) as package:
+        _require_members(set(package.namelist()), _wheel_required_members(version), archive)
+        _validate_wheel_checkout_files(package, archive)
+        metadata = email.parser.BytesParser().parsebytes(package.read(f"{dist_info}/METADATA"))
+    _validate_wheel_metadata(metadata, archive, version)
 
 
 def _sdist_required_members(root: str) -> set[str]:
@@ -299,8 +284,7 @@ def _validate_sbom(path: Path, version: str) -> None:
     _validate_dependency_names(package_index, dependency_ids, path)
 
 
-def _release_subjects(version: str) -> tuple[Path, Path, Path]:
-    directory = Path("dist")
+def _release_subjects(version: str, directory: Path = Path("dist")) -> tuple[Path, Path, Path]:
     return (
         directory / f"trackmaniarl-{version}-py3-none-any.whl",
         directory / f"trackmaniarl-{version}.tar.gz",
@@ -309,7 +293,7 @@ def _release_subjects(version: str) -> tuple[Path, Path, Path]:
 
 
 def _validate_archive_set(wheel: Path, sdist: Path) -> None:
-    found = set(Path("dist").glob("*.whl")) | set(Path("dist").glob("*.tar.gz"))
+    found = set(wheel.parent.glob("*.whl")) | set(wheel.parent.glob("*.tar.gz"))
     expected = {wheel, sdist}
     if found != expected:
         names = ", ".join(sorted(path.name for path in found ^ expected))
@@ -350,6 +334,7 @@ def _verify_checksums(subjects: tuple[Path, ...], target: Path) -> None:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", help="Release tag, expected in the form v<project-version>")
+    parser.add_argument("--dist-dir", type=Path, default=Path("dist"))
     checksum_mode = parser.add_mutually_exclusive_group()
     checksum_mode.add_argument("--write-checksums", action="store_true")
     checksum_mode.add_argument("--verify-checksums", action="store_true")
@@ -365,7 +350,7 @@ def main() -> None:
     args = _parse_args()
     version = _project_version()
     _validate_release_tag(args.tag, version)
-    wheel, sdist, sbom = _release_subjects(version)
+    wheel, sdist, sbom = _release_subjects(version, args.dist_dir)
     missing = [str(archive) for archive in (wheel, sdist) if not archive.is_file()]
     if missing:
         raise RuntimeError(f"Missing release archives: {', '.join(missing)}")
@@ -375,7 +360,7 @@ def main() -> None:
     if args.write_checksums or args.verify_checksums:
         _validate_sbom(sbom, version)
         subjects = (wheel, sdist, sbom)
-        checksums = Path("dist") / CHECKSUMS_NAME
+        checksums = args.dist_dir / CHECKSUMS_NAME
         if args.write_checksums:
             _write_checksums(subjects, checksums)
         else:

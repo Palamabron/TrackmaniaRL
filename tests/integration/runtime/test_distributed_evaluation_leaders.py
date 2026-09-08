@@ -18,7 +18,12 @@ from tests.integration.runtime.distributed_evaluation_support import (
     _finished_evaluation,
 )
 from trackmaniarl.distributed.coordinator_checkpoint import EvaluationCheckpointKind
-from trackmaniarl.distributed.coordinator_leaders import record_evaluation_leaders
+from trackmaniarl.distributed.coordinator_evaluation import _evaluation_batch_stats
+from trackmaniarl.distributed.coordinator_leaders import (
+    EvaluationCandidate,
+    candidate_from_stats,
+    record_evaluation_leaders,
+)
 
 _RELIABLE = EvaluationCheckpointKind.RELIABLE
 _FASTEST = EvaluationCheckpointKind.FASTEST
@@ -65,6 +70,100 @@ def test_reliable_leader_prioritizes_finish_rate_before_median(tmp_path: Path) -
     record_evaluation_leaders(coordinator, _candidate(42, 0.6, (40.0, 39.0)))
     assert checkpoints.count(_RELIABLE) == 1
     assert checkpoints.count(_FASTEST) == 2
+
+
+def test_configured_mean_target_strictly_qualifies_reliable_leaders(tmp_path: Path) -> None:
+    events: list[tuple[str, dict[str, Any]]] = []
+    checkpoints: list[EvaluationCheckpointKind] = []
+    coordinator = _evaluation_coordinator(tmp_path, events, checkpoints)
+    coordinator.run.spec.evaluation.target_mean_s = 37.0
+    candidate = EvaluationCandidate(1.0, 5, 5, 36.0, 36.5, 37.0, 41)
+
+    record_evaluation_leaders(coordinator, candidate)
+
+    assert checkpoints == [_FASTEST]
+    fastest = [payload for event, payload in events if event == "eval/fastest_checkpoint"]
+    assert fastest[0]["reliable_qualified"] == 0.0
+
+
+def test_configured_mean_target_ranks_reliable_leaders_by_mean(tmp_path: Path) -> None:
+    events: list[tuple[str, dict[str, Any]]] = []
+    checkpoints: list[EvaluationCheckpointKind] = []
+    coordinator = _evaluation_coordinator(tmp_path, events, checkpoints)
+    coordinator.run.spec.evaluation.target_mean_s = 37.0
+    coordinator._evaluation_policy_states[42] = {"weight": 2.0}
+    first = EvaluationCandidate(1.0, 5, 5, 36.1, 36.8, 36.7, 41)
+    lower_median_higher_mean = EvaluationCandidate(1.0, 5, 5, 35.0, 35.5, 36.9, 42)
+
+    record_evaluation_leaders(coordinator, first)
+    record_evaluation_leaders(coordinator, lower_median_higher_mean)
+
+    reliable = [payload for event, payload in events if event == "eval/best_checkpoint"]
+    assert [payload["policy_version"] for payload in reliable] == [41]
+
+
+def test_configured_mean_target_uses_median_as_the_tie_breaker(tmp_path: Path) -> None:
+    events: list[tuple[str, dict[str, Any]]] = []
+    checkpoints: list[EvaluationCheckpointKind] = []
+    coordinator = _evaluation_coordinator(tmp_path, events, checkpoints)
+    coordinator.run.spec.evaluation.target_mean_s = 37.0
+    coordinator._evaluation_policy_states[42] = {"weight": 2.0}
+    first = EvaluationCandidate(1.0, 5, 5, 36.1, 36.5, 36.8, 41)
+    faster_best_worse_median = EvaluationCandidate(1.0, 5, 5, 35.0, 36.7, 36.8, 42)
+
+    record_evaluation_leaders(coordinator, first)
+    record_evaluation_leaders(coordinator, faster_best_worse_median)
+
+    reliable = [payload for event, payload in events if event == "eval/best_checkpoint"]
+    assert [payload["policy_version"] for payload in reliable] == [41]
+
+
+@pytest.mark.parametrize(
+    ("maximum_ms", "expected"),
+    [(100.0, [_RELIABLE, _FASTEST]), (100.01, [_FASTEST])],
+)
+def test_configured_runtime_target_qualifies_reliable_leaders(
+    tmp_path: Path,
+    maximum_ms: float,
+    expected: list[EvaluationCheckpointKind],
+) -> None:
+    events: list[tuple[str, dict[str, Any]]] = []
+    checkpoints: list[EvaluationCheckpointKind] = []
+    coordinator = _evaluation_coordinator(tmp_path, events, checkpoints)
+    coordinator.run.spec.evaluation.max_step_race_time_ms = 100.0
+    candidate = EvaluationCandidate(1.0, 5, 5, 36.0, 36.5, 36.6, 41, maximum_ms, True, 10, 10)
+
+    record_evaluation_leaders(coordinator, candidate)
+
+    assert checkpoints == expected
+    fastest = [payload for event, payload in events if event == "eval/fastest_checkpoint"]
+    assert fastest[0]["reliable_qualified"] == float(_RELIABLE in expected)
+
+
+def test_runtime_target_rejects_a_candidate_with_an_unmeasured_trial(tmp_path: Path) -> None:
+    events: list[tuple[str, dict[str, Any]]] = []
+    checkpoints: list[EvaluationCheckpointKind] = []
+    coordinator = _evaluation_coordinator(tmp_path, events, checkpoints)
+    coordinator.run.spec.evaluation.max_step_race_time_ms = 100.0
+    candidate = EvaluationCandidate(1.0, 5, 5, 36.0, 36.5, 36.6, 41, 60.0, False, 9, 10)
+
+    record_evaluation_leaders(coordinator, candidate)
+
+    assert checkpoints == [_FASTEST]
+
+
+def test_runtime_target_rejects_partial_actor_summary_after_aggregation(tmp_path: Path) -> None:
+    checkpoints: list[EvaluationCheckpointKind] = []
+    coordinator = _evaluation_coordinator(tmp_path, [], checkpoints)
+    coordinator.run.spec.evaluation.max_step_race_time_ms = 100.0
+    summary = _finished_evaluation(36.0)
+    summary["timing/step_race_measurement_count"] = 9.0
+    summary["timing/step_race_measurements_valid"] = 0.0
+
+    candidate = candidate_from_stats(_evaluation_batch_stats([summary], (40.0,)))
+    record_evaluation_leaders(coordinator, candidate)
+
+    assert checkpoints == [_FASTEST]
 
 
 def test_leader_checkpoint_requires_the_exact_evaluated_policy(tmp_path: Path) -> None:

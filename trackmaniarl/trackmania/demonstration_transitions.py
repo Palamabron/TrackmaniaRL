@@ -268,6 +268,7 @@ def _transition_info(context: _TransitionContext, scored: _ScoredStep) -> dict[s
     return {
         "source": "demo",
         "is_demo": True,
+        "demonstration_progress_fraction": context.reward.progress_pct / 100.0,
         "demonstration_steering_switch": scored.step.steering_switch,
         "demonstration_steering_switch_distance": scored.step.steering_switch_distance,
         "sampling/projected_lap_time_s": context.finish_time_s,

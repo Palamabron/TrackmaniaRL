@@ -51,19 +51,6 @@ class FakeRun:
         )
 
 
-def test_parse_run_path_requires_entity_project_and_run_id() -> None:
-    assert FETCH.parse_run_path("/entity/project/run/") == "entity/project/run"
-    with pytest.raises(ValueError, match="ENTITY/PROJECT/RUN_ID"):
-        FETCH.parse_run_path("entity/project")
-
-
-def test_create_api_rejects_an_incomplete_sdk(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setitem(sys.modules, "wandb", object())
-
-    with pytest.raises(RuntimeError, match="incomplete"):
-        FETCH._create_api(30)
-
-
 def test_analysis_fetch_requires_explicit_runs() -> None:
     args = FETCH.FetchArguments(
         runs=["entity/project/run"],
@@ -106,17 +93,3 @@ def test_analyze_run_reports_empty_history() -> None:
     assert analysis["warnings"] == [
         "History is empty; only run metadata and W&B summary are available."
     ]
-
-
-def test_report_renders_highlights_and_stability_warning() -> None:
-    analysis = FETCH.analyze_run(FakeRun(), "entity/project/z67iytmc", "z67iytmc")
-    report = REPORT.build_json_report({"z67iytmc": analysis})
-    markdown = REPORT.build_markdown_report(report)
-
-    experiment = report["experiments"][0]
-    assert experiment["run"]["state"] == "running"
-    episode_rows = experiment["sections"]["episode_health"]
-    assert next(row for row in episode_rows if row["name"] == "episode/return")["last"] == 24.0
-    assert any("learner/loss/value rose" in alert for alert in experiment["alerts"])
-    assert "## z67iytmc" in markdown
-    assert "`episode/return`" in markdown

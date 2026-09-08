@@ -5,7 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from math import ceil, sqrt
+from datetime import UTC, datetime
+from math import ceil, isfinite, sqrt
 from pathlib import Path
 from statistics import NormalDist
 from typing import Any, cast
@@ -15,6 +16,7 @@ import numpy as np
 from trackmaniarl.commands.helpers import _training_learner_state
 from trackmaniarl.core.runtime import ResolvedRun, resolve_run
 from trackmaniarl.core.spec import EvaluationSuiteSpec, RunSpec
+from trackmaniarl.trackmania.recording import RecordingOptions, record_window
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,10 +27,32 @@ class _BenchmarkArtifact:
     checkpoint_path: Path
 
 
+@dataclass(frozen=True, slots=True)
+class _BenchmarkGate:
+    trials: int
+    completed: int
+    required: int
+    median_s: float
+    mean_s: float | None
+    maximum_step_ms: float | None
+    runtime_trials_valid: bool
+    skipped_telemetry_trials: int
+    evaluation: EvaluationSuiteSpec
+
+
 def _benchmark(args: argparse.Namespace) -> None:
     spec, evaluation = _benchmark_spec(args)
     run = resolve_run(spec, base_dir=Path(args.config).parent)
-    trials, metrics, checkpoint = _evaluate_checkpoint(run, args.checkpoint)
+    recording = (
+        RecordingOptions(args.record, args.window_title, args.ffmpeg)
+        if getattr(args, "record", None) is not None
+        else None
+    )
+    try:
+        with record_window(recording):
+            trials, metrics, checkpoint = _evaluate_checkpoint(run, args.checkpoint)
+    finally:
+        run.logger.close()
     artifact = _BenchmarkArtifact(trials, checkpoint, evaluation, args.checkpoint)
     _validate_benchmark_artifact(artifact)
     _print_benchmark_report(trials, metrics)
@@ -40,23 +64,25 @@ def _benchmark_spec(args: argparse.Namespace) -> tuple[RunSpec, EvaluationSuiteS
     evaluation = _require_evaluation(spec, "benchmark")
     updates = _evaluation_overrides(args)
     if updates:
-        evaluation = evaluation.model_copy(update=updates)
+        evaluation = EvaluationSuiteSpec.model_validate({**evaluation.model_dump(), **updates})
         spec = spec.model_copy(update={"evaluation": evaluation})
-    if evaluation.target_median_s is None:
-        raise ValueError(
-            "benchmark requires evaluation.target_median_s "
-            "(for example 37.0 for a sub-37s release gate)"
-        )
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%f")
+    spec = spec.model_copy(update={"run_id": f"{spec.run_id}-benchmark-{stamp}"})
     return spec, evaluation
 
 
-def _evaluation_overrides(args: argparse.Namespace) -> dict[str, float | int]:
+def _evaluation_overrides(args: argparse.Namespace) -> dict[str, float | int | bool]:
     candidates = (
         ("trials_per_map", getattr(args, "trials", None)),
         ("target_median_s", getattr(args, "target_median", None)),
+        ("target_mean_s", getattr(args, "target_mean", None)),
+        ("max_step_race_time_ms", getattr(args, "max_step_race_time_ms", None)),
         ("min_finish_rate", getattr(args, "min_finish_rate", None)),
     )
-    return {key: value for key, value in candidates if value is not None}
+    updates = {key: value for key, value in candidates if value is not None}
+    if getattr(args, "reject_telemetry_skips", False):
+        updates["reject_telemetry_skips"] = True
+    return updates
 
 
 def _require_evaluation(spec: RunSpec, command: str) -> EvaluationSuiteSpec:
@@ -71,12 +97,9 @@ def _evaluate_checkpoint(
 ) -> tuple[list[dict[str, Any]], dict[str, float], str | None]:
     if run.evaluator is None:
         raise ValueError("benchmark requires components.evaluator")
-    try:
-        _load_checkpoint(run, checkpoint_path)
-        metrics = dict(run.evaluator.evaluate(run.learner.policy()))
-        artifact = _load_evaluation_artifact(run.run_dir)
-    finally:
-        run.logger.close()
+    _load_checkpoint(run, checkpoint_path)
+    metrics = dict(run.evaluator.evaluate(run.learner.policy()))
+    artifact = _load_evaluation_artifact(run.run_dir)
     return _artifact_trials(artifact), metrics, _artifact_checkpoint(artifact)
 
 
@@ -135,6 +158,15 @@ def _validate_benchmark_artifact(artifact: _BenchmarkArtifact) -> None:
             f"benchmark artifact must contain exactly {expected_trials} trials covering "
             f"{sorted(expected_maps)}"
         )
+    expected = {
+        (item.id, index) for item in evaluation.maps for index in range(evaluation.trials_per_map)
+    }
+    observed = {(trial["map_id"], trial["trial_index"]) for trial in trials}
+    if expected != observed:
+        raise RuntimeError("benchmark artifact contains duplicate or missing trial identities")
+    map_uids = {item.id: item.expected_map_uid for item in evaluation.maps}
+    if any(trial["map_uid"] != map_uids[trial["map_id"]] for trial in trials):
+        raise RuntimeError("benchmark artifact contains a mismatched map UID")
 
 
 def _apply_benchmark_gate(
@@ -142,29 +174,148 @@ def _apply_benchmark_gate(
     metrics: dict[str, float],
     evaluation: EvaluationSuiteSpec,
 ) -> None:
-    completed = _completed_trials(trials)
-    required = ceil(evaluation.min_finish_rate * len(trials))
-    median = float(metrics["eval/median_finish_time_s"])
-    passed = len(completed) >= required and median < _target_median(evaluation)
-    if not passed or _has_runtime_errors(trials):
-        raise RuntimeError(
-            "benchmark failed: require "
-            f">={required}/{len(trials)} finishes, "
-            f"median completed time <{_target_median(evaluation)}s, "
-            "and no telemetry/controller errors"
-        )
-    print(f"Benchmark passed: {len(completed)}/{len(trials)} finishes, median {median:.3f}s")
+    gate = _benchmark_gate(trials, metrics, evaluation)
+    if not _benchmark_gate_passed(gate) or _has_runtime_errors(trials):
+        raise RuntimeError(_benchmark_gate_failure(gate))
+    print(_benchmark_gate_success(gate))
 
 
-def _target_median(evaluation: EvaluationSuiteSpec) -> float:
+def _benchmark_gate(
+    trials: list[dict[str, Any]],
+    metrics: dict[str, float],
+    evaluation: EvaluationSuiteSpec,
+) -> _BenchmarkGate:
+    trial_count = len(trials)
+    maximum_step_ms, runtime_trials_valid = _runtime_trial_statistics(trials)
+    return _BenchmarkGate(
+        trials=trial_count,
+        completed=len(_completed_trials(trials)),
+        required=ceil(evaluation.min_finish_rate * trial_count),
+        median_s=float(metrics["eval/median_finish_time_s"]),
+        mean_s=_gated_metric(metrics, "eval/finish_time_s", evaluation.target_mean_s),
+        maximum_step_ms=maximum_step_ms,
+        runtime_trials_valid=runtime_trials_valid,
+        skipped_telemetry_trials=len(_telemetry_skipped_trials(trials)),
+        evaluation=evaluation,
+    )
+
+
+def _gated_metric(metrics: dict[str, float], key: str, target: float | None) -> float | None:
+    value = metrics.get(key)
+    return None if target is None or value is None else float(value)
+
+
+def _runtime_trial_statistics(trials: list[dict[str, Any]]) -> tuple[float | None, bool]:
+    measurements: list[float] = []
+    valid = True
+    for trial in trials:
+        measurement = _positive_finite_number(trial.get("step_race_time_ms_max"))
+        if measurement is None:
+            valid = False
+        else:
+            measurements.append(measurement)
+        valid = _runtime_trial_measurements_valid(trial) and valid
+    return (max(measurements) if measurements else None), valid
+
+
+def _runtime_trial_measurements_valid(trial: dict[str, Any]) -> bool:
+    steps = trial.get("steps")
+    measurement_count = trial.get("step_race_time_measurement_count")
+    return (
+        _positive_integer(steps)
+        and _nonnegative_integer(measurement_count)
+        and measurement_count == steps
+        and trial.get("step_race_time_measurements_valid") is True
+    )
+
+
+def _positive_finite_number(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (float, int)):
+        return None
+    number = float(value)
+    return number if isfinite(number) and number > 0.0 else None
+
+
+def _positive_integer(value: object) -> bool:
+    return not isinstance(value, bool) and isinstance(value, int) and value > 0
+
+
+def _nonnegative_integer(value: object) -> bool:
+    return not isinstance(value, bool) and isinstance(value, int) and value >= 0
+
+
+def _benchmark_gate_passed(gate: _BenchmarkGate) -> bool:
+    evaluation = gate.evaluation
+    mean_ok = evaluation.target_mean_s is None or (
+        gate.mean_s is not None and gate.mean_s < evaluation.target_mean_s
+    )
+    runtime_ok = evaluation.max_step_race_time_ms is None or (
+        gate.runtime_trials_valid
+        and gate.maximum_step_ms is not None
+        and 0.0 < gate.maximum_step_ms <= evaluation.max_step_race_time_ms
+    )
+    telemetry_ok = not evaluation.reject_telemetry_skips or gate.skipped_telemetry_trials == 0
+    median_ok = evaluation.target_median_s is None or gate.median_s < evaluation.target_median_s
+    finishes_ok = gate.trials > 0 and gate.completed >= gate.required
+    return finishes_ok and median_ok and mean_ok and runtime_ok and telemetry_ok
+
+
+def _benchmark_gate_failure(gate: _BenchmarkGate) -> str:
+    evaluation = gate.evaluation
+    return (
+        "benchmark failed: require "
+        f">={gate.required}/{gate.trials} finishes, "
+        f"{_median_requirement(evaluation)}"
+        f"{_mean_requirement(evaluation)}"
+        f"{_runtime_requirement(evaluation)}"
+        f"{_telemetry_skip_requirement(gate)}"
+        "and no telemetry/controller errors"
+    )
+
+
+def _benchmark_gate_success(gate: _BenchmarkGate) -> str:
+    summary = (
+        f"Benchmark passed: {gate.completed}/{gate.trials} finishes, median {gate.median_s:.3f}s"
+    )
+    if gate.mean_s is not None:
+        summary += f", mean {gate.mean_s:.3f}s"
+    if gate.maximum_step_ms is not None:
+        summary += f", maximum race-clock step {gate.maximum_step_ms:.3f}ms"
+    return summary
+
+
+def _mean_requirement(evaluation: EvaluationSuiteSpec) -> str:
+    target = evaluation.target_mean_s
+    return "" if target is None else f"mean completed time <{target}s, "
+
+
+def _runtime_requirement(evaluation: EvaluationSuiteSpec) -> str:
+    maximum = evaluation.max_step_race_time_ms
+    return "" if maximum is None else f"maximum race-clock step <={maximum}ms, "
+
+
+def _telemetry_skip_requirement(gate: _BenchmarkGate) -> str:
+    if not gate.evaluation.reject_telemetry_skips:
+        return ""
+    return "zero skipped telemetry frames in every trial, "
+
+
+def _median_requirement(evaluation: EvaluationSuiteSpec) -> str:
     target = evaluation.target_median_s
-    if target is None:
-        raise ValueError("evaluation.target_median_s is required")
-    return target
+    return "" if target is None else f"median completed time <{target}s, "
 
 
 def _completed_trials(trials: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [trial for trial in trials if trial["finished"]]
+
+
+def _telemetry_skipped_trials(trials: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [trial for trial in trials if _skipped_telemetry_frames(trial) > 0]
+
+
+def _skipped_telemetry_frames(trial: dict[str, Any]) -> int:
+    value = trial.get("telemetry_skipped_frames_total", 0)
+    return int(value) if isinstance(value, int | float) else 1
 
 
 def _has_runtime_errors(trials: list[dict[str, Any]]) -> bool:

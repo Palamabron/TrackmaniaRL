@@ -229,7 +229,7 @@ def test_replay_checkpoint_requires_valid_episode_sampling_paces() -> None:
         InMemoryReplayStore().load_state_dict(state)
 
 
-def test_replay_checkpoint_restores_v1_without_pending_episode_pace() -> None:
+def test_replay_checkpoint_rejects_v1_without_pending_episode_pace() -> None:
     source = InMemoryReplayStore(capacity=2)
     source.label_episode_sampling_pace("future", 36.0)
     state = source.state_dict()
@@ -237,11 +237,8 @@ def test_replay_checkpoint_restores_v1_without_pending_episode_pace() -> None:
     state.pop("episode_sampling_paces")
 
     restored = InMemoryReplayStore(capacity=2)
-    restored.load_state_dict(state)
-    _append_episode(restored, _EpisodeSpec("future", 1))
-
-    assert np.isinf(restored.sampling_pace_s(0))
-    assert restored.state_dict()["episode_sampling_paces"] == {}
+    with pytest.raises(ValueError, match="unsupported replay checkpoint format"):
+        restored.load_state_dict(state)
 
 
 @pytest.mark.parametrize("finish_time_s", [0.0, -1.0, float("nan"), float("inf")])

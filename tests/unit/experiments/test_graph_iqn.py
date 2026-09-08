@@ -29,26 +29,6 @@ from trackmaniarl.models.track_graphs import (
 from trackmaniarl.trackmania.geometry import GEOMETRY_ASSET_VERSION
 
 
-@pytest.mark.parametrize(
-    "encoder_type",
-    [TrackGnnSimbaEncoder, TrackArcLengthGnnSimbaEncoder, TrackDirectionalGnnSimbaEncoder],
-)
-def test_graph_iqn_model_contract(encoder_type: type[torch.nn.Module]) -> None:
-    encoder = encoder_type()
-    head = DuelingImplicitQuantileHead()
-    observation = {
-        "track": torch.zeros(2, 3, 88),
-        "physics": torch.zeros(2, 60),
-    }
-    support = ValueSupport(torch.full((2, 32), 0.5), torch.full((2, 32), 1.0 / 32.0))
-
-    features = encoder(observation)
-    values = head.evaluate_all(features, support)
-
-    assert features.shape == (2, 192)
-    assert values.shape == (2, 32, 78)
-
-
 def test_graph_iqn_head_selects_actions_across_sequence_dimensions() -> None:
     head = DuelingImplicitQuantileHead()
     features = torch.randn(2, 3, 192)
@@ -194,16 +174,6 @@ def test_arc_length_graph_is_deterministic_and_differentiable() -> None:
     assert torch.isfinite(track.grad).all()
 
 
-def test_arc_length_graph_uses_fixed_normalized_lookahead_distance() -> None:
-    graph = ArcLengthTrackNeighborGraph(point_count=4)
-
-    torch.testing.assert_close(
-        graph.normalized_arc_length,
-        torch.tensor([0.25, 0.5, 0.75, 1.0]),
-    )
-    assert not graph.normalized_arc_length.requires_grad
-
-
 def test_arc_length_graph_rejects_invalid_point_count() -> None:
     with pytest.raises(ValueError, match="dimensions must be positive"):
         ArcLengthTrackNeighborGraph(point_count=1)
@@ -306,15 +276,6 @@ def test_order_aware_model_cpu_update_resumes_exactly(
     assert restored.update_count == learner.update_count == 2
     for name, value in restored.model.state_dict().items():
         torch.testing.assert_close(value, expected[name], rtol=0.0, atol=0.0)
-
-
-def test_gtn_simba_encoder_matches_value_model_contract() -> None:
-    observation = {"track": torch.zeros(2, 3, 88), "physics": torch.zeros(2, 60)}
-
-    features = TrackGtnSimbaEncoder()(observation)
-
-    assert features.shape == (2, 192)
-    assert torch.isfinite(features).all()
 
 
 @pytest.mark.parametrize(

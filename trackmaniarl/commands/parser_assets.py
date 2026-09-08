@@ -10,6 +10,7 @@ from trackmaniarl.commands.assets import (
     _record_demo,
     _record_trajectory,
 )
+from trackmaniarl.commands.human_recovery import _record_human_recovery
 from trackmaniarl.commands.parser_types import CommandParsers
 
 
@@ -18,6 +19,7 @@ def register_asset_commands(commands: CommandParsers) -> None:
     track_commands = track.add_subparsers(dest="track_command", required=True)
     _register_trajectory_recorder(track_commands)
     _register_demo_recorder(track_commands)
+    _register_human_recovery_recorder(track_commands)
     _register_boundary_recorder(track_commands)
     _register_geometry_builder(track_commands)
     _register_track_check(track_commands)
@@ -63,6 +65,83 @@ def _add_demo_recording_options(parser: argparse.ArgumentParser) -> None:
         type=float,
         default=0.0,
         help="physical sampling interval; 0 records every new telemetry frame",
+    )
+
+
+def _register_human_recovery_recorder(commands: CommandParsers) -> None:
+    parser = commands.add_parser(
+        "record-recovery",
+        help="inject one incident, hand control to a human, and save completed recovery laps",
+    )
+    _add_human_recovery_source_options(parser)
+    _add_human_recovery_window_options(parser)
+    _add_human_recovery_session_options(parser)
+    parser.set_defaults(handler=_record_human_recovery)
+
+
+def _add_human_recovery_source_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("output", type=Path, help="directory that receives recovery .npz files")
+    parser.add_argument("--config", type=Path, required=True, help="run YAML matching the policy")
+    parser.add_argument("--checkpoint", type=Path, required=True, help="policy checkpoint to drive")
+
+
+def _add_human_recovery_session_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--count", type=int, default=36, help="laps; 36 gives two per stratified incident cell"
+    )
+    parser.add_argument(
+        "--max-attempts",
+        type=int,
+        help="stop after this many started laps (default: max(3*count, count+2))",
+    )
+    parser.add_argument("--seed", type=int, help="perturbation seed (default: run seed)")
+    parser.add_argument("--max-duration", type=float, default=180.0)
+    _add_human_recovery_handover_options(parser)
+    parser.add_argument(
+        "--minimum-context",
+        type=float,
+        default=1.0,
+        help="minimum seconds of causal context before perturbation (at least 0.95)",
+    )
+
+
+def _add_human_recovery_handover_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--takeover-timeout",
+        type=float,
+        default=10.0,
+        help="seconds to observe controller release and the first clear human input",
+    )
+    parser.add_argument(
+        "--human-input-deadzone",
+        type=float,
+        default=0.10,
+        help="minimum gas, brake, or steering magnitude that starts expert labels",
+    )
+
+
+def _add_human_recovery_window_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--target-progress-min",
+        type=float,
+        default=0.55,
+        help="minimum perturbation progress as a fraction (default: 0.55)",
+    )
+    parser.add_argument(
+        "--target-progress-max",
+        type=float,
+        default=0.83,
+        help="maximum perturbation progress as a fraction (default: 0.83)",
+    )
+    _add_human_recovery_duration_options(parser)
+
+
+def _add_human_recovery_duration_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--perturbation-duration-min-ms", type=float, default=50.0, help="shortest incident"
+    )
+    parser.add_argument(
+        "--perturbation-duration-max-ms", type=float, default=200.0, help="longest incident"
     )
 
 

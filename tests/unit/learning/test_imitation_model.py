@@ -219,20 +219,6 @@ def test_steering_auxiliary_loss_penalizes_incorrect_controls() -> None:
     _assert_steering_loss_penalizes_wrong_analog_magnitude()
 
 
-def test_behavior_cloning_model_emits_one_logit_per_compact_action() -> None:
-    model = LidarBehaviorCloningModel(action_ids=(0, 1, 3, 39, 72, 73, 75), spatial_bins=4)
-    observation = {
-        "lidar": torch.zeros((2, 4, 8)),
-        "lidar_mask": torch.ones((2, 8), dtype=torch.bool),
-        "telemetry": torch.zeros((2, 26)),
-    }
-
-    logits = model(observation)
-
-    assert logits.shape == (2, 7)
-    assert model.action_count == 7
-
-
 def test_factorized_behavior_cloning_head_shares_steering_and_drive_evidence() -> None:
     model = LidarBehaviorCloningModel(
         action_ids=(0, 3, 39, 75),

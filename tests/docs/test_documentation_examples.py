@@ -29,6 +29,7 @@ EXAMPLES = ROOT / "readme" / "examples"
 MARKDOWN_FILES = (
     ROOT / "README.md",
     *sorted((ROOT / "readme").glob("*.md")),
+    *sorted((ROOT / "docs").glob("*.md")),
     ROOT / "docs" / "diagrams" / "README.md",
 )
 YAML_EXAMPLES = tuple(sorted((*EXAMPLES.glob("*.yaml"), *EXAMPLES.glob("*.yml"))))
@@ -127,8 +128,8 @@ def _documented_table_fields(reference: str) -> set[str]:
 
 def _assert_runtime_config_fields_are_documented() -> None:
     reference = "\n".join(
-        (ROOT / "readme" / name).read_text(encoding="utf-8")
-        for name in ("configuration.md", "rewards.md")
+        (ROOT / name).read_text(encoding="utf-8")
+        for name in ("readme/configuration.md", "docs/reward-function.md")
     )
     documented = _documented_table_fields(reference)
     missing = {
