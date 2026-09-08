@@ -62,10 +62,10 @@ reported `ready=true`; all of its 15 trials completed and form the second block.
 
 ## Video evidence
 
-- `C:\Users\szulc\Videos\Captures\TrackmaniaRL-benchmark-20260906-v106b-v107c.mp4`
+- `%USERPROFILE%\Videos\Captures\TrackmaniaRL-benchmark-20260906-v106b-v107c.mp4`
   - 35:18, approximately 2.81 GB
   - contains V106B, the visible invalid transition/replay interval, and the first valid V107C block
-- `C:\Users\szulc\Videos\Captures\TrackmaniaRL-benchmark-20260906-v107c-continuation.mp4`
+- `%USERPROFILE%\Videos\Captures\TrackmaniaRL-benchmark-20260906-v107c-continuation.mp4`
   - 10:27, approximately 564 MB
   - contains the clean second V107C block
 

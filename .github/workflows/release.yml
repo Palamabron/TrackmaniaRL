@@ -225,6 +225,7 @@ jobs:
           UV_INDEX: pytorch-cuda=https://download.pytorch.org/whl/cpu
         run: |
           $wheel = (Get-ChildItem dist -Filter *.whl -File | Select-Object -First 1).FullName
+          $PSNativeCommandUseErrorActionPreference = $true
           $testDir = New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP "release-wheel-test")
           $agentDir = Join-Path $testDir.FullName "agent"
           Push-Location $testDir.FullName
@@ -243,6 +244,19 @@ jobs:
           if ($lock -notmatch 'download(?:-r2)?\.pytorch\.org/whl/cpu' -or $lock -notmatch 'version = "[^"]+\+cpu"') {
             throw "generated Windows project did not resolve CPU Torch"
           }
+
+      - name: Exercise installed starter on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: uv run --isolated --no-project --no-config --index "$TORCH_CPU_INDEX" --with "torch==$TORCH_CPU_VERSION" --with ./dist/*.whl python scripts/smoke_installed.py
+
+      - name: Exercise installed starter on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $wheel = (Get-ChildItem dist -Filter *.whl -File | Select-Object -First 1).FullName
+          uv run --isolated --no-project --no-config --index "$env:TORCH_CPU_INDEX" --with "torch==$env:TORCH_CPU_VERSION" --with "$wheel" python scripts/smoke_installed.py
 
   attest-publish:
     name: Attest and publish canonical bytes

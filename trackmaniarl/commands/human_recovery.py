@@ -162,8 +162,13 @@ def _collection_status(message: str) -> None:
         import winsound
     except ImportError:
         return
+    play_sound = getattr(winsound, "PlaySound", None)
+    sound_alias = getattr(winsound, "SND_ALIAS", 0)
+    sound_async = getattr(winsound, "SND_ASYNC", 0)
+    if not callable(play_sound):
+        return
     try:
-        winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
+        play_sound("SystemExclamation", sound_alias | sound_async)
     except RuntimeError:
         return
 

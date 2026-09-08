@@ -5,7 +5,7 @@ Pydantic as RunSpec 2.0, rejects unknown fields and NaN/Inf, then resolves each
 `module:attribute` component from the local environment. It is executable
 configuration: use only files and extension packages you trust.
 
-Start with the [generated Trackmania project](../README.md#install-and-create-your-project)
+Start with the [generated Trackmania project](../README.md#installation)
 for a real run. The complete, game-free
 [`builtin-smoke.yaml`](examples/builtin-smoke.yaml) is kept under test and can
 be checked without Trackmania:

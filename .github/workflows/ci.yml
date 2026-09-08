@@ -113,7 +113,7 @@ jobs:
         run: uv run --isolated --no-project python scripts/check_distribution.py
 
       - name: Verify wheel import and CLI
-        run: uv run --isolated --no-project --index "$TORCH_CPU_INDEX" --with "torch==$TORCH_CPU_VERSION" --with ./dist/*.whl trackmaniarl --help
+        run: uv run --isolated --no-project --no-config --index "$TORCH_CPU_INDEX" --with "torch==$TORCH_CPU_VERSION" --with ./dist/*.whl python scripts/smoke_installed.py
 
       - name: Verify generated project resolves the released wheel
         run: |
