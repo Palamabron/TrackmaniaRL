@@ -5,23 +5,23 @@ custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronou
 training, checkpoint resume, and repeatable evaluation.
 
 The game integration runs on Windows. Training and analysis can also run on Linux.
-Version 1.2.0 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
+Version 1.2.1 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
 
 ## Installation
 
 Install [uv](https://docs.astral.sh/uv/), then create a project:
 
 ```powershell
-uv tool install "trackmaniarl==1.2.0"
+uv tool install "trackmaniarl==1.2.1"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
 ```
 
-Until 1.2.0 is published, install a built wheel instead:
+To install a locally built wheel instead:
 
 ```powershell
-uv tool install path\to\trackmaniarl-1.2.0-py3-none-any.whl
+uv tool install path\to\trackmaniarl-1.2.1-py3-none-any.whl
 ```
 
 To work from this repository, run `uv sync --group dev` and prefix commands with
@@ -44,7 +44,7 @@ a compatible PyTorch build. See [platform and performance guidance](readme/perfo
 
 ## Neural inference in motion
 
-![Gameplay alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](docs/assets/trackmaniarl-neural-flow.gif)
+![Gameplay alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/7ccd15f74cf6a85ced5b4bb373904370a51affd8/docs/assets/trackmaniarl-neural-flow.gif)
 
 This excerpt visualizes the **best-performing model supplied for this release**.
 The panel follows geometry, car and context inputs through model stages to action
@@ -168,7 +168,7 @@ zero-drop benchmark.
 [Full method and all 30 times](docs/benchmarks/2026-09-08-v108-live.md) ·
 [Experiment source](experiments/sub37/README.md)
 
-![Best recorded trial: 36.560 s by telemetry](docs/assets/v108-neighbors-best.gif)
+![Best recorded trial: 36.560 s by telemetry](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/7ccd15f74cf6a85ced5b4bb373904370a51affd8/docs/assets/v108-neighbors-best.gif)
 
 The image is trial 29 from the full benchmark. Telemetry reports 36.560 s and the
 in-game overlay displays 36.568 s.

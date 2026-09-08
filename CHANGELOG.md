@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 - 2026-09-08
+
+- Use immutable GitHub URLs for README GIFs so they render on PyPI.
+
 ## 1.2.0 - 2026-09-08
 
 - Give checkpoint writers independent temporary files and clean partial JSON
