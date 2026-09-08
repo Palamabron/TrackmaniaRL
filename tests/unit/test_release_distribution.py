@@ -146,7 +146,8 @@ def _assert_release_workflow_publishes_without_rebuilding() -> None:
     publish = _jobs()["attest-publish"]
     commands = _commands(publish)
     assert "uv build" not in commands
-    assert "uv publish dist/*.whl dist/*.tar.gz" in commands
+    # Let uv discover adjacent `.publish.attestation` files for each archive.
+    assert _step_named(publish, "Publish the attested release to PyPI")["run"] == "uv publish"
     assert publish["environment"] == "pypi"
     assert publish["permissions"] == {
         "contents": "read",
