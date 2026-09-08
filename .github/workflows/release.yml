@@ -330,4 +330,4 @@ jobs:
           done
 
       - name: Publish the attested release to PyPI
-        run: uv publish dist/*.whl dist/*.tar.gz
+        run: uv publish
