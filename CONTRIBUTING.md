@@ -50,3 +50,18 @@ and HTML derivatives. Diagram validation and visual inspection are part of the
 documentation gate.
 
 Security reports follow [SECURITY.md](SECURITY.md), not the public issue tracker.
+
+## Before sharing a change or release
+
+- Inspect staged files and reachable history for secrets, home paths, private
+  URLs, account/session identifiers and machine/network details. Report categories
+  and relative paths, never copy sensitive values into issues or review output.
+- Keep credentials in environment variables; copy `.env-example` locally and
+  never commit real values. Keep recordings, checkpoints and datasets outside
+  distribution inputs.
+- Review screenshots and every selected video segment for visible private data;
+  remove nonessential container/EXIF/XMP metadata before publishing media.
+- Build the wheel and source distribution and run `scripts/check_distribution.py`
+  on that exact pair. Git ignore rules alone do not control setuptools archives.
+- Read [the release review](docs/reviews/1.2.0-release-review.md) and resolve its
+  publication blockers. Preserve license and upstream attribution.

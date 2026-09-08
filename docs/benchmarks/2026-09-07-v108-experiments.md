@@ -80,7 +80,7 @@ If the game returns to the finish/menu screen between commands, return to the
 track before launching the next command.
 
 ```powershell
-Set-Location 'H:\Studia\inzynierskie\inzynierkav2\AITrackmania'
+Set-Location '%PROJECT_ROOT%/'
 uv run python -m scripts.sub37_experiments benchmark --variant baseline --trials 10
 uv run python -m scripts.sub37_experiments benchmark --variant envelope --trials 10
 uv run python -m scripts.sub37_experiments benchmark --variant cvar75 --trials 10

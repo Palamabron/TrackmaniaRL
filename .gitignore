@@ -28,6 +28,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+.ci-dev-requirements.txt
 build/
 develop-eggs/
 dist/
@@ -119,6 +120,14 @@ celerybeat-schedule
 
 # Environments
 .env
+.env.*
+!.env.example
+!.env-example
+.agents/
+*.pem
+*.key
+*.npz
+*.npy
 .venv
 .venv-linux/
 .venv-windows/
@@ -208,3 +217,4 @@ output/
 !/experiments/
 /experiments/*
 !/experiments/sub37/
+!/experiments/activation_film/

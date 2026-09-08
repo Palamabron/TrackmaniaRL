@@ -12,5 +12,13 @@ recursive-include examples *.yaml
 include docs/*.md
 recursive-include docs/benchmarks *.md *.json
 recursive-include experiments/sub37 *.py *.md
+recursive-include experiments/activation_film *.py
+recursive-include docs/reviews *.md
 recursive-include tests *.py
 recursive-include trackmaniarl/project/openplanet *.as *.md *.toml
+include .env-example
+global-exclude .env .env.* *.pem *.key *.pt *.pth *.ckpt *.safetensors
+global-exclude *.npz *.npy *.mp4 *.mkv *.sqlite3 *.log *.pyc *.pyo
+prune artifacts
+prune wandb
+prune .venv

@@ -1,68 +1,100 @@
 # TrackmaniaRL
 
-A Python library for training reinforcement-learning agents on your own Trackmania
-2020 maps. Prepare map geometry, record or reuse demonstrations, train locally or
-with remote actors, resume checkpoints, and benchmark every attempt with telemetry
-diagnostics. No pretrained model, private assets or W&B account is required.
+TrackmaniaRL is a Python library for training reinforcement-learning agents on
+custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronous
+training, checkpoint resume, and repeatable evaluation.
 
-This source tree targets **1.2.0**, Python **3.12**, RunSpec **2.0** and training
-checkpoint schema **2.0**. Trackmania runs on Windows; offline training and remote
-learners can run on other supported PyTorch platforms. This is beta software.
+The game integration runs on Windows. Training and analysis can also run on Linux.
+Version 1.2.0 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
 
-## Install and create your project
+## Installation
 
-With Python 3.12 and [uv](https://docs.astral.sh/uv/) installed:
+Install [uv](https://docs.astral.sh/uv/), then create a project:
 
 ```powershell
 uv tool install "trackmaniarl==1.2.0"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
+```
+
+Until 1.2.0 is published, install a built wheel instead:
+
+```powershell
+uv tool install path\to\trackmaniarl-1.2.0-py3-none-any.whl
+```
+
+To work from this repository, run `uv sync --group dev` and prefix commands with
+`uv run`.
+
+For a game-free installation check, generate the small SDK starter instead:
+
+```powershell
+trackmaniarl init sdk-check --template starter
+cd sdk-check
+uv sync
+uv run trackmaniarl inspect-config run.yaml
 uv run trackmaniarl validate run.yaml
 ```
 
-Before 1.2.0 is published, install the prepared wheel with
-`uv tool install path/to/trackmaniarl-1.2.0-py3-none-any.whl`, or run
-`uv sync --group dev` and `uv run trackmaniarl init my-agent --template trackmania`
-from this checkout. Generated projects contain a synthetic geometry placeholder
-so validation can run without the game. **Replace it before driving.**
+Validation executes trusted component code and a synthetic update. It does not
+drive the game or establish driving performance. CPU execution is sufficient for
+this check; live neural inference and training benefit from an NVIDIA GPU with
+a compatible PyTorch build. See [platform and performance guidance](readme/performance.md).
 
-The generated Trackmania project declares the distributed dependencies and pins
-the vetted virtual-gamepad fork. Its installer may provision ViGEmBus on Windows.
-For an existing project, install `trackmaniarl[trackmania,distributed]` and follow
-the [controller setup](readme/trackmania.md); the public extra does not install the
-Git-pinned gamepad dependency. Choose a PyTorch build matching your GPU; generated
-projects select CUDA 12.8 on Windows/Linux. CPU users must change that source
-before syncing. W&B is optional (`wandb` extra plus an explicit logger).
+## Neural inference in motion
 
-## Prepare your own map
+![Gameplay alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](docs/assets/trackmaniarl-neural-flow.gif)
 
-You need Trackmania 2020, Openplanet in School Mode, and the managed
-**TrackmaniaRL Connect / SAC_GetData** plugin with the expected telemetry and
-session protocol. The repository includes its 2.4.0 reference source. Install and
-check the signed plugin through Plugin Manager; see the
-[environment setup](readme/trackmania.md) and
-[plugin guide](trackmaniarl/project/openplanet/README.md).
+This excerpt visualizes the **best-performing model supplied for this release**.
+The panel follows geometry, car and context inputs through model stages to action
+values and selected controls. The animated summaries are not a causal attribution
+of individual neurons. This selected lap uses the map-specific `neighbors` action
+filter; it is neither an unassisted-policy benchmark nor evidence of generalization.
+See [the model and recording explanation](docs/activation-film.md) for provenance,
+the five-attempt film series and [GIF reproduction](docs/neural-flow-media.md).
 
-Load your map in the editor's validation mode, with the car ready to drive.
-School Mode disables ordinary online play. Telemetry uses localhost TCP **9000**;
-session readiness and map identity use **9001**. Do not expose them publicly.
+## Game setup
+
+You need:
+
+- Trackmania 2020 on Windows
+- Openplanet in School Mode
+- the **TrackmaniaRL Connect / SAC_GetData** plugin
+- your map open in the editor's validation mode, with the car at the start.
+
+The plugin uses TCP ports 9000 (telemetry) and 9001 (session and map status) on
+localhost. The setup guide explains plugin installation and controller setup:
+[Trackmania setup](readme/trackmania.md).
+
+Check the connection before recording data or training:
 
 ```powershell
 uv run trackmaniarl track check
-uv run trackmaniarl track record-boundary left assets/my-map-left.npy
-uv run trackmaniarl track record-boundary right assets/my-map-right.npy
-uv run trackmaniarl track build-geometry assets/my-map.geometry.npz --left assets/my-map-left.npy --right assets/my-map-right.npy --map-uid YOUR_MAP_UID --map-path maps/my-map.Map.Gbx
 ```
 
-Drive each boundary from start to finish in the same direction. Copy your map to
-`maps/my-map.Map.Gbx`. Replace `REPLACE_WITH_YOUR_MAP_UID` in all three places
-in `run.yaml` with the UID reported by `track check`. The generated configuration
-is also available as [a complete example](examples/own-map.yaml).
-Map selection is manual; the library verifies the loaded map rather than loading
-arbitrary maps through an undocumented game API.
+## Configure a map
 
-## Train, reuse demonstrations and resume
+Record both track boundaries from start to finish, then build the geometry file:
+
+```powershell
+uv run trackmaniarl track record-boundary left assets/my-map-left.npy
+uv run trackmaniarl track record-boundary right assets/my-map-right.npy
+uv run trackmaniarl track build-geometry assets/my-map.geometry.npz `
+  --left assets/my-map-left.npy `
+  --right assets/my-map-right.npy `
+  --map-uid YOUR_MAP_UID `
+  --map-path maps/my-map.Map.Gbx
+```
+
+Copy the map to `maps/`, then replace `REPLACE_WITH_YOUR_MAP_UID` in `run.yaml`
+with the UID printed by `track check`. See [examples/own-map.yaml](examples/own-map.yaml)
+for a complete configuration. TrackmaniaRL verifies the open map but does not
+select it for you.
+
+## Train and resume
+
+Validate the configuration and run a short smoke test before a full training run:
 
 ```powershell
 uv run trackmaniarl validate run.yaml
@@ -71,103 +103,106 @@ uv run trackmaniarl smoke run.yaml --transitions 100
 uv run trackmaniarl train run.yaml
 ```
 
-The default model is a lidar encoder and dueling IQN with 78 control actions.
-Training is asynchronous: an actor drives while a learner updates replay.
-Use a fresh run ID when changing immutable configuration.
+The starter project uses a lidar encoder, a dueling IQN policy, and 78 discrete
+control actions. An actor drives while the learner trains from replay.
 
-Optional human demonstrations can seed the same training path:
+Demonstrations are optional:
 
 ```powershell
 uv run trackmaniarl track record-demo demonstrations --config run.yaml --count 5
 uv run trackmaniarl train run.yaml --demo demonstrations
-uv run trackmaniarl resume run.yaml artifacts/YOUR_RUN/checkpoints/YOUR_CHECKPOINT.pt
 ```
 
-Use the actual checkpoint path produced by your run. Exact resume restores
-training state; `train --model-initialization-checkpoint PATH` starts a new run
-from compatible weights. A policy-only checkpoint cannot resume an optimizer.
-Demo recording intentionally filters training data; benchmark attempts are
-never filtered to improve reported times. See [demonstrations and recovery](readme/imitation-learning.md)
-and [checkpoint migration](readme/migration-2.0.md).
-
-## Benchmark and record evaluation
-
-With the matching map ready:
+Resume the full training state from a checkpoint:
 
 ```powershell
-uv run trackmaniarl benchmark run.yaml artifacts/YOUR_RUN/checkpoints/YOUR_CHECKPOINT.pt --trials 30 --min-finish-rate 1
-uv run trackmaniarl benchmark run.yaml artifacts/YOUR_RUN/checkpoints/YOUR_CHECKPOINT.pt --trials 30 --min-finish-rate 1 --record recordings/benchmark.mkv
+uv run trackmaniarl resume run.yaml artifacts/RUN/checkpoints/CHECKPOINT.pt
 ```
 
-Recording requires FFmpeg on PATH (or `--ffmpeg PATH`) and a visible Windows
-window titled `Trackmania` (or `--window-title TITLE`). It records the full
-evaluation without audio and closes the recording on completion or error.
-See [recording and publication](docs/recording.md).
+To start a new run with compatible weights, use
+`train --model-initialization-checkpoint CHECKPOINT.pt`. A policy-only checkpoint
+does not contain optimizer or replay state and cannot be used for an exact resume.
 
-Each benchmark has a fresh output directory, a complete `evaluation.json` and
-an append-only trial timeline. Finish times come from the game telemetry clock,
-not video duration. A DNF remains an attempt; mean/median finish time is
-conditional on finishing and must always be accompanied by finish rate.
-Optional `--target-mean`, `--target-median`, `--max-step-race-time-ms` and
-`--reject-telemetry-skips` define acceptance gates. A failed gate retains the
-evidence and returns a failing exit status. No gate discards a slow trial.
+## Evaluate a checkpoint
 
-## Recorded result — one map, experimental controller
+Run every trial and keep the complete result:
 
-| Policy | Finishes | Mean | Median | Best | Worst |
-| --- | --- | --- | --- | --- | --- |
-| V107I checkpoint, ordinary policy (screening) | 10/10 | 38.061 s | — | 36.630 s | 42.430 s |
-| V107I + optional `neighbors` (fresh confirmation) | 30/30 | 36.976667 s | 36.835 s | 36.560 s | 41.370 s |
+```powershell
+uv run trackmaniarl benchmark run.yaml artifacts/RUN/checkpoints/CHECKPOINT.pt `
+  --trials 30 --min-finish-rate 1
+```
 
-The confirmation used a **map-specific replay-based action filter**, with unchanged
-V107I weights. It is not a universal pretrained model or ordinary checkpoint
-evaluation. The 10-trial baseline is a smaller screening series, not a matched
-30-trial comparison. All 30 confirmation attempts count, including 41.370 s.
-There were 458 skipped producer frames; this was not a zero-drop benchmark.
-The mean has only a 0.023333 s margin below 37 s and does not guarantee repetition.
+Add `--record recordings/benchmark.mkv` to record the Trackmania window. Recording
+requires FFmpeg. Use `--ffmpeg PATH` or `--window-title TITLE` when the defaults do
+not match your system.
 
-[Full report and all times](docs/benchmarks/2026-09-08-v108-live.md) ·
-[Optional source reproduction](experiments/sub37/README.md)
+Each benchmark writes `evaluation.json` and an append-only trial timeline. A DNF
+still counts as an attempt. Mean and median times cover finished attempts, so report
+them together with the finish rate. Telemetry drops are recorded because they can
+delay observations and control decisions. `--reject-telemetry-skips` rejects the
+whole evaluation. It never removes individual slow attempts.
 
-![Trial 29 of 30, V107I plus map-specific neighbors](docs/assets/v108-neighbors-best.gif)
+More detail: [evaluation architecture](docs/library-architecture.md#checkpoints-and-evaluation),
+[recording](docs/recording.md), and [troubleshooting](docs/troubleshooting.md).
 
-*Trial 29 from the complete 8 September confirmation. Benchmark telemetry reports
-36.560 s; the in-game finish overlay reads 36.568 s. Full-lap excerpt at normal
-speed; unchanged network weights plus the optional map-specific wrapper.*
+## Recorded result on the TMRL test track
 
-## Documentation and supported surface
+| Setup | Finishes | Mean | Median | Best | Worst |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| V107I checkpoint | 10/10 | 38.061 s | not reported | 36.630 s | 42.430 s |
+| V107I + `neighbors` action filter | 30/30 | 36.976667 s | 36.835 s | 36.560 s | 41.370 s |
 
-| Topic | Guide |
-| --- | --- |
-| Model, observations, actions and public API | [Library architecture](docs/library-architecture.md), [SDK](readme/sdk.md) |
-| Configuration and component contracts | [Configuration reference](readme/configuration.md) |
-| Every reward term, units and tuning | [Reward function](docs/reward-function.md) |
-| Replay, n-step returns and temporal models | [Replay and sequences](readme/replay-and-sequences.md) |
-| Algorithms and limitations | [Algorithm support matrix](readme/algorithms.md) |
-| Demonstrations, BC, DAgger and recovery | [Imitation learning](readme/imitation-learning.md) |
-| Process boundaries and distributed training | [Runtime architecture](readme/architecture.md) |
-| Metrics and performance | [Observability](readme/observability.md), [Performance](readme/performance.md) |
-| Connection, menus, telemetry, GPU/CPU | [Troubleshooting](docs/troubleshooting.md) |
-| Optional and repository-only experiments | [Support status](docs/support-status.md) |
-| Development, tests and releases | [Development](readme/development.md), [Contributing](CONTRIBUTING.md), [Changelog](CHANGELOG.md) |
+`neighbors` is not a trained model. It is a wrapper written specifically for the
+TMRL test track. Between 54% and 90% track progress, it finds the 15 closest states
+in replay recorded on that map. It keeps only actions that occurred in those
+states, then lets the unchanged V107I network choose the highest-valued remaining
+action. Outside that section, when no close replay state exists, or at very low
+speed, the base policy acts without this filter.
 
-PPO uses the local on-policy Trainer API, not the asynchronous actor/learner CLI.
-Graph recovery encoders, trajectory optimisation and orchestration strategies are
-opt-in experiments; their tests establish contracts, not general performance.
-There is no supported camera-vision training pipeline in the starter project.
-Configs import Python objects: run only trusted configurations and checkpoints.
+This result therefore measures V107I plus map knowledge stored in its replay. It
+does not show the performance of the checkpoint alone and says nothing about a new
+map. The two table rows also use different trial counts. All 30 confirmation trials
+were included. The run reported 458 dropped telemetry frames, so it was not a
+zero-drop benchmark.
+
+[Full method and all 30 times](docs/benchmarks/2026-09-08-v108-live.md) ·
+[Experiment source](experiments/sub37/README.md)
+
+![Best recorded trial: 36.560 s by telemetry](docs/assets/v108-neighbors-best.gif)
+
+The image is trial 29 from the full benchmark. Telemetry reports 36.560 s and the
+in-game overlay displays 36.568 s.
+
+## Documentation
+
+- [Configuration](readme/configuration.md)
+- [Model, observations, actions, and evaluation](docs/library-architecture.md)
+- [Neural activation film and repeatable export](docs/activation-film.md)
+- [Reward function](docs/reward-function.md)
+- [Demonstrations and recovery](readme/imitation-learning.md)
+- [Replay and sequences](readme/replay-and-sequences.md)
+- [Distributed runtime](readme/architecture.md)
+- [Supported and experimental features](docs/support-status.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Migration to schema 2.0](readme/migration-2.0.md)
+- [Python API](readme/sdk.md)
+
+PPO and the graph-based recovery models are experimental and are not part of the
+default Trackmania training path. The project does not currently provide a camera
+vision pipeline. Configuration files and PyTorch checkpoints can execute Python.
+only use files you trust.
 
 ## Development
 
 ```powershell
 uv sync --group dev
+uv run ruff format --check .
 uv run ruff check .
-uv run mypy trackmaniarl
-uv run pytest -o addopts='' tests
+uv run mypy --strict trackmaniarl
+uv run pytest
 uv build
 uv run python scripts/check_distribution.py
 ```
 
-TrackmaniaRL originated from TMRL; see [NOTICE](NOTICE) and [MIT license](LICENSE).
-It is not affiliated with Ubisoft, Nadeo or the TMRL maintainers.
-See the [security policy](SECURITY.md) for trust boundaries.
+TrackmaniaRL is released under the [MIT license](LICENSE). It originated from TMRL.
+attribution is in [NOTICE](NOTICE). It is not affiliated with Ubisoft or Nadeo.

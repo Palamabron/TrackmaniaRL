@@ -2,6 +2,12 @@
 
 Status: local preparation only; no commit, push, merge, tag or publication.
 
+The later [public-library release review](reviews/1.2.0-release-review.md)
+supersedes the readiness assessment below. Its current-tree checks pass, but
+reachable-history privacy findings and the transitive dependency advisory need
+an explicit publication disposition. The older counts below are historical
+preparation evidence, not the latest gate results.
+
 ## Changes and migration
 
 The own-map starter no longer assumes the TMRL test map or a 37-second target.

@@ -79,13 +79,15 @@ def _write_metadata(options: RecordingOptions, command: list[str]) -> None:
 
 
 def _launch(command: list[str], log: TextIO) -> subprocess.Popen[str]:
+    # Typeshed omits this Windows-only constant when mypy runs on Linux.
+    creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     return subprocess.Popen(
         command,
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
         stderr=log,
         text=True,
-        creationflags=subprocess.CREATE_NO_WINDOW,
+        creationflags=creation_flags,
     )
 
 

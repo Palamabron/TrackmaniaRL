@@ -16,8 +16,10 @@ from typing import cast
 
 if __package__:
     from .distribution_manifest import DIAGRAM_STEMS, DIAGRAM_SUFFIXES, SDIST_REQUIRED_PATHS
+    from .distribution_privacy import validate_archive_privacy
 else:
     from distribution_manifest import DIAGRAM_STEMS, DIAGRAM_SUFFIXES, SDIST_REQUIRED_PATHS
+    from distribution_privacy import validate_archive_privacy
 
 SBOM_NAME = "trackmaniarl-release.spdx.json"
 CHECKSUMS_NAME = "SHA256SUMS"
@@ -157,6 +159,7 @@ def _wheel_dependency_errors(metadata: Message) -> list[str]:
 
 
 def _validate_wheel(archive: Path, version: str) -> None:
+    validate_archive_privacy(archive)
     dist_info = f"trackmaniarl-{version}.dist-info"
     with zipfile.ZipFile(archive) as package:
         _require_members(set(package.namelist()), _wheel_required_members(version), archive)
@@ -175,6 +178,7 @@ def _sdist_required_members(root: str) -> set[str]:
 
 
 def _validate_sdist(archive: Path, version: str) -> None:
+    validate_archive_privacy(archive)
     root = f"trackmaniarl-{version}"
     with tarfile.open(archive) as package:
         names = {member.name.replace("\\", "/") for member in package.getmembers()}

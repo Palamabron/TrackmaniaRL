@@ -2,6 +2,15 @@
 
 ## 1.2.0 - Unreleased
 
+- Give checkpoint writers independent temporary files and clean partial JSON
+  saves after serialization or replacement failures; existing checkpoints survive.
+- Reject private files, unsafe archive entries, oversized members and common
+  personal-path/credential signatures in both release distributions.
+- Remove local account paths from current benchmark documentation, clarify
+  credential setup, and document historical privacy findings before publication.
+- Add an optimized neural-flow excerpt with model provenance and evaluation
+  caveats; compress the complete older illustrative gameplay animation.
+
 - Make the generated Trackmania project use generic own-map paths, explicit
   School Mode finish handling and no map-specific lap-time target.
 - Add full-window benchmark recording, append-only trial timelines and unique

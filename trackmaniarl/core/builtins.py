@@ -181,7 +181,7 @@ class TorchCheckpointCodec:
 
     def save(self, state: Mapping[str, Any], path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = path.with_suffix(path.suffix + ".tmp")
+        temporary = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
         try:
             _write_zstd_checkpoint(state, temporary)
             os.replace(temporary, path)
@@ -244,12 +244,15 @@ class JsonCheckpointCodec:
 
     def save(self, state: Mapping[str, Any], path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = path.with_suffix(path.suffix + ".tmp")
-        with temporary.open("w", encoding="utf-8") as destination:
-            json.dump(dict(state), destination, sort_keys=True)
-            destination.flush()
-            os.fsync(destination.fileno())
-        os.replace(temporary, path)
+        temporary = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
+        try:
+            with temporary.open("x", encoding="utf-8") as destination:
+                json.dump(dict(state), destination, sort_keys=True)
+                destination.flush()
+                os.fsync(destination.fileno())
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
         sync_checkpoint_path(path)
 
     def load(self, path: Path) -> Mapping[str, Any]:

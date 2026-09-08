@@ -87,7 +87,6 @@ def test_torch_checkpoint_removes_temporary_after_write_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     path = tmp_path / "checkpoint.pt"
-    temporary = path.with_suffix(".pt.tmp")
 
     def fail_write(state: object, destination: Path) -> None:
         del state
@@ -100,7 +99,7 @@ def test_torch_checkpoint_removes_temporary_after_write_failure(
         TorchCheckpointCodec().save({}, path)
 
     assert not path.exists()
-    assert not temporary.exists()
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_torch_checkpoint_removes_temporary_after_replace_failure(
@@ -108,10 +107,12 @@ def test_torch_checkpoint_removes_temporary_after_replace_failure(
 ) -> None:
     path = tmp_path / "checkpoint.pt"
     path.write_bytes(b"previous checkpoint")
-    temporary = path.with_suffix(".pt.tmp")
 
     def fail_replace(source: Path, destination: Path) -> None:
-        assert (source, destination) == (temporary, path)
+        assert source.parent == path.parent
+        assert source != path
+        assert source.is_file()
+        assert destination == path
         raise PermissionError("injected replace failure")
 
     monkeypatch.setattr(core_builtins.os, "replace", fail_replace)
@@ -120,7 +121,7 @@ def test_torch_checkpoint_removes_temporary_after_replace_failure(
         TorchCheckpointCodec().save({"counter": 1}, path)
 
     assert path.read_bytes() == b"previous checkpoint"
-    assert not temporary.exists()
+    assert list(tmp_path.iterdir()) == [path]
 
 
 def _assert_wandb_capture(capture: _WandbCapture) -> None:
