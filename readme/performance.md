@@ -72,7 +72,7 @@ while producing the same 49,969 valid windows.
 
 The W&B projection path was measured separately with 50,000 update events and
 a local no-network fake run: 7.25 µs enqueue time per event, 7.67 µs including
-worker drain, and zero drops. This verifies the application-side projection and
+worker drain and zero drops. This verifies the application-side projection and
 queue overhead; it does not estimate remote service latency. The bounded worker
 isolates that latency and reports drops/errors while local JSONL remains the
 authority.

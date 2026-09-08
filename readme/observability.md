@@ -8,7 +8,7 @@ answer a training or operations question and omits high-cardinality detail.
 Configuration passed to remote trackers is recursively redacted for keys whose
 names contain `key`, `token`, `secret` or `password`. Do not place secrets under
 misleading names. The asynchronous adapter has a bounded queue; remote failure
-does not stop training, and `health/tracker_dropped_events` plus
+does not stop training and `health/tracker_dropped_events` plus
 `health/tracker_worker_errors` expose incomplete remote telemetry.
 
 Configure it under `components.additional_loggers` with these kwargs:
@@ -179,7 +179,7 @@ Configure alerts or external monitors from these explicit conditions:
 
 There is no universal gradient-norm or loss threshold across algorithms and
 reward scales. Establish a seeded healthy baseline, alert on non-finite values
-immediately, and treat sustained deviations together with outcome metrics.
+immediately and treat sustained deviations together with outcome metrics.
 
 References: [W&B custom axes](https://docs.wandb.ai/models/track/log/customize-logging-axes),
 [system metrics](https://docs.wandb.ai/models/ref/python/experiments/system-metrics),

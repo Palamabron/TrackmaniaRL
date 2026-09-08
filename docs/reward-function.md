@@ -129,7 +129,7 @@ accepted_motion <= min(position_displacement,
 ```
 
 This prevents a stationary car near a later crossing or hairpin from catching
-up over repeated calls, and avoids using a global longest-segment allowance on
+up over repeated calls and avoids using a global longest-segment allowance on
 shorter parts of the map. If race time is absent, the conservative time budget
 is `max_time_delta_s`.
 
@@ -192,7 +192,7 @@ The loader verifies:
 
 Demonstration positions are projected monotonically onto the geometry. The
 first time observed at each visited trajectory index is retained, missing
-indices are linearly interpolated, and the last profile value is set to the
+indices are linearly interpolated and the last profile value is set to the
 recorded finish time. Optional speed values are converted with
 `velocity_to_mps_scale`, interpolated and smoothed; the reward itself uses the
 reference times.
@@ -263,11 +263,11 @@ uv run trackmaniarl smoke run.yaml --transitions 100
 The last two commands are live gates and require Trackmania, the prepared map,
 controller backend and [TrackmaniaRL Connect](https://openplanet.dev/plugin/sac_getdata).
 
-## Why these terms, and recovery on another map
+## Why these terms and recovery on another map
 
 The base reward combines a dense progress signal with an explicit incentive to
 finish and a cost for elapsed race time. Defaults give 10 direct progress units
-per complete lap, 30 for finishing, and -0.1 per second. A valid finish fills any
+per complete lap, 30 for finishing and -0.1 per second. A valid finish fills any
 small remaining accepted progress gap before the terminal terms are evaluated.
 The progress potential adds short-horizon feedback. Optional velocity, pace and
 time-attack terms are disabled by default; their weights change the learning

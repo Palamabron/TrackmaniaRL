@@ -50,10 +50,10 @@ configuration, split membership and a dataset fingerprint.
 
 The current archive format stores `frames` with one more row than `actions`,
 continuous `controls` with shape `(transitions, 3)`, `finish_time_s`,
-`action_repeat_frames`, optional `decision_interval_ms`, and
+`action_repeat_frames`, optional `decision_interval_ms` and
 `control_alignment`. Controls are `[gas, brake, steer]`; the discrete action
 must equal deterministic quantization of that row. Race timestamps must be
-strictly increasing, only the final frame may carry the finish flag, and the
+strictly increasing, only the final frame may carry the finish flag and the
 finish metadata must agree with it within 50 ms.
 
 Native recording targets 100 Hz telemetry: first frame at most 15 ms after the
@@ -113,7 +113,7 @@ training:
 ```
 
 `action_ids` must exactly match
-`components.environment.kwargs.config.compact_action_ids`, and the model's
+`components.environment.kwargs.config.compact_action_ids` and the model's
 `history_length`, `telemetry_dim` and `lidar_channels` must match the feature
 pipeline output. The minimal configuration above produces 17 telemetry values
 and four lidar channels. If
@@ -200,12 +200,12 @@ batch size does not change the result.
 
 Accuracy is exact compact-action accuracy. Balanced accuracy averages recall
 over observed actions. Transition metrics cover action changes, steering
-metrics collapse actions to left/neutral/right, and intervention metrics cover
+metrics collapse actions to left/neutral/right and intervention metrics cover
 teacher interventions. The control score ranks eligible open-loop candidates;
 it is not evidence that the car drives safely or finishes.
 
 Always run `bc-benchmark` before promotion. Compare finish rate first, then
-median finish time/progress and intervention/recovery behavior, and use
+median finish time/progress and intervention/recovery behavior and use
 open-loop metrics only as tie-breakers. A checkpoint that improves frame-level
 accuracy may regress in closed loop because prediction errors compound.
 
@@ -245,7 +245,7 @@ last recorded control. Aggregation requires:
 `demo-benchmark --action-offset-ms O` is a separate open-loop diagnostic. It
 adds `O` to the timestamps at which replay switches actions. A positive offset
 delays switching; a negative offset advances it. It does not rewrite training
-labels, and it cannot be combined with phase-locked or trajectory-tracking
+labels and it cannot be combined with phase-locked or trajectory-tracking
 replay. Once the best diagnostic offset is understood, express an anticipatory
 training correction with the non-negative label lead and record the decision,
 instead of leaving an unexplained benchmark-only offset.
@@ -278,7 +278,7 @@ Four mechanisms must not be conflated:
   drift directly;
 - **phase locking** matches current feature state to a nearby reference phase;
 - **trajectory tracking** finds a nearby forward world-space reference state,
-  takes feed-forward expert controls at an optional lead, and adds steering
+  takes feed-forward expert controls at an optional lead and adds steering
   feedback from lateral, heading and lateral-velocity error;
 - **DAgger** visits student-induced states and asks the closed-loop trajectory
   teacher for labels.
@@ -312,7 +312,7 @@ Every archive records the map UID, geometry SHA-256, action-repeat or decision
 interval, `frame_start` control alignment and a SHA-256 over the source
 demonstration's canonical metadata and arrays. DAgger archives also record the
 student-checkpoint file SHA-256 for audit attribution. `bc-train` compares the
-contract with the active feature geometry and parsed environment, and requires
+contract with the active feature geometry and parsed environment and requires
 the canonical source digest to match one of its `--demo` inputs, before
 building any observations. It cannot independently re-hash the historical
 student checkpoint unless that file is retained. Version 1 and 2 archives lack
@@ -378,7 +378,7 @@ run contract.
 BC remains sensitive to expert quality, class imbalance and covariate shift.
 It does not optimize lap return or recovery trajectories directly. Use DAgger
 or demonstration-aware RL objectives for states outside the expert
-distribution, and never promote a model solely from open-loop validation.
+distribution and never promote a model solely from open-loop validation.
 
 Behavior cloning here follows the supervised imitation-learning setup
 described in [Learning to act by watching others](https://www.cse.unsw.edu.au/~claude/papers/MI15.pdf),

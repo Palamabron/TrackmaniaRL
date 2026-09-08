@@ -2,7 +2,8 @@
 
 ## 1.2.1 - 2026-09-08
 
-- Use immutable GitHub URLs for README GIFs so they render on PyPI.
+- Use an immutable GitHub URL for the README GIF so it renders on PyPI and move
+  the TMRL test-track result out of the main README.
 
 ## 1.2.0 - 2026-09-08
 
@@ -11,7 +12,7 @@
 - Reject private files, unsafe archive entries, oversized members and common
   personal-path/credential signatures in both release distributions.
 - Remove local account paths from current benchmark documentation, clarify
-  credential setup, and document historical privacy findings before publication.
+  credential setup and document historical privacy findings before publication.
 - Add an optimized neural-flow excerpt with model provenance and evaluation
   caveats; compress the complete older illustrative gameplay animation.
 
@@ -42,7 +43,7 @@
   race-clock measurements for every evaluated control step; incomplete or
   inconsistent actor timing evidence can no longer promote a checkpoint.
 - Add mean-time and maximum step race-clock promotion targets, controller brake
-  pulse and cadence observability, and matching soak-benchmark verification.
+  pulse and cadence observability and matching soak-benchmark verification.
 - Make published extras honest about the pinned virtual-gamepad fork: generated
   Trackmania projects now declare and pin it directly, while existing projects
   receive an explicit installation path instead of an unsafe implicit resolver
@@ -67,7 +68,7 @@
   named-submodule warm-start reports. The unified `DiscreteValueLearner` is the
   sole scalar Q, QR-DQN, IQN and FQF training path.
 - Persist AMP scaler state for every Torch learner, reject unsupported sequence
-  configurations before training, and make composite priority validation
+  configurations before training and make composite priority validation
   atomic with the optimizer update.
 - Make uniform and prioritized sequence replay share one raw-context/n-step
   contract, cache valid sequence windows by replay revision and correct TQC and
@@ -89,7 +90,7 @@
   the MLP fixture and 1.41x for the lidar fixture under the recorded noisy
   workload, with the same direction in an interleaved repeat.
 - Fail Trackmania startup closed on telemetry, protocol, readiness, map UID and
-  geometry mismatches, and make actor startup failures terminate nonzero
+  geometry mismatches and make actor startup failures terminate nonzero
   instead of leaving the learner waiting indefinitely.
 - Allow School Mode runs in editor validation to skip the normal-play Enter
   confirmation and handle the editor's author-time result while retaining gamepad driving.
@@ -107,7 +108,7 @@
 - Reject non-finite RunSpec values, malformed geometry and pace profiles,
   backward reward clocks and physically unreachable progress jumps. Require the
   built-in reward discount to equal `training.gamma`, report terminal and
-  time-attack reward components without double counting, and use the documented
+  time-attack reward components without double counting and use the documented
   OpenPlanet velocity conversion for pace and projected-velocity diagnostics.
 - Sample recurrent replay only from complete, unique, episode-local histories;
   preserve n-step boundaries and elite weighting in both optimized and fallback
@@ -146,12 +147,12 @@
 - Correct SAC, REDQ-SAC and TQC scalar/quantile shapes, preserve structured
   observation PyTrees and batch single CHW observations during policy inference.
 - Bind local exact resume and distributed handshakes to the semantic RunSpec,
-  declared and resolved component-package source, and geometry/pace-reference
+  declared and resolved component-package source and geometry/pace-reference
   contents. Suppress obsolete warm-start loading during state restoration and
   record resolved execution separately for every process attempt. Pytest now
   uses an ignored repository-local base temp directory on Windows.
 - Validate documented component constructor kwargs and public configuration
-  field coverage, correct the RunSpec examples and defaults, and distinguish the
+  field coverage, correct the RunSpec examples and defaults and distinguish the
   off-policy architecture diagrams from the local PPO lifecycle.
 - Add a bounded actor-stall watchdog and fail closed when Trackmania stops
   producing environment steps instead of leaving the learner running forever.
@@ -187,7 +188,7 @@
   learners, with focused contract coverage and explicit dependency errors.
 - Document the Mamba training contract, supported deployment split and RunSpec
   wiring, with a new editable model data-flow diagram.
-- Enable the pinned vgamepad fork and its `libevdev` dependency on Linux, and
+- Enable the pinned vgamepad fork and its `libevdev` dependency on Linux and
   select the tested CUDA Torch index for Windows and Linux Trackmania hosts.
 
 - Bound distributed wire messages by their decompressed size and added a
@@ -199,7 +200,7 @@
   development/extension workflow and a dated security audit.
 - Add editable Excalidraw diagrams and SVG/HTML previews for the runtime,
   extension workflow and distributed security boundaries.
-- Split behavior cloning into model, learner and data package entry points, and
+- Split behavior cloning into model, learner and data package entry points and
   move shared lidar encoding out of the IQN-specific module.
 - Validate declared model/learner contracts during RunSpec resolution.
 - Expose gamepad or keyboard control in the generated Trackmania configuration;
@@ -225,24 +226,24 @@
 
 - Renamed the distribution, Python package and CLI to TrackmaniaRL / `trackmaniarl`.
 - Added attribution, trademark disclaimer and a security reporting policy.
-- Made the generated Trackmania project valid TOML, W&B-free by default, and benchmark-ready.
+- Made the generated Trackmania project valid TOML, W&B-free by default and benchmark-ready.
 - Validated actions through each learner policy and made discrete SAC emit Python action indices.
 - Removed automatic unsafe checkpoint unpickling and added wheel-level CI verification.
 
-- Recurrent IQN training now updates every post-burn-in timestep in a sequence (R2D2-style) instead of only the final step, and sequence priorities use a mixed max/mean TD error.
+- Recurrent IQN training now updates every post-burn-in timestep in a sequence (R2D2-style) instead of only the final step and sequence priorities use a mixed max/mean TD error.
 - Added optional R2D2 value rescaling and a DQfD-style demonstration margin loss to `ImplicitQuantileQLearning`; demonstration transitions are protected from FIFO eviction.
 - Progress rewards bound per-step index advance to a physically reachable arc length, preventing hairpin cuts through folded reference lines.
 - Lidar features keep the last valid horizontal heading through vertical moments instead of aborting the actor.
-- Distributed run safety: journal pruning after checkpoints, refusal to silently re-ingest stale journals on fresh starts, bounded coordinator rollout queue with backpressure, actor threads that stop the process on unexpected failure, telemetry stalls that truncate episodes instead of killing the run, spool-cap pause instead of crash, thread-safe JSONL logging, safer checkpoint loading (`weights_only`), and resume-friendly manifests.
+- Distributed run safety: journal pruning after checkpoints, refusal to silently re-ingest stale journals on fresh starts, bounded coordinator rollout queue with backpressure, actor threads that stop the process on unexpected failure, telemetry stalls that truncate episodes instead of killing the run, spool-cap pause instead of crash, thread-safe JSONL logging, safer checkpoint loading (`weights_only`) and resume-friendly manifests.
 - `trackmaniarl benchmark` is config-driven via `evaluation.target_median_s` / `min_finish_rate` instead of a hardcoded `trackmaniarl-test` release gate.
-- Packaging: `setuptools>=77` for SPDX licenses, OS classifiers, stricter mypy import overrides, Windows CI, and broader `.gitignore` coverage for sqlite/event leftovers.
+- Packaging: `setuptools>=77` for SPDX licenses, OS classifiers, stricter mypy import overrides, Windows CI and broader `.gitignore` coverage for sqlite/event leftovers.
 
-- `trackmaniarl track record-demo` now records a whole session: `--count` laps in one go, discards outliers slower than the best finish by more than `--max-gap` seconds (default 1s), saves the rest into the output directory at the end, and mid-lap restarts discard only the partial lap instead of failing the recording.
+- `trackmaniarl track record-demo` now records a whole session: `--count` laps in one go, discards outliers slower than the best finish by more than `--max-gap` seconds (default 1s), saves the rest into the output directory at the end and mid-lap restarts discard only the partial lap instead of failing the recording.
 - Lidar telemetry now scales velocity and speed by the configured `velocity_to_mps_scale / max_speed_mps` instead of a hardcoded 1/1000, so those observation channels carry usable signal; retrain checkpoints that relied on the previous scaling.
 - Prioritized sequence sampling builds full n-step returns only for the timestep the learner bootstraps from, cutting redundant replay work for recurrent batches.
 
 - Coordinator ingests the entire rollout backlog every learner iteration, removing the standing queue that trained on minutes-old transitions and inflated the reported policy lag.
 - The distributed actor freezes one policy snapshot per training episode, so episode metrics measure a single policy version instead of a refresh mixture.
 - IQN policies report the greedy action gap; episode and evaluation summaries log `q_margin/mean`, `q_margin/min` and `q_margin/start_mean`.
-- Evaluation batches aggregate into `eval/summary`, and strictly better batches write an immediate best-eval checkpoint (`eval/best_checkpoint`).
+- Evaluation batches aggregate into `eval/summary` and strictly better batches write an immediate best-eval checkpoint (`eval/best_checkpoint`).
 - Replay checkpoints can restore into a larger configured capacity, enabling resume-with-bigger-buffer experiments.

@@ -2,7 +2,7 @@
 
 TrackmaniaRL is a Python library for training reinforcement-learning agents on
 custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronous
-training, checkpoint resume, and repeatable evaluation.
+training, checkpoint resume and repeatable evaluation.
 
 The game integration runs on Windows. Training and analysis can also run on Linux.
 Version 1.2.1 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
@@ -103,7 +103,7 @@ uv run trackmaniarl smoke run.yaml --transitions 100
 uv run trackmaniarl train run.yaml
 ```
 
-The starter project uses a lidar encoder, a dueling IQN policy, and 78 discrete
+The starter project uses a lidar encoder, a dueling IQN policy and 78 discrete
 control actions. An actor drives while the learner trains from replay.
 
 Demonstrations are optional:
@@ -143,40 +143,12 @@ delay observations and control decisions. `--reject-telemetry-skips` rejects the
 whole evaluation. It never removes individual slow attempts.
 
 More detail: [evaluation architecture](docs/library-architecture.md#checkpoints-and-evaluation),
-[recording](docs/recording.md), and [troubleshooting](docs/troubleshooting.md).
-
-## Recorded result on the TMRL test track
-
-| Setup | Finishes | Mean | Median | Best | Worst |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| V107I checkpoint | 10/10 | 38.061 s | not reported | 36.630 s | 42.430 s |
-| V107I + `neighbors` action filter | 30/30 | 36.976667 s | 36.835 s | 36.560 s | 41.370 s |
-
-`neighbors` is not a trained model. It is a wrapper written specifically for the
-TMRL test track. Between 54% and 90% track progress, it finds the 15 closest states
-in replay recorded on that map. It keeps only actions that occurred in those
-states, then lets the unchanged V107I network choose the highest-valued remaining
-action. Outside that section, when no close replay state exists, or at very low
-speed, the base policy acts without this filter.
-
-This result therefore measures V107I plus map knowledge stored in its replay. It
-does not show the performance of the checkpoint alone and says nothing about a new
-map. The two table rows also use different trial counts. All 30 confirmation trials
-were included. The run reported 458 dropped telemetry frames, so it was not a
-zero-drop benchmark.
-
-[Full method and all 30 times](docs/benchmarks/2026-09-08-v108-live.md) ·
-[Experiment source](experiments/sub37/README.md)
-
-![Best recorded trial: 36.560 s by telemetry](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/7ccd15f74cf6a85ced5b4bb373904370a51affd8/docs/assets/v108-neighbors-best.gif)
-
-The image is trial 29 from the full benchmark. Telemetry reports 36.560 s and the
-in-game overlay displays 36.568 s.
+[recording](docs/recording.md) and [troubleshooting](docs/troubleshooting.md).
 
 ## Documentation
 
 - [Configuration](readme/configuration.md)
-- [Model, observations, actions, and evaluation](docs/library-architecture.md)
+- [Model, observations, actions and evaluation](docs/library-architecture.md)
 - [Neural activation film and repeatable export](docs/activation-film.md)
 - [Reward function](docs/reward-function.md)
 - [Demonstrations and recovery](readme/imitation-learning.md)

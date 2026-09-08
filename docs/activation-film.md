@@ -69,7 +69,7 @@ uv run python -m experiments.activation_film.verify artifacts/activation-film/ne
 ```
 
 Capture requires the visible Trackmania window on the matching map, Openplanet
-telemetry and editor validation ready, and the configured controller backend.
+telemetry and editor validation ready and the configured controller backend.
 It uses the existing experimental evaluator. It is a local publication tool for
 this policy, not a generic capture command for every model architecture.
 

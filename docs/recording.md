@@ -8,7 +8,7 @@ benchmark, including resets, slow trials and failures:
 trackmaniarl benchmark run.yaml artifacts/YOUR_RUN/checkpoints/YOUR_CHECKPOINT.pt --trials 30 --min-finish-rate 1 --record recordings/benchmark.mkv
 ```
 
-Use `--ffmpeg PATH` when FFmpeg is not on PATH, and `--window-title TITLE` when
+Use `--ffmpeg PATH` when FFmpeg is not on PATH and `--window-title TITLE` when
 the window has another title. Existing output files are never overwritten.
 The `.recording.json` sidecar stores launch time and encoding arguments;
 `.ffmpeg.log` records capture errors. `evaluation-timeline.jsonl` stores UTC
@@ -18,7 +18,7 @@ before publishing: startup latency is not an exact frame synchronization signal.
 
 Recording consumes CPU and storage and may change telemetry quality. Declare
 recording settings before collecting the series, report skips and long clock
-steps, and do not selectively repeat unsuccessful attempts. The default game
+steps and do not selectively repeat unsuccessful attempts. The default game
 recorder is Windows-only; use an external recorder for other display setups.
 Local recordings are ignored by Git and never included in Python wheels.
 

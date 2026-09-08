@@ -52,7 +52,7 @@ components:
 Use `gamepad` for analog steering and rumble-based collision detection. Select
 `keyboard` when a virtual gamepad is unavailable. The keyboard backend converts
 analog model output to digital gas/brake and left/right input, with a steering
-dead zone, and cannot provide rumble collision signals. The choice belongs to
+dead zone and cannot provide rumble collision signals. The choice belongs to
 the environment, not the model, so the same policy can drive either backend;
 expect different driving dynamics after analog-to-digital conversion.
 
@@ -87,7 +87,7 @@ Replace `YOUR_MAP_UID` with the UID reported by `track check` and
 set that same UID in `environment.kwargs.config.expected_map_uid`,
 `feature_pipeline.kwargs.config.expected_map_uid` and
 `evaluation.maps[].expected_map_uid`. Load that local `.Map.Gbx` manually in
-Trackmania, enter it with a visible vehicle, and run:
+Trackmania, enter it with a visible vehicle and run:
 
 ```powershell
 uv run trackmaniarl track check --config run.yaml
@@ -114,7 +114,7 @@ it does not require aim-yaw telemetry. TQC remains an optional example only.
 
 Model factories publish their train-time contract and learners publish the
 contracts they accept. Composed Q/QR-DQN/IQN/FQF models expose `discrete_value`, the telemetry
-TQC baseline exposes `continuous_quantile_actor_critic`, and behavior cloning
+TQC baseline exposes `continuous_quantile_actor_critic` and behavior cloning
 exposes `categorical_policy`. `trackmaniarl validate` rejects a mismatched pair
 before model setup instead of failing later on a missing head. Models remain
 interchangeable between algorithms that consume the same contract; algorithms
@@ -133,19 +133,19 @@ selects the algorithm:
 | FQF | `ImplicitQuantileHead` | `LearnedFractionStrategy` |
 
 For recurrent experiments select `GruTemporalCore` or `MambaTemporalCore`, set
-`training.sequence_length`, and configure learner `burn_in`. The lidar encoder
+`training.sequence_length` and configure learner `burn_in`. The lidar encoder
 is frame-only: the model vectorizes `[B,T]` into `[B*T]` before encoding and
 restores `[B,T,D]` before the temporal core.
 
 FQF creates its own fraction optimizer from
 `LearnedFractionStrategy.auxiliary_parameters()`. Monitor fraction entropy and
 boundary spacing as well as TD/quantile metrics. The target network contains
-its own fraction proposal network, and target quantiles are evaluated only for
+its own fraction proposal network and target quantiles are evaluated only for
 the action selected by online Double-DQN.
 
 To initialize FQF from a proven IQN run, use the warm-start loader for named
 `encoder`, `temporal` and compatible `head` tensors from a current compressed
-checkpoint. Pre-2.0 checkpoints are rejected, and tensors with changed names,
+checkpoint. Pre-2.0 checkpoints are rejected and tensors with changed names,
 shapes or dtypes are reported without being copied. Preserve the generated
 match report with the experiment artifacts.
 
@@ -240,10 +240,10 @@ uv run trackmaniarl smoke run.yaml --transitions 100
 
 The release benchmark is deterministic only in the sense that it repeats the
 same local map and assets. It does not claim game-engine seed control. It uses
-the `trials_per_map`, `min_finish_rate`, `target_median_s`, and optional
+the `trials_per_map`, `min_finish_rate`, `target_median_s` and optional
 `target_mean_s` and `max_step_race_time_ms` thresholds in `run.yaml`, writes
 `evaluation.json` with
-per-trial status, latency/FPS and map UID, and fails when any configured
+per-trial status, latency/FPS and map UID and fails when any configured
 acceptance threshold is missed:
 
 ```bash
@@ -285,7 +285,7 @@ human reaction delay are retained only as causal context; the first clear
 physical input starts the expert labels. Unfinished laps, restarts and
 kinematically implausible respawn/teleport jumps are discarded. The requested
 impulse is not trusted blindly: its start, duration and control are reconstructed
-from the controls echoed by telemetry, and a missing, wrong-direction or too-short
+from the controls echoed by telemetry and a missing, wrong-direction or too-short
 impulse rejects the attempt.
 
 Collect multiple completed left- and right-side recoveries from the exact
@@ -313,9 +313,9 @@ Only completed laps are saved. Each archive embeds the source checkpoint's
 SHA-256; fine-tuning rejects mixed or stale policy data. It reconstructs the
 full causal feature history, selects only post-takeover samples for which the
 incident gate is active, removes episodes with too little gated supervision or
-implausibly slow normalized recovery, and derives progress, severity and direction
+implausibly slow normalized recovery and derives progress, severity and direction
 strata from what actually happened rather than from the requested plan. The data
-gate requires all nine progress-by-severity cells, and the deterministic held-out
+gate requires all nine progress-by-severity cells and the deterministic held-out
 split preserves balanced progress, severity and direction coverage. Episodes are
 sampled uniformly so a long lap cannot dominate. It optimizes only the bounded
 recovery adapter:
@@ -366,14 +366,14 @@ evidence.
 ## Connection troubleshooting
 
 - **Port 9000 refuses the connection:** keep only signed TrackmaniaRL Connect
-  2.4.0 enabled in Plugin Manager, enable School Mode, and enter the local map.
+  2.4.0 enabled in Plugin Manager, enable School Mode and enter the local map.
 - **Port 9000 connects but sends no complete frame:** make sure a local vehicle
   is visible. The supported plugin waits for real player and vehicle-visual
   state instead of zero-filling missing fields.
 - **Port 9001, protocol or readiness fails:** reload the managed plugin and
   return to the local map. Protocol 2 and a ready local player are required.
 - **The active UID differs:** use the UID printed by `track check`, replace all
-  three UID settings, and rebuild geometry from that exact `.Map.Gbx`.
+  three UID settings and rebuild geometry from that exact `.Map.Gbx`.
 - **Geometry checksum is missing or different:** re-run `track build-geometry`
   with `--map-path`; the generated `.npz` is intentionally only a placeholder.
 - **Reset times out:** confirm that the configured `gamepad` or `keyboard`

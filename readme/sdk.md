@@ -53,22 +53,22 @@ Each learner consumes a `TrainingBatch` with explicit n-step bootstrap discounts
 termination/truncation flags, PER weights and monotonic transition IDs. This lets
 a user replace one component at a time without extra runtime adapters.
 
-Set `training.n_step`, `training.gamma`, `training.sequence_length`, and optional
+Set `training.n_step`, `training.gamma`, `training.sequence_length` and optional
 `training.beta` in `run.yaml`; the local trainer forwards these values in every
 `BatchRequest`. Discounting is intentionally owned by this replay request rather
 than by individual learner constructors.
 
 `UniformSampler`, `PrioritizedSampler`, `SequenceSampler` and `DemoMixSampler`
 are separate from `InMemoryReplayStore`. PER receives `PriorityUpdate` from a
-learner, sequence sampling accepts only contiguous episode windows, and demo
+learner, sequence sampling accepts only contiguous episode windows and demo
 mixing enforces explicit min/max fractions.
 
-Bundled model factories declare a `ModelContract`, and bundled learners declare
+Bundled model factories declare a `ModelContract` and bundled learners declare
 the contracts they accept. This keeps an encoder choice independent from runtime
 or controller selection while preventing invalid objective/head combinations.
 For example, scalar Q, QR-DQN, IQN and FQF compositions implement
 `discrete_value` and are all trained by `DiscreteValueLearner`;
-TQC requires `continuous_quantile_actor_critic`, and behavior cloning requires
+TQC requires `continuous_quantile_actor_critic` and behavior cloning requires
 `categorical_policy`. Custom components without declarations retain structural
 protocol validation, while declared incompatible pairs fail during resolution.
 
@@ -92,13 +92,13 @@ before training:
 | FQF | `ImplicitQuantileHead` | `LearnedFractionStrategy` | main + fractions |
 
 The encoder maps independent `[N,...]` frames to `[N,D]`.
-`FrameBatchAdapter` owns `[B,T]` flatten/restore, and `IdentityTemporalCore`,
+`FrameBatchAdapter` owns `[B,T]` flatten/restore and `IdentityTemporalCore`,
 `GruTemporalCore` or `MambaTemporalCore` consumes `[B,T,D]`. History, burn-in
 and recurrent state do not belong in a `SensorEncoder`.
 
 The learner creates a fraction optimizer whenever
 `strategy.auxiliary_parameters()` is non-empty. FQF quantile regression does
-not update fraction boundaries, and its analytical fraction objective does not
+not update fraction boundaries and its analytical fraction objective does not
 update the encoder or quantile head.
 
 `evaluate_actions` is the selected-action hot path. Double-DQN first obtains
@@ -109,19 +109,19 @@ tensors.
 ### Composite model constructor reference
 
 `CompositeValueModelFactory` requires four nested `ComponentSpec` values:
-`encoder`, `temporal`, `head`, and `strategy`. Config-wrapper components place
+`encoder`, `temporal`, `head` and `strategy`. Config-wrapper components place
 their fields below `kwargs.config`; direct-signature components place fields
 directly below `kwargs`.
 
 | Component | Accepted configuration |
 | --- | --- |
 | `LidarSensorEncoder` | `kwargs.config` requires no field but must match the pipeline: `telemetry_dim=20`, `spatial_bins=0`, `lidar_channels=4`, `telemetry_group_dims=null`, `telemetry_layer_norm=true`, `base_telemetry_dim=null`, `auxiliary_remaining_distance_index=null`, `auxiliary_progress_index=null`, `auxiliary_start_progress=0`, `auxiliary_residual_scale=null`, `hidden_dim=192`, `output_dim=256`, `masked_telemetry_indices=[]`. |
-| `MlpSensorEncoder` | Direct `input_dim`, `output_dim`, and `hidden_dim=256`; all dimensions are positive. |
-| `ConvolutionalSensorEncoder` | Direct `channels`, `output_dim`, and `hidden_dim=128`; all dimensions are positive. |
+| `MlpSensorEncoder` | Direct `input_dim`, `output_dim` and `hidden_dim=256`; all dimensions are positive. |
+| `ConvolutionalSensorEncoder` | Direct `channels`, `output_dim` and `hidden_dim=128`; all dimensions are positive. |
 | `IdentityTemporalCore` | Direct positive `input_dim`; burn-in must be zero. |
 | `GruTemporalCore` | Direct positive `input_dim` and `hidden_dim`. |
-| `MambaTemporalCore` | Direct positive `input_dim`; `hidden_dim=null` means input width, `d_state=16`, `d_conv=4`, `expand=2`, and `backend=auto|native|torch`. |
-| `ScalarQHead` | Direct positive `feature_dim`, positive `action_count`, and `mode=standard|dueling`. |
+| `MambaTemporalCore` | Direct positive `input_dim`; `hidden_dim=null` means input width, `d_state=16`, `d_conv=4`, `expand=2` and `backend=auto|native|torch`. |
+| `ScalarQHead` | Direct positive `feature_dim`, positive `action_count` and `mode=standard|dueling`. |
 | `FixedQuantileHead` | `kwargs.config` requires positive `feature_dim` and `action_count`; `quantile_count=32` (at least two), `dueling=false`. |
 | `ImplicitQuantileHead` | `kwargs.config` requires positive `feature_dim` and `action_count`; `cosine_count=64`, `dueling=false`. |
 | `ScalarValueStrategy` | No kwargs. |
@@ -158,7 +158,7 @@ fingerprints; no backend silently substitutes GRU.
 An extension project may supply any of these protocols: `Learner`,
 `OfflineSupervisedLearner`, `Policy`,
 `ModelFactory`, `ReplayStore`, `Sampler`, `FeaturePipeline`, `Evaluator`,
-`RunLogger`, `CheckpointCodec`, and an environment factory with `create(seed=)`.
+`RunLogger`, `CheckpointCodec` and an environment factory with `create(seed=)`.
 Use `module:Symbol` paths in `run.yaml`; do not modify the TrackmaniaRL package for an
 experiment.
 
@@ -212,7 +212,7 @@ components:
 ```
 
 The exact batch structure is a contract between the pipeline/sampler and the
-learner. Keep it typed and deterministic, and test one synthetic transition
+learner. Keep it typed and deterministic and test one synthetic transition
 round trip before a live run.
 
 `validate` does not start TrackMania. It resolves components, writes the
@@ -267,7 +267,7 @@ containing its semantic run fingerprint, learner, replay store, sampler and
 counters. Do not pass that checkpoint to distributed `resume` or
 `learner --checkpoint`. Exact resume does not reload the original warm-start
 artifact. The run fingerprint includes effective component parameters, every
-Python source file in both the declared and resolved component packages, and
+Python source file in both the declared and resolved component packages and
 configured geometry and pace-reference file contents. Logging choices,
 `run_id`, artifact locations and evaluation map file locations do not define
 training identity.
@@ -301,7 +301,7 @@ run.
 
 Promote a component from an extension project only when it is reusable across
 runs. Put generic mechanisms in `core`, algorithms in `algorithms`, network
-modules in `models`, and Trackmania-only behavior in `trackmania`. Expose a
+modules in `models` and Trackmania-only behavior in `trackmania`. Expose a
 stable built-in entry point only after deterministic contract, checkpoint and
 resume coverage. Distributed changes additionally need idempotency, size-limit
 and slow-learner tests.
@@ -330,15 +330,15 @@ component paths, is internal and may change between package releases.
 | Import root | Supported exports |
 | --- | --- |
 | `trackmaniarl.core` | contracts (`Learner`, `OfflineSupervisedLearner`, `Policy`, `BehaviorPolicy`, `ExploratoryPolicy`, `ReplicablePolicy`, `ModelFactory`, `ReplayStore`, `Sampler`, `FeaturePipeline`, `EnvironmentFactory`, `Evaluator`, `RunLogger`, `CheckpointCodec`); data (`Transition`, `Trajectory`, `TrainingBatch`, `BatchRequest`, `PriorityUpdate`, `EpisodeArtifact`); RunSpec/evaluation models; replay implementations; `ResolvedRun`, `resolve_run`, `validate_resolved_run`, `Trainer`, `TrainingResult`. |
-| `trackmaniarl.algorithms` | `DiscreteValueLearner`, `SoftActorCritic`, `RandomizedEnsembleSAC`, `TruncatedQuantileCritic`, `ProximalPolicyOptimization`, experimental `StableDiscreteSoftActorCritic`, Torch execution models, and adaptive clipping types. |
-| `trackmaniarl.models` | composite model/factory and frame adapter; Gaussian/categorical/PPO actors; continuous and quantile critics; general geometry encoders; SimBaV2 blocks and projection helper. Composable value heads, strategies, and temporal cores use the documented `trackmaniarl.models.heads`, `.strategies`, and `.temporal` paths. |
-| `trackmaniarl.trackmania` | environment config/factory, lidar and telemetry pipelines, lidar encoder, telemetry TQC factory/evaluator, collector types, action-table builder, and boundary/trajectory recording helpers. Behavior-cloning APIs live under the documented `.imitation_learning` path. |
-| `trackmaniarl.experiments` | `EvaluationResult`, `aggregate_results`, `StudySpec`, `StudyRunner`, and `FallbackStrategy`; orchestration dependencies are optional. |
-| `trackmaniarl.observability` | `AsyncEpisodeWriter`, `write_run_manifest`, and optional `WandbTracker`. |
+| `trackmaniarl.algorithms` | `DiscreteValueLearner`, `SoftActorCritic`, `RandomizedEnsembleSAC`, `TruncatedQuantileCritic`, `ProximalPolicyOptimization`, experimental `StableDiscreteSoftActorCritic`, Torch execution models and adaptive clipping types. |
+| `trackmaniarl.models` | composite model/factory and frame adapter; Gaussian/categorical/PPO actors; continuous and quantile critics; general geometry encoders; SimBaV2 blocks and projection helper. Composable value heads, strategies and temporal cores use the documented `trackmaniarl.models.heads`, `.strategies` and `.temporal` paths. |
+| `trackmaniarl.trackmania` | environment config/factory, lidar and telemetry pipelines, lidar encoder, telemetry TQC factory/evaluator, collector types, action-table builder and boundary/trajectory recording helpers. Behavior-cloning APIs live under the documented `.imitation_learning` path. |
+| `trackmaniarl.experiments` | `EvaluationResult`, `aggregate_results`, `StudySpec`, `StudyRunner` and `FallbackStrategy`; orchestration dependencies are optional. |
+| `trackmaniarl.observability` | `AsyncEpisodeWriter`, `write_run_manifest` and optional `WandbTracker`. |
 | `trackmaniarl.distributed` | lazy `ActorRuntime` and `Coordinator` exports; importing/using them requires the `distributed` extra. |
 
 `StudySpec` describes a bounded reproducible parameter study; `StudyRunner`
-executes its strategy, and `FallbackStrategy` provides deterministic local
+executes its strategy and `FallbackStrategy` provides deterministic local
 selection when an optional external orchestrator is not used. Evaluation
 results are aggregated independently of training. Collector and asset helpers
 are lower-level building blocks for custom Trackmania workflows; the CLI is the

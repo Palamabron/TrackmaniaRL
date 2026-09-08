@@ -1,7 +1,7 @@
 # RunSpec 2.0 architecture
 
 RunSpec `2.0` selects explicit components. The core coordinates them, reusable
-learning mechanisms remain game-independent, and Trackmania-specific telemetry,
+learning mechanisms remain game-independent and Trackmania-specific telemetry,
 geometry and controls stay in `trackmaniarl.trackmania`.
 
 ## Off-policy runtime data flow
@@ -46,7 +46,7 @@ The reusable value path is:
 FrameBatchAdapter → SensorEncoder → TemporalCore → ValueHead + ValueStrategy
 ```
 
-- `FrameBatchAdapter` validates PyTrees, maps `[B,T,...]` to `[B*T,...]`, and
+- `FrameBatchAdapter` validates PyTrees, maps `[B,T,...]` to `[B*T,...]` and
   restores `[B,T,D]` before temporal processing.
 - `SensorEncoder` sees independent frames only. Lidar MLP/CNN encoders cannot
   accidentally mix timesteps.
@@ -79,7 +79,7 @@ Behavior cloning shares the lidar encoder and temporal cores but uses a
 categorical policy head and an `OfflineSupervisedLearner` validation lifecycle.
 It is intentionally offline: demonstrations do not pass through actor WAL or RL
 replay. Data is quality-gated, split by complete lap/episode, tensorized once,
-trained with weighted supervised losses, and attributed through an immutable
+trained with weighted supervised losses and attributed through an immutable
 dataset manifest. Exact BC resume restores RNG and trainer-selection state.
 
 Closed-loop `bc-benchmark` is a required promotion gate. Compatible encoder and
@@ -145,13 +145,13 @@ The single-process `Trainer` used by PPO has its own schema 2.0 checkpoint with
 a semantic run fingerprint, learner, replay, sampler and local counters. It is
 resumed through `Trainer` and is not interchangeable with a distributed schema
 2.0 checkpoint. The run fingerprint binds effective component parameters, the
-full Python source trees of each declared and resolved component package, and
+full Python source trees of each declared and resolved component package and
 the contents of configured geometry and pace-reference assets. Moving a run or
 renaming its artifact directory does not change that identity.
 
 Warm-start is deliberately weaker than resume. It loads selected named
 submodules, copies only exact name/shape/dtype matches, reports every match and
-mismatch, and fails on zero matches or missing required tensors. Prefix
+mismatch and fails on zero matches or missing required tensors. Prefix
 remapping and partial-shape copying are unsupported. Checkpoints from before the
 RunSpec 2.0 boundary are rejected instead of being translated implicitly. Exact
 resume restores the checkpoint state directly and does not require the original
@@ -180,7 +180,7 @@ fallback because that would change the architecture and invalidate checkpoints.
 [local preview](../docs/diagrams/distributed-security-preview.html)
 
 Rollout chunks are persisted before ingestion, sequence IDs make retries
-idempotent, and policy state uses safetensors-compatible tensor trees. The
+idempotent and policy state uses safetensors-compatible tensor trees. The
 codec enforces compressed and decompressed limits. A bearer token authenticates
 participants but does not encrypt transport; remote operation requires an SSH,
 WireGuard or equivalent encrypted tunnel.

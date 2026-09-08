@@ -64,5 +64,5 @@ The existing `rollout-v107c-clean.gif` was also recompressed in full from
 29,340,096 to 8,376,597 bytes, keeping its 320 × 176 dimensions and approximately
 37.36-second playback. The original remains in the ignored local review evidence
 directory. The conversion used the same palette/dither settings, `fps=8`, no
-scaling, no seek/trim, and `-map_metadata -1`; this is illustrative gameplay,
+scaling, no seek/trim and `-map_metadata -1`; this is illustrative gameplay,
 not the neural-flow source or a new benchmark.

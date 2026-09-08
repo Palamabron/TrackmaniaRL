@@ -68,7 +68,7 @@ Offline output is under
 `my-trackmania-agent/artifacts/sub37-v108-offline-baseline-20260907T212905133500/`.
 The runner also prints its output directory for each new invocation. Unit checks
 cover lower-tail preference, highest-Q selection within the envelope, window
-boundaries, empty-mask fallback, and exclusion of demo/incomplete episodes.
+boundaries, empty-mask fallback and exclusion of demo/incomplete episodes.
 
 ## Tomorrow: live protocol
 
@@ -104,7 +104,7 @@ zero telemetry/controller errors and valid race-clock steps no larger than 100 m
 Raw telemetry skip counts remain visible. A ten-lap pass is a screening result.
 
 Select the lowest-mean candidate among those completing all ten healthy attempts,
-freeze it, and run a fresh 30-lap confirmation. For example, **only if `envelope`
+freeze it and run a fresh 30-lap confirmation. For example, **only if `envelope`
 wins the screen**:
 
 ```powershell

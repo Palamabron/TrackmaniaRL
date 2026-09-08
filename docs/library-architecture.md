@@ -1,7 +1,7 @@
 # Library architecture and data contracts
 
 The supported entry points are `RunSpec`, `resolve_run`, `Trainer` and
-`__version__` from `trackmaniarl`, the contracts in `trackmaniarl.core`, and the
+`__version__` from `trackmaniarl`, the contracts in `trackmaniarl.core` and the
 component paths documented in the [SDK](../readme/sdk.md). The CLI entry point
 is `trackmaniarl.cli:entrypoint`. Underscore-prefixed helpers are internal;
 the CLI no longer re-exports them as a compatibility facade.
@@ -11,7 +11,7 @@ the CLI no longer re-exports them as a compatibility facade.
 Openplanet emits a 33-field frame. The environment checks session identity,
 applies a control action and returns a transition. The feature pipeline turns
 telemetry and map geometry into model inputs. The actor journals transitions;
-the coordinator ingests them into replay, and the learner samples training
+the coordinator ingests them into replay and the learner samples training
 batches. Updated policy snapshots return to the actor asynchronously.
 
 ![Versioned runtime diagram](diagrams/runtime-architecture-preview.svg)
@@ -65,7 +65,7 @@ replay and sampler state appropriate to its training path. Architecture and
 run fingerprints guard exact resume. Policy-only artifacts can benchmark or
 initialize a compatible model, but do not contain a resumable optimizer.
 The codec uses Zstandard-compressed Torch serialization; use the library codec,
-not a direct `torch.load` call, and load only trusted artifacts.
+not a direct `torch.load` call and load only trusted artifacts.
 
 The normal `benchmark` command evaluates the configured learner policy. It
 does not attach `neighbors`, choose a demonstration or alter actions. Its
@@ -86,7 +86,7 @@ alone cannot identify whether the bottleneck is the game, CPU/GPU scheduling,
 transport, recording, or policy inference.
 
 Missing observations can delay feedback: the car continues under the currently
-applied controls, and a correction can arrive after the useful braking or steering
+applied controls and a correction can arrive after the useful braking or steering
 point. A recurrent or finite-difference feature also sees a less regular sequence.
 The effect is trajectory-dependent; do not assume every skip slows a lap by a
 fixed amount, or that every collision was caused by a skip. Compare complete,
@@ -99,7 +99,7 @@ directly subtract time from the reported lap. Nevertheless, delayed or missing
 terminal observations and the telemetry clock's precision limit the measurement;
 the evaluator has an elapsed-time fallback if a positive terminal race clock is
 unavailable. Such a fallback is not evidence of a precise in-game finish time.
-Keep clock-validity checks and video evidence, and label the clock source. A
+Keep clock-validity checks and video evidence and label the clock source. A
 healthy same-clock finish notification is valid, unlike a regressing clock or a
 nonterminal zero-duration step. In V108, the best telemetry time was 36.560 s,
 while the recorded game overlay read 36.568 s.
@@ -121,7 +121,7 @@ that the same controller has an equivalent mean on another machine.
 
 `trackmaniarl.experiments.graph_iqn*` remains installable because its graph,
 context and recovery components have independent tests, work with configurable
-geometry, and are dependencies of existing checkpoints and recovery fine-tuning.
+geometry and are dependencies of existing checkpoints and recovery fine-tuning.
 They are opt-in and have no generalization guarantee. Removing older graph
 classes would break the V6 inheritance chain, not merely remove an alias.
 

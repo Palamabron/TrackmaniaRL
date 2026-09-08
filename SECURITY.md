@@ -71,7 +71,7 @@ attribution and repository identity are intentional publication metadata.
 
 Use environment variables for credentials; `.env-example` contains empty values.
 The library does not automatically load `.env`. Export only the variables needed
-by the selected integration, and keep tokens out of command-line arguments,
+by the selected integration and keep tokens out of command-line arguments,
 component kwargs, screenshots and shared run directories. Local manifests and
 recording sidecars may contain paths and timestamps even when tokens are redacted.
 
@@ -81,7 +81,7 @@ recording sidecars may contain paths and timestamps even when tokens are redacte
 before 83.0.0. PyTorch 2.11.0 requires runtime `setuptools<82`, so that runtime
 dependency still appears in the raw audit. It must not be used to build release
 archives. Both this package and generated projects pin `setuptools==83.0.0`
-in their isolated build requirements, and CI builds with isolation enabled.
+in their isolated build requirements and CI builds with isolation enabled.
 
 For 1.2.0, the disposition is **accepted for the Torch runtime only, mitigated
 for package building by isolated setuptools 83.0.0**. This is not a claim that

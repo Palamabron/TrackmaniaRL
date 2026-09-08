@@ -64,7 +64,7 @@ reported `ready=true`; all of its 15 trials completed and form the second block.
 
 - `%USERPROFILE%\Videos\Captures\TrackmaniaRL-benchmark-20260906-v106b-v107c.mp4`
   - 35:18, approximately 2.81 GB
-  - contains V106B, the visible invalid transition/replay interval, and the first valid V107C block
+  - contains V106B, the visible invalid transition/replay interval and the first valid V107C block
 - `%USERPROFILE%\Videos\Captures\TrackmaniaRL-benchmark-20260906-v107c-continuation.mp4`
   - 10:27, approximately 564 MB
   - contains the clean second V107C block
@@ -238,7 +238,7 @@ V107H completed its 50,032-transition screen and is rejected. The exact-start ev
 65 finished 10/10 with mean/median/best `38.902 / 36.965 / 36.630` seconds. At update 1,257 the
 online recovery adapter briefly reduced the mean to `37.490` seconds (10/10, median `37.030`, best
 `36.840`, 3/10 below 37 seconds), but this policy was not retained as a checkpoint. Continued
-learning then collapsed: update 3,970 finished 9/10 with a `57.160`-second completed-lap mean, and
+learning then collapsed: update 3,970 finished 9/10 with a `57.160`-second completed-lap mean and
 update 6,539 finished only 5/10 with a `57.878`-second mean and `50.280`-second best. The run itself
 ended normally at update 7,508; this was learning instability, not an infrastructure failure.
 
@@ -297,7 +297,7 @@ source-checkpoint provenance. It requires at least 24 usable episodes, six held-
 active-gate labels and 15 such labels per episode. The recorder reconstructs the applied impulse
 from telemetry and rejects a missing, wrong-direction or too-short perturbation. Fine-tuning bins
 the actual progress, actual duration and actual direction, requires every progress-by-severity
-cell, and makes a deterministic episode-held-out split with balanced marginals. Complete episodes
+cell and makes a deterministic episode-held-out split with balanced marginals. Complete episodes
 are sampled uniformly and later reaction frames receive less weight. Only the bounded recovery
 adapter is updated. The unchanged update-zero adapter is also a validation candidate; a trained
 candidate must improve held-out action accuracy while changing 5--20% of the source policy's
@@ -326,7 +326,7 @@ is too slow. The client intentionally drains queued render-rate packets and acts
 Slow laps were brake-tap heavy: controller-apply time and the reported skipped-frame fraction had a
 correlation of `0.999993`, consistent with the synchronous 10 ms brake pulse allowing extra render
 packets to queue. Fast and slow laps used almost the same controller-apply plus telemetry-wait time
-(about 41.27 ms versus 41.15 ms), and the maximum observed race-clock step was only 60 ms against a
+(about 41.27 ms versus 41.15 ms) and the maximum observed race-clock step was only 60 ms against a
 50 ms target interval.
 
 Raw skipped packets are therefore retained as a diagnostic and are not an acceptance gate. The

@@ -109,7 +109,7 @@ A public component should have:
 - checkpoint state for everything required to resume correctly.
 
 Value-model additions must also declare their representation contract, validate
-encoder/temporal/head/strategy dimensions, cover `[B,...]` and `[B,T,...]`, and
+encoder/temporal/head/strategy dimensions, cover `[B,...]` and `[B,T,...]` and
 prove that selected-action paths do not materialize unnecessary all-action
 tensors. A learned value strategy needs optimizer-isolation and finite-difference
 gradient tests.
@@ -162,7 +162,7 @@ together as the single `release-dist` artifact. Ubuntu and Windows download and
 verify that artifact, including its checksums, wheel CLI and generated-project
 resolution. Only after both verifiers pass does the final job attach and locally
 verify GitHub SLSA provenance and SBOM attestations, create and locally verify
-PEP 740 publish attestations, and publish the same wheel and source-archive
+PEP 740 publish attestations and publish the same wheel and source-archive
 bytes to PyPI. The publish job must not check out the repository or rebuild the
 package.
 

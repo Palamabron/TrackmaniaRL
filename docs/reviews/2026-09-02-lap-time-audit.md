@@ -9,7 +9,7 @@ live baseline `sub37-iqn-gnn-simba-v104f-s17-online-scratch` (IQN + neighbour-GN
 
 This is a useful hypothesis inventory, not an approved experiment recipe. Independent review of PR #30
 found no external reviews or CI checks. The bundled `sub37-v105-candidate.yaml` is not runnable from
-`docs/reviews` because configuration-relative asset paths point to missing directories, and it changes
+`docs/reviews` because configuration-relative asset paths point to missing directories and it changes
 many learning variables at once. The project owner selected a bundle-first discovery run, followed by
 backward ablations if it beats V104F. Use the corrected runnable copy and gates recorded in
 `my-trackmania-agent/agent-notes/SUB37.md`, not this documentation-relative file.
@@ -53,13 +53,13 @@ Finding ids (F001...) refer to the merged list; "measured" = reproduced numerica
    (0.23% of the return). All time pressure comes from γ = 0.99 per 50 ms (5 s horizon), which
    values a 1 s stall at 18% of the remaining value but makes the finish bonus (10) worth 0.006 from
    the start and only 3.7 five seconds out. W&B confirms: finished training laps returned 309.9 at
-   74.6 s and 322.1 at 43.8 s, and the whole difference is collisions, not time (measured, F001/F022).
+   74.6 s and 322.1 at 43.8 s and the whole difference is collisions, not time (measured, F001/F022).
 3. **Every evaluation lap collided** (`evaluation/collision_rate` = 1.0 from batch 2 on). A collision
    costs 2 with a 2 s cooldown the policy cannot observe (≈0.24 s of lap time equivalent); the
    optimum of this reward is a cautious, wall-touching lap (measured, F023).
 4. **The policy cannot see what it needs to drive at the limit.** The 60-dim physics vector has 7
    constant-zero slots, no velocity direction (only |v|), no yaw rate, no previous control (masked
-   twice), a raw global yaw that wraps 34 times per 10 laps, and unnormalised scales (km/h up to 313
+   twice), a raw global yaw that wraps 34 times per 10 laps and unnormalised scales (km/h up to 313
    next to [-1, 1] curvature). Yaw rate is the most variable hidden quantity on the expert laps
    (std 0.93 rad/s) and is unrecoverable from one frame with an Identity temporal core (measured;
    F002/F004/F005/F006 unverified by a second reviewer).
@@ -80,7 +80,7 @@ Finding ids (F001...) refer to the merged list; "measured" = reproduced numerica
 
 | # | Change | Why | Effect | Effort | Risk |
 |---|---|---|---|---|---|
-| 1 | Fail fast on actor stalls, clean recoverable temporary-write failures, and checkpoint every 5k updates | v104f produced no new episodes for 4.4 h and its final queued write left a 0-byte temporary; any hot-fix now blocks resume (F015/F016/F048/F014) | preserve more work and surface a stopped collector; automatic restart remains a follow-up | S-M | low |
+| 1 | Fail fast on actor stalls, clean recoverable temporary-write failures and checkpoint every 5k updates | v104f produced no new episodes for 4.4 h and its final queued write left a 0-byte temporary; any hot-fix now blocks resume (F015/F016/F048/F014) | preserve more work and surface a stopped collector; automatic restart remains a follow-up | S-M | low |
 | 2 | Time-sensitive reward + longer horizon: `time_penalty_per_second` 1.0, `finish_reward` 70, γ 0.995, n-step 5, collision penalty per contact step without cooldown | objective currently blind to 8.9 s of lap time; finish is a value cliff; hidden cooldown state (F001/F022/F023) | optimum becomes the fast lap; faster laps become visible in the training return | S (config) | medium: Q scale doubles; watch `learner/q_target_max` |
 | 3 | Observation v2 (`graph_iqn_v2`): body-frame velocity, yaw rate, input echo, relative heading, normalised scales | 7 dead inputs, no rotation/direction signal (F002/F004/F005/F006/F051) | test whether a fresh online policy learns fewer collisions and sharper braking; tensor shapes stay fixed but feature semantics and encoder state do not | S (in this PR) | medium: online scratch only; native demo controls leak same-frame targets |
 | 4 | Temporally extended, expert-shaped exploration: `exploration_hold_steps` 6, ε floor 0.01 on a transition schedule, neighbour-steering half the time; later make the mode weights configurable | 50 ms pulses cannot change a line; global samples should match the expert's measured joint control distribution (F007/F008/F034/F038) | discovers later braking points / different lines | S (config) + M (weights) | low |
@@ -297,7 +297,7 @@ Each cycle:
    If episode/collision_count is not below 3 by 300k, raise collision_penalty to 0.3 per step.
 4. Treat v105a as the one explicitly approved bundle-first discovery run. If it beats V104F, use
    backward ablations that remove or restore one mechanism per run. Record for each run: config diff,
-   transitions reached, best confirmed eval median, collisions/episode at the end, and the reason it
+   transitions reached, best confirmed eval median, collisions/episode at the end and the reason it
    stopped, in docs/reviews/experiment-log.md.
 5. Promote a checkpoint only after a 5-trial confirmation re-evaluation of the same snapshot; the
    release gate is 2 consecutive batches with finish_rate 1.0 and median <= 37.0 s.

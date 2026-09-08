@@ -265,7 +265,7 @@ authoritative.
 
 Built-in auxiliary objectives accept: `DemonstrationMarginObjective(margin=0.8,
 weight=1.0, steering_switch_weight=1.0)`,
-`DemonstrationCrossEntropyObjective(weight=1.0, steering_switch_weight=1.0)`, and
+`DemonstrationCrossEntropyObjective(weight=1.0, steering_switch_weight=1.0)` and
 `PolicyAnchorObjective(weight=1.0)`. All values are non-negative. A switch
 weight above one emphasizes demonstration positions where the steering bin
 changes, while one preserves uniform weighting. The policy anchor requires a
@@ -319,7 +319,7 @@ to `manifest-attempts.jsonl`; `manifest.json` remains the config identity.
 
 Experimental `AdaptiveGradientClipper` is applied after AMP unscaling and
 before `optimizer.step`; its EMA/warmup state is checkpointed. Its constructor
-is `decay=0.995` (`[0,1)`), `warmup_steps=100` (non-negative), and
+is `decay=0.995` (`[0,1)`), `warmup_steps=100` (non-negative) and
 `clip_factor=2.0` (positive). Experimental
 [SimBaV2](https://arxiv.org/abs/2502.15280) and
 [Mamba](https://arxiv.org/abs/2312.00752) blocks remain opt-in reusable model
@@ -327,8 +327,8 @@ components; their presence does not reproduce the papers' full experiment
 setups. Change one experimental variable at a time and compare against an
 identical seeded baseline.
 
-`SimbaV2Backbone` requires `input_dim` and `hidden_dim`, and accepts
-`block_count=2`, `expansion=4`, and `input_shift=1.0`. Dimensions and expansion
+`SimbaV2Backbone` requires `input_dim` and `hidden_dim` and accepts
+`block_count=2`, `expansion=4` and `input_shift=1.0`. Dimensions and expansion
 must be positive; block count is non-negative. A custom learner using it must
 call `project_hyperspherical_weights(model)` after each optimizer step. The
 built-in discrete learner performs that projection automatically.
