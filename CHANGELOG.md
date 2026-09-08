@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0 - Unreleased
+## 1.2.0 - 2026-09-08
 
 - Give checkpoint writers independent temporary files and clean partial JSON
   saves after serialization or replacement failures; existing checkpoints survive.
