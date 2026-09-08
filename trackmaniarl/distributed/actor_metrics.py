@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from math import ceil
+from math import ceil, isfinite
+from numbers import Real
 from typing import Any, Self
 
+from trackmaniarl.distributed.actor_control_summary import _EMPTY_CONTROL_SUMMARY
 from trackmaniarl.trackmania.diagnostics import ProgressBinDiagnostics, ProgressDiagnosticRecord
 
 _EPISODE_START_MARGIN_STEPS = 50
@@ -71,6 +73,7 @@ class ControlUsageTracker:
         self.steer_abs_total = 0.0
         self.race_ms_total = 0.0
         self.race_ms_values: list[float] = []
+        self.race_ms_invalid_measurements = 0
         self.controller_ms_values: list[float] = []
         self.telemetry_wait_ms_values: list[float] = []
         self.telemetry_skipped_frames_total = 0
@@ -79,15 +82,11 @@ class ControlUsageTracker:
         self.samples = 0
 
     def record(self, info: Mapping[str, Any]) -> None:
-        if "control_gas" not in info:
-            return
-        self.gas_total += float(info["control_gas"])
-        self.brake_total += float(info["control_brake"])
+        self.gas_total += float(info.get("control_gas", 0.0))
+        self.brake_total += float(info.get("control_brake", 0.0))
         self.brake_taps += int(bool(info.get("control_brake_tap", False)))
-        self.steer_abs_total += abs(float(info["control_steer"]))
-        race_ms = float(info.get("step_race_time_ms", 0.0))
-        self.race_ms_total += race_ms
-        self.race_ms_values.append(race_ms)
+        self.steer_abs_total += abs(float(info.get("control_steer", 0.0)))
+        self._record_race_time(info)
         self.controller_ms_values.append(float(info.get("controller_apply_ms", 0.0)))
         self.telemetry_wait_ms_values.append(float(info.get("telemetry_wait_ms", 0.0)))
         skipped_frames = int(info.get("telemetry_skipped_frames", 0))
@@ -96,22 +95,39 @@ class ControlUsageTracker:
         self.telemetry_steps_with_skipped_frames += int(skipped_frames > 0)
         self.samples += 1
 
+    def _record_race_time(self, info: Mapping[str, Any]) -> None:
+        race_ms = _positive_finite_measurement(info.get("step_race_time_ms"))
+        if race_ms is None:
+            self.race_ms_invalid_measurements += 1
+            return
+        self.race_ms_total += race_ms
+        self.race_ms_values.append(race_ms)
+
     def summary(self) -> dict[str, float]:
         if not self.samples:
             return self._empty_summary()
-        ordered = sorted(self.race_ms_values)
-        p99_index = ceil(0.99 * len(ordered)) - 1
+        race_count = len(self.race_ms_values)
+        p99, maximum = _race_time_tail(self.race_ms_values)
         summary = {
             "control_gas_fraction": self.gas_total / self.samples,
             "control_brake_fraction": self.brake_total / self.samples,
             "control_brake_tap_fraction": self.brake_taps / self.samples,
             "control_steer_abs_mean": self.steer_abs_total / self.samples,
-            "step_race_time_ms_mean": self.race_ms_total / self.samples,
-            "step_race_time_ms_p99": ordered[p99_index],
-            "step_race_time_ms_max": ordered[-1],
+            "step_race_time_ms_mean": self.race_ms_total / race_count if race_count else 0.0,
+            "step_race_time_ms_p99": p99,
+            "step_race_time_ms_max": maximum,
+            "step_race_time_measurement_count": float(race_count),
+            "step_race_time_measurements_valid": float(self._race_time_measurements_valid()),
         }
         summary.update(self._timing_summary())
         return summary
+
+    def _race_time_measurements_valid(self) -> bool:
+        return (
+            self.samples > 0
+            and len(self.race_ms_values) == self.samples
+            and self.race_ms_invalid_measurements == 0
+        )
 
     def _timing_summary(self) -> dict[str, float]:
         return {
@@ -129,23 +145,22 @@ class ControlUsageTracker:
 
     @staticmethod
     def _empty_summary() -> dict[str, float]:
-        return {
-            "control_gas_fraction": 0.0,
-            "control_brake_fraction": 0.0,
-            "control_brake_tap_fraction": 0.0,
-            "control_steer_abs_mean": 0.0,
-            "step_race_time_ms_mean": 0.0,
-            "step_race_time_ms_p99": 0.0,
-            "step_race_time_ms_max": 0.0,
-            "controller_apply_ms_mean": 0.0,
-            "controller_apply_ms_max": 0.0,
-            "telemetry_wait_ms_mean": 0.0,
-            "telemetry_wait_ms_max": 0.0,
-            "telemetry_skipped_frames_total": 0.0,
-            "telemetry_skipped_frames_mean": 0.0,
-            "telemetry_skipped_frames_max": 0.0,
-            "telemetry_steps_with_skipped_frames_fraction": 0.0,
-        }
+        return dict(_EMPTY_CONTROL_SUMMARY)
+
+
+def _race_time_tail(values: list[float]) -> tuple[float, float]:
+    if not values:
+        return 0.0, 0.0
+    ordered = sorted(values)
+    p99_index = ceil(0.99 * len(ordered)) - 1
+    return ordered[p99_index], ordered[-1]
+
+
+def _positive_finite_measurement(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, Real):
+        return None
+    measurement = float(value)
+    return measurement if isfinite(measurement) and measurement > 0.0 else None
 
 
 @dataclass(slots=True)
@@ -309,13 +324,37 @@ def _progress_summary(info: Mapping[str, Any]) -> dict[str, float | int]:
 
 def _control_summary(info: Mapping[str, Any]) -> dict[str, float]:
     return {
+        **_control_usage_summary(info),
+        **_step_race_time_summary(info),
+        **_control_timing_summary(info),
+    }
+
+
+def _control_usage_summary(info: Mapping[str, Any]) -> dict[str, float]:
+    return {
         "control/gas_fraction": float(info.get("control_gas_fraction", 0.0)),
         "control/brake_fraction": float(info.get("control_brake_fraction", 0.0)),
         "control/brake_tap_fraction": float(info.get("control_brake_tap_fraction", 0.0)),
         "control/steer_abs_mean": float(info.get("control_steer_abs_mean", 0.0)),
+    }
+
+
+def _step_race_time_summary(info: Mapping[str, Any]) -> dict[str, float]:
+    return {
         "timing/step_race_ms_mean": float(info.get("step_race_time_ms_mean", 0.0)),
         "timing/step_race_ms_p99": float(info.get("step_race_time_ms_p99", 0.0)),
         "timing/step_race_ms_max": float(info.get("step_race_time_ms_max", 0.0)),
+        "timing/step_race_measurement_count": float(
+            info.get("step_race_time_measurement_count", 0.0)
+        ),
+        "timing/step_race_measurements_valid": float(
+            info.get("step_race_time_measurements_valid", 0.0)
+        ),
+    }
+
+
+def _control_timing_summary(info: Mapping[str, Any]) -> dict[str, float]:
+    return {
         "timing/policy_inference_ms_mean": float(info.get("policy_inference_ms_mean", 0.0)),
         "timing/policy_inference_ms_max": float(info.get("policy_inference_ms_max", 0.0)),
         "controller_apply_ms_mean": float(info.get("controller_apply_ms_mean", 0.0)),

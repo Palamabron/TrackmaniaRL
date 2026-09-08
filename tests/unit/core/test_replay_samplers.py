@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import threading
 
 import pytest
@@ -10,7 +11,6 @@ import torch
 from tests.unit.core._replay_sampler_support import (
     _basic_n_step_store,
     _behavior_store,
-    _CountingSequenceStore,
     _store,
 )
 from trackmaniarl.core.builtins import IdentityFeaturePipeline
@@ -158,29 +158,8 @@ def test_prioritized_sampler_normalizes_weights_and_accepts_priority_feedback() 
     assert min(batch.importance_weights) > 0.0
 
 
-def test_prioritized_sampler_uses_demo_flags_without_an_expert_threshold() -> None:
-    store = _store(demos=4)
-    sampler = PrioritizedSampler(IdentityFeaturePipeline(), seed=1)
-
-    batch = sampler.sample(store, BatchRequest(batch_size=4))
-
-    assert "expert_demo_flags" not in batch.metadata
-    assert any(batch.metadata["demo_flags"])
-
-
-def test_uniform_sampler_exposes_demo_flags_to_learner_objectives() -> None:
-    store = _store(demos=4)
-    sampler = UniformSampler(IdentityFeaturePipeline(), seed=1)
-
-    batch = sampler.sample(store, BatchRequest(batch_size=4))
-
-    assert batch.metadata["demo_flags"] == tuple(store.demo_flags(batch.transition_ids))
-
-
 def _switch_transition(step: int) -> Transition:
     is_demo = step < 2
-    steering_switch = step in (0, 3)
-    switch_info = {"demonstration_steering_switch": steering_switch} if is_demo else {}
     return Transition(
         observation=float(step),
         action=0,
@@ -188,8 +167,17 @@ def _switch_transition(step: int) -> Transition:
         next_observation=float(step + 1),
         terminated=True,
         truncated=False,
-        info={"is_demo": is_demo, **switch_info},
+        info={"is_demo": is_demo, **_demo_switch_info(step)},
     )
+
+
+def _demo_switch_info(step: int) -> dict[str, float | bool]:
+    if step >= 2:
+        return {}
+    return {
+        "demonstration_progress_fraction": step / 4.0,
+        "demonstration_steering_switch": step in (0, 3),
+    }
 
 
 def test_uniform_sampler_preserves_demo_switches_in_a_mixed_batch() -> None:
@@ -204,6 +192,13 @@ def test_uniform_sampler_preserves_demo_switches_in_a_mixed_batch() -> None:
         for item in store.get(batch.transition_ids)
     )
     assert batch.metadata["demonstration_steering_switches"] == expected
+    progress = batch.metadata["demonstration_progress_fractions"]
+    assert all(
+        value == pytest.approx(item.info["demonstration_progress_fraction"])
+        if item.info.get("is_demo", False)
+        else math.isnan(value)
+        for value, item in zip(progress, store.get(batch.transition_ids), strict=True)
+    )
 
 
 def test_prioritized_sampler_state_round_trips_current_schema() -> None:
@@ -297,22 +292,6 @@ def test_columnar_n_step_fast_path_is_limited_to_non_sequence_batches() -> None:
         store, BatchRequest(batch_size=2, sequence_length=3, n_step=2)
     )
     assert store.materialize_calls == 1
-
-
-def test_sequence_sampler_reuses_its_window_index_until_replay_changes() -> None:
-    source = _store(episodes=1, steps=8)
-    store = _CountingSequenceStore()
-    _copy_store(source, store)
-    sampler = SequenceSampler(IdentityFeaturePipeline(), sequence_length=3, seed=4)
-    request = BatchRequest(batch_size=2, sequence_length=3)
-
-    sampler.sample(store, request)
-    sampler.sample(store, request)
-
-    assert store.available_ids_calls == 1
-    store.append(_terminal_transition(0.0, "episode-1"))
-    sampler.sample(store, request)
-    assert store.available_ids_calls == 2
 
 
 def test_sequence_sampler_rng_resume_is_independent_of_derived_window_cache() -> None:

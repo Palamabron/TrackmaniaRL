@@ -23,6 +23,26 @@ class _ResetGamepad:
         raise AssertionError(f"unexpected gamepad restart button {button}")
 
 
+class _ButtonGamepad:
+    def __init__(self, calls: list[tuple[str, int] | str]) -> None:
+        self.calls = calls
+
+    def press_button(self, *, button: int) -> None:
+        self.calls.append(("press", button))
+
+    def release_button(self, *, button: int) -> None:
+        self.calls.append(("release", button))
+
+    def update(self) -> None:
+        self.calls.append("update")
+
+
+def _bare_gamepad_controller() -> GamepadController:
+    controller = object.__new__(GamepadController)
+    controller._tap_lock = RLock()
+    return controller
+
+
 def test_keyboard_controller_maps_recorded_steering_sign_to_keys() -> None:
     events: list[tuple[int, bool]] = []
     controller = KeyboardController(lambda event: events.append((event.key, event.pressed)))
@@ -44,8 +64,7 @@ def test_keyboard_controller_maps_recorded_steering_sign_to_keys() -> None:
 def test_gamepad_brake_tap_releases_synchronously(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    controller = object.__new__(GamepadController)
-    controller._tap_lock = RLock()
+    controller = _bare_gamepad_controller()
     applied: list[np.ndarray] = []
     delays: list[float] = []
     monkeypatch.setattr(controller, "_apply", lambda action: applied.append(action.copy()))
@@ -59,6 +78,24 @@ def test_gamepad_brake_tap_releases_synchronously(
     assert applied[1] == pytest.approx([1.0, 0.0, 0.5])
 
 
+def test_gamepad_confirms_finish_with_controller_select_button(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, int] | str] = []
+    controller = _bare_gamepad_controller()
+    controller._gamepad = _ButtonGamepad(calls)
+    monkeypatch.setattr("trackmaniarl.trackmania.control.sleep", lambda _: None)
+
+    controller.confirm_finish()
+
+    assert calls == [
+        ("press", GamepadController._CONFIRM_BUTTON),
+        "update",
+        ("release", GamepadController._CONFIRM_BUTTON),
+        "update",
+    ]
+
+
 @pytest.mark.parametrize(
     ("mode", "function"),
     [
@@ -70,8 +107,7 @@ def test_gamepad_can_use_keyboard_restart_modes(
     monkeypatch: pytest.MonkeyPatch, mode: str, function: str
 ) -> None:
     calls: list[str] = []
-    controller = object.__new__(GamepadController)
-    controller._tap_lock = RLock()
+    controller = _bare_gamepad_controller()
     controller._gamepad = _ResetGamepad(calls)
     controller._restart_input = mode
     monkeypatch.setattr(

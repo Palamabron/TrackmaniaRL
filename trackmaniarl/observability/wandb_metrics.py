@@ -7,243 +7,22 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-_UPDATE_METRICS = {
-    "replay_size": "replay/size",
-    "replay_fill_fraction": "replay/fill_fraction",
-    "update_credit": "pipeline/update_credit",
-    "rollout_queue_depth": "pipeline/rollout_queue_depth",
-    "updates_per_s": "performance/updates_per_s",
-    "transitions_per_s": "performance/transitions_per_s",
-    "cumulative_transitions_per_s": "performance/cumulative_transitions_per_s",
-    "target_updates_per_s": "performance/target_updates_per_s",
-    "update_throughput_ratio": "performance/update_throughput_ratio",
-    "update_backlog_s": "pipeline/update_backlog_s",
-    "episodes": "outcome/train_episodes",
-    "finish_rate": "outcome/train_finish_rate",
-    "per_beta": "replay/per_beta",
-    "accelerator_memory_bytes": "system/torch_cuda_memory_bytes",
-}
-_DEBUG_METRICS = {
-    "action_batch_entropy",
-    "action_batch_unique_fraction",
-    "action_entropy",
-    "action_unique_fraction",
-    "bootstrap_discount_mean",
-    "bootstrap_zero_fraction",
-    "demonstration_action_accuracy",
-    "demo_accuracy",
-    "demo_sample_fraction",
-    "demo_steady_accuracy",
-    "demo_steering_switch_accuracy",
-    "demo_steering_switch_fraction",
-    "gradient_clip_coefficient",
-    "gradient_clipped_fraction",
-    "gradient_norm",
-    "gradient_norm_max",
-    "importance_weight_mean",
-    "importance_weight_min",
-    "n_step_return_mean",
-    "offline_progress_fraction",
-    "q_selected_abs_max",
-    "q_selected_max",
-    "q_selected_mean",
-    "q_selected_std_mean",
-    "q_target_max",
-    "q_target_mean",
-    "reward_abs_max",
-    "reward_mean",
-    "target_abs_max",
-    "target_mean",
-    "target_std_mean",
-    "target_synced_fraction",
-    "td_abs_max",
-    "td_abs_mean",
-}
-_REPLAY_METRICS = {
-    "demo_sample_fraction",
-    "elite_active_fraction",
-    "elite_sample_fraction",
-    "expert_demo_active_fraction",
-    "expert_demo_sample_fraction",
-    "expert_demo_target_fraction",
-}
-_TIMING_METRICS = {
-    "backward_s",
-    "checkpoint_snapshot_s",
-    "forward_s",
-    "gradient_clip_s",
-    "host_to_device_s",
-    "learner_update_s",
-    "logging_s",
-    "optimizer_s",
-    "offline_eta_s",
-    "offline_updates_per_s",
-    "policy_publish_s",
-    "replay_sample_s",
-    "replay_wait_s",
-    "update_s",
-}
-_EPISODE_METRICS = {
-    "collision/count",
-    "collision/detected_count",
-    "control/brake_fraction",
-    "control/brake_tap_fraction",
-    "control/gas_fraction",
-    "control/steer_abs_mean",
-    "duration_s",
-    "exploration_epsilon",
-    "finish_rate",
-    "finish_time_s",
-    "finished",
-    "index",
-    "policy_version",
-    "pace/reference_time_s",
-    "pace/time_debt_s",
-    "potential/progress",
-    "progress/accepted_delta_m",
-    "progress_m",
-    "progress/nearest_distance_m",
-    "progress_pct",
-    "progress/steps_since",
-    "progress/window_m",
-    "q_margin/mean",
-    "q_margin/min",
-    "q_margin/start_mean",
-    "race_time_s",
-    "return",
-    "reward/collision",
-    "reward/pace",
-    "reward/pbrs",
-    "reward/progress",
-    "reward/projected_speed",
-    "reward/projected_velocity",
-    "reward/steering_delta",
-    "reward/terminal",
-    "reward/time",
-    "reward/time_attack_terminal",
-    "reward_per_transition",
-    "replay/labeled_transitions",
-    "steps",
-    "telemetry/error",
-    "termination/max_steps",
-    "termination/no_progress",
-    "termination/off_track",
-    "termination/slow_progress",
-    "termination/telemetry_error",
-    "termination/time_limit",
-    "timing/policy_inference_ms_max",
-    "timing/policy_inference_ms_mean",
-    "timing/step_race_ms_max",
-    "timing/step_race_ms_mean",
-    "timing/step_race_ms_p99",
-    "controller_apply_ms_mean",
-    "controller_apply_ms_max",
-    "telemetry_wait_ms_mean",
-    "telemetry_wait_ms_max",
-    "telemetry_skipped_frames_total",
-    "telemetry_skipped_frames_mean",
-    "telemetry_skipped_frames_max",
-    "telemetry_steps_with_skipped_frames_fraction",
-    "velocity/projected_mps",
-    "velocity/ratio",
-    "velocity/ratio_mean",
-    "velocity/ratio_max",
-}
-_EVALUATION_METRICS = {
-    "action_latency_ms",
-    "crash_rate",
-    "collision_rate",
-    "control_brake_fraction_mean",
-    "control_brake_tap_fraction_mean",
-    "control_gas_fraction_mean",
-    "control_steer_abs_mean",
-    "failure_progress_best_pct",
-    "failure_progress_mean_pct",
-    "failure_progress_median_pct",
-    "finish_rate",
-    "finish_time_best_s",
-    "finish_time_mean_s",
-    "finish_time_median_s",
-    "finished_trials",
-    "off_track_rate",
-    "policy_version",
-    "projected_velocity_ratio_mean",
-    "q_margin_start_mean",
-    "reward",
-    "sub_36_rate",
-    "sub_38_rate",
-    "sub_40_rate",
-    "telemetry_error_rate",
-    "controller_apply_ms",
-    "telemetry_wait_ms",
-    "telemetry_skipped_frames_total",
-    "telemetry_skipped_frames_mean",
-    "telemetry_skipped_frames_max",
-    "telemetry_steps_with_skipped_frames_fraction",
-    "throughput_fps",
-    "trials",
-}
-_IMITATION_METRICS = {
-    "accuracy",
-    "balanced_accuracy",
-    "best",
-    "control_score",
-    "intervention_accuracy",
-    "learning_rate",
-    "loss",
-    "steering_accuracy",
-    "steering_transition_accuracy",
-    "student_disagreement_accuracy",
-    "transition_accuracy",
-    "weighted_accuracy",
-}
-_EXPERT_METRICS = {
-    "action_switch_recall",
-    "count",
-    "demonstrations/count",
-    "demonstrations/completed",
-    "elapsed_s",
-    "eta_s",
-    "exact_action_accuracy",
-    "expert_action_steady_step_exact_accuracy",
-    "expert_action_switch_count",
-    "expert_action_switch_step_exact_accuracy",
-    "expert_steering_steady_step_accuracy",
-    "expert_steering_switch_count",
-    "expert_steering_switch_step_accuracy",
-    "policy_action_switch_count",
-    "policy_steering_switch_count",
-    "steering_bin_accuracy",
-    "steering_switch_recall",
-    "switch_comparison_count",
-}
-_LEADER_METRICS = {
-    "exact_policy",
-    "finish_rate",
-    "finish_time_best_s",
-    "finish_time_mean_s",
-    "finish_time_median_s",
-    "finished_trials",
-    "policy_version",
-    "release_qualified",
-    "reliable_qualified",
-    "shared_with_reliable",
-    "trials",
-}
-_IGNORED_REMOTE_EVENTS = {
-    "actor/heartbeat",
-    "eval/progress_bin",
-    "train/execution",
-    "train/progress_bin",
-}
-_EVALUATION_ALIASES = {
-    "finish_time_s": "finish_time_mean_s",
-    "median_finish_time_s": "finish_time_median_s",
-    "best_finish_time_s": "finish_time_best_s",
-    "sub36_rate": "sub_36_rate",
-    "sub38_rate": "sub_38_rate",
-    "sub40_rate": "sub_40_rate",
-}
+from trackmaniarl.observability._wandb_metric_catalog import (
+    _DEBUG_METRICS,
+    _EPISODE_METRICS,
+    _EVALUATION_ALIASES,
+    _EVALUATION_METRICS,
+    _EXPERT_METRICS,
+    _IGNORED_REMOTE_EVENTS,
+    _IMITATION_METRICS,
+    _LEADER_METRICS,
+    _RECOVERY_METRICS,
+    _REPLAY_METRICS,
+    _TIMING_METRICS,
+    _UPDATE_METRICS,
+)
+
+__all__ = ["_IGNORED_REMOTE_EVENTS"]
 
 
 def _flat_name(namespace: str, key: str) -> str:
@@ -278,6 +57,15 @@ def _evaluation_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
     return _selected(normalized, _EVALUATION_METRICS, "evaluation")
 
 
+def _recovery_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
+    normalized = {
+        key.removeprefix("recovery/"): value
+        for key, value in payload.items()
+        if key.startswith("recovery/")
+    }
+    return _selected(normalized, _RECOVERY_METRICS, "recovery")
+
+
 def _update_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
     values = {name: payload[key] for key, name in _UPDATE_METRICS.items() if key in payload}
     for key, value in payload.items():
@@ -301,17 +89,22 @@ def _event_metrics(event: str, payload: Mapping[str, Any]) -> dict[str, Any]:
     if event in {"eval/summary", "eval/suite"}:
         return _evaluation_metrics(payload)
     if event in {"bc/train", "bc/validation"}:
-        phase = event.removeprefix("bc/")
-        return _selected(payload, _IMITATION_METRICS, f"imitation_{phase}")
+        return _selected(payload, _IMITATION_METRICS, f"imitation_{event[3:]}")
+    if event in {"recovery/update", "train/checkpoint"}:
+        return _single_event_metrics(event, payload)
     if event in {"diagnose/expert", "diagnose/expert_progress"}:
         return _selected(payload, _EXPERT_METRICS, "expert")
     if event in {"eval/best_checkpoint", "eval/fastest_checkpoint"}:
         return _leader_metrics(event, payload)
     if event == "distributed/policy_published":
         return _policy_publish_metrics(payload)
-    if event == "train/checkpoint":
-        return _checkpoint_metrics(payload)
     return {}
+
+
+def _single_event_metrics(event: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+    if event == "recovery/update":
+        return _recovery_metrics(payload)
+    return _checkpoint_metrics(payload)
 
 
 def _leader_metrics(event: str, payload: Mapping[str, Any]) -> dict[str, Any]:

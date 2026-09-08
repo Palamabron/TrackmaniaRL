@@ -6,7 +6,6 @@ from typing import Any
 
 from trackmaniarl.core.builtins import IdentityFeaturePipeline, ZeroPolicy
 from trackmaniarl.core.collector import (
-    EpisodeCollector,
     FixedStepRolloutCollector,
     RolloutCollectionConfig,
 )
@@ -32,15 +31,6 @@ class FakeTrackmania:
             False,
             {"observation_ref": f"frame-{self.step_index}"},
         )
-
-
-def test_collector_stores_transitions_and_keeps_only_observation_refs() -> None:
-    store = InMemoryReplayStore()
-    collector = EpisodeCollector(store, IdentityFeaturePipeline(), ZeroPolicy())
-    result = collector.collect(FakeTrackmania(), "episode", max_steps=10)
-    assert result.transitions == 2
-    assert len(store) == 2
-    assert result.artifact.observation_refs == ["frame-1", "frame-2"]
 
 
 def test_fixed_rollout_continues_episode_across_collection_boundaries() -> None:

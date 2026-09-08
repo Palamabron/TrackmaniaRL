@@ -5,16 +5,14 @@ from typing import Any
 
 import pytest
 
-from trackmaniarl.cli import (
-    _restore_smoke_checkpoint,
+from trackmaniarl.cli import entrypoint
+from trackmaniarl.commands.common import (
+    _matches_attempt,
+    _next_versioned_run_id,
     _resumed_attempt_spec,
-    _smoke_training,
-    _train,
-    entrypoint,
 )
-from trackmaniarl.commands.common import _matches_attempt, _next_versioned_run_id
-from trackmaniarl.commands.smoke import _smoke_spec
-from trackmaniarl.commands.training import _offline_pretrain
+from trackmaniarl.commands.smoke import _restore_smoke_checkpoint, _smoke_spec, _smoke_training
+from trackmaniarl.commands.training import _offline_pretrain, _train
 from trackmaniarl.core.spec import RunSpec, TrainingSpec
 from trackmaniarl.distributed.coordinator_types import CoordinatorConfig
 from trackmaniarl.distributed.protocol import run_fingerprint

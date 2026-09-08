@@ -50,7 +50,20 @@ class _EvaluationEnvironment:
         assert action == 0
         self.steps += 1
         if self.steps == 1:
-            return 1, 2.0, False, False, {"reward_time": -0.1, "reward_pbrs": 2.1}
+            return (
+                1,
+                2.0,
+                False,
+                False,
+                {
+                    "reward_time": -0.1,
+                    "reward_pbrs": 2.1,
+                    "control_gas": 1.0,
+                    "control_brake": 0.0,
+                    "control_steer": 0.0,
+                    "step_race_time_ms": 50.0,
+                },
+            )
         return 2, 3.0, True, False, _finished_evaluation_info()
 
 
@@ -61,6 +74,10 @@ def _finished_evaluation_info() -> dict[str, Any]:
         "reward_time": -0.2,
         "reward_pbrs": 3.2,
         "reward_terminal": 10.0,
+        "control_gas": 1.0,
+        "control_brake": 0.0,
+        "control_steer": 0.0,
+        "step_race_time_ms": 50.0,
     }
 
 
@@ -94,6 +111,8 @@ def test_actor_evaluation_is_greedy_and_never_spooled_as_training_data() -> None
     assert summary["reward/time"] == pytest.approx(-0.3)
     assert summary["reward/pbrs"] == pytest.approx(5.3)
     assert summary["reward/terminal"] == 10.0
+    assert summary["timing/step_race_measurement_count"] == 2.0
+    assert summary["timing/step_race_measurements_valid"] == 1.0
 
 
 class _MarginPolicy:

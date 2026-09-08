@@ -13,6 +13,7 @@ import pytest
 from trackmaniarl.trackmania.actions import build_brake_tap_action_table
 from trackmaniarl.trackmania.control import RecordingController
 from trackmaniarl.trackmania.environment import OpenPlanetEnvironment
+from trackmaniarl.trackmania.environment_step import _score_step
 from trackmaniarl.trackmania.reward import RewardResult
 from trackmaniarl.trackmania.reward_types import TransitionInput
 from trackmaniarl.trackmania.telemetry import (
@@ -147,12 +148,37 @@ def test_environment_step_reports_applied_control_and_race_time_delta(
     _assert_timing_info(info)
 
 
+def test_environment_preserves_regressing_clock_in_step_diagnostics() -> None:
+    environment = object.__new__(OpenPlanetEnvironment)
+    environment.config = SimpleNamespace(position_indices=(4, 5, 6), velocity_indices=(7, 8, 9))
+    environment.controller = RecordingController()
+    environment.reward = _StaticReward()
+    environment._last_race_time_ms = 100.0
+    values = np.zeros(33, dtype=np.float32)
+    values[3] = 90.0
+    outcome = _score_step(environment, np.array([1.0, 0.0, 0.0]), TelemetryFrame(values))
+    assert outcome.step_race_time_ms == -10.0
+
+
 def test_environment_waits_for_race_timer_restart() -> None:
     environment = object.__new__(OpenPlanetEnvironment)
     environment.client = _RestartClient()
-    environment.config = SimpleNamespace(start_timeout_s=1.0, start_poll_s=0.0)
+    environment.config = SimpleNamespace(
+        start_timeout_s=1.0, start_poll_s=0.0, start_race_time_ms=0.0
+    )
     frame = environment._wait_for_active_run(500.0)
     assert float(frame.values[3]) == 50.0
+
+
+def test_environment_can_align_first_observation_to_race_clock() -> None:
+    environment = object.__new__(OpenPlanetEnvironment)
+    environment.client = _RestartClient()
+    environment.client.race_times_ms = iter((1000.0, 0.0, 10.0, 50.0, 100.0))
+    environment.config = SimpleNamespace(
+        start_timeout_s=1.0, start_poll_s=0.0, start_race_time_ms=100.0
+    )
+    frame = environment._wait_for_active_run(500.0)
+    assert float(frame.values[3]) == 100.0
 
 
 def test_environment_confirms_ready_after_observing_timer_restart() -> None:
@@ -161,7 +187,9 @@ def test_environment_confirms_ready_after_observing_timer_restart() -> None:
     environment.client = _RestartClient()
     environment.controller = SimpleNamespace(reset=lambda: calls.append("reset"))
     environment._session = SimpleNamespace(confirm_ready=lambda _: calls.append("ready"))
-    environment.config = SimpleNamespace(start_timeout_s=1.0, start_poll_s=0.0)
+    environment.config = SimpleNamespace(
+        start_timeout_s=1.0, start_poll_s=0.0, start_race_time_ms=0.0
+    )
     environment._expected_map_uid = "map"
     environment._last_race_time_ms = 500.0
     environment._finish_confirmation_pending = False

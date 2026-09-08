@@ -39,4 +39,8 @@ def _demonstration_metadata(transitions: list[Transition]) -> dict[str, Any]:
             int(transition.info.get("demonstration_steering_switch_distance", 1_000_000))
             for transition in transitions
         ),
+        "demonstration_progress_fractions": tuple(
+            float(transition.info.get("demonstration_progress_fraction", float("nan")))
+            for transition in transitions
+        ),
     }

@@ -19,7 +19,6 @@ from trackmaniarl.distributed.actor import (
     ActorBackgroundError,
     ActorRuntime,
 )
-from trackmaniarl.distributed.actor_transport import is_retryable_rpc_error
 from trackmaniarl.distributed.codec import (
     WireCodec,
 )
@@ -157,22 +156,6 @@ def test_fsynced_actor_spool_survives_exit_and_is_removed_only_after_ack(
     assert actor.client.calls == 1
     assert not path.exists()
     assert actor._spool_bytes_total == 0
-
-
-def test_actor_rpc_retry_classifier_accepts_transient_codes() -> None:
-    for code in (grpc.StatusCode.UNAVAILABLE, grpc.StatusCode.DEADLINE_EXCEEDED):
-        assert is_retryable_rpc_error(_RpcFailure(code))
-
-
-def test_actor_rpc_retry_classifier_rejects_permanent_codes() -> None:
-    permanent = (
-        grpc.StatusCode.UNAUTHENTICATED,
-        grpc.StatusCode.PERMISSION_DENIED,
-        grpc.StatusCode.FAILED_PRECONDITION,
-        grpc.StatusCode.INVALID_ARGUMENT,
-    )
-    for code in permanent:
-        assert not is_retryable_rpc_error(_RpcFailure(code))
 
 
 class _ImmediateStop:

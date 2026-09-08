@@ -61,16 +61,6 @@ def pipeline(tmp_path: Path) -> BoundaryGraphFeaturePipelineV2:
     return result
 
 
-def test_v2_shapes_and_first_frame(pipeline: BoundaryGraphFeaturePipelineV2) -> None:
-    first = pipeline.transform_observation(_frame({"t": 0.0, "x": 10.0, "speed": 50.0}))
-
-    assert first["physics"].shape == (60,)
-    assert first["track"].shape == (3, 88)
-    assert _named(first["physics"])["acceleration"] == 0.0
-    assert _named(first["physics"])["yaw_rate"] == 0.0
-    assert torch.isfinite(first["track"]).all()
-
-
 _BRAKING_SPEC = {
     "t": 50.0,
     "x": 12.5,

@@ -51,9 +51,10 @@ components:
     class_path: trackmaniarl.trackmania.environment:OpenPlanetEnvironmentFactory
     kwargs:
       config:
-        geometry_path: assets/trackmaniarl-test.geometry.npz
-        expected_map_uid: REPLACE_WITH_TEST_3_UID
+        geometry_path: assets/my-map.geometry.npz
+        expected_map_uid: REPLACE_WITH_YOUR_MAP_UID
         control_backend: gamepad
+        confirm_finish_before_reset: false
         action_repeat_frames: 1
         decision_interval_ms: 50.0
         demonstration_control_aggregation: true
@@ -94,20 +95,20 @@ components:
     class_path: trackmaniarl.trackmania.features:LidarFeaturePipeline
     kwargs:
       config:
-        geometry_path: assets/trackmaniarl-test.geometry.npz
-        expected_map_uid: REPLACE_WITH_TEST_3_UID
+        geometry_path: assets/my-map.geometry.npz
+        expected_map_uid: REPLACE_WITH_YOUR_MAP_UID
   evaluator:
     class_path: trackmaniarl.trackmania.evaluation:TrackmaniaEvaluator
 evaluation:
-  name: trackmaniarl-test
+  name: my-map
   version: "1"
   maps:
-    - id: trackmaniarl-test
-      map_path: maps/trackmaniarl-test.Map.Gbx
-      geometry_path: assets/trackmaniarl-test.geometry.npz
-      expected_map_uid: REPLACE_WITH_TEST_3_UID
+    - id: my-map
+      map_path: maps/my-map.Map.Gbx
+      geometry_path: assets/my-map.geometry.npz
+      expected_map_uid: REPLACE_WITH_YOUR_MAP_UID
   trials_per_map: 20
-  target_median_s: 37.0
+  min_finish_rate: 1.0
 distributed:
   epsilon_profiles: [1.0]
   epsilon_start: 0.5

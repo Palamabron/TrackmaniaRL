@@ -1,0 +1,32 @@
+# Support status for 1.2.0
+
+Tests verify contracts and failure handling; they do not prove fast driving on
+unseen maps. The [algorithm matrix](../readme/algorithms.md) is authoritative for
+supported learner/replay/model combinations.
+
+| Surface | Status and purpose |
+| --- | --- |
+| RunSpec 2.0, typed contracts, component resolution | Public SDK |
+| `init`, `inspect-config`, `validate` | Supported project setup and offline validation |
+| `track check`, boundary/trajectory recording, geometry building | Supported own-map asset workflow |
+| `train`, `resume`, `smoke`, `learner`, `actor` | Supported asynchronous off-policy workflow |
+| `benchmark`, optional window recording | Supported checkpoint evaluation; Windows-only recorder |
+| `track record-demo`, `offline-pretrain`, `bc-train`, `bc-benchmark` | Supported demonstration and imitation workflows, subject to documented data contracts |
+| `track record-recovery` | Guarded, opt-in human intervention collection; requires an attentive human |
+| `recovery-finetune` | Experimental incident-gated graph adapter; not an arbitrary-model trainer |
+| `demo-benchmark`, `diagnose expert` | Diagnostic expert replay/policy comparison, distinct from learned-policy benchmarking |
+| `dagger-collect`, trajectory tracking/stitching/synthetic recovery/optimisation | Experimental; configure map, timing and provenance explicitly |
+| Graph IQN V1–V6, residual GRU, Mamba | Optional model families; older graph layers are implementation dependencies, not legacy import aliases |
+| W&B | Optional projection of authoritative local logs; no account required for default workflow |
+| Gemini/Optuna orchestration | Optional experiment scheduling, no speed or reliability guarantee |
+| `experiments/sub37/` | Repository-only single-map benchmark reproduction, never a default policy |
+| `scripts/` | Maintainer distribution checks, soak verification and analysis; not public Python API |
+
+Historical failed experiments and forensic reports stay in `experiments/` and
+`docs/benchmarks/`. Local checkpoints, recordings, databases and generated logs
+remain ignored and are not distributed. Preserve them separately if reproducing
+an old result. No local training data was deleted for this release cleanup.
+
+RunSpec/checkpoint 1.x loading and private CLI helper aliases are not supported.
+Version numbers belonging to other formats (for example JSONL events or geometry)
+are independent contracts, not reasons to remove working data support.

@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
+from math import isfinite
 from statistics import fmean, median
 from typing import TYPE_CHECKING, Any
 
@@ -235,13 +236,83 @@ def _termination_stats(batch: _EvaluationBatch) -> dict[str, float]:
 def _evaluation_timing_stats(summaries: list[dict[str, Any]]) -> dict[str, float]:
     steps = [int(item.get("steps", 0)) for item in summaries]
     batch = _TimingBatch(summaries, steps, sum(steps))
-    skipped_total = sum(
-        float(item.get("telemetry_skipped_frames_total", 0.0)) for item in summaries
-    )
+    return {**_control_timing_stats(batch), **_skipped_frame_stats(batch)}
+
+
+def _control_timing_stats(batch: _TimingBatch) -> dict[str, float]:
+    summaries = batch.summaries
     return {
         "action_latency_ms": _weighted_mean(batch, "timing/policy_inference_ms_mean"),
         "controller_apply_ms": _weighted_mean(batch, "controller_apply_ms_mean"),
         "telemetry_wait_ms": _weighted_mean(batch, "telemetry_wait_ms_mean"),
+        "step_race_time_ms_p99": _maximum_metric(summaries, "timing/step_race_ms_p99"),
+        "step_race_time_ms_max": _maximum_metric(summaries, "timing/step_race_ms_max"),
+        "step_race_time_measurement_count": _step_race_time_measurement_count(summaries),
+        "step_race_time_expected_measurement_count": float(batch.total_steps),
+        "step_race_time_measurements_valid": float(_step_race_time_measurements_valid(summaries)),
+    }
+
+
+def _step_race_time_measurements_valid(summaries: list[dict[str, Any]]) -> bool:
+    return all(_summary_step_race_time_measurements_valid(summary) for summary in summaries)
+
+
+def _summary_step_race_time_measurements_valid(summary: Mapping[str, Any]) -> bool:
+    steps = summary.get("steps")
+    count = summary.get("timing/step_race_measurement_count")
+    return (
+        _positive_integer(steps)
+        and _nonnegative_integer(count)
+        and count == steps
+        and _binary_true(summary.get("timing/step_race_measurements_valid"))
+        and _positive_finite_number(summary.get("timing/step_race_ms_max"))
+    )
+
+
+def _step_race_time_measurement_count(summaries: list[dict[str, Any]]) -> float:
+    return sum(
+        float(value)
+        for summary in summaries
+        if (value := summary.get("timing/step_race_measurement_count")) is not None
+        and _nonnegative_integer(value)
+    )
+
+
+def _positive_finite_number(value: object) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (float, int))
+        and isfinite(float(value))
+        and float(value) > 0.0
+    )
+
+
+def _positive_integer(value: object) -> bool:
+    return not isinstance(value, bool) and isinstance(value, int) and value > 0
+
+
+def _nonnegative_integer(value: object) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (float, int))
+        and isfinite(float(value))
+        and float(value).is_integer()
+        and float(value) >= 0.0
+    )
+
+
+def _binary_true(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    return isinstance(value, (float, int)) and isfinite(float(value)) and float(value) == 1.0
+
+
+def _skipped_frame_stats(batch: _TimingBatch) -> dict[str, float]:
+    summaries = batch.summaries
+    skipped_total = sum(
+        float(item.get("telemetry_skipped_frames_total", 0.0)) for item in summaries
+    )
+    return {
         "telemetry_skipped_frames_total": skipped_total,
         "telemetry_skipped_frames_mean": skipped_total / batch.total_steps
         if batch.total_steps

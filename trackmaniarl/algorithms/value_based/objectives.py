@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
+from itertools import pairwise
 from math import isfinite
 from typing import Protocol
 
@@ -101,6 +103,56 @@ class DemonstrationCrossEntropyObjective:
         )
 
 
+class DemonstrationProgressWindowCrossEntropyObjective:
+    """Imitate demonstrations only where track-local intervention is needed."""
+
+    requires_all_actions = True
+
+    def __init__(
+        self,
+        windows: Sequence[Sequence[float]],
+        weight: float = 1.0,
+    ) -> None:
+        _validate_non_negative((weight,), "demonstration cross-entropy weight")
+        self.windows = _validate_progress_windows(windows)
+        self.weight = weight
+
+    def loss(self, context: ValueObjectiveContext) -> torch.Tensor | None:
+        if not self.weight:
+            return None
+        demo, progress = _demonstration_progress(context)
+        in_window = _progress_window_mask(progress, self.windows)
+        expected = _masked_demo_values(context, demo & in_window)
+        losses = _cross_entropy_losses(context, expected)
+        valid = context.valid & demo & in_window & torch.isfinite(progress)
+        objective = _WeightedDemoLoss(context, losses, valid)
+        return self.weight * _weighted_demo_mean(objective, 1.0, 0)
+
+
+def _demonstration_progress(
+    context: ValueObjectiveContext,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    flags = context.metadata.get("demo_flags")
+    values = context.metadata.get("demonstration_progress_fractions")
+    if flags is None:
+        raise ValueError("demonstration progress objective requires demo_flags metadata")
+    if values is None:
+        raise ValueError("demonstration progress objective requires progress metadata")
+    return (
+        _metadata_tensor(context, flags, torch.bool),
+        _metadata_tensor(context, values, torch.float32),
+    )
+
+
+def _progress_window_mask(
+    progress: torch.Tensor, windows: Sequence[tuple[float, float]]
+) -> torch.Tensor:
+    result = torch.zeros_like(progress, dtype=torch.bool)
+    for start, end in windows:
+        result |= (progress >= start) & (progress <= end)
+    return result
+
+
 def _cross_entropy_losses(context: ValueObjectiveContext, expected: torch.Tensor) -> torch.Tensor:
     losses = torch.nn.functional.cross_entropy(
         expected.reshape(-1, expected.shape[-1]),
@@ -147,6 +199,25 @@ def _validate_switch_radius(value: int) -> int:
     return value
 
 
+def _validate_progress_windows(
+    windows: Sequence[Sequence[float]],
+) -> tuple[tuple[float, float], ...]:
+    result: list[tuple[float, float]] = []
+    for window in windows:
+        if len(window) != 2:
+            raise ValueError("each demonstration progress window requires start and end")
+        start, end = (float(value) for value in window)
+        if not all(isfinite(value) for value in (start, end)) or not 0.0 <= start < end <= 1.0:
+            raise ValueError("demonstration progress windows must satisfy 0 <= start < end <= 1")
+        result.append((start, end))
+    if not result:
+        raise ValueError("at least one demonstration progress window is required")
+    ordered = tuple(sorted(result))
+    if any(current[0] <= previous[1] for previous, current in pairwise(ordered)):
+        raise ValueError("demonstration progress windows must not overlap")
+    return ordered
+
+
 def _metadata_tensor(
     context: ValueObjectiveContext, values: object, dtype: torch.dtype
 ) -> torch.Tensor:
@@ -171,7 +242,12 @@ def _masked_demo_values(context: ValueObjectiveContext, demo: torch.Tensor) -> t
     allowed = context.action_mask[context.actions]
     if torch.any(context.valid & demo & ~allowed):
         raise ValueError("demonstration action is excluded by policy_action_ids")
-    return context.expected_values.masked_fill(~context.action_mask, -torch.inf)
+    selected = context.valid & demo
+    masked = context.expected_values.masked_fill(~context.action_mask, -torch.inf)
+    # Objectives compute per-row losses before their selected rows are reduced.  Leaving
+    # an excluded target at ``-inf`` on an unselected row creates ``inf * 0`` (or
+    # ``nan * 0`` for the margin loss), which poisons the whole reduction.
+    return torch.where(selected.unsqueeze(-1), masked, context.expected_values)
 
 
 class PolicyAnchorObjective:

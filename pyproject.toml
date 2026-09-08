@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "TrackmaniaRL"
-version = "1.1.0"
+version = "1.2.0"
 description = "Reinforcement-learning library for training agents in Trackmania 2020"
 readme = "README.md"
 license = "MIT"
@@ -48,7 +48,6 @@ orchestrator = [
 ]
 trackmania = [
     "libevdev>=0.13; sys_platform == 'linux'",
-    "vgamepad>=0.1.0; sys_platform == 'win32' or sys_platform == 'linux'",
 ]
 wandb = [
     "wandb>=0.15.8",
@@ -66,7 +65,6 @@ all = [
     "google-genai>=2.2.0",
     "optuna>=3.0",
     "libevdev>=0.13; sys_platform == 'linux'",
-    "vgamepad>=0.1.0; sys_platform == 'win32' or sys_platform == 'linux'",
     "wandb>=0.15.8",
     "grpcio>=1.66",
     "protobuf>=5.27",
@@ -184,6 +182,9 @@ addopts = [
     "--strict-markers",
 ]
 cache_dir = ".pytest-cache/cache"
+markers = [
+    "must_have: critical regression coverage run by default",
+]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
@@ -197,6 +198,7 @@ fmt = [
 lint = "ruff check ."
 types = "mypy trackmaniarl"
 test = "pytest"
+test-full = "pytest -o addopts='' tests"
 check = ["lint", "types"]
 
 [tool.mypy]

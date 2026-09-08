@@ -9,6 +9,11 @@ import torch
 
 from trackmaniarl.core.replay.store_pace import validated_sampling_pace
 from trackmaniarl.distributed.codec import WireCodec
+from trackmaniarl.distributed.coordinator_observability_validation import (
+    _validate_binary_flag,
+    _validate_finite_number,
+    _validate_observability_summary,
+)
 from trackmaniarl.distributed.protocol import transition_from_wire
 
 
@@ -168,51 +173,20 @@ def _validate_evaluation_summary(value: object) -> None:
         raise TypeError("evaluations must contain mappings")
     _validate_binary_flag(value["finished"], "evaluation finished")
     _validate_finite_number(value["finish_time_s"], "evaluation finish_time_s")
+    _validate_evaluation_outcome(value)
     steps = _required_integer(value, "steps", minimum=0)
     _required_integer(value, "policy_version", minimum=0)
     _validate_observability_summary(value, "evaluation", steps)
     _validate_finite_tree(value, "evaluation summary")
 
 
-def _validate_observability_summary(value: Mapping[str, Any], name: str, steps: int) -> None:
-    observed = {
-        key: _validate_nonnegative_number(value[key], f"{name} {key}")
-        for key in _OBSERVABILITY_FIELDS
-        if key in value
-    }
-    fraction = _skipped_frame_fraction(value, name)
-    if steps == 0 and (any(observed.values()) or fraction > 0.0):
-        raise ValueError(f"{name} timing and frame metrics require at least one step")
-    _validate_skipped_frame_counts(observed, name)
-
-
-def _skipped_frame_fraction(value: Mapping[str, Any], name: str) -> float:
-    key = "telemetry_steps_with_skipped_frames_fraction"
-    if key not in value:
-        return 0.0
-    fraction = _validate_nonnegative_number(value[key], f"{name} {key}")
-    if fraction > 1.0:
-        raise ValueError(f"{name} {key} must be at most one")
-    return fraction
-
-
-def _validate_skipped_frame_counts(observed: Mapping[str, float], name: str) -> None:
-    total = observed.get("telemetry_skipped_frames_total")
-    maximum = observed.get("telemetry_skipped_frames_max")
-    if total is not None and not total.is_integer():
-        raise ValueError(f"{name} skipped frame total must be an integer")
-    if maximum is not None and not maximum.is_integer():
-        raise ValueError(f"{name} skipped frame maximum must be an integer")
-    if total is not None and maximum is not None and maximum > total:
-        raise ValueError(f"{name} skipped frame maximum cannot exceed its total")
-
-
-def _validate_nonnegative_number(value: Any, name: str) -> float:
-    _validate_finite_number(value, name)
-    scalar = float(value)
-    if scalar < 0.0:
-        raise ValueError(f"{name} must be non-negative")
-    return scalar
+def _validate_evaluation_outcome(value: Mapping[str, Any]) -> None:
+    finished = bool(value["finished"])
+    finish_time_s = float(value["finish_time_s"])
+    if finished and finish_time_s <= 0.0:
+        raise ValueError("finished evaluation finish_time_s must be positive")
+    if not finished and finish_time_s != 0.0:
+        raise ValueError("unfinished evaluation finish_time_s must be zero")
 
 
 def _required_list(value: Mapping[str, Any], key: str) -> list[Any]:
@@ -294,25 +268,6 @@ def _validate_finite_tree(value: Any, name: str) -> None:
         raise TypeError(f"{name} contains unsupported {type(value).__name__}")
 
 
-def _validate_finite_number(value: Any, name: str) -> None:
-    numeric = isinstance(value, (int, float, np.number, torch.Tensor))
-    if isinstance(value, bool) or not numeric:
-        raise TypeError(f"{name} must be numeric")
-    if isinstance(value, torch.Tensor) and value.numel() != 1:
-        raise TypeError(f"{name} must be scalar")
-    scalar = float(value)
-    if not np.isfinite(scalar):
-        raise ValueError(f"{name} must be finite")
-
-
-def _validate_binary_flag(value: Any, name: str) -> None:
-    if isinstance(value, (bool, np.bool_)):
-        return
-    _validate_finite_number(value, name)
-    if float(value) not in {0.0, 1.0}:
-        raise ValueError(f"{name} must be boolean or numeric zero/one")
-
-
 _SUBMIT_FIELDS = frozenset(
     {
         "protocol_version",
@@ -362,16 +317,4 @@ _EPISODE_NUMERIC_FIELDS = {
     "velocity/ratio_max",
     "race_time_s",
     "exploration_epsilon",
-}
-
-_OBSERVABILITY_FIELDS = {
-    "timing/policy_inference_ms_mean",
-    "timing/policy_inference_ms_max",
-    "controller_apply_ms_mean",
-    "controller_apply_ms_max",
-    "telemetry_wait_ms_mean",
-    "telemetry_wait_ms_max",
-    "telemetry_skipped_frames_total",
-    "telemetry_skipped_frames_mean",
-    "telemetry_skipped_frames_max",
 }

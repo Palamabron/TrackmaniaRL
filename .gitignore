@@ -193,3 +193,18 @@ config.json
 
 # Local TrackMania recordings and captured demonstrations
 my-trackmania-agent/demos-v*/
+
+# Local model, media and profiling data; publish selected media deliberately.
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.mkv
+*.mp4
+.uv-cache*/
+output/
+
+# Publish only the reviewed reproduction, including on hosts excluding experiments locally.
+!/experiments/
+/experiments/*
+!/experiments/sub37/

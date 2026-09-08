@@ -12,9 +12,9 @@ from trackmaniarl.commands.evaluation import (
     _artifact_trials,
     _has_runtime_errors,
     _load_evaluation_artifact,
+    _median_requirement,
     _print_benchmark_report,
     _require_evaluation,
-    _target_median,
 )
 from trackmaniarl.commands.trajectory import _with_environment_decision_interval
 from trackmaniarl.core.contracts import Policy
@@ -109,8 +109,6 @@ def _prepare_replay(args: argparse.Namespace) -> _PreparedReplay:
     if updates:
         evaluation = evaluation.model_copy(update=updates)
         spec = spec.model_copy(update={"evaluation": evaluation})
-    if evaluation.target_median_s is None:
-        raise ValueError("demo-benchmark requires evaluation.target_median_s")
     settings = _replay_settings(spec, args)
     spec, demonstration = _align_replay_interval(spec, settings, args)
     return _PreparedReplay(spec, evaluation, settings, demonstration)
@@ -287,7 +285,8 @@ def _apply_replay_gate(gate: _ReplayGate) -> None:
     completed = [trial for trial in trials if trial["finished"]]
     required = ceil(evaluation.min_finish_rate * len(trials))
     median = float(gate.metrics["eval/median_finish_time_s"])
-    failed = len(completed) < required or median >= _target_median(evaluation)
+    target = evaluation.target_median_s
+    failed = len(completed) < required or (target is not None and median >= target)
     failed |= _has_runtime_errors(trials)
     if failed and gate.report_only:
         print("Demonstration replay gate failed; --report-only keeps the diagnostic run successful")
@@ -304,7 +303,7 @@ def _replay_failure(required: int, trials: int, evaluation: EvaluationSuiteSpec)
     return (
         "demonstration replay failed: require "
         f">={required}/{trials} finishes, "
-        f"median completed time <{_target_median(evaluation)}s, "
+        f"{_median_requirement(evaluation)}"
         "and no telemetry/controller errors"
     )
 

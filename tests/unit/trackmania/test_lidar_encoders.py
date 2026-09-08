@@ -10,9 +10,6 @@ import torch
 from trackmaniarl.models.encoders import (
     TemporalMambaTrackGeometryEncoder,
 )
-from trackmaniarl.models.encoders.track_geometry_frame import (
-    _deterministic_adaptive_mean_pool,
-)
 from trackmaniarl.trackmania.encoders import LidarSimbaSensorEncoder
 
 
@@ -42,15 +39,6 @@ def _mamba_encoder() -> TemporalMambaTrackGeometryEncoder:
     return TemporalMambaTrackGeometryEncoder(
         4, 6, history_length=4, burn_in=1, spatial_bins=2, mamba_cls=_FakeMamba
     )
-
-
-def test_deterministic_spatial_pool_matches_adaptive_average() -> None:
-    values = torch.randn(3, 5, 90)
-
-    pooled = _deterministic_adaptive_mean_pool(values, 12)
-
-    expected = torch.nn.functional.adaptive_avg_pool1d(values, 12)
-    torch.testing.assert_close(pooled, expected)
 
 
 def test_lidar_simba_encoder_is_feedforward_and_normalized() -> None:

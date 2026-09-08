@@ -20,6 +20,12 @@ STANDARD_METRICS = (
     "eval/action_latency_ms",
     "eval/controller_apply_ms",
     "eval/telemetry_wait_ms",
+    "eval/control_brake_tap_fraction",
+    "eval/step_race_time_ms_p99",
+    "eval/step_race_time_ms_max",
+    "eval/step_race_time_measurement_count",
+    "eval/step_race_time_expected_measurement_count",
+    "eval/step_race_time_measurements_valid",
     "eval/telemetry_skipped_frames_total",
     "eval/telemetry_skipped_frames_mean",
     "eval/telemetry_skipped_frames_max",
@@ -48,6 +54,11 @@ class EvaluationResult:
     steps: int = 0
     controller_apply_ms: float = 0.0
     telemetry_wait_ms: float = 0.0
+    control_brake_tap_fraction: float = 0.0
+    step_race_time_ms_p99: float = 0.0
+    step_race_time_ms_max: float = 0.0
+    step_race_time_measurement_count: int = 0
+    step_race_time_measurements_valid: bool = False
     telemetry_skipped_frames_total: int = 0
     telemetry_skipped_frames_mean: float = 0.0
     telemetry_skipped_frames_max: int = 0
@@ -95,13 +106,51 @@ def _finish_metrics(summary: _EvaluationSummary) -> dict[str, float]:
 
 
 def _step_metrics(summary: _EvaluationSummary) -> dict[str, float]:
+    metrics = _control_loop_metrics(summary)
+    metrics.update(_skipped_frame_metrics(summary))
+    return metrics
+
+
+def _control_loop_metrics(summary: _EvaluationSummary) -> dict[str, float]:
     values = summary.values
     steps = summary.total_steps
-    skipped = summary.skipped_frames
     return {
         "eval/action_latency_ms": _step_weighted_mean(values, "action_latency_ms", steps),
         "eval/controller_apply_ms": _step_weighted_mean(values, "controller_apply_ms", steps),
         "eval/telemetry_wait_ms": _step_weighted_mean(values, "telemetry_wait_ms", steps),
+        "eval/control_brake_tap_fraction": _step_weighted_mean(
+            values, "control_brake_tap_fraction", steps
+        ),
+        **_step_race_time_metrics(values, steps),
+    }
+
+
+def _step_race_time_metrics(values: list[EvaluationResult], steps: int) -> dict[str, float]:
+    return {
+        "eval/step_race_time_ms_p99": max(item.step_race_time_ms_p99 for item in values),
+        "eval/step_race_time_ms_max": max(item.step_race_time_ms_max for item in values),
+        "eval/step_race_time_measurement_count": float(
+            sum(item.step_race_time_measurement_count for item in values)
+        ),
+        "eval/step_race_time_expected_measurement_count": float(steps),
+        "eval/step_race_time_measurements_valid": float(_step_race_time_measurements_valid(values)),
+    }
+
+
+def _step_race_time_measurements_valid(values: list[EvaluationResult]) -> bool:
+    return all(
+        item.steps > 0
+        and item.step_race_time_measurements_valid
+        and item.step_race_time_measurement_count == item.steps
+        for item in values
+    )
+
+
+def _skipped_frame_metrics(summary: _EvaluationSummary) -> dict[str, float]:
+    values = summary.values
+    steps = summary.total_steps
+    skipped = summary.skipped_frames
+    return {
         "eval/telemetry_skipped_frames_total": float(skipped),
         "eval/telemetry_skipped_frames_mean": skipped / steps if steps else 0.0,
         "eval/telemetry_skipped_frames_max": float(

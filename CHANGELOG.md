@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.2.0 - Unreleased
+
+- Make the generated Trackmania project use generic own-map paths, explicit
+  School Mode finish handling and no map-specific lap-time target.
+- Add full-window benchmark recording, append-only trial timelines and unique
+  benchmark output directories. Time targets are optional; strict telemetry
+  rejection fails the series without removing attempts from statistics.
+- Move map-specific V108 controllers into repository-only `experiments/sub37`.
+  Preserve their historical results, portable trial evidence and media provenance.
+- Publish a complete own-map quick start, reward reference, architecture,
+  troubleshooting, support matrix and recording instructions.
+- Remove training-checkpoint 1.0 loading, columnar-v1 replay loading and private
+  CLI helper re-exports. Keep current graph/recovery implementation dependencies.
+- Audit and trim redundant tests; run the supported suite by default instead of
+  selecting only ten marked checks. Preserve behavior and data-integrity regressions.
+
+
+- Add guarded human-recovery recording and auditable recovery-adapter
+  fine-tuning, including reproducible stratified train/validation splits that
+  preserve left/right recovery coverage whenever the input data allows it.
+- Add Graph IQN V3--V6 experiment specifications and the zero-gated residual
+  GRU temporal core for comparing graph and recurrent value-model variants.
+- Make demonstration objectives safe for ordinary replay rows whose action mask
+  excludes the sampled action, preventing inactive auxiliary losses from
+  producing NaNs.
+- Make local and distributed runtime gates require finite, positive physical
+  race-clock measurements for every evaluated control step; incomplete or
+  inconsistent actor timing evidence can no longer promote a checkpoint.
+- Add mean-time and maximum step race-clock promotion targets, controller brake
+  pulse and cadence observability, and matching soak-benchmark verification.
+- Make published extras honest about the pinned virtual-gamepad fork: generated
+  Trackmania projects now declare and pin it directly, while existing projects
+  receive an explicit installation path instead of an unsafe implicit resolver
+  choice.
+- Show the V108 best-attempt animation in the README with explicit map-specific
+  controller and clock-source attribution; retain the illustrative V107C material
+  in the Trackmania guide. Include GIF documentation assets in source archives.
+
 ## 1.1.0 - 2026-09-04
 
 - Require RunSpec API 2.0 and compose discrete value models from a frame-only

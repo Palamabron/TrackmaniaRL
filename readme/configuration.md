@@ -5,7 +5,7 @@ Pydantic as RunSpec 2.0, rejects unknown fields and NaN/Inf, then resolves each
 `module:attribute` component from the local environment. It is executable
 configuration: use only files and extension packages you trust.
 
-Start with the [generated Trackmania project](../README.md#install-and-create-an-agent)
+Start with the [generated Trackmania project](../README.md#install-and-create-your-project)
 for a real run. The complete, game-free
 [`builtin-smoke.yaml`](examples/builtin-smoke.yaml) is kept under test and can
 be checked without Trackmania:
@@ -142,7 +142,10 @@ Map IDs are unique and every path is bound into evaluation provenance.
 | `trials_per_map` | `1` | Closed-loop attempts per map. |
 | `time_buckets_s` | `[40,38,36]` s | Positive strict finish-time thresholds used for rates. |
 | `target_median_s` | null | Positive release target; BC's mandatory gate fails when absent unless `--report-only` is explicit. |
+| `target_mean_s` | null | Optional positive mean-time target. When configured, reliable checkpoint promotion and the benchmark gate require the completed-lap mean to be strictly below it. |
+| `max_step_race_time_ms` | null | Optional positive runtime-health target. Reliable promotion, the benchmark and soak verification require a finite, positive race-clock measurement for every evaluated control step and the largest observed step to be at most this value. It does not gate on render-rate packets discarded by latest-frame draining. |
 | `min_finish_rate` | `.9` | Required fraction in `[0,1]`. |
+| `reject_telemetry_skips` | `false` | Fail the entire benchmark when any trial skips producer frames; keep every trial in the report. |
 
 Each `maps[]` item has an immutable local asset identity:
 
@@ -164,6 +167,7 @@ The paths below are under `components.environment.kwargs.config`.
 | --- | --- | --- |
 | `host`, `port`, `session_port` | `127.0.0.1`, `9000`, `9001` | OpenPlanet telemetry/control and session endpoints. |
 | `timeout_s`, `start_timeout_s`, `start_poll_s`, `reset_settle_s` | `10`, `15`, `.01`, `0` s | I/O timeout, start deadline, polling cadence and optional post-reset wait. |
+| `start_race_time_ms` | `0` ms | Optional lower bound on the first observation after a detected restart. Experimental timing alignment; not used in the V108 confirmation. |
 | `confirm_finish_before_reset` | `true` | Send Enter before reset for normal play result screens; set `false` when School Mode requires editor validation. |
 | `restart_input` | `gamepad` | With gamepad driving, use its Give Up binding, `keyboard` Delete, or the `editor_validation` Delete/Improve sequence. |
 | `action_repeat_frames` | `4` | Native telemetry frames per decision, `1..20`. Must be `1` when `decision_interval_ms` is set. |
@@ -340,7 +344,9 @@ trackmaniarl resume RUN.yaml CHECKPOINT [--reset-replay]
 trackmaniarl learner RUN.yaml --bind 127.0.0.1:8787
 trackmaniarl actor RUN.yaml --connect 127.0.0.1:8787 [--actor-id ID]
 trackmaniarl smoke RUN.yaml --transitions 100
-trackmaniarl benchmark RUN.yaml CHECKPOINT
+trackmaniarl benchmark RUN.yaml CHECKPOINT [--target-mean SECONDS] [--max-step-race-time-ms MILLIS]
+trackmaniarl recovery-finetune RUN.yaml CHECKPOINT --recovery FILE_OR_DIRECTORY
+trackmaniarl track record-recovery OUTPUT --config RUN.yaml --checkpoint CHECKPOINT
 ```
 
 Use `trackmaniarl COMMAND --help` as the syntax authority. The

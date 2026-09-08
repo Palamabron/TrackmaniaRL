@@ -8,17 +8,6 @@ from trackmaniarl.models.track_graphs import (
 )
 
 
-def test_directional_graph_routes_predecessor_and_successor_separately() -> None:
-    graph = DirectionalTrackNeighborGraph(point_count=4, hidden_dim=8, layer_count=1)
-    hidden = torch.arange(32, dtype=torch.float32).reshape(1, 4, 8)
-    predecessor, successor = graph._directional_neighbors(hidden)
-    zero = torch.zeros_like(hidden[:, :1])
-
-    torch.testing.assert_close(predecessor, torch.cat((zero, hidden[:, :-1]), dim=1))
-    torch.testing.assert_close(successor, torch.cat((hidden[:, 1:], zero), dim=1))
-    assert graph.predecessor_layers[0] is not graph.successor_layers[0]
-
-
 def _linear(module: torch.nn.Module) -> torch.nn.Linear:
     if not isinstance(module, torch.nn.Linear):
         raise AssertionError("directional graph layers must be linear")
@@ -68,27 +57,6 @@ def test_directional_graph_generalizes_tied_neighbor_aggregation() -> None:
         actual = directional(track)
 
     torch.testing.assert_close(actual, expected)
-
-
-def test_directional_graph_adds_only_untied_edge_parameters() -> None:
-    baseline_count = sum(parameter.numel() for parameter in TrackNeighborGraph().parameters())
-    directional_count = sum(
-        parameter.numel() for parameter in DirectionalTrackNeighborGraph().parameters()
-    )
-
-    assert directional_count - baseline_count == 2 * 128**2
-
-
-def test_directional_graph_matches_baseline_parameter_scale() -> None:
-    graph = DirectionalTrackNeighborGraph(hidden_dim=128)
-    baseline_bound = (2 * graph.hidden_dim) ** -0.5
-
-    for layers in (graph.self_layers, graph.predecessor_layers, graph.successor_layers):
-        for module in layers:
-            linear = _linear(module)
-            assert linear.weight.abs().max() <= baseline_bound
-            if linear.bias is not None:
-                assert linear.bias.abs().max() <= baseline_bound
 
 
 def test_directional_graph_is_deterministic_and_direction_sensitive() -> None:

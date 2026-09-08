@@ -22,6 +22,7 @@ _SEQUENCE_PRIORITY_MAX_WEIGHT = 0.9
 _OBJECTIVE_POSITION_KEYS = (
     "demo_flags",
     "expert_demo_flags",
+    "demonstration_progress_fractions",
     "demonstration_steering_switches",
     "demonstration_steering_switch_distances",
 )

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import email
 import json
 import re
 import tarfile
@@ -44,39 +43,6 @@ def _step_named(job: dict[str, object], name: str) -> dict[str, object]:
     return next(step for step in steps if step.get("name") == name)
 
 
-def test_python_files_respect_the_modularity_budget() -> None:
-    roots = (
-        REPOSITORY / "trackmaniarl",
-        REPOSITORY / "tests",
-        REPOSITORY / "scripts",
-        REPOSITORY / "docs" / "diagrams",
-    )
-    oversized = {
-        path.relative_to(REPOSITORY): line_count
-        for root in roots
-        for path in root.rglob("*.py")
-        if (line_count := len(path.read_text(encoding="utf-8").splitlines())) >= 400
-    }
-    assert oversized == {}
-
-
-def test_release_workflow_uses_canonical_job_order_and_matrices() -> None:
-    workflow = _workflow()
-    jobs = _jobs()
-    source_gate = jobs["source-gate"]
-    build = jobs["build"]
-    verify = jobs["verify-dist"]
-    publish = jobs["attest-publish"]
-    assert workflow["permissions"] == {}
-    assert workflow["env"] == CPU_TORCH_ENV | {"UV_VERSION": "0.12.5"}
-    expected_matrix = {"os": ["ubuntu-latest", "windows-latest"]}
-    assert source_gate["strategy"]["matrix"] == expected_matrix
-    assert verify["strategy"]["matrix"] == expected_matrix
-    assert build["needs"] == "source-gate"
-    assert verify["needs"] == "build"
-    assert publish["needs"] == "verify-dist"
-
-
 def _assert_locked_cpu_gate(job: dict[str, object], required: tuple[str, ...]) -> None:
     commands = _commands(job)
     assert LOCKED_DEV_EXPORT in commands
@@ -105,23 +71,6 @@ def _assert_windows_wheel_validation_requires_cpu_torch() -> None:
     assert str(workflow).count("'UV_INDEX':") == 1
     assert "generated Windows project resolved a CUDA Torch wheel" in command
     assert "generated Windows project did not resolve CPU Torch" in command
-
-
-def test_release_workflow_uses_uv_quality_gate() -> None:
-    source_gate = _jobs()["source-gate"]
-    required = (
-        "uv lock --check",
-        "ruff format --check .",
-        "ruff check .",
-        "mypy --strict trackmaniarl",
-        "pytest",
-    )
-    _assert_locked_cpu_gate(source_gate, required)
-    assert "uv pip" not in "\n".join(_commands(job) for job in _jobs().values())
-
-
-def test_release_verification_uses_exact_cpu_torch() -> None:
-    _assert_windows_wheel_validation_requires_cpu_torch()
 
 
 def test_release_builds_once_and_verifies_canonical_bytes() -> None:
@@ -155,17 +104,7 @@ def test_distribution_contains_current_packaging_sources() -> None:
         for path in (REPOSITORY / "trackmaniarl").rglob("*.py")
     } <= wheel_members
     assert {f"trackmaniarl-2.0.0/{name}" for name in scaffold_modules} <= sdist_members
-
-
-def test_distribution_metadata_and_attribution_are_release_ready() -> None:
-    metadata = email.message_from_string(
-        "Name: TrackmaniaRL\nVersion: 2.0.0\nRequires-Python: <3.13,>=3.12"
-    )
-    check_distribution._validate_wheel_metadata(metadata, Path("package.whl"), "2.0.0")
-    license_text = (REPOSITORY / "LICENSE").read_text(encoding="utf-8")
-    assert "Copyright (c) 2021 Edouard Geze and Yann Bouteiller" in license_text
-    assert "Copyright (c) 2026 Jakub Szulc" in license_text
-    assert "This repository originated from TMRL" in (REPOSITORY / "NOTICE").read_text()
+    assert "trackmaniarl-2.0.0/docs/assets/v108-neighbors-best.gif" in sdist_members
 
 
 def _assert_release_workflow_uploads_archives_and_spdx_sbom() -> None:

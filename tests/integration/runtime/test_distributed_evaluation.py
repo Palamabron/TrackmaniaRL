@@ -23,8 +23,27 @@ from trackmaniarl.distributed.actor_evaluation import EvaluationPlan, _evaluatio
 from trackmaniarl.distributed.actor_requests import EvaluationEpisodeRequest
 from trackmaniarl.distributed.coordinator import Coordinator
 from trackmaniarl.distributed.coordinator_checkpoint import EvaluationCheckpointKind
+from trackmaniarl.distributed.coordinator_evaluation import _evaluation_batch_stats
 from trackmaniarl.distributed.coordinator_support import _Counters
 from trackmaniarl.distributed.coordinator_validation import _validate_evaluation_summary
+
+_INVALID_OBSERVABILITY_METRICS: tuple[dict[str, object], ...] = (
+    {"steps": -1},
+    {"steps": 1.5},
+    {"steps": 1, "controller_apply_ms_mean": -0.1},
+    {"steps": 1, "timing/step_race_ms_max": -0.1},
+    {"steps": 1, "timing/step_race_ms_p99": 60.0, "timing/step_race_ms_max": 50.0},
+    {"steps": 1, "timing/step_race_measurement_count": 0.5},
+    {
+        "steps": 1,
+        "timing/step_race_measurement_count": 0.0,
+        "timing/step_race_measurements_valid": 1.0,
+    },
+    {"steps": 1, "control/brake_tap_fraction": 1.1},
+    {"steps": 1, "telemetry_steps_with_skipped_frames_fraction": 1.1},
+    {"steps": 1, "telemetry_skipped_frames_total": 0.5},
+    {"steps": 1, "telemetry_skipped_frames_total": 1.0, "telemetry_skipped_frames_max": 2.0},
+)
 
 
 def test_external_stop_does_not_ingest_or_train_a_queued_backlog(tmp_path: Path) -> None:
@@ -173,6 +192,11 @@ def _assert_evaluation_observability(summary: dict[str, Any]) -> None:
     assert summary["action_latency_ms"] == pytest.approx(2.5)
     assert summary["controller_apply_ms"] == pytest.approx(3.5)
     assert summary["telemetry_wait_ms"] == pytest.approx(6.5)
+    assert summary["step_race_time_ms_p99"] == 58.0
+    assert summary["step_race_time_ms_max"] == 75.0
+    assert summary["step_race_time_measurement_count"] == 40.0
+    assert summary["step_race_time_expected_measurement_count"] == 40.0
+    assert summary["step_race_time_measurements_valid"] == 1.0
     assert summary["telemetry_skipped_frames_total"] == 5.0
     assert summary["telemetry_skipped_frames_mean"] == pytest.approx(0.125)
     assert summary["telemetry_skipped_frames_max"] == 3.0
@@ -200,18 +224,50 @@ def _assert_best_evaluation(
 
 
 def test_evaluation_summary_rejects_invalid_observability_metrics() -> None:
-    invalid_metrics = (
-        {"steps": -1},
-        {"steps": 1.5},
-        {"steps": 1, "controller_apply_ms_mean": -0.1},
-        {"steps": 1, "telemetry_steps_with_skipped_frames_fraction": 1.1},
-        {"steps": 1, "telemetry_skipped_frames_total": 0.5},
-        {"steps": 1, "telemetry_skipped_frames_total": 1.0, "telemetry_skipped_frames_max": 2.0},
+    for invalid in _INVALID_OBSERVABILITY_METRICS:
+        _assert_invalid_evaluation_summary(invalid)
+
+
+def _assert_invalid_evaluation_summary(invalid: dict[str, object]) -> None:
+    summary = {"finished": 0.0, "finish_time_s": 0.0, "policy_version": 0, **invalid}
+    with pytest.raises((TypeError, ValueError)):
+        _validate_evaluation_summary(summary)
+
+
+@pytest.mark.parametrize(("finished", "finish_time_s"), [(1.0, 0.0), (1.0, -1.0), (0.0, 36.0)])
+def test_evaluation_summary_rejects_incoherent_outcomes(
+    finished: float, finish_time_s: float
+) -> None:
+    with pytest.raises(ValueError, match="evaluation finish_time_s"):
+        _validate_evaluation_summary(
+            {"finished": finished, "finish_time_s": finish_time_s, "policy_version": 0, "steps": 0}
+        )
+
+
+def test_evaluation_summary_accepts_boolean_timing_validity() -> None:
+    _validate_evaluation_summary(
+        {
+            "finished": False,
+            "finish_time_s": 0.0,
+            "policy_version": 0,
+            "steps": 1,
+            "timing/step_race_ms_max": 50.0,
+            "timing/step_race_measurement_count": 1.0,
+            "timing/step_race_measurements_valid": True,
+        }
     )
-    for invalid in invalid_metrics:
-        summary = {"finished": 0.0, "finish_time_s": 0.0, "policy_version": 0, **invalid}
-        with pytest.raises((TypeError, ValueError)):
-            _validate_evaluation_summary(summary)
+
+
+def test_legacy_actor_summary_without_timing_metadata_is_runtime_gate_ineligible() -> None:
+    summary = _finished_evaluation(36.0)
+    summary.pop("timing/step_race_measurement_count")
+    summary.pop("timing/step_race_measurements_valid")
+
+    stats = _evaluation_batch_stats([summary], (40.0,))
+
+    assert stats["step_race_time_measurement_count"] == 0.0
+    assert stats["step_race_time_expected_measurement_count"] == 10.0
+    assert stats["step_race_time_measurements_valid"] == 0.0
 
 
 def test_evaluation_stop_requires_consecutive_successful_batches() -> None:

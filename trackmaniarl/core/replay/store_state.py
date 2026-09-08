@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 
 _STATE_FORMAT = "columnar-v2"
-_LEGACY_STATE_FORMAT = "columnar-v1"
 _BASE_STATE_FIELDS = frozenset(
     {
         "format",
@@ -132,11 +131,10 @@ def load_state_dict(store: InMemoryReplayStore, state: Mapping[str, Any]) -> Non
 def _validate_state(state: Mapping[str, Any]) -> None:
     _require_fields(state, _BASE_STATE_FIELDS, "replay checkpoint")
     state_format = state["format"]
-    if state_format not in {_STATE_FORMAT, _LEGACY_STATE_FORMAT}:
+    if state_format != _STATE_FORMAT:
         raise ValueError(f"unsupported replay checkpoint format: {state['format']!r}")
-    if state_format == _STATE_FORMAT:
-        _require_fields(state, frozenset({"episode_sampling_paces"}), "replay checkpoint")
-        validate_episode_sampling_paces(state["episode_sampling_paces"])
+    _require_fields(state, frozenset({"episode_sampling_paces"}), "replay checkpoint")
+    validate_episode_sampling_paces(state["episode_sampling_paces"])
     if int(state["size"]):
         _require_fields(state, _POPULATED_STATE_FIELDS, "populated replay checkpoint")
 
@@ -201,7 +199,7 @@ def _restore_metadata(store: InMemoryReplayStore, state: Mapping[str, Any]) -> N
     store._episode_names = {int(code): str(name) for code, name in names.items()}
     store._episode_codes_by_name = {name: code for code, name in store._episode_names.items()}
     store._next_episode_code = max(store._episode_names, default=-1) + 1
-    raw_paces = state["episode_sampling_paces"] if state["format"] == _STATE_FORMAT else {}
+    raw_paces = state["episode_sampling_paces"]
     paces = cast(Mapping[str, float], raw_paces)
     store._episode_sampling_paces = dict(paces)
     store._next_overrides = dict(state["next_overrides"])

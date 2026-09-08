@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
+from datetime import UTC, datetime
 from pathlib import Path
 from statistics import median
 from time import perf_counter
@@ -23,6 +24,7 @@ from trackmaniarl.trackmania.diagnostics import (
     ProgressDiagnosticRecord,
     aggregate_progress_bins,
 )
+from trackmaniarl.trackmania.evaluation_observability import EvaluationObservability
 from trackmaniarl.trackmania.geometry import BoundaryGeometry
 from trackmaniarl.trackmania.session import PLUGIN_PROTOCOL_VERSION
 
@@ -38,6 +40,11 @@ _TRIAL_FIELDS = (
     "action_latency_ms",
     "controller_apply_ms",
     "telemetry_wait_ms",
+    "control_brake_tap_fraction",
+    "step_race_time_ms_p99",
+    "step_race_time_ms_max",
+    "step_race_time_measurement_count",
+    "step_race_time_measurements_valid",
     "telemetry_skipped_frames_total",
     "telemetry_skipped_frames_mean",
     "telemetry_skipped_frames_max",
@@ -61,12 +68,7 @@ class _EpisodeRequest:
 
 @dataclass(slots=True)
 class _EpisodeState:
-    action_latency_ms: float = 0.0
-    controller_apply_ms: float = 0.0
-    telemetry_wait_ms: float = 0.0
-    telemetry_skipped_frames_total: int = 0
-    telemetry_skipped_frames_max: int = 0
-    telemetry_steps_with_skipped_frames: int = 0
+    observability: EvaluationObservability = field(default_factory=EvaluationObservability)
     reward_sum: float = 0.0
     steps: int = 0
     finished: bool = False
@@ -194,10 +196,32 @@ class TrackmaniaEvaluator:
             if request.trial_index == 0:
                 self._prewarm_policy(request)
                 context.started = perf_counter()
+            self._write_trial_event(request, "start")
             self._run_episode(request, context, state)
         except (TimeoutError, ConnectionError) as exc:
             state.telemetry_error = f"{type(exc).__name__}: {exc}"
-        return self._episode_result(_EpisodeOutcome(request, context, state))
+        result = self._episode_result(_EpisodeOutcome(request, context, state))
+        self._write_trial_event(request, "end", result)
+        return result
+
+    def _write_trial_event(
+        self, request: _EpisodeRequest, event: str, result: EvaluationResult | None = None
+    ) -> None:
+        if self.run_dir is None:
+            return
+        self.run_dir.mkdir(parents=True, exist_ok=True)
+        with (self.run_dir / "evaluation-timeline.jsonl").open("a", encoding="utf-8") as file:
+            json.dump(
+                {
+                    "utc": datetime.now(UTC).isoformat(),
+                    "event": event,
+                    "map_id": request.map_spec.id,
+                    "trial_index": request.trial_index,
+                    "result": None if result is None else asdict(result),
+                },
+                file,
+            )
+            file.write("\n")
 
     def _episode_context(self, request: _EpisodeRequest) -> _EpisodeContext:
         diagnostics = ProgressBinDiagnostics(_policy_action_count(request.policy), bin_count=20)
@@ -262,7 +286,7 @@ class TrackmaniaEvaluator:
         )
 
     def _record_step(self, loop: _EpisodeLoop, state: _EpisodeState, step: _EvaluatedStep) -> bool:
-        self._record_step_timings(state, step)
+        state.observability.record(step.info, step.action_duration_ms)
         record = ProgressDiagnosticRecord(
             float(step.info.get("progress_pct", state.progress_pct)),
             step.action,
@@ -276,16 +300,6 @@ class TrackmaniaEvaluator:
         state.steps += 1
         self._record_outcome(state, step.info)
         return step.terminated or step.truncated
-
-    @staticmethod
-    def _record_step_timings(state: _EpisodeState, step: _EvaluatedStep) -> None:
-        state.action_latency_ms += step.action_duration_ms
-        state.controller_apply_ms += float(step.info.get("controller_apply_ms", 0.0))
-        state.telemetry_wait_ms += float(step.info.get("telemetry_wait_ms", 0.0))
-        skipped_frames = int(step.info.get("telemetry_skipped_frames", 0))
-        state.telemetry_skipped_frames_total += skipped_frames
-        state.telemetry_skipped_frames_max = max(state.telemetry_skipped_frames_max, skipped_frames)
-        state.telemetry_steps_with_skipped_frames += int(skipped_frames > 0)
 
     @staticmethod
     def _record_outcome(state: _EpisodeState, info: dict[str, Any]) -> None:
@@ -316,7 +330,7 @@ class TrackmaniaEvaluator:
             finish_time_s=(state.finish_time_s or elapsed_s) if state.finished else None,
             crashed=state.crashed,
             reward=state.reward_sum,
-            action_latency_ms=state.action_latency_ms / max(state.steps, 1),
+            action_latency_ms=state.observability.mean_action_latency_ms(state.steps),
             throughput_fps=state.steps / elapsed_s if elapsed_s > 0.0 else 0.0,
             progress_pct=state.progress_pct,
         )
@@ -335,22 +349,7 @@ class TrackmaniaEvaluator:
             progress_bins=context.diagnostics.summary(),
             steps=state.steps,
         )
-        return self._telemetry_result(identified, state)
-
-    @staticmethod
-    def _telemetry_result(result: EvaluationResult, state: _EpisodeState) -> EvaluationResult:
-        steps = max(state.steps, 1)
-        return replace(
-            result,
-            controller_apply_ms=state.controller_apply_ms / steps,
-            telemetry_wait_ms=state.telemetry_wait_ms / steps,
-            telemetry_skipped_frames_total=state.telemetry_skipped_frames_total,
-            telemetry_skipped_frames_mean=state.telemetry_skipped_frames_total / steps,
-            telemetry_skipped_frames_max=state.telemetry_skipped_frames_max,
-            telemetry_steps_with_skipped_frames_fraction=(
-                state.telemetry_steps_with_skipped_frames / steps
-            ),
-        )
+        return state.observability.annotated_result(identified, state.steps)
 
     @staticmethod
     def _close_environment(environment: Any) -> None:
