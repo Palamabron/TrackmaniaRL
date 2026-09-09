@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.4 - 2026-09-09
+
+- Add first-party telemetry SAC, REDQ and stable discrete SAC models and generate
+  complete SAC, REDQ, TQC and stable discrete SAC RunSpecs.
+- Verify actor-critic training, resume and evaluation, graph recovery archive
+  loading through selected-policy evaluation, DAgger collection through BC
+  training, synthetic recovery consumption and persisted trajectory search.
+- Document supported public workflow contracts consistently. Keep research
+  provenance and explicit runtime limits separate from feature maturity.
+- Close DAgger logging even if environment cleanup fails.
+- Include the vision extra in release-archive metadata validation and verify the
+  validator stays aligned with declared package extras.
+
+- Support camera observations with RGB preprocessing, episode-local frame stacks,
+  a composable CNN encoder, a PPO vision model and optional desktop capture.
+- Generate telemetry and vision PPO configurations with the Trackmania project.
+  Document PPO as a supported local on-policy training and resume workflow.
+- Reject invalid PPO samplers and undersized rollout buffers. Preserve terminal
+  flags when preparing PPO batches containing time-limit truncations.
+- Expand the architecture, configuration and troubleshooting guides for vision
+  and PPO, add a documentation reading guide and align current docs with 1.2.4.
+
 ## 1.2.3 - 2026-09-09
 
 - Declare the SVG namespace used by formula glyphs so standalone images render

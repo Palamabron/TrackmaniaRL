@@ -64,6 +64,7 @@ def main() -> None:
         )
         _run([*cli, "inspect-config", "run.yaml"], starter)
         _run([*cli, "validate", "run.yaml"], starter)
+        _validate_game_configurations(work / "game")
         invalid = subprocess.run(
             [*cli, "unknown-command"],
             cwd=work,
@@ -80,10 +81,44 @@ def main() -> None:
                     "templates": 2,
                     "inspect": True,
                     "starter_validation": True,
+                    "game_configurations_validated": 7,
                     "invalid_command_exit": 2,
                 }
             )
         )
+
+
+def _validate_game_configurations(directory: Path) -> None:
+    from trackmaniarl.core.runtime import resolve_run
+    from trackmaniarl.core.runtime_validation import validate_resolved_run
+    from trackmaniarl.core.spec import RunSpec
+
+    for name in (
+        "run",
+        "run-sac",
+        "run-redq",
+        "run-tqc",
+        "run-discrete-sac",
+        "run-ppo",
+        "run-ppo-vision",
+    ):
+        spec = RunSpec.from_yaml(directory / f"{name}.yaml")
+        # Keep shipped models and wiring, bound only the offline smoke workload.
+        training = spec.training.model_copy(
+            update={"batch_size": 2, "n_step": 1, "sequence_length": 4 if "ppo" in name else 1}
+        )
+        learner = spec.components.learner
+        execution = {"device": "cpu", "precision": "float32"}
+        learner = learner.model_copy(update={"kwargs": {**learner.kwargs, "execution": execution}})
+        components = spec.components.model_copy(update={"learner": learner})
+        run = resolve_run(
+            spec.model_copy(update={"training": training, "components": components}),
+            base_dir=directory,
+        )
+        try:
+            validate_resolved_run(run)
+        finally:
+            run.logger.close()
 
 
 if __name__ == "__main__":

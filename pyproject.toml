@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "TrackmaniaRL"
-version = "1.2.3"
+version = "1.2.4"
 description = "Reinforcement-learning library for training agents in Trackmania 2020"
 readme = "README.md"
 license = "MIT"
@@ -42,6 +42,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+vision = ["mss>=10.0,<11"]
 orchestrator = [
     "google-genai>=2.2.0",
     "optuna>=3.0",
@@ -62,6 +63,7 @@ mamba = [
     "mamba-ssm>=2.2; sys_platform == 'linux'",
 ]
 all = [
+    "mss>=10.0,<11",
     "google-genai>=2.2.0",
     "optuna>=3.0",
     "libevdev>=0.13; sys_platform == 'linux'",
@@ -228,5 +230,7 @@ module = [
     "wandb.*",
     "zstandard",
     "zstandard.*",
+    "mss",
+    "mss.*",
 ]
 ignore_missing_imports = true

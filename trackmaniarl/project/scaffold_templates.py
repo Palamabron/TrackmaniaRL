@@ -131,6 +131,31 @@ The `openplanet` directory is a developer-reference source snapshot, not a
 second plugin installation path. Do not run its loose script alongside the
 managed Plugin Manager installation.
 
+## Actor-critic configurations
+
+`run-sac.yaml`, `run-redq.yaml` and `run-tqc.yaml` provide continuous telemetry
+actor-critic models. `run-discrete-sac.yaml` uses a categorical actor with the
+78-action table. Configure your map in the selected file and use that filename
+for validation, training, resume and benchmarking. No custom model code is required.
+
+## PPO and camera vision
+
+`run-ppo.yaml` selects supported local on-policy PPO with telemetry.
+`run-ppo-vision.yaml` selects PPO with a CNN and four grayscale 84x84 camera frames.
+Set map UIDs and paths in the configuration you use. For camera training, install
+`uv add "trackmaniarl[trackmania,distributed,vision]"`, set the `capture` rectangle
+to the visible game viewport, and keep that viewport unobstructed.
+
+```powershell
+uv run trackmaniarl validate run-ppo-vision.yaml
+uv run trackmaniarl train run-ppo-vision.yaml
+```
+
+PPO runs locally and uses fresh fixed-length rollouts. Its total transition budget
+must be divisible by `sequence_length`. Telemetry and geometry still supply rewards
+and race termination when the policy uses vision. Camera capture and telemetry
+are sampled sequentially, not from an atomic game-engine snapshot.
+
 ## Optional Weights & Biases logging
 
 The generated run writes local JSONL logs only. To opt in to W&B, add the extra
@@ -147,7 +172,7 @@ components:
       kwargs: {project: my-trackmania-agent}
 ```
 
-Set `WANDB_API_KEY` in your private environment; never commit it.
+Set `WANDB_API_KEY` in your private environment. Never commit it.
 """
 
 

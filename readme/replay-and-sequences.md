@@ -1,7 +1,7 @@
 # Replay, n-step returns and recurrent sequences
 
 Replay is an explicit RunSpec component. `InMemoryReplayStore` owns transition
-storage and episode links; a sampler decides which eligible IDs become a
+storage and episode links. A sampler decides which eligible IDs become a
 `TrainingBatch`. The learner returns optional priority feedback. This separation
 keeps uniform, prioritized, recurrent and demonstration-aware experiments
 comparable without changing the environment.
@@ -24,11 +24,11 @@ See [algorithms](algorithms.md) for learner compatibility and
 | `PrioritizedSampler` | Proportional PER with replacement, optional uniform mixture and expert strata | Yes, with `InMemoryReplayStore` | Applied | Recommended value-learning replay |
 | `SequenceSampler` | Uniform complete contiguous windows without replacement | Required, length at least 2 | Ignored | Recurrent ablation without PER |
 | `DemoMixSampler` | Explicit bounded demo/online counts without replacement | `sequence_length=1` only | Ignored | Simple demonstration mixing |
-| `OnPolicySequenceSampler` | Latest complete contiguous rollout | Yes; batch size 1, n-step 1 | Ignored | PPO only |
+| `OnPolicySequenceSampler` | Latest complete contiguous rollout | Yes, batch size 1, n-step 1 | Ignored | PPO only |
 
 `InMemoryReplayStore` is a fixed-capacity ring with stable transition IDs,
 episode and step links, an incremental eligibility index and an append revision.
-Demonstration transitions are protected from ordinary online eviction; a store
+Demonstration transitions are protected from ordinary online eviction. A store
 whose capacity cannot keep them safely raises instead of silently deleting
 them.
 
@@ -45,7 +45,7 @@ where `k <= n`. A true terminal sets the bootstrap discount to zero. A
 truncation ends the stored episode but retains the bootstrap convention carried
 by the transition batch. A horizon may end early at either boundary and never
 continues into the next episode. A non-terminal start is eligible only when its
-required continuation exists; this prevents a still-arriving rollout tail from
+required continuation exists. This prevents a still-arriving rollout tail from
 being trained as if it were terminal.
 
 `training.n_step` is a positive integer and `training.gamma` is in `[0, 1]`.
@@ -59,10 +59,10 @@ same gamma from the `BatchRequest`.
 | --- | --- | --- |
 | `InMemoryReplayStore` | `capacity=100000` | Positive number of resident transitions. FIFO eviction preserves protected demonstrations only while they occupy less than half the store. |
 | `UniformSampler` | `seed=RunSpec.seed` | Uniform eligible transition sampling. The runtime injects the feature pipeline and seed. |
-| `SequenceSampler` | `sequence_length` required; `seed=RunSpec.seed` | Uniform full-history windows. Its length must equal `training.sequence_length`. |
+| `SequenceSampler` | `sequence_length` required, `seed=RunSpec.seed` | Uniform full-history windows. Its length must equal `training.sequence_length`. |
 | `OnPolicySequenceSampler` | `seed=RunSpec.seed` | Consumes each complete PPO rollout once and rejects ordinary off-policy batches. |
-| `DemoMixSampler` | `min_demo_fraction=0`, `max_demo_fraction=1`, `seed=RunSpec.seed` | Bounds the per-batch demonstration fraction; requires `0 <= min <= max <= 1` and supports only single-step replay. |
-| `PrioritizedSampler` | fields below; `seed=RunSpec.seed` | Proportional PER, optional uniform mixing, elite boost and expert stratification; supports single steps and full recurrent histories. |
+| `DemoMixSampler` | `min_demo_fraction=0`, `max_demo_fraction=1`, `seed=RunSpec.seed` | Bounds the per-batch demonstration fraction, requires `0 <= min <= max <= 1` and supports only single-step replay. |
+| `PrioritizedSampler` | fields below, `seed=RunSpec.seed` | Proportional PER, optional uniform mixing, elite boost and expert stratification, supports single steps and full recurrent histories. |
 
 Do not put `pipeline` in YAML. The runtime injects the configured feature
 pipeline into every sampler that declares that constructor parameter.
@@ -83,18 +83,18 @@ w_i_normalized = w_i / max_batch(w)
 
 | Parameter | Type/default | Meaning and failure mode |
 | --- | --- | --- |
-| `components.sampler.kwargs.alpha` | float, `0.6` | Priority exponent. `0` is uniform; a large value concentrates training on few samples. Must be non-negative. |
-| `components.sampler.kwargs.beta` | float, `0.4` | Default importance-sampling correction. `0` disables correction; `1` fully corrects the configured sampling distribution. |
+| `components.sampler.kwargs.alpha` | float, `0.6` | Priority exponent. `0` is uniform, a large value concentrates training on few samples. Must be non-negative. |
+| `components.sampler.kwargs.beta` | float, `0.4` | Default importance-sampling correction. `0` disables correction, `1` fully corrects the configured sampling distribution. |
 | `components.sampler.kwargs.priority_epsilon` | float, `1e-6` | Positive floor added after absolute value, keeping every active item sampleable. |
-| `components.sampler.kwargs.uniform_mix` | float, `0.0` | Probability-mixture weight in `[0, 1]`; prevents complete priority concentration but weakens prioritization. |
+| `components.sampler.kwargs.uniform_mix` | float, `0.0` | Probability-mixture weight in `[0, 1]`, prevents complete priority concentration but weakens prioritization. |
 | `training.beta` | float or null, `null` | Per-run override. When set, it takes precedence over sampler `beta` in every batch. |
-| `training.per_beta_final` | float or null, `null` | Final beta in `[0, 1]`; requires `training.beta`. |
+| `training.per_beta_final` | float or null, `null` | Final beta in `[0, 1]`, requires `training.beta`. |
 | `training.per_beta_anneal_transitions` | positive int or null | Linear annealing duration. If omitted, `total_transitions` is used. |
 
 New eligible transitions receive the largest priority seen so far. Stale
 updates for an evicted transition ID are ignored. Sampler RNG, priority arrays,
 eligibility frontier and store contents are checkpointed at a consistent
-learner boundary; exact resume restores them before further sampling.
+learner boundary. Exact resume restores them before further sampling.
 
 For a sequence, `DiscreteValueLearner` aggregates valid absolute TD errors as
 
@@ -114,9 +114,9 @@ These are sampling controls, not reward terms:
 | Parameter | Default | Exact effect |
 | --- | --- | --- |
 | `elite_time_s` | `null` | A transition whose `sampling/projected_lap_time_s` is at most this threshold is elite. Positive seconds. |
-| `elite_priority_boost` | `1.0` | Multiplies elite proportional weight after `p ** alpha`; must be at least 1. |
+| `elite_priority_boost` | `1.0` | Multiplies elite proportional weight after `p ** alpha`, must be at least 1. |
 | `expert_demo_time_s` | `null` | A demo transition at or below this projected-lap threshold enters the expert stratum. Positive seconds. |
-| `expert_fraction` | `0.0` | Rounded fraction of each batch drawn from the expert stratum. Requires `expert_demo_time_s`; both expert and non-expert pools must satisfy the requested counts. |
+| `expert_fraction` | `0.0` | Rounded fraction of each batch drawn from the expert stratum. Requires `expert_demo_time_s`, both expert and non-expert pools must satisfy the requested counts. |
 | `expert_fraction_final` | `null` | Optional final forced expert fraction. Configure it together with `expert_fraction_anneal_transitions`. |
 | `expert_fraction_anneal_transitions` | `null` | Number of collected online transitions over which the forced fraction changes linearly from `expert_fraction` to `expert_fraction_final`. |
 
@@ -124,7 +124,7 @@ Elite boosting composes with `uniform_mix`. When expert stratification is
 active, reported sampling probabilities include the selected stratum fraction,
 so importance weights correct the distribution that was actually used.
 After an annealed quota reaches zero, expert transitions remain protected in
-replay and may still be selected naturally by PER; they are no longer forced
+replay and may still be selected naturally by PER. They are no longer forced
 into every batch.
 
 `DemoMixSampler` is simpler: `min_demo_fraction` and `max_demo_fraction` bound
@@ -138,16 +138,16 @@ are both required.
 `training.sequence_length` is the replay time dimension. A sequence sampler
 accepts only full, unique, contiguous histories from one identified episode:
 
-- transition IDs are consecutive;
-- `episode_id` is present and unchanged;
-- `step` increments when present;
-- the preceding transition is neither terminal nor truncated;
+- transition IDs are consecutive.
+- `episode_id` is present and unchanged.
+- `step` increments when present.
+- the preceding transition is neither terminal nor truncated.
 - every learning position has its complete n-step horizon.
 
 Windows at the beginning of an episode that lack real history are ineligible.
 The recurrent samplers do not simulate context by repeating the first
 observation. Returned masks have shape `(batch, time)` and the current complete
-windows contain all `true` values; the learner still applies them to losses and
+windows contain all `true` values. The learner still applies them to losses and
 priority aggregation.
 
 `components.learner.kwargs.burn_in` reconstructs temporal context on the prefix
@@ -161,12 +161,12 @@ training.n_step < training.sequence_length
 The final window position remains a learning anchor with its own materialized
 n-step target. Intermediate learning positions stop before the unavailable
 right edge. GRU and Mamba temporal cores reconstruct state from the sampled
-observations; recurrent state is not stored in replay.
+observations. Recurrent state is not stored in replay.
 
 `components.feature_pipeline.kwargs.config.history_length` and replay sequences are
 two different ways to supply history. Runtime validation rejects both values
 above one because that would stack a history of histories. For GRU/Mamba replay
-set feature `history_length: 1`; for a feed-forward model using a fixed feature
+set feature `history_length: 1`. For a feed-forward model using a fixed feature
 stack keep `training.sequence_length: 1`.
 
 ## R2D2-style scope
@@ -179,11 +179,11 @@ Implemented similarities include distributed actors, complete recurrent replay
 windows, burn-in, n-step targets, sequence-level max/mean priorities, policy
 version metadata and soft/hard policy-lag controls. Important differences are:
 
-- recurrent states are reconstructed from observations rather than stored;
-- overlap arises from sampled windows rather than a fixed actor unroll schedule;
-- the priority mixture is `0.9 max + 0.1 mean`, not claimed paper equivalence;
+- recurrent states are reconstructed from observations rather than stored.
+- overlap arises from sampled windows rather than a fixed actor unroll schedule.
+- the priority mixture is `0.9 max + 0.1 mean`, not claimed paper equivalence.
 - signed-square-root value rescaling is available as an opt-in learner setting,
-  but the package does not claim the paper's complete rescaling setup;
+  but the package does not claim the paper's complete rescaling setup.
 - actor and learner scheduling, network architecture and optimizer defaults are
   TrackmaniaRL contracts rather than the paper's exact configuration.
 
@@ -251,10 +251,10 @@ training:
   beta: 0.4
 ```
 
-Use `trackmaniarl.models.temporal:GruTemporalCore`, or the experimental
+Use `trackmaniarl.models.temporal:GruTemporalCore`, or the optional
 `trackmaniarl.models.temporal:MambaTemporalCore`. Mamba's technique originates
 in [Mamba: Linear-Time Sequence Modeling with Selective State
-Spaces](https://arxiv.org/abs/2312.00752); the TrackmaniaRL block is a reusable
+Spaces](https://arxiv.org/abs/2312.00752). The TrackmaniaRL block is a reusable
 temporal component, not a reproduction of that paper's language-model setup.
 
 ### Demo-mixed single-step replay

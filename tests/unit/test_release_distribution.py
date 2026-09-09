@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import tarfile
+import tomllib
 import zipfile
 from pathlib import Path
 from typing import cast
@@ -20,6 +21,11 @@ CPU_TORCH_ENV = {
 }
 LOCKED_DEV_EXPORT = "uv export --quiet --locked --group dev --prune torch"
 CPU_REQUIREMENTS = "--with-requirements .ci-dev-requirements.txt"
+
+
+def test_archive_validator_accepts_every_declared_public_extra() -> None:
+    project = tomllib.loads((REPOSITORY / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    assert frozenset(project["optional-dependencies"]) == check_distribution.PUBLIC_EXTRAS
 
 
 def _workflow() -> dict[str, object]:

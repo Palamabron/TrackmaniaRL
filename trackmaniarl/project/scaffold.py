@@ -6,7 +6,12 @@ from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
 
-from trackmaniarl.project.scaffold_run_templates import _config, _trackmania_config
+from trackmaniarl.project.scaffold_run_templates import (
+    _config,
+    _trackmania_actor_critic_config,
+    _trackmania_config,
+    _trackmania_ppo_config,
+)
 from trackmaniarl.project.scaffold_templates import (
     COMPONENTS,
     _project_readme,
@@ -54,6 +59,15 @@ def _write_project_metadata(target: Path, package: str, template: str) -> None:
     (target / "README.md").write_text(_project_readme(template), encoding="utf-8")
     config = _config(package) if template == "starter" else _trackmania_config()
     (target / "run.yaml").write_text(config, encoding="utf-8")
+    if template == "trackmania":
+        (target / "run-ppo.yaml").write_text(_trackmania_ppo_config(), encoding="utf-8")
+        (target / "run-ppo-vision.yaml").write_text(
+            _trackmania_ppo_config(vision=True), encoding="utf-8"
+        )
+        for algorithm in ("sac", "redq", "tqc", "discrete-sac"):
+            (target / f"run-{algorithm}.yaml").write_text(
+                _trackmania_actor_critic_config(algorithm), encoding="utf-8"
+            )
 
 
 def _generated_pyproject(package: str, template: str) -> str:

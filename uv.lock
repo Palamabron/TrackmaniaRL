@@ -801,6 +801,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mss"
+version = "10.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/5d/eee782a6d674f562c946ae6a026f4c595ea2b7b031f290bf9fbf60da09b5/mss-10.2.0.tar.gz", hash = "sha256:ab271860775545e62f29d7b11f82f279ac1048f5bbdd26cfad84830208dbd393", size = 200317, upload-time = "2026-04-23T10:44:57.305Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f2/c3/313e14f245c79b4c05bd0f3a84a4813aa26fa10f8993aebd91d04c5fad3f/mss-10.2.0-py3-none-any.whl", hash = "sha256:e79f428899280e7e64e38365b5bfed683851ebea807eeaeadaf06eb8e0d67197", size = 67106, upload-time = "2026-04-23T10:44:56.266Z" },
+]
+
+[[package]]
 name = "mypy"
 version = "1.19.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1764,7 +1773,7 @@ wheels = [
 
 [[package]]
 name = "trackmaniarl"
-version = "1.2.3"
+version = "1.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "gymnasium" },
@@ -1784,6 +1793,7 @@ all = [
     { name = "grpcio" },
     { name = "libevdev", marker = "sys_platform == 'linux'" },
     { name = "mamba-ssm", marker = "sys_platform == 'linux'" },
+    { name = "mss" },
     { name = "optuna" },
     { name = "protobuf" },
     { name = "safetensors" },
@@ -1804,6 +1814,9 @@ orchestrator = [
 ]
 trackmania = [
     { name = "libevdev", marker = "sys_platform == 'linux'" },
+]
+vision = [
+    { name = "mss" },
 ]
 wandb = [
     { name = "wandb" },
@@ -1839,6 +1852,8 @@ requires-dist = [
     { name = "libevdev", marker = "sys_platform == 'linux' and extra == 'trackmania'", specifier = ">=0.13" },
     { name = "mamba-ssm", marker = "sys_platform == 'linux' and extra == 'all'", specifier = ">=2.2" },
     { name = "mamba-ssm", marker = "sys_platform == 'linux' and extra == 'mamba'", specifier = ">=2.2" },
+    { name = "mss", marker = "extra == 'all'", specifier = ">=10.0,<11" },
+    { name = "mss", marker = "extra == 'vision'", specifier = ">=10.0,<11" },
     { name = "numpy", specifier = ">=1.24" },
     { name = "optuna", marker = "extra == 'all'", specifier = ">=3.0" },
     { name = "optuna", marker = "extra == 'orchestrator'", specifier = ">=3.0" },
@@ -1855,7 +1870,7 @@ requires-dist = [
     { name = "wandb", marker = "extra == 'wandb'", specifier = ">=0.15.8" },
     { name = "zstandard", specifier = ">=0.23" },
 ]
-provides-extras = ["orchestrator", "trackmania", "wandb", "distributed", "mamba", "all"]
+provides-extras = ["vision", "orchestrator", "trackmania", "wandb", "distributed", "mamba", "all"]
 
 [package.metadata.requires-dev]
 dev = [

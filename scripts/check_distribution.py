@@ -27,7 +27,9 @@ SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 CORE_DEPENDENCIES = frozenset(
     {"gymnasium", "numpy", "pydantic", "pyyaml", "tensordict", "torch", "zstandard"}
 )
-PUBLIC_EXTRAS = frozenset({"all", "distributed", "mamba", "orchestrator", "trackmania", "wandb"})
+PUBLIC_EXTRAS = frozenset(
+    {"all", "distributed", "mamba", "orchestrator", "trackmania", "vision", "wandb"}
+)
 
 
 def _project_version() -> str:

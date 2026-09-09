@@ -100,6 +100,11 @@ def _validate_training_contract(spec: RunSpec, components: _TrainingComponents) 
     _validate_history_contract(spec, components.pipeline)
     if getattr(components.learner, "on_policy", False) and spec.training.n_step != 1:
         raise ValueError("on-policy training requires training.n_step=1")
+    if getattr(components.learner, "on_policy", False):
+        if not getattr(components.sampler, "on_policy_rollouts", False):
+            raise ValueError("On-policy learners require OnPolicySequenceSampler")
+        if spec.training.total_transitions % spec.training.sequence_length:
+            raise ValueError("On-policy total_transitions must be divisible by sequence_length")
 
 
 def _validate_sequence_contract(spec: RunSpec, components: _TrainingComponents) -> None:
@@ -143,9 +148,11 @@ def _validate_history_contract(spec: RunSpec, pipeline: object) -> None:
 
 
 def _validate_reward_discount(spec: RunSpec, environment_factory: object | None) -> None:
-    if environment_factory is None or (
-        type(environment_factory).__module__ != "trackmaniarl.trackmania.environment"
-        or type(environment_factory).__name__ != "OpenPlanetEnvironmentFactory"
+    from trackmaniarl.trackmania.environment import OpenPlanetEnvironmentFactory
+    from trackmaniarl.trackmania.vision_environment import VisionEnvironmentFactory
+
+    if not isinstance(
+        environment_factory, (OpenPlanetEnvironmentFactory, VisionEnvironmentFactory)
     ):
         return
     factory: Any = environment_factory

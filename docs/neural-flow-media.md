@@ -11,10 +11,10 @@ benchmark is a separate experiment.
 
 The visible branches summarize road geometry, car features and context, followed
 by residual blocks, an IQN action-value head and chosen steering/pedals. Colours
-and links summarize recorded activations; links are not individual synapses or
+and links summarize recorded activations. Links are not individual synapses or
 proof of causality. Geometry is supplied for the map, not inferred from the
 gameplay pixels. The [static model diagram](../readme/architecture.md#composed-value-model)
-explains the supported compositional API; the film depicts an opt-in graph model,
+explains the supported compositional API. The film depicts an opt-in graph model,
 not the default starter architecture.
 
 ## Reproduce the GIF
@@ -34,9 +34,9 @@ Output: **960 × 540, 9,904,640 bytes**, infinite loop.
 The requested 30 fps export uses the original MP4 frames. A four-second excerpt
 and 128-colour palette keep the asset below a deliberate 10 MiB web-media budget
 while preserving panel resolution. The earlier 8 fps export remains in ignored
-local review evidence; the MP4 is unchanged.
+local review evidence. The MP4 is unchanged.
 
-Exact conversion command (PowerShell; FFmpeg 7.1 from imageio-ffmpeg 0.6.0 on
+Exact conversion command (PowerShell. FFmpeg 7.1 from imageio-ffmpeg 0.6.0 on
 the review host):
 
 ```powershell
@@ -53,10 +53,10 @@ dithering and rectangle differencing limit animation noise and file size.
 
 Metadata inspection found codec/container identifiers, with no location,
 account, comment or title metadata. Sampled source frames across the film and
-the selected excerpt showed gameplay, clocks and model/control displays; no
+the selected excerpt showed gameplay, clocks and model/control displays. No
 private messages, credentials or account names were observed. This is a visual
 review, not a guarantee against every possible identifier in every pixel.
-The published GIF has no comment or EXIF/XMP metadata; only playback metadata
+The published GIF has no comment or EXIF/XMP metadata. Only playback metadata
 and the looping extension remain. Text alternatives and the static diagram
 provide the explanation without requiring the animation to be played.
 
@@ -64,5 +64,5 @@ The existing `rollout-v107c-clean.gif` was also recompressed in full from
 29,340,096 to 8,376,597 bytes, keeping its 320 × 176 dimensions and approximately
 37.36-second playback. The original remains in the ignored local review evidence
 directory. The conversion used the same palette/dither settings, `fps=8`, no
-scaling, no seek/trim and `-map_metadata -1`; this is illustrative gameplay,
+scaling, no seek/trim and `-map_metadata -1`. This is illustrative gameplay,
 not the neural-flow source or a new benchmark.

@@ -21,6 +21,7 @@ def _wheel_metadata(*requirements: str) -> Message:
         "Provides-Extra: mamba",
         "Provides-Extra: orchestrator",
         "Provides-Extra: trackmania",
+        "Provides-Extra: vision",
         "Provides-Extra: wandb",
         'Requires-Dist: libevdev>=0.13; sys_platform == "linux" and extra == "trackmania"',
     ]

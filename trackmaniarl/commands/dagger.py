@@ -149,9 +149,11 @@ def _dagger_collect(args: argparse.Namespace) -> None:
         _collect_dagger_samples(dagger_run)
         output = _save_dagger_samples(dagger_run)
     finally:
-        if actors is not None:
-            actors.environment.close()
-        run.logger.close()
+        try:
+            if actors is not None:
+                actors.environment.close()
+        finally:
+            run.logger.close()
     _print_dagger_summary(dagger_run, output)
 
 

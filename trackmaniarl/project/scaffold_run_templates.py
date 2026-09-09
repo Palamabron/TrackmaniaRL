@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import yaml
+
 _STARTER_CONFIG = """api_version: "2.0"
 run_id: starter
 seed: 0
@@ -131,3 +133,82 @@ training:
 
 def _trackmania_config() -> str:
     return _TRACKMANIA_CONFIG
+
+
+def _trackmania_ppo_config(*, vision: bool = False) -> str:
+    config = yaml.safe_load(_TRACKMANIA_CONFIG)
+    config["run_id"] = "trackmania-ppo-vision" if vision else "trackmania-ppo-telemetry"
+    config.pop("distributed")
+    components = config["components"]
+    components["learner"] = {
+        "class_path": "trackmaniarl.algorithms:ProximalPolicyOptimization",
+        "kwargs": {
+            "learning_rate": 3e-4,
+            "update_epochs": 10,
+            "minibatch_size": 64,
+            "normalize_observations": not vision,
+            "execution": {"device": "auto", "precision": "float32"},
+        },
+    }
+    components["model_factory"] = {
+        "class_path": "trackmaniarl.trackmania.vision_models:VisionPpoModelFactory"
+        if vision
+        else "trackmaniarl.trackmania.baseline:TelemetryPpoModelFactory"
+    }
+    components["feature_pipeline"] = {
+        "class_path": "trackmaniarl.trackmania.vision:VisionFeaturePipeline"
+        if vision
+        else "trackmaniarl.trackmania.features:TelemetryFeaturePipeline"
+    }
+    components["sampler"] = {"class_path": "trackmaniarl.core.replay:OnPolicySequenceSampler"}
+    components["replay_store"]["kwargs"] = {"capacity": 2048}
+    if vision:
+        components["environment"]["class_path"] = (
+            "trackmaniarl.trackmania.vision_environment:VisionEnvironmentFactory"
+        )
+        components["environment"]["kwargs"]["capture"] = {
+            "left": 0,
+            "top": 0,
+            "width": 1280,
+            "height": 720,
+        }
+    config["training"] = {
+        "total_transitions": 2048000,
+        "sequence_length": 2048,
+        "batch_size": 1,
+        "n_step": 1,
+        "gamma": 0.995,
+        "max_episode_steps": 4000,
+        "checkpoint_interval_updates": 10,
+    }
+    return yaml.safe_dump(config, sort_keys=False)
+
+
+def _trackmania_actor_critic_config(algorithm: str) -> str:
+    choices = {
+        "sac": ("SoftActorCritic", "actor_critic:TelemetrySacModelFactory"),
+        "redq": ("RandomizedEnsembleSAC", "actor_critic:TelemetryRedqModelFactory"),
+        "tqc": ("TruncatedQuantileCritic", "baseline:TelemetryTqcModelFactory"),
+        "discrete-sac": (
+            "StableDiscreteSoftActorCritic",
+            "actor_critic:TelemetryDiscreteSacModelFactory",
+        ),
+    }
+    if algorithm not in choices:
+        raise ValueError(f"unknown actor-critic algorithm: {algorithm}")
+    learner, model = choices[algorithm]
+    config = yaml.safe_load(_TRACKMANIA_CONFIG)
+    config["run_id"] = f"trackmania-{algorithm}-telemetry"
+    config.pop("distributed")
+    components = config["components"]
+    components["learner"] = {
+        "class_path": f"trackmaniarl.algorithms:{learner}",
+        "kwargs": {"execution": {"device": "auto", "precision": "float32"}},
+    }
+    components["model_factory"] = {"class_path": f"trackmaniarl.trackmania.{model}"}
+    components["feature_pipeline"] = {
+        "class_path": "trackmaniarl.trackmania.features:TelemetryFeaturePipeline"
+    }
+    config["training"]["batch_size"] = 256
+    config["training"]["sequence_length"] = 1
+    return yaml.safe_dump(config, sort_keys=False)

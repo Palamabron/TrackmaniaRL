@@ -1,7 +1,7 @@
 # Algorithms
 
-This page describes the algorithm implementations in the current TrackmaniaRL
-2.0 tree. It is a support contract, not a claim that a class reproduces every
+This page describes the algorithm implementations in TrackmaniaRL 1.2.4 with
+RunSpec 2.0. It is a support contract, not a claim that a class reproduces every
 detail, hyperparameter, benchmark, or result from the paper whose name it uses.
 The paper links identify the closest primary reference.
 
@@ -10,29 +10,42 @@ For new discrete-value work, use
 IQN and FQF are model compositions trained by that one learner.
 
 The YAML blocks below are deliberately labelled **fragments**. Merge the shown
-keys into a complete RunSpec 2.0 file; keep the environment, evaluator, map,
+keys into a complete RunSpec 2.0 file. Keep the environment, evaluator, map,
 geometry, logging and distributed sections from the generated project unless
 the fragment replaces them. See the [configuration guide](configuration.md),
 [replay guide](replay-and-sequences.md), [reward guide](rewards.md) and
 [imitation-learning guide](imitation-learning.md) for those shared contracts.
 
+## Generated Trackmania configurations
+
+`trackmaniarl init my-agent --template trackmania` writes `run.yaml` (IQN),
+`run-sac.yaml`, `run-redq.yaml`, `run-tqc.yaml`, `run-discrete-sac.yaml`,
+`run-ppo.yaml` and `run-ppo-vision.yaml`. Each is a complete RunSpec, not a fragment.
+Configure your own map and geometry in the file you use. Validate that file,
+then pass the same filename to `train`, `resume` and `benchmark`.
+
+SAC, REDQ and TQC use continuous gas, brake and steering. Stable discrete SAC
+uses the environment's 78-action table. Their generated feature pipeline is
+33-field telemetry. PPO has separate telemetry and camera configurations.
+The default IQN project continues to use lidar features.
+
 ## Support matrix
 
 | Algorithm | Current status and public entry point | Action and training contract | Replay and sequences | Execution | Checkpoint and warm start |
 | --- | --- | --- | --- | --- | --- |
-| Standard Q / DQN | Supported scalar composition of `DiscreteValueLearner`; built-in key `discrete_value` | Discrete indices; off-policy online RL; the learner still uses a Double-DQN target | Uniform or prioritized replay; single-step or contiguous sequences | Local and distributed | Exact v2 learner/replay/sampler resume; named composite submodule warm start |
-| Double + Dueling | Supported behavior of the unified learner plus `ScalarQHead(mode: dueling)`; not a separate class | Discrete indices; online network selects and target network evaluates | Same as scalar Q | Local and distributed | Same as unified scalar Q |
-| QR-DQN | Supported composition of `DiscreteValueLearner` | Discrete distributional value learning with fixed quantile locations | Uniform or prioritized replay; single-step or sequences | Local and distributed | Exact v2 resume and composite warm start |
-| IQN | Supported composition of `DiscreteValueLearner`; generated Trackmania default | Discrete implicit quantile value learning; optional upper-CVaR action evaluation | Uniform or prioritized replay; single-step or sequences | Local and distributed | Exact v2 resume and composite warm start |
-| FQF | Supported composition of `DiscreteValueLearner` | Discrete learned-fraction distributional value learning | Uniform or prioritized replay; single-step or sequences | Local and distributed | Exact v2 resume, fraction optimizer state and composite warm start |
-| SAC | Public learner `SoftActorCritic`; built-in key `soft_actor_critic`; custom model factory required | Continuous off-policy actor-critic | Uniform or PER; `sequence_length: 1` only | Local and distributed when the custom model is installed on every participant | Exact resume; no built-in partial warm start |
-| REDQ / randomized-ensemble SAC | Public learner `RandomizedEnsembleSAC`; built-in key `randomized_ensemble_sac`; custom model factory required | Continuous off-policy ensemble actor-critic | Uniform or PER; `sequence_length: 1` only | Local and distributed | Exact resume including target RNG/update count; no built-in partial warm start |
-| TQC | Public learner `TruncatedQuantileCritic`; built-in key `truncated_quantile_critic`; first-party telemetry factory | Continuous off-policy distributional actor-critic | Uniform or PER; `sequence_length: 1` only | Local and distributed | Exact resume including alpha; no built-in partial warm start |
-| PPO | Public learner `ProximalPolicyOptimization`; built-in key `proximal_policy_optimization`; first-party telemetry factory | Continuous on-policy GAE/PPO | Latest contiguous rollout through `OnPolicySequenceSampler` | Local `trackmaniarl train` only; distributed learner/actor rejects it | Exact local resume at restart-safe episode boundaries; no partial warm start |
-| Stable discrete SAC | **SD-SAC-inspired experimental** `StableDiscreteSoftActorCritic`; custom model factory required | Discrete off-policy categorical actor with twin all-action critics | Uniform or PER; `sequence_length: 1` only | Local and distributed | Exact resume including alpha; no built-in partial warm start |
-| Behavior cloning (BC) | Public Trackmania offline-supervised lifecycle, `BehaviorCloningLearner` | Compact discrete categorical policy; offline demonstrations/recovery data | No RL replay or WAL; deterministic lap/episode split and contiguous feature histories | Local `bc-train`; closed-loop `bc-benchmark` | `bc-latest.pt` exact resume; `bc-best-validation.pt` promotion candidate; compatible encoder/temporal tensors can warm-start unified RL |
-| DAgger | Public `dagger-collect` data-collection workflow, not a learner | Student compact discrete BC policy plus trajectory-tracking teacher | Writes weighted recovery `.npz`; feed it back to BC with `--recovery` | Local live Trackmania only | Starts from a BC checkpoint; output is a dataset, not a resumable optimizer checkpoint |
-| DQfD-style objectives | Opt-in `DemonstrationMarginObjective` and `DemonstrationCrossEntropyObjective` inside `DiscreteValueLearner`; **not full DQfD** | Discrete off-policy TD plus demo-only auxiliary losses; offline pretraining is available | Demo-aware replay flags; PER supports sequences, `DemoMixSampler` is single-step | Offline pretrain, then local or distributed off-policy RL | Unified v2 exact resume; objectives are part of the checkpoint contract |
+| Standard Q / DQN | Supported scalar composition of `DiscreteValueLearner`, built-in key `discrete_value` | Discrete indices, off-policy online RL, the learner still uses a Double-DQN target | Uniform or prioritized replay, single-step or contiguous sequences | Local and distributed | Exact v2 learner/replay/sampler resume, named composite submodule warm start |
+| Double + Dueling | Supported behavior of the unified learner plus `ScalarQHead(mode: dueling)`, not a separate class | Discrete indices, online network selects and target network evaluates | Same as scalar Q | Local and distributed | Same as unified scalar Q |
+| QR-DQN | Supported composition of `DiscreteValueLearner` | Discrete distributional value learning with fixed quantile locations | Uniform or prioritized replay, single-step or sequences | Local and distributed | Exact v2 resume and composite warm start |
+| IQN | Supported composition of `DiscreteValueLearner`, generated Trackmania default | Discrete implicit quantile value learning, optional upper-CVaR action evaluation | Uniform or prioritized replay, single-step or sequences | Local and distributed | Exact v2 resume and composite warm start |
+| FQF | Supported composition of `DiscreteValueLearner` | Discrete learned-fraction distributional value learning | Uniform or prioritized replay, single-step or sequences | Local and distributed | Exact v2 resume, fraction optimizer state and composite warm start |
+| SAC | Supported `SoftActorCritic`, built-in key `soft_actor_critic`, first-party telemetry factory | Continuous off-policy actor-critic | Uniform or PER, `sequence_length: 1` only | Local and distributed | Exact resume, no built-in partial warm start |
+| REDQ / randomized-ensemble SAC | Supported `RandomizedEnsembleSAC`, built-in key `randomized_ensemble_sac`, first-party telemetry factory | Continuous off-policy ensemble actor-critic | Uniform or PER, `sequence_length: 1` only | Local and distributed | Exact resume including target RNG/update count, no built-in partial warm start |
+| TQC | Public learner `TruncatedQuantileCritic`, built-in key `truncated_quantile_critic`, first-party telemetry factory | Continuous off-policy distributional actor-critic | Uniform or PER, `sequence_length: 1` only | Local and distributed | Exact resume including alpha, no built-in partial warm start |
+| PPO | Supported learner `ProximalPolicyOptimization`, built-in key `proximal_policy_optimization`, first-party telemetry and vision factories | Continuous on-policy GAE/PPO | Latest contiguous rollout through `OnPolicySequenceSampler` | Local `trackmaniarl train` only, distributed learner/actor rejects it | Exact local resume at restart-safe episode boundaries, no partial warm start |
+| Stable discrete SAC | Supported SD-SAC-inspired `StableDiscreteSoftActorCritic`, first-party telemetry factory | Discrete off-policy categorical actor with twin all-action critics | Uniform or PER, `sequence_length: 1` only | Local and distributed | Exact resume including alpha, no built-in partial warm start |
+| Behavior cloning (BC) | Public Trackmania offline-supervised lifecycle, `BehaviorCloningLearner` | Compact discrete categorical policy, offline demonstrations/recovery data | No RL replay or WAL, deterministic lap/episode split and contiguous feature histories | Local `bc-train`, closed-loop `bc-benchmark` | `bc-latest.pt` exact resume, `bc-best-validation.pt` promotion candidate, compatible encoder/temporal tensors can warm-start unified RL |
+| DAgger | Public `dagger-collect` data-collection workflow, not a learner | Student compact discrete BC policy plus trajectory-tracking teacher | Writes weighted recovery `.npz`, feed it back to BC with `--recovery` | Local live Trackmania only | Starts from a BC checkpoint, output is a dataset, not a resumable optimizer checkpoint |
+| DQfD-style objectives | Opt-in `DemonstrationMarginObjective` and `DemonstrationCrossEntropyObjective` inside `DiscreteValueLearner`, **not full DQfD** | Discrete off-policy TD plus demo-only auxiliary losses, offline pretraining is available | Demo-aware replay flags, PER supports sequences, `DemoMixSampler` is single-step | Offline pretrain, then local or distributed off-policy RL | Unified v2 exact resume, objectives are part of the checkpoint contract |
 
 “Distributed” in the table means the off-policy learner exposes a replicable
 policy and can use `trackmaniarl learner`/`trackmaniarl actor`. Every machine
@@ -54,7 +67,7 @@ same RunSpec fingerprint and action/feature contracts.
   `training.n_step` must be smaller than `training.sequence_length`.
 - The unified discrete policy returns a model action index. With the standard
   78-action Trackmania head, `policy_action_ids` masks a subset of those global
-  indices; it does not remap a compact head.
+  indices. It does not remap a compact head.
 - Continuous action bounds belong to the actor. The first-party TQC and PPO
   telemetry factories use `[accelerator, brake, steer]` bounds
   `[0, 0, -1]` to `[1, 1, 1]`. The SAC and REDQ learners do not clamp an
@@ -68,7 +81,7 @@ same RunSpec fingerprint and action/feature contracts.
 All five configurations in this section use quantile/scalar regression on the
 chosen action, n-step bootstrap discounts, online-network action selection,
 target-network evaluation, importance weights and PER priority feedback.
-`target_tau > 0` performs a Polyak update every learner update; `target_tau: 0`
+`target_tau > 0` performs a Polyak update every learner update. `target_tau: 0`
 uses a hard copy every `target_update_interval` updates.
 
 Common metrics are `loss/value`, `loss/total`, `loss/objectives`,
@@ -84,7 +97,7 @@ per action and Smooth L1 TD regression. It is called “DQN” as a model family
 but its bootstrap is always Double-DQN-style, so this is not the original DQN
 target from the paper.
 
-**Contract.** `ModelContract.DISCRETE_VALUE`; discrete global action indices;
+**Contract.** `ModelContract.DISCRETE_VALUE`. Discrete global action indices.
 online off-policy training. Uniform replay and PER are valid. Identity, GRU,
 or Mamba temporal cores can be used with the corresponding sampler and sequence
 settings. Local and distributed training are supported.
@@ -146,13 +159,13 @@ training:
 learner: the online model chooses `argmax_a Q(s', a)` and the target model
 evaluates that action. Dueling is an independent head option that decomposes
 value and advantage and subtracts mean advantage. It is supported for scalar,
-fixed-quantile and implicit-quantile heads; it is not a separate learner and
+fixed-quantile and implicit-quantile heads. It is not a separate learner and
 does not imply Rainbow.
 
 **Contract, replay, execution and state.** These are identical to the selected
 unified scalar/quantile composition: discrete off-policy, uniform/PER,
 single-step or sequences, local/distributed, exact v2 resume and named
-encoder/temporal warm start. There is no dueling-specific metric; monitor the
+encoder/temporal warm start. There is no dueling-specific metric. Monitor the
 common Q, TD-error, action-entropy and gradient metrics. Invalid head/action
 dimensions and incompatible checkpoints fail at setup/load.
 
@@ -183,11 +196,11 @@ with pairwise quantile Huber loss. Action selection uses the weighted expected
 return, with the same Double target as the other unified variants.
 
 **Contract, replay, execution and state.** Discrete off-policy
-`DISCRETE_VALUE`; uniform/PER; single-step or sequences; local/distributed;
+`DISCRETE_VALUE`. Uniform/PER. Single-step or sequences. Local/distributed.
 exact v2 resume and named composite warm start. `quantile_count` must be at
 least two and must match between `FixedQuantileHead` and
 `FixedQuantileStrategy`. More quantiles increase the pairwise loss tensor and
-memory cost. Use common value/TD/gradient metrics; there are no separate QR
+memory cost. Use common value/TD/gradient metrics. There are no separate QR
 metrics.
 
 **YAML fragment — QR-DQN head and strategy:**
@@ -222,13 +235,13 @@ construction and evaluates deterministic uniform midpoints for policy action
 selection. The implicit head embeds fractions with cosine features.
 
 **Contract, replay, execution and state.** Discrete off-policy
-`DISCRETE_VALUE`; uniform/PER; single-step or contiguous recurrent sequences;
-local/distributed; exact v2 resume and named composite warm start. Key knobs are
+`DISCRETE_VALUE`. Uniform/PER. Single-step or contiguous recurrent sequences.
+local/distributed. Exact v2 resume and named composite warm start. Key knobs are
 the train/target/evaluation quantile counts, `cosine_count`, optional `dueling`,
 and `online_quantile_distortion`/`evaluation_quantile_distortion` with
 `upper_cvar_alpha`. Counts below two, incompatible dimensions, bad masks, or
 non-matching fingerprints fail. Quantile count directly controls compute and
-memory; upper-CVaR is a deliberate risk-seeking upper-tail distortion, not a
+memory. Upper-CVaR is a deliberate risk-seeking upper-tail distortion, not a
 neutral paper baseline.
 
 **YAML fragment — IQN head and strategy:**
@@ -264,12 +277,12 @@ components:
 
 **Status and intuition.** Supported unified composition. FQF uses the same
 implicit quantile head as IQN, but a proposal network learns fraction masses.
-Quantile regression receives detached fraction points; a separate analytical
+Quantile regression receives detached fraction points. A separate analytical
 fraction loss receives detached quantile values. This prevents either optimizer
 from updating the other path through an unintended gradient.
 
 **Contract, replay, execution and state.** Discrete off-policy
-`DISCRETE_VALUE`; uniform/PER; single-step or sequences; local/distributed.
+`DISCRETE_VALUE`. Uniform/PER. Single-step or sequences. Local/distributed.
 Exact v2 checkpoints include both main and fraction optimizer states. Key knobs
 are `fraction_count`, `fraction_learning_rate`, `entropy_coefficient` and
 `fraction_gradient_clip_norm`. Monitor `loss/fraction`, `fraction/entropy`,
@@ -310,14 +323,14 @@ components:
 
 **Status and intuition.** `SoftActorCritic` is a public SAC-v2-style twin-critic
 learner with a squashed stochastic actor, minimum target Q, Polyak targets,
-optional learned temperature and PER feedback. TrackmaniaRL does not bundle a
-`CONTINUOUS_ACTOR_CRITIC` model factory, so this is a public extension API, not
-a turnkey Trackmania baseline.
+optional learned temperature and PER feedback. `TelemetrySacModelFactory`
+provides the `CONTINUOUS_ACTOR_CRITIC` contract with independent actor and critic
+encoders. The complete Trackmania baseline is generated as `run-sac.yaml`.
 
-**Contract.** The custom model must expose `actor`, `q1` and `q2`; the actor
+**Contract.** The custom model must expose `actor`, `q1` and `q2`. The actor
 returns `(action, log_probability)` and each critic returns one scalar per
 observation/action pair. Actions are continuous and their bounds live in the
-actor. Training is online off-policy with `sequence_length: 1`; uniform replay
+actor. Training is online off-policy with `sequence_length: 1`. Uniform replay
 or PER works. The replicable actor policy supports local and distributed runs
 when the factory is installed everywhere.
 
@@ -327,10 +340,10 @@ partial warm-start loader. Key parameters are `learning_rate`, `target_tau`,
 `entropy_coefficient`, `target_entropy` and
 `learn_entropy_coefficient`. Metrics are `loss/actor`, `loss/critic`,
 `loss/entropy` and `state/alpha`. Missing model members, a sequence length above
-one, incorrect action bounds/shapes, or incompatible model state fails; bad
+one, incorrect action bounds/shapes, or incompatible model state fails. Bad
 reward scale/target entropy commonly drives alpha or Q values out of range.
 
-**YAML fragment — SAC with a required user model:**
+**YAML fragment — first-party telemetry SAC:**
 
 ```yaml
 components:
@@ -342,8 +355,7 @@ components:
       entropy_coefficient: 0.2
       learn_entropy_coefficient: true
   model_factory:
-    # Project component; declare ModelContract.CONTINUOUS_ACTOR_CRITIC.
-    class_path: my_trackmania_agent.models:SacModelFactory
+    class_path: trackmaniarl.trackmania.actor_critic:TelemetrySacModelFactory
   replay_store:
     class_path: trackmaniarl.core.replay:InMemoryReplayStore
   sampler:
@@ -357,7 +369,7 @@ training:
   beta: 0.4
 ```
 
-**Command:** after installing `my_trackmania_agent`, run
+**Command:** after applying the fragment to a complete configuration, run
 `uv run trackmaniarl validate run.yaml`, then
 `uv run trackmaniarl train run.yaml`.
 
@@ -368,27 +380,28 @@ training:
 **Status and intuition.** `RandomizedEnsembleSAC` is a public REDQ-style SAC
 learner. It trains every critic against the minimum of a randomly selected
 target subset and updates the actor on the ensemble mean at a configurable
-interval. It uses a fixed entropy coefficient. No first-party
-`ENSEMBLE_ACTOR_CRITIC` model factory is bundled.
+interval. It uses a fixed entropy coefficient. `TelemetryRedqModelFactory`
+provides the `ENSEMBLE_ACTOR_CRITIC` contract with ten independent critics by
+default. Use the generated `run-redq.yaml` for the complete configuration.
 
 **Contract.** A custom model exposes `actor` and an `nn.ModuleList`-like
-`critics`; every critic accepts continuous observation/action batches. It is
+`critics`. Every critic accepts continuous observation/action batches. It is
 online off-policy, single-step only, uniform/PER and local/distributed.
-`training.updates_per_transition` controls the runtime update-to-data ratio;
+`training.updates_per_transition` controls the runtime update-to-data ratio.
 that setting is separate from `policy_update_interval`.
 
 **State, parameters, metrics and failures.** Resume includes models,
-optimizers, `update_count`, target-subset RNG, scaler and learner RNG; no
+optimizers, `update_count`, target-subset RNG, scaler and learner RNG. No
 partial warm start. Key knobs are ensemble size in the custom factory,
 `target_subset_size`, `policy_update_interval`, `target_tau`, fixed
 `entropy_coefficient`, learning rate and runtime update ratio. Metrics are
-`loss/critic` and `loss/actor`; actor loss is zero on skipped actor updates.
+`loss/critic` and `loss/actor`. Actor loss is zero on skipped actor updates.
 Setup rejects a subset larger than the ensemble. A high update ratio, correlated
 critics, or an unsuitable fixed entropy coefficient can erase REDQ's intended
 benefit. This class does not by itself reproduce the paper's benchmark
 configuration.
 
-**YAML fragment — REDQ with a required user model:**
+**YAML fragment — first-party telemetry REDQ:**
 
 ```yaml
 components:
@@ -401,8 +414,9 @@ components:
       target_subset_size: 2
       policy_update_interval: 20
   model_factory:
-    # Project component; declare ModelContract.ENSEMBLE_ACTOR_CRITIC.
-    class_path: my_trackmania_agent.models:RedqModelFactory
+    class_path: trackmaniarl.trackmania.actor_critic:TelemetryRedqModelFactory
+  feature_pipeline:
+    class_path: trackmaniarl.trackmania.features:TelemetryFeaturePipeline
   sampler:
     class_path: trackmaniarl.core.replay:PrioritizedSampler
 training:
@@ -412,7 +426,7 @@ training:
   beta: 0.4
 ```
 
-**Command:** after installing `my_trackmania_agent`, run
+**Command:** after applying the fragment to a complete configuration, run
 `uv run trackmaniarl validate run.yaml`, then
 `uv run trackmaniarl train run.yaml`.
 
@@ -426,13 +440,13 @@ quantiles from all target critics, removes the configured number of upper
 quantiles per critic globally and applies quantile Huber regression. The actor
 uses the mean of current critic quantiles. Temperature learning is optional.
 
-**Contract.** `CONTINUOUS_QUANTILE_ACTOR_CRITIC`; continuous actions. The
+**Contract.** `CONTINUOUS_QUANTILE_ACTOR_CRITIC`. Continuous actions. The
 first-party model uses five critics, 25 quantiles each and Trackmania's native
 three control bounds. Training is online off-policy, `sequence_length: 1`,
 uniform/PER, local/distributed.
 
 **State, parameters, metrics and failures.** Resume includes models, actor,
-critic and alpha optimizers, log-alpha, scaler and RNG; no partial warm start.
+critic and alpha optimizers, log-alpha, scaler and RNG. No partial warm start.
 Key knobs are factory `critics`/`quantiles`, learner
 `top_quantiles_to_drop_per_critic`, `target_tau`, learning rate, entropy
 coefficient and target entropy. Metrics are `loss/actor`, `loss/critic`,
@@ -475,22 +489,26 @@ training:
 
 ### Proximal Policy Optimization (PPO)
 
-**Status and intuition.** `ProximalPolicyOptimization` is public and has a
-first-party telemetry actor/value factory. It uses behavior-time latent actions,
+The Trackmania scaffold includes complete `run-ppo.yaml` and `run-ppo-vision.yaml`
+configurations. See [camera vision and PPO](vision.md) for the RGB capture pipeline,
+CNN model, frame stacking and commands.
+
+**Status and intuition.** `ProximalPolicyOptimization` is supported and has
+first-party telemetry and vision actor/value factories. It uses behavior-time latent actions,
 log probabilities and values, GAE, normalized advantages, clipped policy and
 value objectives, observation/reward normalization, linear learning-rate
 annealing, minibatch epochs and optional KL early stopping.
 
-**Contract.** `CONTINUOUS_ACTOR_VALUE`; bounded continuous actions. The actor
+**Contract.** `CONTINUOUS_ACTOR_VALUE`. Bounded continuous actions. The actor
 must expose `sample_with_latent` and `evaluate_latent_actions`. PPO is routed by
 `trackmaniarl train` to the in-process `Trainer`, not the asynchronous
 coordinator. Use `OnPolicySequenceSampler`, `n_step: 1` and a fixed rollout
-`sequence_length`; `total_transitions` must be divisible by it. Distributed
+`sequence_length`. `total_transitions` must be divisible by it. Distributed
 learner/actor commands reject on-policy learners.
 
 **State, parameters, metrics and failures.** Resume stores model, optimizer,
 observation and reward normalizers, processed-transition count, scaler, RNG,
-and trainer counters. On-policy replay/sampler state is intentionally absent;
+and trainer counters. On-policy replay/sampler state is intentionally absent.
 resume restarts at a recorded episode boundary. There is no partial warm start.
 Key knobs are clip epsilons, `gae_lambda`, entropy/value coefficients, update
 epochs, minibatch size, `target_kl`, normalization clips and gradient norm.
@@ -535,19 +553,20 @@ training:
 
 **Primary paper:** [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347).
 
-## Experimental discrete actor-critic
+## Discrete actor-critic
 
 ### StableDiscreteSoftActorCritic
 
-**Status and intuition.** This is explicitly an **SD-SAC-inspired experimental**
+**Status and intuition.** This is a supported **SD-SAC-inspired**
 learner, not a claim of full SD-SAC paper compliance. It uses a categorical
 actor, two all-action critics, double-average target Q, Q-clipped critic losses,
 an entropy-change penalty against the target actor, optional temperature
 learning and Polyak targets. It is publicly exported and registered under
-`stable_discrete_soft_actor_critic`, but no first-party
-`DISCRETE_ACTOR_CRITIC` factory or Trackmania baseline is supplied.
+`stable_discrete_soft_actor_critic`. `TelemetryDiscreteSacModelFactory` provides
+the `DISCRETE_ACTOR_CRITIC` contract. `run-discrete-sac.yaml` supplies the complete
+Trackmania baseline with the full 78-action environment table.
 
-**Contract.** The custom model exposes `actor`, `q1` and `q2`; the actor must
+**Contract.** The custom model exposes `actor`, `q1` and `q2`. The actor must
 provide `probabilities(observation)` and categorical sampling, while each critic
 returns `[batch, action_count]`. The policy returns the sampled/argmax index
 directly and has no `policy_action_ids` mask, so a custom compact-action model
@@ -555,16 +574,16 @@ must align its output with the environment contract. Training is online
 off-policy, single-step only, uniform/PER and local/distributed.
 
 **State, parameters, metrics and failures.** Resume stores online/target
-models, three optimizers when alpha is learned, alpha, scaler and RNG; no
+models, three optimizers when alpha is learned, alpha, scaler and RNG. No
 partial warm start. Key knobs are `q_clip_epsilon`,
 `entropy_penalty_coefficient`, `target_entropy`, `entropy_coefficient`,
 `target_tau` and learning rate. Metrics are `loss/actor`, `loss/critic`,
 `loss/entropy` and `state/alpha`. Missing probability/all-action interfaces,
 bad action mapping, sequence replay, or incompatible state fails. Paper-level
-claims require a separate baseline-controlled experiment; the current tree
+claims require a separate baseline-controlled experiment. The current tree
 provides unit/runtime support, not the paper's Atari/MOBA evidence.
 
-**YAML fragment — experimental custom-model SD-SAC:**
+**YAML fragment — first-party telemetry stable discrete SAC:**
 
 ```yaml
 components:
@@ -577,8 +596,9 @@ components:
       entropy_penalty_coefficient: 0.5
       learn_entropy_coefficient: true
   model_factory:
-    # Project component; declare ModelContract.DISCRETE_ACTOR_CRITIC.
-    class_path: my_trackmania_agent.models:StableDiscreteSacModelFactory
+    class_path: trackmaniarl.trackmania.actor_critic:TelemetryDiscreteSacModelFactory
+  feature_pipeline:
+    class_path: trackmaniarl.trackmania.features:TelemetryFeaturePipeline
   sampler:
     class_path: trackmaniarl.core.replay:PrioritizedSampler
 training:
@@ -587,7 +607,7 @@ training:
   beta: 0.4
 ```
 
-**Command:** after installing `my_trackmania_agent`, run
+**Command:** after applying the fragment to a complete configuration, run
 `uv run trackmaniarl validate run.yaml`, then
 `uv run trackmaniarl train run.yaml`.
 
@@ -603,7 +623,7 @@ complete human laps and optional recovery episodes. It shares lidar encoders
 and temporal cores with RL models, but `bc-train` does not use the RL replay,
 WAL, rollout actor, or distributed coordinator.
 
-**Contract.** `CATEGORICAL_POLICY`; compact discrete actions. The model's
+**Contract.** `CATEGORICAL_POLICY`. Compact discrete actions. The model's
 `action_ids` must exactly match `environment.config.compact_action_ids` and
 model feature/history dimensions must match `LidarFeaturePipeline`. Dataset
 splitting is deterministic by complete lap/episode. History and optional GRU
@@ -612,7 +632,7 @@ benchmarking are local.
 
 **State, parameters, metrics and failures.** `bc-latest.pt` stores exact
 learner, optimizer, scheduler, scaler, RNG, dataset fingerprint, batch RNG and
-selection state; use it for `--resume`. `bc-best-validation.pt` is the selected
+selection state. Use it for `--resume`. `bc-best-validation.pt` is the selected
 open-loop candidate. Key knobs include learning rate/weight decay, label
 smoothing, class weighting, transition weighting, focal gamma, steering loss,
 history/burn-in, augmentation, validation interval, scheduler and early
@@ -674,7 +694,7 @@ standalone optimizer. It runs a deterministic BC student in Trackmania, labels
 visited states with a trajectory-tracking demonstration policy, probabilistically
 or error-threshold-selects teacher intervention and records expert labels,
 student actions, intervention flags, state error and bounded sample weights.
-The current workflow is DAgger-inspired: it performs one collection invocation;
+The current workflow is DAgger-inspired: it performs one collection invocation.
 the user explicitly retrains BC and repeats. The teacher is the configured
 trajectory tracker rather than an arbitrary interactive human oracle.
 
@@ -682,13 +702,13 @@ trajectory tracker rather than an arbitrary interactive human oracle.
 `OpenPlanetEnvironmentFactory`, `LidarFeaturePipeline`, an evaluation map, a
 valid teacher demonstration, compact actions and a BC model with
 `previous_action_conditioning: false`. It is local live collection. The output
-recovery archive is split by episode when passed to `bc-train --recovery`; no RL
+recovery archive is split by episode when passed to `bc-train --recovery`. No RL
 replay or DAgger optimizer checkpoint exists. Collection starts from a BC
 checkpoint.
 
 **Parameters, metrics and failures.** Key CLI knobs are `--episodes`,
 `--teacher-probability`, `--intervention-error` and `--action-lead-ms`.
-Collection reports per-episode finish and sample counts; the archive carries
+Collection reports per-episode finish and sample counts. The archive carries
 weights/interventions/errors for BC recovery metrics. Invalid map/geometry/time
 contracts, previous-action conditioning, missing evaluation map, or a teacher
 outside its recorded trajectory contract fails. A trajectory teacher can
@@ -730,21 +750,21 @@ positions. This supports TD plus large-margin and/or classification guidance,
 but it is **DQfD-style, not a full DQfD implementation**: the exact paper loss,
 regularization, priority constants, schedule and benchmark recipe are not
 packaged as one named learner. `PolicyAnchorObjective` is also public, but no
-built-in sampler produces its required `policy_anchor_q_values`; it needs a
+built-in sampler produces its required `policy_anchor_q_values`. It needs a
 custom batch producer.
 
 **Contract, replay, execution and state.** Use any unified discrete-value
 composition. Imported demonstrations are protected from ring eviction while
 they occupy less than half the store. `PrioritizedSampler` supports demo flags
-for single-step or sequence batches; `DemoMixSampler` enforces explicit demo
+for single-step or sequence batches. `DemoMixSampler` enforces explicit demo
 fractions but only with `sequence_length: 1`. `offline-pretrain` performs the
 configured number of demo-only updates, after which the same learner can train
 locally or through the distributed coordinator.
 
 **Parameters, metrics and failures.** Margin/CE weights and margin size are
-objective parameters; `offline_pretrain_updates`, n-step/gamma, replay alpha/beta
+objective parameters. `offline_pretrain_updates`, n-step/gamma, replay alpha/beta
 and demo sampling control the data path. The unified learner reports their sum
-as `loss/objectives`; replay reports demo sample fractions. There are not yet
+as `loss/objectives`. Replay reports demo sample fractions. There are not yet
 separate per-objective metrics. Demonstration actions excluded by
 `policy_action_ids`, insufficient batch footprint, missing demo flags, an
 over-half-full protected demo set, or an impossible `DemoMixSampler` fraction
@@ -785,12 +805,12 @@ continue from the checkpoint path printed by that command with
 - Start with the generated unified IQN configuration for discrete Trackmania
   control. Change only head/strategy to compare scalar Q, QR-DQN, or FQF under
   the same seed, replay, update budget and evaluation suite.
-- Use TQC when a continuous three-control telemetry baseline is intentional.
-  SAC and REDQ require a project-owned model bundle before they are viable.
+- Use generated SAC, REDQ or TQC configurations for continuous three-control
+  telemetry baselines. No project-owned model bundle is required.
 - Use PPO only when synchronous local on-policy collection and its lower data
-  reuse are acceptable; do not route it to distributed actor/learner commands.
-- Treat SD-SAC as an opt-in experiment with an explicit baseline and failure
-  report.
+  reuse are acceptable. Do not route it to distributed actor/learner commands.
+- Use `run-discrete-sac.yaml` for a categorical actor-critic baseline. Compare
+  its stability and finish rate with IQN under the same evaluation conditions.
 - Use BC as an initialization/data-quality tool, then require closed-loop
   benchmarking. Add DAgger recovery or DQfD-style objectives only for a measured
   distribution-shift problem.

@@ -154,6 +154,18 @@ def _assert_ppo_metrics(metrics: Mapping[str, float]) -> None:
     assert metrics["state/learning_rate"] == pytest.approx(3e-4)
 
 
+def test_ppo_update_preserves_terminal_flags_when_batch_contains_truncation(
+    ppo_sequence_case: tuple[ProximalPolicyOptimization, TrainingBatch],
+) -> None:
+    learner, batch = ppo_sequence_case
+    batch.truncated[0, 1] = True
+    original_terminated = batch.terminated.clone()
+    original_truncated = batch.truncated.clone()
+    learner.update(batch)
+    torch.testing.assert_close(batch.terminated, original_terminated)
+    torch.testing.assert_close(batch.truncated, original_truncated)
+
+
 @pytest.fixture
 def ppo_sequence_case() -> tuple[ProximalPolicyOptimization, TrainingBatch]:
     learner = ProximalPolicyOptimization(
