@@ -64,8 +64,10 @@ This is not a claim of exhaustive formal verification of every library module.
   coverage for updates, nonzero sensor gradients, training and checkpoint resume.
   The paired pipeline forwards evaluation-map changes to lidar geometry and resets
   camera history. Encoders are independently constructed for actor and critics.
-- Paired BC archive import is not implemented by this RL extension. Existing
-  camera-only and lidar-only BC workflows remain separate and are documented as such.
+- Paired BC archives now carry aligned 33-field telemetry alongside RGB and actions.
+  The shared BC model trains both sensor branches, restores exact continuation and
+  evaluates with paired observations. Tests verify modality matching, timestamps,
+  control masking and consistent reflection of both sensors.
 
 ### Local runtime instability
 

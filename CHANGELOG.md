@@ -2,6 +2,8 @@
 
 ## 1.2.7 - 2026-09-09
 
+- Add paired lidar/image BC archives, control-leakage protection, a generated
+  configuration and CLI training, exact resume and benchmark regression coverage.
 - Add lidar and paired lidar/image configurations for all nine RL families with
   independent actor/critic encoders and training/resume integration tests.
 - Unify actor observation arguments with critics and composite models, reject

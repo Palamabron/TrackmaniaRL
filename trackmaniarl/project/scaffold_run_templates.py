@@ -308,7 +308,7 @@ def _trackmania_sensor_config(algorithm: str, *, fusion: bool = False) -> str:
     return yaml.safe_dump(config, sort_keys=False)
 
 
-def _trackmania_bc_vision_config() -> str:
+def _trackmania_bc_vision_config(*, fusion: bool = False) -> str:
     config = yaml.safe_load(_trackmania_vision_config("iqn"))
     config.pop("distributed", None)
     config["run_id"] = "trackmania-bc-vision"
@@ -327,4 +327,16 @@ def _trackmania_bc_vision_config() -> str:
     components["environment"]["kwargs"]["config"]["demonstration_control_aggregation"] = False
     components["sampler"] = {"class_path": "trackmaniarl.core.replay:UniformSampler"}
     config["training"].update(batch_size=32, n_step=1, sequence_length=1)
+    if fusion:
+        config["run_id"] = "trackmania-bc-lidar-vision"
+        components["environment"]["kwargs"]["include_telemetry"] = True
+        components["model_factory"]["kwargs"]["config"] = {"lidar": {"output_dim": 256}}
+        lidar = yaml.safe_load(_TRACKMANIA_CONFIG)["components"]["feature_pipeline"]["kwargs"][
+            "config"
+        ]
+        lidar["mask_current_control_inputs"] = True
+        components["feature_pipeline"] = {
+            "class_path": prefix + "LidarVisionBehaviorCloningPipeline",
+            "kwargs": {"lidar": lidar},
+        }
     return yaml.safe_dump(config, sort_keys=False)

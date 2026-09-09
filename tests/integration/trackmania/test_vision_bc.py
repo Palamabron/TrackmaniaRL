@@ -60,19 +60,28 @@ def _episode(geometry: BoundaryGeometry, seed: int) -> VisionDemonstration:
 
 
 class _ImageRollout:
-    def __init__(self) -> None:
+    def __init__(self, *, fusion: bool = False) -> None:
         self.steps = 0
         self.closed = False
+        self.fusion = fusion
+
+    def _observation(self, image: Any) -> Any:
+        if not self.fusion:
+            return image
+        telemetry = np.zeros(33, dtype=np.float32)
+        telemetry[12] = 1
+        telemetry[3] = self.steps * 10
+        return {"telemetry": telemetry, "images": image}
 
     def reset(self, *, seed: int | None = None) -> tuple[Any, dict[str, Any]]:
         self.steps = 0
-        return np.zeros((8, 8, 3), dtype=np.uint8), {}
+        return self._observation(np.zeros((8, 8, 3), dtype=np.uint8)), {}
 
     def step(self, action: int) -> tuple[Any, float, bool, bool, dict[str, Any]]:
         assert 0 <= action < 3
         self.steps += 1
         return (
-            np.full((8, 8, 3), self.steps, dtype=np.uint8),
+            self._observation(np.full((8, 8, 3), self.steps, dtype=np.uint8)),
             1.0,
             self.steps == 4,
             False,
@@ -88,24 +97,54 @@ class _ImageRollout:
 
 
 @pytest.mark.parametrize("previous_action", [False, True])
-def test_camera_bc_cli_train_resume_and_benchmark(
+@pytest.mark.parametrize("fusion", [False, True])
+def test_camera_bc_cli_train_resume_and_benchmark(  # noqa: PLR0913 - two fixtures and two input modes
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     *,
     previous_action: bool,
+    fusion: bool,
 ) -> None:
     config = _config(tmp_path, previous_action=previous_action)
+    if fusion:
+        components = config["components"]
+        components["environment"]["kwargs"]["include_telemetry"] = True
+        components["model_factory"]["kwargs"]["config"]["lidar"] = {
+            "hidden_dim": 8,
+            "output_dim": 8,
+        }
+        components["feature_pipeline"] = {
+            "class_path": (
+                "trackmaniarl.trackmania.imitation_learning.vision:"
+                "LidarVisionBehaviorCloningPipeline"
+            ),
+            "kwargs": {
+                "lidar": {
+                    "geometry_path": config["evaluation"]["maps"][0]["geometry_path"],
+                    "mask_current_control_inputs": True,
+                },
+                "vision": {"width": 8, "height": 8},
+            },
+        }
     path = save_config(tmp_path, config)
     geometry = BoundaryGeometry(config["evaluation"]["maps"][0]["geometry_path"])
     demos = tmp_path / "demos"
     demos.mkdir()
     for index in range(3):
-        save_vision_demonstration(demos / f"{index}.npz", _episode(geometry, index))
+        episode = _episode(geometry, index)
+        if fusion:
+            telemetry = np.zeros((4, 33), dtype=np.float32)
+            telemetry[:, 12] = 1
+            telemetry[:, 3] = episode.timestamps_ms
+            episode = replace(episode, telemetry=telemetry)
+        save_vision_demonstration(demos / f"{index}.npz", episode)
     entrypoint(["validate", str(path)])
     run = resolve_run(RunSpec.from_yaml(path), base_dir=tmp_path)
     try:
         run.learner.setup({"seed": 0, "model_factory": run.model_factory})
-        initial = run.learner.model.encoder.convolution[0].weight.detach().clone()
+        initial = {
+            name: p.detach().clone() for name, p in run.learner.model.encoder.named_parameters()
+        }
     finally:
         run.logger.close()
     original_save = TorchCheckpointCodec.save
@@ -119,11 +158,17 @@ def test_camera_bc_cli_train_resume_and_benchmark(
             original_save(self, state, Path(target).with_name("midrun.pt"))
 
     monkeypatch.setattr(TorchCheckpointCodec, "save", save_with_midrun_snapshot)
-    entrypoint(["bc-train", str(path), "--demo", str(demos), "--horizontal-flip-augmentation"])
+    augmentation = [] if fusion else ["--horizontal-flip-augmentation"]
+    entrypoint(["bc-train", str(path), "--demo", str(demos), *augmentation])
     checkpoint = next((tmp_path / "artifacts").rglob("bc-latest.pt"))
     state = TorchCheckpointCodec().load(checkpoint)
     assert state["training"]["step"] == 2
-    assert not torch.equal(initial, state["learner"]["model"]["encoder.convolution.0.weight"])
+    for branch in ("vision.", "lidar.") if fusion else ("convolution.",):
+        assert any(
+            name.startswith(branch)
+            and not torch.equal(value, state["learner"]["model"]["encoder." + name])
+            for name, value in initial.items()
+        )
     manifest = json.loads((checkpoint.parent.parent / "bc-dataset-manifest.json").read_text())
     training = {source.split("#")[0] for source in manifest["training_sources"]}
     assert training.isdisjoint(manifest["validation_sources"])
@@ -133,7 +178,7 @@ def test_camera_bc_cli_train_resume_and_benchmark(
             str(path),
             "--demo",
             str(demos),
-            "--horizontal-flip-augmentation",
+            *augmentation,
             "--resume",
             str(checkpoint.with_name("midrun.pt")),
         ]
@@ -141,7 +186,7 @@ def test_camera_bc_cli_train_resume_and_benchmark(
     restored = TorchCheckpointCodec().load(checkpoint)
     for key, value in state["learner"]["model"].items():
         torch.testing.assert_close(value, restored["learner"]["model"][key], rtol=0, atol=0)
-    environment = _ImageRollout()
+    environment = _ImageRollout(fusion=fusion)
     monkeypatch.setattr(VisionEnvironmentFactory, "create", lambda *a, **kw: environment)
     selected = checkpoint.with_name("bc-best-validation.pt")
     entrypoint(["bc-benchmark", str(path), str(selected), "--trials", "2", "--report-only"])

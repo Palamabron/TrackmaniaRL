@@ -150,8 +150,8 @@ Action bounds must be finite, ordered and representable in float32.
 Integration tests exercise updates, both sensor gradients, training and checkpoint
 resume for all nine RL families with lidar and with paired inputs. This does not
 establish live driving performance or atomic camera/telemetry synchronization.
-The paired configurations are RL configurations. The supplied BC archive importer
-still supports lidar-only or camera-only episodes, not paired RGB/telemetry BC data.
+For paired behavior cloning use `run-bc-lidar-vision.yaml` and archives containing
+aligned RGB, telemetry and actions. See the [paired BC instructions](vision-bc.md#paired-lidar--vision).
 
 Off-policy camera templates use a 2048-transition replay buffer, batch size 32
 and 512 warmup transitions. Increase capacity only after checking memory usage.

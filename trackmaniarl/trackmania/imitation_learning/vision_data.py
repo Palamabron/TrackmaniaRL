@@ -30,6 +30,7 @@ class VisionDemonstration:
     timestamps_ms: np.ndarray[Any, Any]
     contract: RecoveryContract
     finish_time_s: float
+    telemetry: np.ndarray[Any, Any] | None = None
 
     def validate(self) -> None:
         if self.frames.dtype != np.uint8 or self.frames.ndim != 4 or self.frames.shape[-1] != 3:
@@ -37,6 +38,17 @@ class VisionDemonstration:
         if min(self.frames.shape[:3]) < 1:
             raise ValueError("vision demo frames must not be empty")
         count = len(self.frames)
+        if self.telemetry is not None:
+            if (
+                self.telemetry.shape != (count, 33)
+                or self.telemetry.dtype.kind not in "fiu"
+                or not np.isfinite(self.telemetry).all()
+            ):
+                raise ValueError(
+                    "paired demo requires finite numeric telemetry with shape (steps, 33)"
+                )
+            if not np.array_equal(self.telemetry[:, 3], self.timestamps_ms):
+                raise ValueError("paired telemetry race times must match image timestamps")
         if self.actions.shape != (count,) or self.actions.dtype.kind not in "iu":
             raise ValueError("vision demo requires one integer canonical action per frame")
         if np.any(self.actions < 0) or np.any(self.actions >= 78):
@@ -59,12 +71,17 @@ def save_vision_demonstration(path: str | Path, demonstration: VisionDemonstrati
     """Save a complete episode without pickle or overwriting an existing file."""
     demonstration.validate()
     metadata = {
-        "format": VISION_DEMONSTRATION_FORMAT,
+        "format": VISION_DEMONSTRATION_FORMAT
+        if demonstration.telemetry is None
+        else "trackmaniarl-paired-demo-v1",
         "contract": asdict(demonstration.contract),
         "finish_time_s": demonstration.finish_time_s,
     }
     target = Path(path)
     stream = target.open("xb")
+    extra: dict[str, Any] = (
+        {} if demonstration.telemetry is None else {"telemetry": demonstration.telemetry}
+    )
     try:
         with stream:
             np.savez_compressed(
@@ -73,6 +90,7 @@ def save_vision_demonstration(path: str | Path, demonstration: VisionDemonstrati
                 actions=demonstration.actions,
                 timestamps_ms=demonstration.timestamps_ms,
                 metadata=json.dumps(metadata),
+                **extra,
             )
     except BaseException:
         target.unlink(missing_ok=True)
@@ -82,10 +100,15 @@ def save_vision_demonstration(path: str | Path, demonstration: VisionDemonstrati
 def load_vision_demonstration(path: str | Path) -> VisionDemonstration:
     with np.load(path, allow_pickle=False) as data:
         required = {"frames", "actions", "timestamps_ms", "metadata"}
-        if set(data.files) != required:
+        if set(data.files) not in (required, required | {"telemetry"}):
             raise ValueError("expected a vision demonstration archive with RGB frames and actions")
         metadata = json.loads(str(data["metadata"].item()))
-        if not isinstance(metadata, dict) or metadata.get("format") != VISION_DEMONSTRATION_FORMAT:
+        expected_format = (
+            "trackmaniarl-paired-demo-v1"
+            if "telemetry" in data.files
+            else VISION_DEMONSTRATION_FORMAT
+        )
+        if not isinstance(metadata, dict) or metadata.get("format") != expected_format:
             raise ValueError("unsupported vision demonstration format")
         if set(metadata) != {"format", "contract", "finish_time_s"}:
             raise ValueError("invalid vision demonstration metadata")
@@ -95,6 +118,7 @@ def load_vision_demonstration(path: str | Path) -> VisionDemonstration:
             data["timestamps_ms"],
             RecoveryContract(**metadata["contract"]),
             float(metadata["finish_time_s"]),
+            data["telemetry"] if "telemetry" in data.files else None,
         )
     demonstration.validate()
     return demonstration
@@ -116,6 +140,8 @@ def load_vision_behavior_cloning_laps(request: VisionLapLoadRequest) -> list[Beh
     seen: set[bytes] = set()
     for path in request.paths:
         demonstration = load_vision_demonstration(path)
+        if request.pipeline.expects_telemetry != (demonstration.telemetry is not None):
+            raise ValueError("BC pipeline and demonstration sensor modalities must match")
         if demonstration.contract != request.contract:
             raise ValueError(f"vision demo {path} map, geometry or timing contract does not match")
         # Copies of one episode must not leak into both training and validation.
@@ -144,8 +170,15 @@ def _vision_lap(
     observations: list[dict[str, torch.Tensor]] = []
     labels: list[int] = []
     try:
-        for frame, action in zip(demonstration.frames, demonstration.actions, strict=True):
-            observation = request.pipeline.transform_observation(frame)
+        for index, (frame, action) in enumerate(
+            zip(demonstration.frames, demonstration.actions, strict=True)
+        ):
+            raw = (
+                frame
+                if demonstration.telemetry is None
+                else {"images": frame, "telemetry": demonstration.telemetry[index]}
+            )
+            observation = request.pipeline.transform_observation(raw)
             observation["expert_previous_action"] = torch.tensor(previous, dtype=torch.long)
             if request.previous_action_conditioning:
                 observation["previous_action"] = torch.tensor(previous, dtype=torch.long)

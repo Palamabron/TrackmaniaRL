@@ -123,6 +123,12 @@ def _behavior_context(run: ResolvedRun, spec: RunSpec, paths: tuple[Path, ...]) 
     camera = isinstance(run.feature_pipeline, VisionBehaviorCloningPipeline)
     if camera != isinstance(factory, VisionEnvironmentFactory):
         raise ValueError("BC camera features require a matching vision environment factory")
+    if camera:
+        paired = bool(getattr(run.feature_pipeline, "expects_telemetry", False))
+        if paired != getattr(factory, "include_telemetry", False) or paired != bool(
+            getattr(model, "paired", False)
+        ):
+            raise ValueError("BC model, pipeline and environment sensor modalities must match")
     return _BehaviorContext(run, spec, paths, action_ids, model, factory.config)
 
 
@@ -149,9 +155,10 @@ def _behavior_split(context: _BehaviorContext, args: argparse.Namespace) -> _Beh
     )
     if not use_flip:
         return split
-    if not isinstance(context.run.feature_pipeline, VisionBehaviorCloningPipeline) and not getattr(
-        context.run.feature_pipeline, "local_velocity_features", False
-    ):
+    if (
+        not isinstance(context.run.feature_pipeline, VisionBehaviorCloningPipeline)
+        or getattr(context.run.feature_pipeline, "expects_telemetry", False)
+    ) and not getattr(context.run.feature_pipeline, "local_velocity_features", False):
         raise ValueError("horizontal flip augmentation requires local_velocity_features")
     augmented = augment_behavior_cloning_laps(split.training, context.action_ids)
     return _BehaviorSplit(augmented, split.validation, split.recovery_paths)

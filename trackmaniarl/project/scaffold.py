@@ -73,6 +73,9 @@ def _write_project_metadata(target: Path, package: str, template: str) -> None:
     if template == "trackmania":
         (target / "run-ppo.yaml").write_text(_trackmania_ppo_config(), encoding="utf-8")
         (target / "run-bc-vision.yaml").write_text(_trackmania_bc_vision_config(), encoding="utf-8")
+        (target / "run-bc-lidar-vision.yaml").write_text(
+            _trackmania_bc_vision_config(fusion=True), encoding="utf-8"
+        )
         (target / "run-ppo-vision.yaml").write_text(
             _trackmania_ppo_config(vision=True), encoding="utf-8"
         )

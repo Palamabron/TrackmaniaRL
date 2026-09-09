@@ -130,3 +130,42 @@ Match CNN channel and feature dimensions in both configurations. BC transfer
 selects encoder and temporal tensors only. The categorical BC head is never
 copied into an RL value head. Inspect the generated `warm-start.json` for matched
 and mismatched tensors. This is initialization of a new RL run, not BC resume.
+
+## Paired lidar + vision
+
+Use the generated `run-bc-lidar-vision.yaml` configuration for supervised fusion.
+The environment preserves telemetry with `include_telemetry: true`. The
+`LidarVisionBehaviorCloningPipeline` transforms both sensors and exposes the flat
+BC fields `lidar`, `lidar_mask`, `telemetry` and `images`. The model factory is
+`VisionBehaviorCloningModelFactory` with `kwargs.config.lidar` set to a
+`LidarSensorConfig` mapping. Match its dimensions to the lidar pipeline, and match
+`channels` to the image stack. Both sensor branches and the fusion projection train.
+
+Extend each `VisionDemonstration` with `telemetry=telemetry_rows`, a finite numeric
+array of shape `(steps, 33)` using the standard Openplanet field order. Every row
+must accompany the image preceding the same action. Column 3 must exactly match
+`timestamps_ms`. The writer stores these episodes as `trackmaniarl-paired-demo-v1`
+without pickle. It retains the same map, geometry, timing, action-range and duplicate
+episode checks as image-only archives. Neither missing telemetry nor missing RGB
+is reconstructed or silently substituted. Sensor modes must match the model,
+pipeline, environment and every archive.
+
+```powershell
+uv run trackmaniarl validate run-bc-lidar-vision.yaml
+uv run trackmaniarl bc-train run-bc-lidar-vision.yaml --demo demonstrations/paired
+uv run trackmaniarl bc-train run-bc-lidar-vision.yaml --demo demonstrations/paired --resume artifacts/RUN/checkpoints/bc-latest.pt
+uv run trackmaniarl bc-benchmark run-bc-lidar-vision.yaml artifacts/RUN/checkpoints/bc-best-validation.pt --report-only
+```
+
+The template masks current telemetry controls to prevent action-label leakage.
+The pipeline refuses unmasked controls. Previous-action conditioning remains
+optional and shifts labels by one step, restarting at each episode boundary.
+Both sensor histories reset between episodes and evaluation maps. Lidar history
+length is one, while image frame stacking remains configurable.
+
+Default paired templates do not enable horizontal reflection. For reflection,
+use the existing supported local-velocity 8-channel lidar and 46/49-feature
+telemetry layout. The augmentation then mirrors images, lidar, telemetry and
+action labels together, after splitting training from validation. Unsupported
+layouts fail explicitly. Telemetry-only recovery and DAgger files still cannot
+supply missing RGB frames.

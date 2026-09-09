@@ -148,8 +148,8 @@ Camera observations work with every RL family. Complete image configurations are
 Every RL algorithm also has `run-ALGORITHM-lidar.yaml` and
 `run-ALGORITHM-lidar-vision.yaml`. The latter combines boundary lookahead and
 telemetry with a camera CNN. Configure the geometry path and capture rectangle.
-Both encoders receive gradients during training. Paired RL configurations do not
-import the camera-only BC archive format.
+Both encoders receive gradients during training. `run-bc-lidar-vision.yaml` trains
+paired BC from RGB/action archives with aligned 33-field telemetry rows.
 Select one for validation, training, resume and benchmarking. Off-policy camera
 templates use a 2048-transition replay buffer and batch size 32 to bound memory.
 
