@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.7 - 2026-09-09
+
+- Use versioned absolute repository links in the README so documentation and
+  source links resolve correctly on PyPI.
+- Replace broken or blocked research links with stable public sources and retain
+  access-restricted W&B records as non-clickable provenance IDs.
+
 ## 1.2.6 - 2026-09-09
 
 - Keep the complete 42.10-second neural-drive animation at 30 FPS while reducing

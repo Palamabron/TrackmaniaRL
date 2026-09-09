@@ -26,7 +26,7 @@ path. Do not add the MP4 or its local sidecars to the source archive.
 The source is 1920 × 1080, H.264, 30 fps, 42.10 seconds, with no audio stream.
 Source SHA-256:
 `aea2e9f65458a48a6aea126971e09f5f983b1fa00c63e1a128475dd1fb98b03c`.
-Version 1.2.6 shows the **entire supplied film**, from the start through the finish
+Version 1.2.7 shows the **entire supplied film**, from the start through the finish
 and the result card, replacing the short excerpt. No seek, trim or speed changes
 are applied. GIF frame durations alternate between 30 and 40 ms because GIF
 timing has 10 ms resolution. The export has 1,263 frames, lasts 42.10 seconds

@@ -381,6 +381,6 @@ or demonstration-aware RL objectives for states outside the expert
 distribution and never promote a model solely from open-loop validation.
 
 Behavior cloning here follows the supervised imitation-learning setup
-described in [Learning to act by watching others](https://www.cse.unsw.edu.au/~claude/papers/MI15.pdf),
+described in [Learning to act by watching others](https://cgi.cse.unsw.edu.au/~claude/papers/MI15.pdf),
 but the data contract, weighted losses, lidar model and release gates are
 TrackmaniaRL-specific.

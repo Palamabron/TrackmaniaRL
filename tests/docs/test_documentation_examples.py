@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import inspect
 import re
+import tomllib
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -281,3 +282,44 @@ def test_repository_relative_markdown_links_and_anchors_resolve() -> None:
     ]
 
     assert not failures, "\n" + "\n".join(failures)
+
+
+def test_pypi_readme_uses_versioned_absolute_repository_links() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    version = pyproject["project"]["version"]
+    assert isinstance(version, str)
+    expected_blob_prefix = f"/Palamabron/TrackmaniaRL/blob/v{version}/"
+    expected_raw_prefix = f"/Palamabron/TrackmaniaRL/v{version}/"
+    failures: list[str] = []
+
+    for destination in _markdown_destinations(readme):
+        parsed = urlsplit(destination.value)
+        label = f"README.md:{destination.line}"
+        if not parsed.scheme and not parsed.netloc and parsed.path:
+            failures.append(f"{label}: PyPI cannot resolve relative link {destination.value}")
+        elif parsed.hostname == "github.com" and parsed.path.startswith(
+            "/Palamabron/TrackmaniaRL/"
+        ):
+            if not parsed.path.startswith(expected_blob_prefix):
+                failures.append(f"{label}: repository link is not versioned: {destination.value}")
+        elif (
+            parsed.hostname == "raw.githubusercontent.com"
+            and parsed.path.startswith("/Palamabron/TrackmaniaRL/")
+            and not parsed.path.startswith(expected_raw_prefix)
+        ):
+            failures.append(f"{label}: raw media link is not versioned: {destination.value}")
+
+    assert not failures, "\n" + "\n".join(failures)
+
+
+def test_benchmark_documentation_does_not_expose_private_wandb_links() -> None:
+    benchmark = (ROOT / "docs/benchmarks/2026-09-05-v106b-policy199840-30-trial.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs" not in benchmark
+    assert "`il7rr7dx`" in benchmark
+    assert "`66se3dlg`" in benchmark
+    assert "https://willdabney.com/publication/r2d2/" in benchmark
+    assert "https://doi.org/10.1038/s41586-021-04357-7" in benchmark
