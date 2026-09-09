@@ -1,42 +1,28 @@
 {
-  "title": "Local and remote deployment",
-  "subtitle": "Both modes use the same actor/learner protocol and durability; remote mode adds an encrypted tunnel because the bearer token does not encrypt traffic.",
-  "width": 1200,
-  "height": 980,
+  "title": "Choose a local or remote actor",
+  "subtitle": "Both deployments use the same authenticated actor-learner protocol and durability guarantees.",
+  "eyebrow": "TRACKMANIARL   /   SYSTEM GUIDE   /   08",
+  "width": 1000,
+  "height": 1080,
   "zones": [
-    {"id": "local-zone", "label": "Local train · one Windows host", "x": 40, "y": 150, "w": 520, "h": 315, "color": "green"},
-    {"id": "remote-zone", "label": "Remote actor · separate Trackmania host", "x": 590, "y": 150, "w": 570, "h": 315, "color": "blue"},
-    {"id": "learner-zone", "label": "Shared learner runtime", "x": 40, "y": 495, "w": 1120, "h": 300, "color": "purple"}
+    {"id": "local", "label": "01  Local deployment", "x": 40, "y": 184, "w": 448, "h": 440, "color": "slate"},
+    {"id": "remote", "label": "02  Remote deployment", "x": 512, "y": 184, "w": 448, "h": 440, "color": "slate"}
   ],
   "nodes": [
-    {"id": "launcher", "label": "CLI launcher", "detail": "multiprocessing spawn", "x": 70, "y": 220, "w": 200, "h": 95, "color": "green"},
-    {"id": "local-actor", "label": "Actor process", "detail": "game · policy · spool", "x": 330, "y": 220, "w": 200, "h": 95, "color": "green"},
-    {"id": "local-learner", "label": "Learner process", "detail": "loopback gRPC", "x": 200, "y": 350, "w": 200, "h": 90, "color": "purple"},
-    {"id": "remote-actor", "label": "Actor + spool", "detail": "stable actor ID", "x": 620, "y": 220, "w": 180, "h": 95, "color": "green"},
-    {"id": "tunnel", "label": "SSH or VPN", "detail": "authenticated encryption", "x": 820, "y": 220, "w": 160, "h": 95, "color": "blue"},
-    {"id": "remote-loopback", "label": "Loopback port", "detail": "SSH/VPN forward", "x": 1000, "y": 220, "w": 130, "h": 95, "color": "red"},
-    {"id": "same-contract", "label": "Same run identity", "detail": "token · fingerprint · map · contracts", "x": 780, "y": 350, "w": 260, "h": 90, "color": "red"},
-    {"id": "endpoint", "label": "Coordinator endpoint", "detail": "bounded authenticated requests", "x": 75, "y": 570, "w": 240, "h": 105, "color": "red"},
-    {"id": "wal", "label": "WAL + applied frontier", "detail": "persist before ACK", "x": 350, "y": 570, "w": 240, "h": 105, "color": "orange"},
-    {"id": "learner", "label": "Replay + learner", "detail": "sample · update · evaluate", "x": 625, "y": 570, "w": 240, "h": 105, "color": "purple"},
-    {"id": "outputs", "label": "Portable outputs", "detail": "policy snapshot · checkpoint", "x": 900, "y": 570, "w": 220, "h": 105, "color": "blue"}
+    {"id": "host", "label": "One Windows host", "detail": "Launcher starts separate actor and learner processes using spawn.", "x": 64, "y": 254, "w": 400, "h": 132, "color": "blue", "shape": "rectangle"},
+    {"id": "local-transport", "label": "Local gRPC", "detail": "The actor connects over loopback. Rollouts still pass authentication.", "x": 64, "y": 454, "w": 400, "h": 132, "color": "slate", "shape": "rectangle"},
+    {"id": "remote-actor", "label": "Separate game host", "detail": "The remote actor drives Trackmania and retains a durable rollout spool.", "x": 536, "y": 254, "w": 400, "h": 132, "color": "blue", "shape": "rectangle"},
+    {"id": "tunnel", "label": "SSH or VPN tunnel", "detail": "Authenticated encryption forwards the learner loopback endpoint.", "x": 536, "y": 454, "w": 400, "h": 132, "color": "orange", "shape": "rectangle"},
+    {"id": "shared", "label": "Shared learner runtime", "detail": "Authenticate identity → commit WAL → apply replay → update learner → publish policy / checkpoint", "x": 64, "y": 740, "w": 872, "h": 132, "color": "green", "shape": "rectangle"}
   ],
   "edges": [
-    {"id": "e-launcher-actor", "from": "launcher", "to": "local-actor", "label": "spawn", "color": "green"},
-    {"id": "e-launcher-learner", "from": "launcher", "to": "local-learner", "points": [[170,315],[170,395],[200,395]], "color": "purple"},
-    {"id": "e-local-actor-learner", "from": "local-actor", "to": "local-learner", "points": [[430,315],[430,330],[300,330],[300,350]], "label": "rollouts", "label_at": [365,330], "color": "green"},
-    {"id": "e-remote-actor-tunnel", "from": "remote-actor", "to": "tunnel", "color": "blue"},
-    {"id": "e-tunnel-loopback", "from": "tunnel", "to": "remote-loopback", "color": "blue"},
-    {"id": "e-remote-identity", "from": "remote-actor", "to": "same-contract", "points": [[710,315],[710,395],[780,395]], "color": "red"},
-    {"id": "e-loopback-identity", "from": "remote-loopback", "to": "same-contract", "points": [[1065,315],[1065,395],[1040,395]], "color": "red"},
-    {"id": "e-local-endpoint", "from": "local-learner", "to": "endpoint", "points": [[300,440],[300,475],[20,475],[20,622],[75,622]], "color": "purple"},
-    {"id": "e-remote-endpoint", "from": "same-contract", "to": "endpoint", "points": [[780,395],[575,395],[575,470],[20,470],[20,622],[75,622]], "color": "blue"},
-    {"id": "e-endpoint-wal", "from": "endpoint", "to": "wal", "color": "red"},
-    {"id": "e-wal-learner", "from": "wal", "to": "learner", "color": "orange"},
-    {"id": "e-learner-outputs", "from": "learner", "to": "outputs", "color": "purple"}
+    {"id": "e-host-local-transport", "from": "host", "to": "local-transport", "color": "slate", "points": [[264.0, 386], [264.0, 454]]},
+    {"id": "e-remote-actor-tunnel", "from": "remote-actor", "to": "tunnel", "color": "orange", "points": [[736.0, 386], [736.0, 454]]},
+    {"id": "e-local-transport-shared", "from": "local-transport", "to": "shared", "color": "blue", "points": [[264, 586], [264, 682], [500, 682], [500, 740]]},
+    {"id": "e-tunnel-shared", "from": "tunnel", "to": "shared", "color": "orange", "points": [[736, 586], [736, 682], [500, 682], [500, 740]]}
   ],
   "notes": [
-    {"id": "local-note", "text": "Local does not mean in-process: actor and learner are separate spawn-safe processes, and failures must propagate to the launcher.", "x": 80, "y": 825, "w": 1040, "h": 60, "color": "green"},
-    {"id": "remote-note", "text": "Never expose gRPC directly. Keep the learner on literal loopback and carry it through an authenticated encrypted tunnel.", "x": 80, "y": 905, "w": 1040, "h": 60, "color": "red"}
+    {"id": "identity", "text": "IDENTITY\nBoth sides must agree on the run fingerprint, map and contracts. The bearer token authorizes requests.", "x": 40, "y": 924, "w": 448, "h": 124, "color": "blue"},
+    {"id": "transport", "text": "ENCRYPTION\nThe bearer token does not encrypt traffic. Keep learner gRPC on loopback and tunnel remote access.", "x": 512, "y": 924, "w": 448, "h": 124, "color": "orange"}
   ]
 }

@@ -8,10 +8,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-from docs.diagrams.render_common import PALETTE, Bounds, TextLayout
+from docs.diagrams.render_common import PALETTE, Bounds, TextLayout, node_content_layouts
 from docs.diagrams.render_common import edge_label_position as _edge_label_position
 from docs.diagrams.render_common import edge_points as _edge_points
 from docs.diagrams.render_common import wrap as _wrap
+from docs.diagrams.render_gallery import render_gallery
 from docs.diagrams.render_preview import PreviewDocument, render_html, render_svg
 
 ROOT = Path(__file__).resolve().parent
@@ -22,7 +23,7 @@ ELEMENT_STYLE_DEFAULTS: dict[str, Any] = {
     "fillStyle": "solid",
     "strokeWidth": 2,
     "strokeStyle": "solid",
-    "roughness": 1,
+    "roughness": 0,
     "opacity": 100,
 }
 ELEMENT_FRAME_DEFAULTS: dict[str, Any] = {
@@ -80,7 +81,7 @@ def _text_properties(label: str, wrapped: str, layout: TextLayout) -> dict[str, 
     return {
         "strokeColor": layout.color,
         "fontSize": layout.size,
-        "fontFamily": 1,
+        "fontFamily": 2,
         "text": wrapped,
         "textAlign": layout.align,
         "verticalAlign": "middle",
@@ -91,88 +92,68 @@ def _text_properties(label: str, wrapped: str, layout: TextLayout) -> dict[str, 
     }
 
 
-def _zone_frame(zone: dict[str, Any], stroke: str, fill: str) -> dict[str, Any]:
+def _zone_frame(zone: dict[str, Any]) -> dict[str, Any]:
     bounds = Bounds(zone["x"], zone["y"], zone["w"], zone["h"])
     frame = _base("rectangle", f"zone-{zone['id']}", bounds)
     frame.update(
         {
-            "strokeColor": stroke,
-            "backgroundColor": fill,
-            "strokeStyle": "dashed",
-            "strokeWidth": 1.5,
-            "opacity": 32,
+            "strokeStyle": "solid",
+            "strokeWidth": 0,
+            "strokeColor": "transparent",
+            "backgroundColor": "#f3f5f7",
+            "opacity": 100,
         }
     )
     return frame
 
 
 def _zone_elements(zone: dict[str, Any]) -> list[dict[str, Any]]:
-    stroke, fill = PALETTE[zone["color"]]
+    stroke = PALETTE[zone["color"]][0]
     layout = TextLayout(
-        zone["x"] + 18,
-        zone["y"] + 14,
-        zone["w"] - 36,
-        19,
+        zone["x"] + 24,
+        zone["y"] + 20,
+        zone["w"] - 48,
+        18,
         stroke,
         "left",
     )
     title = _text(f"zone-{zone['id']}-label", zone["label"], layout)
-    return [_zone_frame(zone, stroke, fill), title]
+    return [_zone_frame(zone), title]
 
 
 def _node_box(node: dict[str, Any], stroke: str, fill: str) -> dict[str, Any]:
     bounds = Bounds(node["x"], node["y"], node["w"], node["h"])
     box = _base(node.get("shape", "rectangle"), node["id"], bounds)
-    box.update({"strokeColor": stroke, "backgroundColor": fill, "strokeWidth": 2.5})
-    return box
-
-
-def _node_content_position(node: dict[str, Any]) -> tuple[int, float]:
-    title_lines = _wrap(node["label"], node["w"] - 24, 20).count("\n") + 1
-    detail = node.get("detail", "")
-    detail_lines = _wrap(detail, node["w"] - 28, 18).count("\n") + 1 if detail else 0
-    detail_height = 5 + detail_lines * 22.5 if detail_lines else 0
-    content_height = title_lines * 25 + detail_height
-    title_y = node["y"] + max(7, (node["h"] - content_height) / 2)
-    return title_lines, title_y
-
-
-def _node_title(node: dict[str, Any], title_y: float) -> dict[str, Any]:
-    layout = TextLayout(node["x"] + 12, title_y, node["w"] - 24, 20, "#111827", "center")
-    return _text(f"{node['id']}-title", node["label"], layout)
-
-
-def _node_detail(node: dict[str, Any], title_lines: int, title_y: float) -> list[dict[str, Any]]:
-    detail = node.get("detail")
-    if not detail:
-        return []
-    layout = TextLayout(
-        node["x"] + 14,
-        title_y + title_lines * 25 + 5,
-        node["w"] - 28,
-        18,
-        "#475569",
-        "center",
+    box.update(
+        {
+            "strokeColor": stroke if node.get("shape") == "diamond" else "#cdd7e2",
+            "backgroundColor": fill if node.get("shape") == "diamond" else "#ffffff",
+            "strokeWidth": 1.5,
+        }
     )
-    return [_text(f"{node['id']}-detail", detail, layout)]
+    return box
 
 
 def _node_elements(node: dict[str, Any]) -> list[dict[str, Any]]:
     stroke, fill = PALETTE[node["color"]]
-    title_lines, title_y = _node_content_position(node)
-    elements = [_node_box(node, stroke, fill), _node_title(node, title_y)]
-    return elements + _node_detail(node, title_lines, title_y)
+    elements = [_node_box(node, stroke, fill)]
+    for suffix, label, layout in node_content_layouts(node):
+        elements.append(_text(f"{node['id']}-{suffix}", label, layout))
+    return elements
 
 
 def _arrow_element(edge: dict[str, Any], points: list[list[float]], stroke: str) -> dict[str, Any]:
     start_x, start_y = points[0]
     relative = [[x - start_x, y - start_y] for x, y in points]
-    bounds = Bounds(start_x, start_y, points[-1][0] - start_x, points[-1][1] - start_y)
+    # Linear elements keep their origin at the first point, but their dimensions
+    # cover every bend, including routes that travel left or back upwards.
+    xs, ys = zip(*points, strict=True)
+    bounds = Bounds(start_x, start_y, max(xs) - min(xs), max(ys) - min(ys))
     arrow = _base("arrow", edge["id"], bounds)
     arrow.update(
         {
             "strokeColor": stroke,
-            "strokeWidth": 2.5,
+            "strokeWidth": 1.75,
             "strokeStyle": edge.get("style", "solid"),
             "points": relative,
             "lastCommittedPoint": None,
@@ -203,11 +184,11 @@ def _edge_elements(edge: dict[str, Any], nodes: dict[str, dict[str, Any]]) -> li
 
 
 def _note_elements(note: dict[str, Any]) -> list[dict[str, Any]]:
-    stroke, fill = PALETTE[note.get("color", "slate")]
+    fill = PALETTE[note.get("color", "slate")][1]
     bounds = Bounds(note["x"], note["y"], note["w"], note["h"])
     box = _base("rectangle", note["id"], bounds)
-    box.update({"strokeColor": stroke, "backgroundColor": fill, "strokeWidth": 1.5})
-    layout = TextLayout(note["x"] + 14, note["y"] + 12, note["w"] - 28, 18, "#1f2937", "left")
+    box.update({"strokeColor": "transparent", "backgroundColor": fill, "strokeWidth": 0})
+    layout = TextLayout(note["x"] + 20, note["y"] + 16, note["w"] - 40, 18, "#1f2937", "left")
     return [
         box,
         _text(f"{note['id']}-text", note["text"], layout),
@@ -216,10 +197,15 @@ def _note_elements(note: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _scene_elements(spec: dict[str, Any], nodes: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     elements: list[dict[str, Any]] = []
-    title_layout = TextLayout(55, 28, spec["width"] - 110, 32, "#111827", "left")
-    subtitle_layout = TextLayout(55, 76, spec["width"] - 110, 18, "#64748b", "left")
+    title_layout = TextLayout(40, 57, spec["width"] - 80, 34, "#152b43", "left")
+    subtitle_layout = TextLayout(40, 113, spec["width"] - 80, 18, "#536579", "left")
     elements.extend(
         [
+            _text(
+                "eyebrow",
+                spec.get("eyebrow", "TRACKMANIARL / SYSTEM GUIDE"),
+                TextLayout(40, 20, spec["width"] - 80, 18, "#087d74", "left"),
+            ),
             _text("title", spec["title"], title_layout),
             _text("subtitle", spec["subtitle"], subtitle_layout),
         ]
@@ -268,6 +254,7 @@ def main() -> None:
     paths = args.specs or sorted(ROOT.glob("*.spec.json"))
     for path in paths:
         render_one(path if path.is_absolute() else ROOT / path)
+    (ROOT / "index.html").write_text(render_gallery(ROOT), encoding="utf-8")
 
 
 if __name__ == "__main__":

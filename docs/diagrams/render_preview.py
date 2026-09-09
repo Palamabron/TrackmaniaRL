@@ -2,20 +2,30 @@ from __future__ import annotations
 
 import html
 import json
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, replace
+from functools import lru_cache
+from io import StringIO
 from typing import Any
+
+from matplotlib import rc_context
+from matplotlib.backends.backend_svg import FigureCanvasSVG
+from matplotlib.figure import Figure
 
 from docs.diagrams.render_common import (
     PALETTE,
     TextLayout,
     edge_label_position,
     edge_points,
+    node_content_layouts,
+    text_width,
     wrap,
 )
 
 HTML_STYLE = (
     "body{margin:0;background:#e2e8f0;font-family:system-ui}main{padding:24px}"
-    ".canvas{max-width:1600px;margin:auto;background:white;box-shadow:0 12px 40px #0f172a33}"
+    ".canvas{max-width:1000px;margin:auto;background:white;border:1px solid #dce3ea;"
+    "border-radius:12px;overflow:hidden}"
     "svg{display:block;width:100%;height:auto}button{position:fixed;right:24px;bottom:24px;"
     "padding:12px 18px;border:0;border-radius:9px;background:#1864ab;color:white;"
     "font-weight:700;cursor:pointer}"
@@ -41,7 +51,7 @@ def _svg_text(label: str, layout: TextLayout) -> str:
     )
     return (
         f'<text x="{text_x}" y="{layout.y}" text-anchor="{anchor}" '
-        f'font-family="Inter,Arial,sans-serif" font-size="{layout.size}" '
+        f'font-family="Arial,Helvetica,sans-serif" font-size="{layout.size}" '
         f'fill="{layout.color}">{spans}</text>'
     )
 
@@ -62,36 +72,41 @@ def render_svg(spec: dict[str, Any]) -> str:
 
 
 def _svg_header(spec: dict[str, Any]) -> list[str]:
-    title = TextLayout(55, 61, spec["width"] - 110, 32, "#111827", "start")
-    subtitle = TextLayout(55, 99, spec["width"] - 110, 18, "#64748b", "start")
+    title = TextLayout(40, 91, spec["width"] - 80, 34, "#152b43", "start")
+    subtitle = TextLayout(40, 131, spec["width"] - 80, 18, "#536579", "start")
     return [
         (
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{spec["width"]}" '
             f'height="{spec["height"]}" viewBox="0 0 {spec["width"]} {spec["height"]}">'
         ),
         (
-            '<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" '
+            '<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="8" '
             'refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" '
             'fill="context-stroke"/></marker><filter id="shadow" x="-20%" y="-20%" '
             'width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" '
             'flood-opacity=".14"/></filter></defs>'
         ),
         '<rect width="100%" height="100%" fill="#ffffff"/>',
-        _svg_text(spec["title"], title),
+        _svg_text(
+            spec.get("eyebrow", "TRACKMANIARL / SYSTEM GUIDE"),
+            TextLayout(40, 37, spec["width"] - 80, 18, "#087d74", "start"),
+        ),
+        '<path d="M40,52 H960" stroke="#dce3ea" stroke-width="1"/>',
+        _svg_text(spec["title"], title).replace("<text ", '<text font-weight="600" ', 1),
         _svg_text(spec["subtitle"], subtitle),
     ]
 
 
 def _svg_zone(zone: dict[str, Any]) -> list[str]:
-    stroke, fill = PALETTE[zone["color"]]
-    layout = TextLayout(zone["x"] + 18, zone["y"] + 29, zone["w"] - 36, 19, stroke, "start")
+    stroke = PALETTE[zone["color"]][0]
+    layout = TextLayout(zone["x"] + 24, zone["y"] + 38, zone["w"] - 48, 18, stroke, "start")
     return [
         (
             f'<rect x="{zone["x"]}" y="{zone["y"]}" width="{zone["w"]}" '
-            f'height="{zone["h"]}" rx="14" fill="{fill}" fill-opacity=".35" '
-            f'stroke="{stroke}" stroke-width="1.5" stroke-dasharray="8 7"/>'
+            f'height="{zone["h"]}" rx="10" fill="#f3f5f7" '
+            'stroke="none"/>'
         ),
-        _svg_text(zone["label"], layout),
+        _svg_text(zone["label"], layout).replace("<text ", '<text font-weight="600" ', 1),
     ]
 
 
@@ -101,53 +116,102 @@ def _svg_edge(edge: dict[str, Any], nodes: dict[str, dict[str, Any]]) -> list[st
     dash = ' stroke-dasharray="8 7"' if edge.get("style") == "dashed" else ""
     joined = " ".join(f"{x},{y}" for x, y in points)
     parts = [
+        f'<g data-edge="{html.escape(edge["id"])}">',
         f'<polyline points="{joined}" fill="none" stroke="{stroke}" '
-        f'stroke-width="2.5"{dash} marker-end="url(#arrow)"/>'
+        f'stroke-width="1.75"{dash} marker-end="url(#arrow)"/>',
     ]
     if label := edge.get("label"):
         label_x, label_y = edge.get("label_at", edge_label_position(points))
+        label_width = min(176, text_width(label, 18))
+        label_height = len(wrap(label, 176, 18).split("\n")) * 22.5
         parts.append(
-            f'<rect x="{label_x - 88}" y="{label_y - 22}" width="176" '
-            'height="25" rx="5" fill="#ffffff" fill-opacity=".92"/>'
+            f'<rect x="{label_x - label_width / 2 - 5}" y="{label_y - 24}" '
+            f'width="{label_width + 10}" '
+            f'height="{label_height + 6}" rx="5" fill="#ffffff" fill-opacity=".92"/>'
         )
         layout = TextLayout(label_x - 88, label_y - 5, 176, 18, stroke, "middle")
         parts.append(_svg_text(label, layout))
-    return parts
+    return [*parts, "</g>"]
 
 
-def _svg_node_position(node: dict[str, Any]) -> tuple[int, float]:
-    title_lines = wrap(node["label"], node["w"] - 24, 20).count("\n") + 1
-    detail = node.get("detail", "")
-    detail_lines = wrap(detail, node["w"] - 28, 18).count("\n") + 1 if detail else 0
-    detail_height = 5 + detail_lines * 22.5 if detail_lines else 0
-    content_height = title_lines * 25 + detail_height
-    content_top = node["y"] + max(7, (node["h"] - content_height) / 2)
-    return title_lines, content_top
+@lru_cache(maxsize=64)
+def _math_svg(latex: str, layout: TextLayout, prefix: str) -> tuple[str, str]:
+    """Render LaTeX math as deterministic SVG paths."""
+    figure = Figure(figsize=(8, 1), dpi=72)
+    FigureCanvasSVG(figure)
+    figure.text(
+        0,
+        0.5,
+        f"${latex}$",
+        fontsize=layout.size,
+        color=layout.color,
+        va="center",
+    )
+    output = StringIO()
+    with rc_context({"svg.fonttype": "path", "svg.hashsalt": "trackmaniarl-diagrams"}):
+        figure.savefig(
+            output,
+            format="svg",
+            transparent=True,
+            bbox_inches="tight",
+            pad_inches=0,
+            metadata={"Date": None},
+        )
+    source = output.getvalue()
+    view_box = re.search(r'viewBox="([^"]+)"', source)
+    if view_box is None:
+        raise ValueError("Rendered formula has no SVG viewBox")
+    body = source[source.index(">", source.index("<svg")) + 1 : source.rindex("</svg>")]
+    body = re.sub(r"<metadata>.*?</metadata>", "", body, flags=re.DOTALL)
+    body = "\n".join(line.rstrip() for line in body.splitlines())
+    ids = set(re.findall(r'id="([^"]+)"', body))
+    for element_id in sorted(ids, key=len, reverse=True):
+        safe_id = f"{prefix}-{element_id}"
+        body = body.replace(f'id="{element_id}"', f'id="{safe_id}"')
+        body = body.replace(f'#{element_id}"', f'#{safe_id}"')
+    return view_box.group(1), body
+
+
+def _svg_formula(latex: str, layout: TextLayout, item_id: str) -> str:
+    view_box, body = _math_svg(latex, layout, item_id)
+    return (
+        f'<svg data-formula="{html.escape(item_id)}" x="{layout.x}" y="{layout.y}" '
+        f'width="{layout.width}" height="{layout.size * 1.6}" viewBox="{view_box}" '
+        f'preserveAspectRatio="xMinYMid meet">{body}</svg>'
+    )
 
 
 def _svg_node_text(node: dict[str, Any]) -> list[str]:
-    title_lines, content_top = _svg_node_position(node)
-    title_layout = TextLayout(
-        node["x"] + 12, content_top + 20, node["w"] - 24, 20, "#111827", "middle"
-    )
-    parts = [_svg_text(node["label"], title_layout)]
-    detail = node.get("detail")
-    if not detail:
-        return parts
-    detail_layout = TextLayout(
-        node["x"] + 14,
-        content_top + title_lines * 25 + 23,
-        node["w"] - 28,
-        18,
-        "#475569",
-        "middle",
-    )
-    return [*parts, _svg_text(detail, detail_layout)]
+    parts = []
+    for kind, label, layout in node_content_layouts(node):
+        if kind == "formula":
+            parts.append(_svg_formula(node["formula"], layout, f"{node['id']}-formula"))
+            continue
+        svg_layout = replace(
+            layout,
+            y=layout.y + layout.size,
+            align="middle" if layout.align == "center" else "start",
+        )
+        text = _svg_text(label, svg_layout)
+        if kind == "title":
+            text = text.replace("<text ", '<text font-weight="600" ', 1)
+        parts.append(text)
+    return parts
 
 
 def _svg_node(node: dict[str, Any]) -> list[str]:
     stroke, fill = PALETTE[node["color"]]
-    return [_svg_node_shape(node, stroke, fill), *_svg_node_text(node)]
+    return [
+        f'<g data-node="{html.escape(node["id"])}">',
+        _svg_node_shape(node, stroke, fill),
+        (
+            f'<path d="M{node["x"] + 20},{node["y"] + 1} h32" stroke="{stroke}" stroke-width="3"/>'
+            if node.get("shape") != "diamond"
+            else ""
+        ),
+        *_svg_node_text(node),
+        "</g>",
+    ]
 
 
 def _svg_node_shape(node: dict[str, Any], stroke: str, fill: str) -> str:
@@ -160,27 +224,26 @@ def _svg_node_shape(node: dict[str, Any], stroke: str, fill: str) -> str:
                 f"{node['x']},{node['y'] + node['h'] / 2}",
             )
         )
-        return (
-            f'<polygon points="{points}" fill="{fill}" stroke="{stroke}" '
-            'stroke-width="2.5" filter="url(#shadow)"/>'
-        )
+        return f'<polygon points="{points}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>'
     return (
         f'<rect x="{node["x"]}" y="{node["y"]}" width="{node["w"]}" '
-        f'height="{node["h"]}" rx="12" fill="{fill}" stroke="{stroke}" '
-        'stroke-width="2.5" filter="url(#shadow)"/>'
+        f'height="{node["h"]}" rx="8" fill="#ffffff" stroke="#cdd7e2" '
+        'stroke-width="1.5"/>'
     )
 
 
 def _svg_note(note: dict[str, Any]) -> list[str]:
-    stroke, fill = PALETTE[note.get("color", "slate")]
-    layout = TextLayout(note["x"] + 14, note["y"] + 31, note["w"] - 28, 18, "#1f2937", "start")
+    fill = PALETTE[note.get("color", "slate")][1]
+    layout = TextLayout(note["x"] + 20, note["y"] + 34, note["w"] - 40, 18, "#1f2937", "start")
     return [
+        f'<g data-note="{html.escape(note["id"])}">',
         (
             f'<rect x="{note["x"]}" y="{note["y"]}" width="{note["w"]}" '
-            f'height="{note["h"]}" rx="10" fill="{fill}" stroke="{stroke}" '
+            f'height="{note["h"]}" rx="8" fill="{fill}" stroke="none" '
             'stroke-width="1.5"/>'
         ),
-        _svg_text(note["text"], layout),
+        _svg_text(note["text"], layout).replace("<tspan ", '<tspan font-weight="600" ', 1),
+        "</g>",
     ]
 
 
@@ -196,7 +259,9 @@ def _download_script(stem: str) -> str:
 
 
 def render_html(preview: PreviewDocument) -> str:
-    encoded = html.escape(json.dumps(preview.scene, ensure_ascii=False))
+    # Script contents are raw text: HTML entities would corrupt JSON.parse.
+    # Escape '<' as JSON instead, so labels cannot close the script element.
+    encoded = json.dumps(preview.scene, ensure_ascii=False).replace("<", "\\u003c")
     script = _download_script(preview.stem)
     return "\n".join(
         (

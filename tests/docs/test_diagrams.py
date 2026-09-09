@@ -5,9 +5,13 @@ import runpy
 import struct
 import sys
 from collections.abc import Callable
+from html.parser import HTMLParser
+from itertools import combinations
 from pathlib import Path
 from typing import Any, cast
 from unittest.mock import patch
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 DIAGRAMS = ROOT / "docs" / "diagrams"
@@ -102,3 +106,113 @@ def _assert_png_matches_canvas(stem: str) -> None:
 def test_png_previews_match_canvases() -> None:
     for stem in EXPECTED_STEMS:
         _assert_png_matches_canvas(stem)
+
+
+class _SceneScriptParser(HTMLParser):
+    """Read script raw text the same way the browser's textContent does."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.in_scene = False
+        self.payload = ""
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.in_scene = tag == "script" and dict(attrs).get("id") == "scene"
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "script":
+            self.in_scene = False
+
+    def handle_data(self, data: str) -> None:
+        if self.in_scene:
+            self.payload += data
+
+
+def test_html_download_preserves_scene_json_and_special_characters() -> None:
+    spec = _spec("runtime-architecture")
+    spec["title"] = 'Quotes " & <tags> </script><script>alert(1)</script>'
+    scene = BUILD_SCENE(spec)
+    document = RENDER_HTML(PREVIEW_DOCUMENT(spec, RENDER_SVG(spec), scene, "test"))
+    parser = _SceneScriptParser()
+    parser.feed(document)
+
+    assert json.loads(parser.payload) == scene
+    assert "</script>" not in parser.payload
+
+
+def test_committed_html_downloads_contain_valid_scene_json() -> None:
+    for stem in EXPECTED_STEMS:
+        parser = _SceneScriptParser()
+        parser.feed((DIAGRAMS / f"{stem}-preview.html").read_text(encoding="utf-8"))
+        assert json.loads(parser.payload) == BUILD_SCENE(_spec(stem))
+
+
+def test_editable_arrow_bounds_include_every_bend() -> None:
+    for stem in EXPECTED_STEMS:
+        spec = _spec(stem)
+        scene = BUILD_SCENE(spec)
+        arrows = {item["id"]: item for item in scene["elements"] if item["type"] == "arrow"}
+        for edge in spec["edges"]:
+            arrow = arrows[edge["id"]]
+            xs, ys = zip(*arrow["points"], strict=True)
+            assert arrow["width"] == max(xs) - min(xs)
+            assert arrow["height"] == max(ys) - min(ys)
+            if "points" in edge:
+                assert [[arrow["x"] + x, arrow["y"] + y] for x, y in arrow["points"]] == edge[
+                    "points"
+                ]
+
+
+def test_text_stays_inside_nodes_and_notes() -> None:
+    for stem in EXPECTED_STEMS:
+        spec = _spec(stem)
+        elements = {element["id"]: element for element in BUILD_SCENE(spec)["elements"]}
+        for node in [*spec["nodes"], *spec.get("notes", [])]:
+            for suffix in ("title", "formula", "detail", "text"):
+                text = elements.get(f"{node['id']}-{suffix}")
+                if text is None:
+                    continue
+                for x in (text["x"], text["x"] + text["width"]):
+                    for y in (text["y"], text["y"] + text["height"]):
+                        if node.get("shape") == "diamond":
+                            assert (
+                                abs(x - node["x"] - node["w"] / 2) / (node["w"] / 2)
+                                + abs(y - node["y"] - node["h"] / 2) / (node["h"] / 2)
+                            ) <= 0.94, (stem, node["id"])
+                        else:
+                            assert node["x"] + 7 <= x <= node["x"] + node["w"] - 7
+                            assert node["y"] + 7 <= y <= node["y"] + node["h"] - 7
+
+
+def test_renderer_rejects_overfilled_diamond() -> None:
+    spec = _spec("imitation-learning")
+    node = next(node for node in spec["nodes"] if node["id"] == "promote")
+    node["detail"] = "named criteria, never implicit"
+    with pytest.raises(ValueError, match="Text does not fit node 'promote'"):
+        BUILD_SCENE(spec)
+
+
+def test_nodes_and_notes_have_clear_separation() -> None:
+    for stem in EXPECTED_STEMS:
+        spec = _spec(stem)
+        for a, b in combinations([*spec["nodes"], *spec.get("notes", [])], 2):
+            assert (
+                a["x"] + a["w"] + 8 <= b["x"]
+                or b["x"] + b["w"] + 8 <= a["x"]
+                or a["y"] + a["h"] + 8 <= b["y"]
+                or b["y"] + b["h"] + 8 <= a["y"]
+            ), (stem, a["id"], b["id"])
+
+
+def test_latex_formulas_have_editable_fallbacks_and_svg_paths() -> None:
+    formula_count = 0
+    for stem in EXPECTED_STEMS:
+        spec = _spec(stem)
+        formulas = [node for node in spec["nodes"] if "formula" in node]
+        formula_count += len(formulas)
+        svg = RENDER_SVG(spec)
+        for node in formulas:
+            assert node["formula_plain"]
+            assert f'data-formula="{node["id"]}-formula"' in svg
+            assert f'id="{node["id"]}-formula-' in svg
+    assert formula_count >= 7

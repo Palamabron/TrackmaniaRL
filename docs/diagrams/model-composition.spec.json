@@ -1,46 +1,35 @@
 {
-  "title": "Composable discrete-value model",
-  "subtitle": "Scalar Q, QR-DQN, IQN and FQF share one sequence-safe learner; head and strategy determine the value representation.",
-  "width": 1200,
-  "height": 960,
+  "title": "Compose a value-based agent",
+  "subtitle": "Choose representation and value components independently. The same learner trains the composition.",
+  "eyebrow": "TRACKMANIARL   /   SYSTEM GUIDE   /   04",
+  "width": 1000,
+  "height": 1144,
   "zones": [
-    {"id": "representation-zone", "label": "Representation path", "x": 40, "y": 145, "w": 1120, "h": 220, "color": "blue"},
-    {"id": "composition-zone", "label": "Head + strategy", "x": 40, "y": 395, "w": 440, "h": 360, "color": "cyan"},
-    {"id": "target-zone", "label": "Double-DQN update", "x": 510, "y": 395, "w": 650, "h": 400, "color": "purple"}
+    {"id": "representation", "label": "01  Build a representation", "x": 40, "y": 184, "w": 920, "h": 248, "color": "slate"},
+    {"id": "composition", "label": "02  Choose the value representation", "x": 40, "y": 470, "w": 920, "h": 238, "color": "slate"},
+    {"id": "update", "label": "03  Train with the shared DiscreteValueLearner", "x": 40, "y": 746, "w": 920, "h": 234, "color": "slate"}
   ],
   "nodes": [
-    {"id": "batch", "label": "Sequence batch", "detail": "n-step · masks · burn-in", "x": 70, "y": 205, "w": 220, "h": 100, "color": "slate"},
-    {"id": "adapter", "label": "Frame adapter", "detail": "[B,T,…] → [B·T,…]", "x": 350, "y": 205, "w": 220, "h": 100, "color": "blue"},
-    {"id": "encoder", "label": "Sensor encoder", "detail": "independent frames", "x": 630, "y": 205, "w": 220, "h": 100, "color": "green"},
-    {"id": "temporal", "label": "Temporal core", "detail": "Identity · GRU · Mamba", "x": 910, "y": 205, "w": 220, "h": 100, "color": "purple"},
-    {"id": "head", "label": "Value head", "detail": "scalar · QR · IQN/FQF", "x": 70, "y": 465, "w": 180, "h": 105, "color": "cyan"},
-    {"id": "strategy", "label": "Value strategy", "detail": "support · expectation", "x": 285, "y": 465, "w": 165, "h": 105, "color": "purple"},
-    {"id": "values", "label": "Action values", "detail": "[..., quantiles, actions]", "x": 175, "y": 625, "w": 200, "h": 95, "color": "orange"},
-    {"id": "current", "label": "Current action", "detail": "selected distribution", "x": 540, "y": 465, "w": 175, "h": 105, "color": "green"},
-    {"id": "online", "label": "Online next state", "detail": "all actions → argmax", "x": 745, "y": 465, "w": 175, "h": 105, "color": "blue"},
-    {"id": "target", "label": "Target next state", "detail": "evaluate selected argmax", "x": 950, "y": 465, "w": 180, "h": 105, "color": "purple"},
-    {"id": "optimizer", "label": "Optimizers", "detail": "main · FQF fraction", "x": 540, "y": 625, "w": 175, "h": 105, "color": "orange"},
-    {"id": "loss", "label": "Loss + priority", "detail": "TD/quantile loss · PER", "x": 745, "y": 625, "w": 175, "h": 105, "color": "red"},
-    {"id": "sync", "label": "Target sync", "detail": "parameters + buffers", "x": 950, "y": 625, "w": 180, "h": 105, "color": "purple"}
+    {"id": "adapter", "label": "Frame adapter", "formula": "[B,T,\\ldots] \\rightarrow [BT,\\ldots]", "formula_plain": "[B,T,...] → [BT,...]", "detail": "Restore sequence axes.", "x": 64, "y": 252, "w": 248, "h": 160, "color": "blue", "shape": "rectangle"},
+    {"id": "encoder", "label": "Sensor encoder", "detail": "Encode each frame independently.", "x": 376, "y": 252, "w": 248, "h": 144, "color": "blue", "shape": "rectangle"},
+    {"id": "temporal", "label": "Temporal core", "detail": "Identity, GRU or Mamba\nRecurrent execution", "x": 688, "y": 252, "w": 248, "h": 144, "color": "blue", "shape": "rectangle"},
+    {"id": "head-strategy", "label": "Value head + strategy", "detail": "Scalar Q · fixed quantiles (QR-DQN)\nRandom support (IQN) · learned fractions (FQF)", "x": 64, "y": 538, "w": 560, "h": 136, "color": "green", "shape": "rectangle"},
+    {"id": "values", "label": "Action values", "detail": "Scalar or quantile values for each action", "x": 688, "y": 538, "w": 248, "h": 136, "color": "green", "shape": "rectangle"},
+    {"id": "current", "label": "Current action", "detail": "Evaluate the selected action distribution.", "x": 64, "y": 812, "w": 248, "h": 136, "color": "green", "shape": "rectangle"},
+    {"id": "target", "label": "Double-Q target", "detail": "Online selects\nTarget evaluates", "x": 376, "y": 812, "w": 248, "h": 136, "color": "green", "shape": "rectangle"},
+    {"id": "loss", "label": "Loss + update", "detail": "Regress values\nPriorities + target sync", "x": 688, "y": 812, "w": 248, "h": 136, "color": "green", "shape": "rectangle"}
   ],
   "edges": [
-    {"id": "e-batch-adapter", "from": "batch", "to": "adapter", "color": "blue"},
     {"id": "e-adapter-encoder", "from": "adapter", "to": "encoder", "color": "blue"},
-    {"id": "e-encoder-temporal", "from": "encoder", "to": "temporal", "color": "green"},
-    {"id": "e-temporal-head", "from": "temporal", "to": "head", "points": [[1020,305],[1020,380],[160,380],[160,465]], "color": "cyan"},
-    {"id": "e-temporal-strategy", "from": "temporal", "to": "strategy", "points": [[1020,305],[1045,305],[1045,385],[367,385],[367,465]], "color": "purple"},
-    {"id": "e-head-values", "from": "head", "to": "values", "points": [[160,570],[160,600],[275,600],[275,625]], "color": "cyan"},
-    {"id": "e-strategy-values", "from": "strategy", "to": "values", "points": [[367,570],[367,600],[275,600],[275,625]], "color": "purple"},
-    {"id": "e-values-current", "from": "values", "to": "current", "points": [[375,672],[500,672],[500,517],[540,517]], "color": "green"},
-    {"id": "e-values-online", "from": "values", "to": "online", "points": [[375,650],[480,650],[480,440],[832,440],[832,465]], "color": "blue"},
-    {"id": "e-online-target", "from": "online", "to": "target", "color": "blue"},
-    {"id": "e-current-loss", "from": "current", "to": "loss", "points": [[627,570],[627,600],[832,600],[832,625]], "color": "green"},
-    {"id": "e-target-loss", "from": "target", "to": "loss", "points": [[1040,570],[1040,600],[832,600],[832,625]], "color": "purple"},
-    {"id": "e-loss-optimizer", "from": "loss", "to": "optimizer", "color": "red"},
-    {"id": "e-optimizer-sync", "from": "optimizer", "to": "sync", "points": [[627,720],[627,775],[1040,775],[1040,720]], "label": "after step", "label_at": [832,775], "color": "purple", "style": "dashed"}
+    {"id": "e-encoder-temporal", "from": "encoder", "to": "temporal", "color": "blue"},
+    {"id": "e-head-strategy-values", "from": "head-strategy", "to": "values", "color": "green"},
+    {"id": "e-temporal-head-strategy", "from": "temporal", "to": "head-strategy", "color": "blue", "points": [[812, 396], [812, 450], [28, 450], [28, 606], [64, 606]]},
+    {"id": "e-current-target", "from": "current", "to": "target", "color": "green"},
+    {"id": "e-target-loss", "from": "target", "to": "loss", "color": "green"},
+    {"id": "e-values-current", "from": "values", "to": "current", "color": "green", "points": [[936, 606], [972, 606], [972, 730], [28, 730], [28, 880], [64, 880]]}
   ],
   "notes": [
-    {"id": "pairs", "text": "Valid pairs: ScalarQ + Scalar · FixedQuantile + Fixed · ImplicitQuantile + Random (IQN) or Learned fractions (FQF).", "x": 75, "y": 815, "w": 1050, "h": 60, "color": "cyan"},
-    {"id": "axis", "text": "Expectation owns the quantile axis. Selected-action priorities add a singleton action axis and are validated before backward.", "x": 75, "y": 885, "w": 1050, "h": 65, "color": "red"}
+    {"id": "fqf", "text": "FQF\nUses a separate fraction optimizer and a target-side fraction proposal network.", "x": 40, "y": 1016, "w": 448, "h": 100, "color": "green"},
+    {"id": "state", "text": "RECURRENT STATE\nBurn-in rebuilds context. Actor hidden state belongs to an episode, not the checkpoint.", "x": 512, "y": 1016, "w": 448, "h": 100, "color": "slate"}
   ]
 }

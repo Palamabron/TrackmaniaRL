@@ -1,93 +1,495 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1150" viewBox="0 0 1700 1150">
-<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".14"/></filter></defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1140" viewBox="0 0 1000 1140">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".14"/></filter></defs>
 <rect width="100%" height="100%" fill="#ffffff"/>
-<text x="55" y="61" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="32" fill="#111827"><tspan x="55" dy="0">Recurrent replay sequence, n-step target and PER feedback</tspan></text>
-<text x="55" y="99" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="18" fill="#64748b"><tspan x="55" dy="0">A sampled anchor is eligible only when its full episode-local history and n-step horizon are available; burn-in is context, not a loss region.</tspan></text>
-<rect x="45" y="130" width="400" height="750" rx="14" fill="#dbeafe" fill-opacity=".35" stroke="#1864ab" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="63" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#1864ab"><tspan x="63" dy="0">Replay eligibility</tspan></text>
-<rect x="470" y="130" width="520" height="750" rx="14" fill="#dcfce7" fill-opacity=".35" stroke="#2b8a3e" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="488" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#2b8a3e"><tspan x="488" dy="0">Sequence unroll</tspan></text>
-<rect x="1015" y="130" width="300" height="750" rx="14" fill="#ede9fe" fill-opacity=".35" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="1033" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#7048e8"><tspan x="1033" dy="0">Value target</tspan></text>
-<rect x="1340" y="130" width="315" height="750" rx="14" fill="#ffedd5" fill-opacity=".35" stroke="#d97706" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="1358" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#d97706"><tspan x="1358" dy="0">Prioritized replay</tspan><tspan x="1358" dy="23.75">feedback</tspan></text>
-<polyline points="245,295 245,380" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="245,495 245,585" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="405,642 455,642 455,340 730,340 730,295" fill="none" stroke="#1864ab" stroke-width="2.5" marker-end="url(#arrow)"/>
-<rect x="487" y="318" width="176" height="25" rx="5" fill="#ffffff" fill-opacity=".92"/>
-<text x="575.0" y="335" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#1864ab"><tspan x="575.0" dy="0">sample history</tspan></text>
-<polyline points="405,805 480,805 480,915 732,915 732,855" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="620,295 620,385" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="840,295 840,385" fill="none" stroke="#2b8a3e" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="715,445.0 745,445.0" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-<rect x="642.0" y="405.0" width="176" height="25" rx="5" fill="#ffffff" fill-opacity=".92"/>
-<text x="730.0" y="422.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="730.0" dy="0">hidden state</tspan></text>
-<polyline points="612,610 612,560 847,560 847,505" fill="none" stroke="#1864ab" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="950,662 995,662 995,497 1045,497" fill="none" stroke="#7048e8" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="950,445 990,445 990,497 1045,497" fill="none" stroke="#2b8a3e" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1165,325 1165,425" fill="none" stroke="#087f8c" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1165,690 1165,570" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1045,497 1000,497 1000,915 732,915 732,855" fill="none" stroke="#7048e8" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="840,817 1010,817 1010,350 1345,350 1345,260 1375,260" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1497,315 1497,405" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1497,540 1497,630" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1497,750 1497,760" fill="none" stroke="#2b8a3e" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1497,870 1497,945 60,945 60,805 85,805" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
-<rect x="687" y="923" width="176" height="25" rx="5" fill="#ffffff" fill-opacity=".92"/>
-<text x="775.0" y="940" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#d97706"><tspan x="775.0" dy="0">next sampled</tspan><tspan x="775.0" dy="22.5">batch</tspan></text>
-<rect x="85" y="190" width="320" height="105" rx="12" fill="#f1f5f9" stroke="#475569" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="245.0" y="236.25" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="245.0" dy="0">Replay transitions</tspan></text>
-<text x="245.0" y="264.25" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="245.0" dy="0">interleaved actor IDs</tspan></text>
-<rect x="85" y="380" width="320" height="115" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="245.0" y="420.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="245.0" dy="0">Episode-local chain</tspan></text>
-<text x="245.0" y="448.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="245.0" dy="0">same episode + step</tspan><tspan x="245.0" dy="22.5">no boundary crossing</tspan></text>
-<rect x="85" y="585" width="320" height="115" rx="12" fill="#dbeafe" stroke="#1864ab" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="245.0" y="625.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="245.0" dy="0">Eligible anchor</tspan></text>
-<text x="245.0" y="653.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="245.0" dy="0">L unique history IDs +</tspan><tspan x="245.0" dy="22.5">complete n-step horizon</tspan></text>
-<rect x="85" y="760" width="320" height="90" rx="12" fill="#ffedd5" stroke="#d97706" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="245.0" y="798.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="245.0" dy="0">Sampled anchor weight</tspan></text>
-<text x="245.0" y="826.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="245.0" dy="0">normalized IS weight</tspan></text>
-<rect x="510" y="190" width="440" height="105" rx="12" fill="#dcfce7" stroke="#2b8a3e" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="730.0" y="236.25" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="730.0" dy="0">Sequence window</tspan></text>
-<text x="730.0" y="264.25" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="730.0" dy="0">t0 … tL−1; priority anchor = tL−1</tspan></text>
-<rect x="510" y="385" width="205" height="120" rx="12" fill="#f1f5f9" stroke="#475569" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="612.5" y="427.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="612.5" dy="0">Burn-in [0, B)</tspan></text>
-<text x="612.5" y="455.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="612.5" dy="0">state update only</tspan><tspan x="612.5" dy="22.5">detached gradient</tspan></text>
-<rect x="745" y="385" width="205" height="120" rx="12" fill="#cffafe" stroke="#087f8c" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="847.5" y="415.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="847.5" dy="0">Learning</tspan><tspan x="847.5" dy="25.0">positions</tspan></text>
-<text x="847.5" y="468.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="847.5" dy="0">B … L−n−1 plus</tspan><tspan x="847.5" dy="22.5">final anchor</tspan></text>
-<rect x="510" y="610" width="205" height="105" rx="12" fill="#dbeafe" stroke="#1864ab" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="612.5" y="645.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="612.5" dy="0">Validity mask</tspan></text>
-<text x="612.5" y="673.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="612.5" dy="0">valid loss</tspan><tspan x="612.5" dy="22.5">positions only</tspan></text>
-<rect x="745" y="610" width="205" height="105" rx="12" fill="#ede9fe" stroke="#7048e8" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="847.5" y="645.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="847.5" dy="0">Target history</tspan></text>
-<text x="847.5" y="673.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="847.5" dy="0">next window keeps</tspan><tspan x="847.5" dy="22.5">context</tspan></text>
-<rect x="625" y="765" width="215" height="90" rx="12" fill="#dcfce7" stroke="#2b8a3e" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="732.5" y="792.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="732.5" dy="0">Per-position loss</tspan></text>
-<text x="732.5" y="820.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="732.5" dy="0">value regression</tspan><tspan x="732.5" dy="22.5">per valid position</tspan></text>
-<rect x="1045" y="210" width="240" height="115" rx="12" fill="#cffafe" stroke="#087f8c" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1165.0" y="250.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1165.0" dy="0">Double-Q bootstrap</tspan></text>
-<text x="1165.0" y="278.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1165.0" dy="0">online selects</tspan><tspan x="1165.0" dy="22.5">target evaluates</tspan></text>
-<rect x="1045" y="425" width="240" height="145" rx="12" fill="#ede9fe" stroke="#7048e8" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1165.0" y="480.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1165.0" dy="0">n-step target</tspan></text>
-<text x="1165.0" y="508.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1165.0" dy="0">Gₜ = Σ γⁱ rₜ₊ᵢ + γᵏ</tspan><tspan x="1165.0" dy="22.5">Qtarget(sₜ₊ₖ)</tspan></text>
-<rect x="1045" y="690" width="240" height="115" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1165.0" y="730.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1165.0" dy="0">Bootstrap contract</tspan></text>
-<text x="1165.0" y="758.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1165.0" dy="0">terminated: zero</tspan><tspan x="1165.0" dy="22.5">truncated: bootstrap</tspan></text>
-<rect x="1375" y="205" width="245" height="110" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1497.5" y="242.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1497.5" dy="0">Absolute value error</tspan></text>
-<text x="1497.5" y="270.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1497.5" dy="0">one |TD| per trained</tspan><tspan x="1497.5" dy="22.5">position</tspan></text>
-<rect x="1375" y="405" width="245" height="135" rx="12" fill="#ffedd5" stroke="#d97706" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1497.5" y="455.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1497.5" dy="0">Sequence priority</tspan></text>
-<text x="1497.5" y="483.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1497.5" dy="0">p = 0.9 · max(|TD|) +</tspan><tspan x="1497.5" dy="22.5">0.1 · mean(|TD|)</tspan></text>
-<rect x="1375" y="630" width="245" height="120" rx="12" fill="#dcfce7" stroke="#2b8a3e" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1497.5" y="672.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1497.5" dy="0">Sampling probability</tspan></text>
-<text x="1497.5" y="700.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1497.5" dy="0">p^alpha + optional</tspan><tspan x="1497.5" dy="22.5">uniform/elite mix</tspan></text>
-<rect x="1375" y="760" width="245" height="110" rx="12" fill="#dbeafe" stroke="#1864ab" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1497.5" y="787" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1497.5" dy="0">Importance</tspan><tspan x="1497.5" dy="25.0">correction</tspan></text>
-<text x="1497.5" y="840" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1497.5" dy="0">w = (N · P)^−beta</tspan><tspan x="1497.5" dy="22.5">normalized by max</tspan></text>
-<rect x="85" y="990" width="1530" height="62" rx="10" fill="#fee2e2" stroke="#c92a2a" stroke-width="1.5"/>
-<text x="99" y="1021" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="18" fill="#1f2937"><tspan x="99" dy="0">Validated before training: n_step &lt; sequence_length, burn_in &lt; sequence_length, and sequence replay cannot be combined with a feature pipeline that</tspan><tspan x="99" dy="22.5">already stacks history.</tspan></text>
-<rect x="85" y="1065" width="1530" height="70" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
-<text x="99" y="1096" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="18" fill="#1f2937"><tspan x="99" dy="0">Scope: R2D2-style recurrent replay. The package reconstructs episode-local histories and burn-in, but does not claim the complete distributed R2D2</tspan><tspan x="99" dy="22.5">system.</tspan></text>
+<text x="40" y="37" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#087d74"><tspan x="40" dy="0">TRACKMANIARL / SYSTEM GUIDE / 06</tspan></text>
+<path d="M40,52 H960" stroke="#dce3ea" stroke-width="1"/>
+<text font-weight="600" x="40" y="91" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="34" fill="#152b43"><tspan x="40" dy="0">Learn from a complete replay history</tspan></text>
+<text x="40" y="131" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="40" dy="0">Episode-local windows preserve real context. Masks and n-step horizons determine valid learning.</tspan></text>
+<rect x="40" y="184" width="920" height="238" rx="10" fill="#f3f5f7" stroke="none"/>
+<text font-weight="600" x="64" y="222" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="64" dy="0">01 One contiguous history, t0 ... tL-1</tspan></text>
+<rect x="40" y="466" width="920" height="240" rx="10" fill="#f3f5f7" stroke="none"/>
+<text font-weight="600" x="64" y="504" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="64" dy="0">02 Construct targets and train</tspan></text>
+<g data-edge="e-eligible-target">
+<polyline points="312,604.0 376,604.0" fill="none" stroke="#285cc4" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-edge="e-target-loss">
+<polyline points="624,604.0 688,604.0" fill="none" stroke="#087d74" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-edge="e-loss-priority">
+<polyline points="812,676 812,742 264,742 264,778" fill="none" stroke="#087d74" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-edge="e-priority-sampling">
+<polyline points="464,854.0 536,850.0" fill="none" stroke="#9b681f" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-edge="e-sampling-eligible">
+<polyline points="736,922 736,964 28,964 28,604 64,604" fill="none" stroke="#9b681f" stroke-width="1.75" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
+</g>
+<g data-node="burnin">
+<rect x="64" y="258" width="240" height="124" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M84,259 h32" stroke="#536579" stroke-width="3"/>
+<text font-weight="600" x="84.0" y="301.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="84.0" dy="0">Burn-in [0, B)</tspan></text>
+<text x="84.0" y="332.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="84.0" dy="0">Rebuild state.</tspan><tspan x="84.0" dy="22.5">No gradient.</tspan></text>
+</g>
+<g data-node="learning">
+<rect x="328" y="258" width="344" height="124" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M348,259 h32" stroke="#087d74" stroke-width="3"/>
+<text font-weight="600" x="348.0" y="301.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="348.0" dy="0">Learning positions</tspan></text>
+<text x="348.0" y="332.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="348.0" dy="0">B ... L-n-1</tspan><tspan x="348.0" dy="22.5">Train only valid positions.</tspan></text>
+</g>
+<g data-node="anchor">
+<rect x="696" y="258" width="240" height="124" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M716,259 h32" stroke="#087d74" stroke-width="3"/>
+<text font-weight="600" x="716.0" y="301.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="716.0" dy="0">Final anchor</tspan></text>
+<text x="716.0" y="332.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="716.0" dy="0">tL-1</tspan><tspan x="716.0" dy="22.5">Own n-step target.</tspan></text>
+</g>
+<g data-node="eligible">
+<rect x="64" y="532" width="248" height="144" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M84,533 h32" stroke="#285cc4" stroke-width="3"/>
+<text font-weight="600" x="84.0" y="585.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="84.0" dy="0">Eligible sample</tspan></text>
+<text x="84.0" y="616.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="84.0" dy="0">One episode + IDs</tspan><tspan x="84.0" dy="22.5">Complete n-step horizon</tspan></text>
+</g>
+<g data-node="target">
+<rect x="376" y="532" width="248" height="144" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M396,533 h32" stroke="#087d74" stroke-width="3"/>
+<text font-weight="600" x="396.0" y="585.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="396.0" dy="0">N-step target</tspan></text>
+<text x="396.0" y="616.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="396.0" dy="0">Rewards + bootstrap</tspan><tspan x="396.0" dy="22.5">Double-Q evaluation</tspan></text>
+</g>
+<g data-node="loss">
+<rect x="688" y="532" width="248" height="144" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M708,533 h32" stroke="#087d74" stroke-width="3"/>
+<text font-weight="600" x="708.0" y="585.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="708.0" dy="0">Masked value loss</tspan></text>
+<text x="708.0" y="616.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="708.0" dy="0">Valid positions only</tspan><tspan x="708.0" dy="22.5">Absolute TD errors</tspan></text>
+</g>
+<g data-node="priority">
+<rect x="64" y="778" width="400" height="152" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M84,779 h32" stroke="#9b681f" stroke-width="3"/>
+<text font-weight="600" x="84.0" y="826.85" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="84.0" dy="0">Sequence priority</tspan></text>
+<svg data-formula="priority-formula" x="84.0" y="841.85" width="360" height="28.8" viewBox="0 0 296.1 27.18" preserveAspectRatio="xMinYMid meet">
+
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="priority-formula-figure_1">
+  <g id="priority-formula-patch_1">
+   <path d="M 0 27.18
+L 296.1 27.18
+L 296.1 0
+L 0 0
+L 0 27.18
+z
+" style="fill: none"/>
+  </g>
+  <g id="priority-formula-text_1">
+   <!-- $p_{\mathrm{seq}} = 0.9\,\max_i |\delta_i| + 0.1\,\operatorname{mean}_i |\delta_i|$ -->
+   <g style="fill: #152b43" transform="translate(0 13.86) scale(0.18 -0.18)">
+    <defs>
+     <path id="priority-formula-DejaVuSans-Oblique-70" d="M 3175 2156
+Q 3175 2616 2975 2859
+Q 2775 3103 2400 3103
+Q 2144 3103 1911 2972
+Q 1678 2841 1497 2591
+Q 1319 2344 1212 1994
+Q 1106 1644 1106 1300
+Q 1106 863 1306 627
+Q 1506 391 1875 391
+Q 2147 391 2380 519
+Q 2613 647 2778 891
+Q 2956 1147 3065 1494
+Q 3175 1841 3175 2156
+z
+M 1394 2969
+Q 1625 3272 1939 3428
+Q 2253 3584 2638 3584
+Q 3175 3584 3472 3232
+Q 3769 2881 3769 2247
+Q 3769 1728 3584 1258
+Q 3400 788 3053 416
+Q 2822 169 2531 39
+Q 2241 -91 1919 -91
+Q 1547 -91 1294 64
+Q 1041 219 916 525
+L 556 -1331
+L -19 -1331
+L 922 3500
+L 1497 3500
+L 1394 2969
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-73" d="M 2834 3397
+L 2834 2853
+Q 2591 2978 2328 3040
+Q 2066 3103 1784 3103
+Q 1356 3103 1142 2972
+Q 928 2841 928 2578
+Q 928 2378 1081 2264
+Q 1234 2150 1697 2047
+L 1894 2003
+Q 2506 1872 2764 1633
+Q 3022 1394 3022 966
+Q 3022 478 2636 193
+Q 2250 -91 1575 -91
+Q 1294 -91 989 -36
+Q 684 19 347 128
+L 347 722
+Q 666 556 975 473
+Q 1284 391 1588 391
+Q 1994 391 2212 530
+Q 2431 669 2431 922
+Q 2431 1156 2273 1281
+Q 2116 1406 1581 1522
+L 1381 1569
+Q 847 1681 609 1914
+Q 372 2147 372 2553
+Q 372 3047 722 3315
+Q 1072 3584 1716 3584
+Q 2034 3584 2315 3537
+Q 2597 3491 2834 3397
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-65" d="M 3597 1894
+L 3597 1613
+L 953 1613
+Q 991 1019 1311 708
+Q 1631 397 2203 397
+Q 2534 397 2845 478
+Q 3156 559 3463 722
+L 3463 178
+Q 3153 47 2828 -22
+Q 2503 -91 2169 -91
+Q 1331 -91 842 396
+Q 353 884 353 1716
+Q 353 2575 817 3079
+Q 1281 3584 2069 3584
+Q 2775 3584 3186 3129
+Q 3597 2675 3597 1894
+z
+M 3022 2063
+Q 3016 2534 2758 2815
+Q 2500 3097 2075 3097
+Q 1594 3097 1305 2825
+Q 1016 2553 972 2059
+L 3022 2063
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-71" d="M 947 1747
+Q 947 1113 1208 752
+Q 1469 391 1925 391
+Q 2381 391 2643 752
+Q 2906 1113 2906 1747
+Q 2906 2381 2643 2742
+Q 2381 3103 1925 3103
+Q 1469 3103 1208 2742
+Q 947 2381 947 1747
+z
+M 2906 525
+Q 2725 213 2448 61
+Q 2172 -91 1784 -91
+Q 1150 -91 751 415
+Q 353 922 353 1747
+Q 353 2572 751 3078
+Q 1150 3584 1784 3584
+Q 2172 3584 2448 3432
+Q 2725 3281 2906 2969
+L 2906 3500
+L 3481 3500
+L 3481 -1331
+L 2906 -1331
+L 2906 525
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-3d" d="M 678 2906
+L 4684 2906
+L 4684 2381
+L 678 2381
+L 678 2906
+z
+M 678 1631
+L 4684 1631
+L 4684 1100
+L 678 1100
+L 678 1631
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-30" d="M 2034 4250
+Q 1547 4250 1301 3770
+Q 1056 3291 1056 2328
+Q 1056 1369 1301 889
+Q 1547 409 2034 409
+Q 2525 409 2770 889
+Q 3016 1369 3016 2328
+Q 3016 3291 2770 3770
+Q 2525 4250 2034 4250
+z
+M 2034 4750
+Q 2819 4750 3233 4129
+Q 3647 3509 3647 2328
+Q 3647 1150 3233 529
+Q 2819 -91 2034 -91
+Q 1250 -91 836 529
+Q 422 1150 422 2328
+Q 422 3509 836 4129
+Q 1250 4750 2034 4750
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-2e" d="M 684 794
+L 1344 794
+L 1344 0
+L 684 0
+L 684 794
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-39" d="M 703 97
+L 703 672
+Q 941 559 1184 500
+Q 1428 441 1663 441
+Q 2288 441 2617 861
+Q 2947 1281 2994 2138
+Q 2813 1869 2534 1725
+Q 2256 1581 1919 1581
+Q 1219 1581 811 2004
+Q 403 2428 403 3163
+Q 403 3881 828 4315
+Q 1253 4750 1959 4750
+Q 2769 4750 3195 4129
+Q 3622 3509 3622 2328
+Q 3622 1225 3098 567
+Q 2575 -91 1691 -91
+Q 1453 -91 1209 -44
+Q 966 3 703 97
+z
+M 1959 2075
+Q 2384 2075 2632 2365
+Q 2881 2656 2881 3163
+Q 2881 3666 2632 3958
+Q 2384 4250 1959 4250
+Q 1534 4250 1286 3958
+Q 1038 3666 1038 3163
+Q 1038 2656 1286 2365
+Q 1534 2075 1959 2075
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-6d" d="M 3328 2828
+Q 3544 3216 3844 3400
+Q 4144 3584 4550 3584
+Q 5097 3584 5394 3201
+Q 5691 2819 5691 2113
+L 5691 0
+L 5113 0
+L 5113 2094
+Q 5113 2597 4934 2840
+Q 4756 3084 4391 3084
+Q 3944 3084 3684 2787
+Q 3425 2491 3425 1978
+L 3425 0
+L 2847 0
+L 2847 2094
+Q 2847 2600 2669 2842
+Q 2491 3084 2119 3084
+Q 1678 3084 1418 2786
+Q 1159 2488 1159 1978
+L 1159 0
+L 581 0
+L 581 3500
+L 1159 3500
+L 1159 2956
+Q 1356 3278 1631 3431
+Q 1906 3584 2284 3584
+Q 2666 3584 2933 3390
+Q 3200 3197 3328 2828
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-61" d="M 2194 1759
+Q 1497 1759 1228 1600
+Q 959 1441 959 1056
+Q 959 750 1161 570
+Q 1363 391 1709 391
+Q 2188 391 2477 730
+Q 2766 1069 2766 1631
+L 2766 1759
+L 2194 1759
+z
+M 3341 1997
+L 3341 0
+L 2766 0
+L 2766 531
+Q 2569 213 2275 61
+Q 1981 -91 1556 -91
+Q 1019 -91 701 211
+Q 384 513 384 1019
+Q 384 1609 779 1909
+Q 1175 2209 1959 2209
+L 2766 2209
+L 2766 2266
+Q 2766 2663 2505 2880
+Q 2244 3097 1772 3097
+Q 1472 3097 1187 3025
+Q 903 2953 641 2809
+L 641 3341
+Q 956 3463 1253 3523
+Q 1550 3584 1831 3584
+Q 2591 3584 2966 3190
+Q 3341 2797 3341 1997
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-78" d="M 3513 3500
+L 2247 1797
+L 3578 0
+L 2900 0
+L 1881 1375
+L 863 0
+L 184 0
+L 1544 1831
+L 300 3500
+L 978 3500
+L 1906 2253
+L 2834 3500
+L 3513 3500
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-Oblique-69" d="M 1172 4863
+L 1747 4863
+L 1606 4134
+L 1031 4134
+L 1172 4863
+z
+M 909 3500
+L 1484 3500
+L 800 0
+L 225 0
+L 909 3500
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-7c" d="M 1344 4891
+L 1344 -1509
+L 813 -1509
+L 813 4891
+L 1344 4891
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-Oblique-3b4" d="M 3472 4053
+Q 3197 4272 2450 4272
+Q 1659 4272 1588 3906
+Q 1531 3619 2328 3469
+Q 2953 3353 3253 3003
+Q 3616 2581 3447 1716
+Q 3284 888 2763 400
+Q 2238 -91 1488 -91
+Q 741 -91 406 400
+Q 72 888 241 1747
+Q 363 2384 891 2900
+Q 1097 3100 1353 3213
+Q 913 3459 1000 3900
+Q 1166 4750 2544 4750
+Q 3234 4750 3566 4531
+L 3472 4053
+z
+M 1753 3056
+Q 1525 2966 1306 2738
+Q 969 2384 847 1747
+Q 722 1113 919 756
+Q 1119 397 1584 397
+Q 2044 397 2381 759
+Q 2722 1122 2838 1716
+Q 2956 2338 2731 2638
+Q 2491 2959 2103 2994
+Q 1906 3013 1753 3056
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-2b" d="M 2944 4013
+L 2944 2272
+L 4684 2272
+L 4684 1741
+L 2944 1741
+L 2944 0
+L 2419 0
+L 2419 1741
+L 678 1741
+L 678 2272
+L 2419 2272
+L 2419 4013
+L 2944 4013
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-31" d="M 794 531
+L 1825 531
+L 1825 4091
+L 703 3866
+L 703 4441
+L 1819 4666
+L 2450 4666
+L 2450 531
+L 3481 531
+L 3481 0
+L 794 0
+L 794 531
+z
+" transform="scale(0.015625)"/>
+     <path id="priority-formula-DejaVuSans-6e" d="M 3513 2113
+L 3513 0
+L 2938 0
+L 2938 2094
+Q 2938 2591 2744 2837
+Q 2550 3084 2163 3084
+Q 1697 3084 1428 2787
+Q 1159 2491 1159 1978
+L 1159 0
+L 581 0
+L 581 3500
+L 1159 3500
+L 1159 2956
+Q 1366 3272 1645 3428
+Q 1925 3584 2291 3584
+Q 2894 3584 3203 3211
+Q 3513 2838 3513 2113
+z
+" transform="scale(0.015625)"/>
+    </defs>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-70" transform="translate(0 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-73" transform="translate(63.476562 -15.828125) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-65" transform="translate(99.946289 -15.828125) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-71" transform="translate(143.012695 -15.828125) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-3d" transform="translate(209.663086 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-30" transform="translate(312.93457 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-2e" transform="translate(376.557617 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-39" transform="translate(408.344727 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-6d" transform="translate(488.20345 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-61" transform="translate(585.615559 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-78" transform="translate(646.894856 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-69" transform="translate(589.20345 -72.782813) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-7c" transform="translate(706.074543 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-3b4" transform="translate(739.76595 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-69" transform="translate(800.94759 -15.828125) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-7c" transform="translate(839.365884 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-2b" transform="translate(892.539712 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-30" transform="translate(995.811196 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-2e" transform="translate(1059.434243 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-31" transform="translate(1091.221353 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-6d" transform="translate(1171.080076 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-65" transform="translate(1268.492185 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-61" transform="translate(1330.015623 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-6e" transform="translate(1391.294919 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-69" transform="translate(1455.630857 -15.828125) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-7c" transform="translate(1494.04915 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-3b4" transform="translate(1527.740557 0.578125)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-Oblique-69" transform="translate(1588.922197 -15.828125) scale(0.7)"/>
+    <use xlink:href="#priority-formula-DejaVuSans-7c" transform="translate(1611.104814 0.578125)"/>
+   </g>
+  </g>
+ </g></svg>
+<text x="84.0" y="896.65" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="84.0" dy="0">Assign to the final anchor ID.</tspan></text>
+</g>
+<g data-node="sampling">
+<rect x="536" y="778" width="400" height="144" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M556,779 h32" stroke="#9b681f" stroke-width="3"/>
+<text font-weight="600" x="556.0" y="831.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="556.0" dy="0">Next sampling distribution</tspan></text>
+<text x="556.0" y="862.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="556.0" dy="0">Use priorities and optional mixtures.</tspan><tspan x="556.0" dy="22.5">Correct loss with normalized IS weights.</tspan></text>
+</g>
+<g data-note="terminal">
+<rect x="40" y="1004" width="448" height="108" rx="8" fill="#f3f5f7" stroke="none" stroke-width="1.5"/>
+<text x="60" y="1038" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#1f2937"><tspan font-weight="600" x="60" dy="0">BOOTSTRAP BOUNDARY</tspan><tspan x="60" dy="22.5">A true terminal uses zero bootstrap. Truncation</tspan><tspan x="60" dy="22.5">follows the transition discount contract.</tspan></text>
+</g>
+<g data-note="constraints">
+<rect x="512" y="1004" width="448" height="108" rx="8" fill="#eff4fc" stroke="none" stroke-width="1.5"/>
+<text x="532" y="1038" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#1f2937"><tspan font-weight="600" x="532" dy="0">SEQUENCE CONTRACT</tspan><tspan x="532" dy="22.5">n_step &lt; L and burn_in &lt; L. Do not combine</tspan><tspan x="532" dy="22.5">replay sequences with stacked feature history.</tspan></text>
+</g>
 </svg>

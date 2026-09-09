@@ -1,106 +1,1140 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Trackmania reward decomposition and terminal-safe shaping</title><style>body{margin:0;background:#e2e8f0;font-family:system-ui}main{padding:24px}.canvas{max-width:1600px;margin:auto;background:white;box-shadow:0 12px 40px #0f172a33}svg{display:block;width:100%;height:auto}button{position:fixed;right:24px;bottom:24px;padding:12px 18px;border:0;border-radius:9px;background:#1864ab;color:white;font-weight:700;cursor:pointer}</style></head>
-<body><main><div class="canvas"><svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1130" viewBox="0 0 1700 1130">
-<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".14"/></filter></defs>
+<title>Understand the reward signal</title><style>body{margin:0;background:#e2e8f0;font-family:system-ui}main{padding:24px}.canvas{max-width:1000px;margin:auto;background:white;border:1px solid #dce3ea;border-radius:12px;overflow:hidden}svg{display:block;width:100%;height:auto}button{position:fixed;right:24px;bottom:24px;padding:12px 18px;border:0;border-radius:9px;background:#1864ab;color:white;font-weight:700;cursor:pointer}</style></head>
+<body><main><div class="canvas"><svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1018" viewBox="0 0 1000 1018">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".14"/></filter></defs>
 <rect width="100%" height="100%" fill="#ffffff"/>
-<text x="55" y="61" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="32" fill="#111827"><tspan x="55" dy="0">Trackmania reward decomposition and terminal-safe shaping</tspan></text>
-<text x="55" y="99" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="18" fill="#64748b"><tspan x="55" dy="0">Ordinary reward terms remain separate from two potential-based shaping terms; terminal transitions use an absorbing zero potential.</tspan></text>
-<rect x="45" y="130" width="330" height="790" rx="14" fill="#dbeafe" fill-opacity=".35" stroke="#1864ab" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="63" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#1864ab"><tspan x="63" dy="0">Validated signals</tspan></text>
-<rect x="400" y="130" width="470" height="790" rx="14" fill="#dcfce7" fill-opacity=".35" stroke="#2b8a3e" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="418" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#2b8a3e"><tspan x="418" dy="0">Ordinary and terminal reward terms</tspan></text>
-<rect x="895" y="130" width="385" height="790" rx="14" fill="#ede9fe" fill-opacity=".35" stroke="#7048e8" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="913" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#7048e8"><tspan x="913" dy="0">Potential-based shaping</tspan></text>
-<rect x="1305" y="130" width="350" height="790" rx="14" fill="#ffedd5" fill-opacity=".35" stroke="#d97706" stroke-width="1.5" stroke-dasharray="8 7"/>
-<text x="1323" y="159" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="19" fill="#d97706"><tspan x="1323" dy="0">Transition result</tspan></text>
-<polyline points="530,280 530,805 645,805 645,825" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="742,280 742,805 645,805 645,825" fill="none" stroke="#2b8a3e" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="530,450 530,805 645,805 645,825" fill="none" stroke="#087f8c" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="742,450 742,805 645,805 645,825" fill="none" stroke="#7048e8" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="530,605 530,805 645,805 645,825" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="742,605 742,805 645,805 645,825" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="640,780 640,815" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="340,242 390,242 390,235 435,235" fill="none" stroke="#1864ab" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="340,437 385,437 385,315 742,315 742,280" fill="none" stroke="#087f8c" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="340,637 385,637 385,640 742,640 742,605" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="340,637 390,637 390,727 545,727" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="340,437 380,437 380,320 880,320 880,235 935,235" fill="none" stroke="#7048e8" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="340,437 385,437 385,325 885,325 885,382 935,382" fill="none" stroke="#087f8c" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1087,285 1087,505" fill="none" stroke="#7048e8" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1087,435 1087,505" fill="none" stroke="#087f8c" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1240,235 1260,235 1260,670 1087,670 1087,700" fill="none" stroke="#7048e8" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
-<polyline points="1240,382 1260,382 1260,670 1087,670 1087,700" fill="none" stroke="#087f8c" stroke-width="2.5" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
-<polyline points="340,637 380,637 380,950 1087,950 1087,835" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="755,857 875,857 875,935 1320,935 1320,322 1350,322" fill="none" stroke="#2b8a3e" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1240,565 1285,565 1285,322 1350,322" fill="none" stroke="#2b8a3e" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1240,767 1290,767 1290,322 1350,322" fill="none" stroke="#c92a2a" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1480,390 1480,505" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrow)"/>
-<polyline points="1480,625 1480,740" fill="none" stroke="#1864ab" stroke-width="2.5" marker-end="url(#arrow)"/>
-<rect x="80" y="190" width="260" height="105" rx="12" fill="#dbeafe" stroke="#1864ab" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="210.0" y="225.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="210.0" dy="0">Telemetry delta</tspan></text>
-<text x="210.0" y="253.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="210.0" dy="0">Δt · path progress ·</tspan><tspan x="210.0" dy="22.5">velocity · steering</tspan></text>
-<rect x="80" y="385" width="260" height="105" rx="12" fill="#cffafe" stroke="#087f8c" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="210.0" y="420.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="210.0" dy="0">Track references</tspan></text>
-<text x="210.0" y="448.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="210.0" dy="0">lap length · tangent ·</tspan><tspan x="210.0" dy="22.5">human pace</tspan></text>
-<rect x="80" y="580" width="260" height="115" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="210.0" y="620.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="210.0" dy="0">Terminal contract</tspan></text>
-<text x="210.0" y="648.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="210.0" dy="0">finish · off-track ·</tspan><tspan x="210.0" dy="22.5">time or stall limit</tspan></text>
-<rect x="80" y="785" width="260" height="95" rx="12" fill="#f1f5f9" stroke="#475569" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="210.0" y="815.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="210.0" dy="0">Reward configuration</tspan></text>
-<text x="210.0" y="843.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="210.0" dy="0">finite scales · shared</tspan><tspan x="210.0" dy="22.5">reward_gamma</tspan></text>
-<rect x="435" y="190" width="190" height="90" rx="12" fill="#ffedd5" stroke="#d97706" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="530.0" y="228.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="530.0" dy="0">Time cost</tspan></text>
-<text x="530.0" y="256.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="530.0" dy="0">−time_scale · Δt</tspan></text>
-<rect x="650" y="190" width="185" height="110" rx="12" fill="#dcfce7" stroke="#2b8a3e" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="742.5" y="217" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="742.5" dy="0">Direct</tspan><tspan x="742.5" dy="25.0">progress</tspan></text>
-<text x="742.5" y="270" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="742.5" dy="0">lap_scale · Δd</tspan><tspan x="742.5" dy="22.5">/ L</tspan></text>
-<rect x="435" y="350" width="190" height="100" rx="12" fill="#cffafe" stroke="#087f8c" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="530.0" y="381.25" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="530.0" dy="0">Projected</tspan><tspan x="530.0" dy="25.0">velocity</tspan></text>
-<text x="530.0" y="434.25" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="530.0" dy="0">scale · v∥ · Δt</tspan></text>
-<rect x="650" y="350" width="185" height="110" rx="12" fill="#ede9fe" stroke="#7048e8" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="742.5" y="377" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="742.5" dy="0">Speed and</tspan><tspan x="742.5" dy="25.0">steering</tspan></text>
-<text x="742.5" y="430" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="742.5" dy="0">speed² bonus</tspan><tspan x="742.5" dy="22.5">steer Δ penalty</tspan></text>
-<rect x="435" y="515" width="190" height="90" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="530.0" y="542.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="530.0" dy="0">Collision</tspan></text>
-<text x="530.0" y="570.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="530.0" dy="0">cooldown-gated</tspan><tspan x="530.0" dy="22.5">penalty</tspan></text>
-<rect x="650" y="515" width="185" height="90" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="742.5" y="542.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="742.5" dy="0">Terminal base</tspan></text>
-<text x="742.5" y="570.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="742.5" dy="0">finish bonus or</tspan><tspan x="742.5" dy="22.5">failure penalty</tspan></text>
-<rect x="545" y="675" width="190" height="105" rx="12" fill="#ffedd5" stroke="#d97706" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="640.0" y="702" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="640.0" dy="0">Time-attack</tspan><tspan x="640.0" dy="25.0">finish term</tspan></text>
-<text x="640.0" y="755" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="640.0" dy="0">finish timing</tspan><tspan x="640.0" dy="22.5">bonus</tspan></text>
-<rect x="535" y="815" width="220" height="85" rx="12" fill="#dcfce7" stroke="#2b8a3e" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="645.0" y="842" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="645.0" dy="0">Ordinary subtotal</tspan></text>
-<text x="645.0" y="870" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="645.0" dy="0">per-step + terminal</tspan><tspan x="645.0" dy="22.5">terms</tspan></text>
-<rect x="935" y="185" width="305" height="100" rx="12" fill="#ede9fe" stroke="#7048e8" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1087.5" y="228.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1087.5" dy="0">Progress potential</tspan></text>
-<text x="1087.5" y="256.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1087.5" dy="0">Φp = wp · d / L</tspan></text>
-<rect x="935" y="330" width="305" height="105" rx="12" fill="#cffafe" stroke="#087f8c" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1087.5" y="365.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1087.5" dy="0">Pace potential</tspan></text>
-<text x="1087.5" y="393.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1087.5" dy="0">Φpace(s) = −wd · clipped</tspan><tspan x="1087.5" dy="22.5">time debt</tspan></text>
-<rect x="935" y="505" width="305" height="120" rx="12" fill="#dcfce7" stroke="#2b8a3e" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1087.5" y="547.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1087.5" dy="0">Non-terminal shaping</tspan></text>
-<text x="1087.5" y="575.5" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1087.5" dy="0">F = γ Φ(s′) − Φ(s), for</tspan><tspan x="1087.5" dy="22.5">both potentials</tspan></text>
-<rect x="935" y="700" width="305" height="135" rx="12" fill="#fee2e2" stroke="#c92a2a" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1087.5" y="738.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1087.5" dy="0">Terminal reset</tspan></text>
-<text x="1087.5" y="766.75" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1087.5" dy="0">Φ(terminal) = 0; emit</tspan><tspan x="1087.5" dy="22.5">−Φ(previous) for both</tspan><tspan x="1087.5" dy="22.5">potentials</tspan></text>
-<rect x="1350" y="255" width="260" height="135" rx="12" fill="#ffedd5" stroke="#d97706" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1480.0" y="305.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1480.0" dy="0">Total reward</tspan></text>
-<text x="1480.0" y="333.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1480.0" dy="0">ordinary + progress</tspan><tspan x="1480.0" dy="22.5">PBRS + pace PBRS</tspan></text>
-<rect x="1350" y="505" width="260" height="120" rx="12" fill="#dbeafe" stroke="#1864ab" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1480.0" y="535.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1480.0" dy="0">RewardResult</tspan><tspan x="1480.0" dy="25.0">breakdown</tspan></text>
-<text x="1480.0" y="588.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1480.0" dy="0">named terms · potential</tspan><tspan x="1480.0" dy="22.5">· pace debt · collision</tspan></text>
-<rect x="1350" y="740" width="260" height="105" rx="12" fill="#f1f5f9" stroke="#475569" stroke-width="2.5" filter="url(#shadow)"/>
-<text x="1480.0" y="775.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" fill="#111827"><tspan x="1480.0" dy="0">Learner transition</tspan></text>
-<text x="1480.0" y="803.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569"><tspan x="1480.0" dy="0">scalar reward ·</tspan><tspan x="1480.0" dy="22.5">terminated · reason</tspan></text>
-<rect x="85" y="970" width="1530" height="55" rx="10" fill="#fee2e2" stroke="#c92a2a" stroke-width="1.5"/>
-<text x="99" y="1001" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="18" fill="#1f2937"><tspan x="99" dy="0">Runtime invariant: reward_gamma must equal training.gamma so the implemented PBRS difference uses the learner&#x27;s discount.</tspan></text>
-<rect x="85" y="1045" width="1530" height="58" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
-<text x="99" y="1076" text-anchor="start" font-family="Inter,Arial,sans-serif" font-size="18" fill="#1f2937"><tspan x="99" dy="0">Direct progress is an intentional ordinary term. Progress PBRS is reported separately, and terminal/time-attack diagnostics do not double-count the</tspan><tspan x="99" dy="22.5">base finish reward.</tspan></text>
+<text x="40" y="37" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#087d74"><tspan x="40" dy="0">TRACKMANIARL / SYSTEM GUIDE / 07</tspan></text>
+<path d="M40,52 H960" stroke="#dce3ea" stroke-width="1"/>
+<text font-weight="600" x="40" y="91" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="34" fill="#152b43"><tspan x="40" dy="0">Understand the reward signal</tspan></text>
+<text x="40" y="131" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="40" dy="0">The scalar reward combines ordinary terms with two separately reported shaping terms.</tspan></text>
+<rect x="40" y="184" width="296" height="300" rx="10" fill="#f3f5f7" stroke="none"/>
+<text font-weight="600" x="64" y="222" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="64" dy="0">01 Ordinary reward</tspan></text>
+<rect x="352" y="184" width="296" height="300" rx="10" fill="#f3f5f7" stroke="none"/>
+<text font-weight="600" x="376" y="222" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="376" dy="0">02 Progress PBRS</tspan></text>
+<rect x="664" y="184" width="296" height="300" rx="10" fill="#f3f5f7" stroke="none"/>
+<text font-weight="600" x="688" y="222" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="688" dy="0">03 Pace PBRS</tspan></text>
+<g data-edge="e-ordinary-total">
+<polyline points="188,450 188,514 500,514 500,556" fill="none" stroke="#087d74" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-edge="e-progress-total">
+<polyline points="500,450 500,514 500,514 500,556" fill="none" stroke="#087d74" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-edge="e-pace-total">
+<polyline points="812,450 812,514 500,514 500,556" fill="none" stroke="#087d74" stroke-width="1.75" marker-end="url(#arrow)"/>
+</g>
+<g data-node="ordinary">
+<rect x="64" y="250" width="248" height="200" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M84,251 h32" stroke="#536579" stroke-width="3"/>
+<text font-weight="600" x="84.0" y="331.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="84.0" dy="0">Base terms</tspan></text>
+<text x="84.0" y="362.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="84.0" dy="0">Time + progress</tspan><tspan x="84.0" dy="22.5">Motion + terminal terms</tspan></text>
+</g>
+<g data-node="progress">
+<rect x="376" y="250" width="248" height="200" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M396,251 h32" stroke="#285cc4" stroke-width="3"/>
+<text font-weight="600" x="396.0" y="308.4" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="396.0" dy="0">Progress potential</tspan></text>
+<svg data-formula="progress-formula" x="396.0" y="323.4" width="208" height="35.2" viewBox="0 0 144.54 32.12" preserveAspectRatio="xMinYMid meet">
+
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="progress-formula-figure_1">
+  <g id="progress-formula-patch_1">
+   <path d="M 0 32.12
+L 144.54 32.12
+L 144.54 0
+L 0 0
+L 0 32.12
+z
+" style="fill: none"/>
+  </g>
+  <g id="progress-formula-text_1">
+   <!-- $\Phi_p(s) = w_p \frac{d(s)}{L}$ -->
+   <g style="fill: #152b43" transform="translate(0 23.54) scale(0.22 -0.22)">
+    <defs>
+     <path id="progress-formula-DejaVuSans-3a6" d="M 2206 3644
+Q 1738 3578 1431 3306
+Q 1025 2947 1025 2328
+Q 1025 1713 1431 1353
+Q 1738 1081 2206 1016
+L 2206 3644
+z
+M 2838 1016
+Q 3306 1081 3613 1353
+Q 4013 1713 4013 2328
+Q 4013 2947 3613 3306
+Q 3306 3578 2838 3644
+L 2838 1016
+z
+M 2206 494
+Q 1444 563 950 981
+Q 359 1481 359 2328
+Q 359 3175 950 3678
+Q 1441 4100 2206 4169
+L 2206 4666
+L 2838 4666
+L 2838 4169
+Q 3600 4097 4091 3678
+Q 4678 3175 4678 2328
+Q 4678 1484 4091 981
+Q 3600 563 2838 491
+L 2838 0
+L 2206 0
+L 2206 494
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-Oblique-70" d="M 3175 2156
+Q 3175 2616 2975 2859
+Q 2775 3103 2400 3103
+Q 2144 3103 1911 2972
+Q 1678 2841 1497 2591
+Q 1319 2344 1212 1994
+Q 1106 1644 1106 1300
+Q 1106 863 1306 627
+Q 1506 391 1875 391
+Q 2147 391 2380 519
+Q 2613 647 2778 891
+Q 2956 1147 3065 1494
+Q 3175 1841 3175 2156
+z
+M 1394 2969
+Q 1625 3272 1939 3428
+Q 2253 3584 2638 3584
+Q 3175 3584 3472 3232
+Q 3769 2881 3769 2247
+Q 3769 1728 3584 1258
+Q 3400 788 3053 416
+Q 2822 169 2531 39
+Q 2241 -91 1919 -91
+Q 1547 -91 1294 64
+Q 1041 219 916 525
+L 556 -1331
+L -19 -1331
+L 922 3500
+L 1497 3500
+L 1394 2969
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-28" d="M 1984 4856
+Q 1566 4138 1362 3434
+Q 1159 2731 1159 2009
+Q 1159 1288 1364 580
+Q 1569 -128 1984 -844
+L 1484 -844
+Q 1016 -109 783 600
+Q 550 1309 550 2009
+Q 550 2706 781 3412
+Q 1013 4119 1484 4856
+L 1984 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-Oblique-73" d="M 3200 3397
+L 3091 2853
+Q 2863 2978 2609 3040
+Q 2356 3103 2088 3103
+Q 1634 3103 1373 2948
+Q 1113 2794 1113 2528
+Q 1113 2219 1719 2053
+Q 1766 2041 1788 2034
+L 1972 1978
+Q 2547 1819 2739 1644
+Q 2931 1469 2931 1166
+Q 2931 609 2489 259
+Q 2047 -91 1331 -91
+Q 1053 -91 747 -37
+Q 441 16 72 128
+L 184 722
+Q 500 559 806 475
+Q 1113 391 1394 391
+Q 1816 391 2080 572
+Q 2344 753 2344 1031
+Q 2344 1331 1650 1516
+L 1591 1531
+L 1394 1581
+Q 956 1697 753 1886
+Q 550 2075 550 2369
+Q 550 2928 970 3256
+Q 1391 3584 2113 3584
+Q 2397 3584 2667 3537
+Q 2938 3491 3200 3397
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-29" d="M 513 4856
+L 1013 4856
+Q 1481 4119 1714 3412
+Q 1947 2706 1947 2009
+Q 1947 1309 1714 600
+Q 1481 -109 1013 -844
+L 513 -844
+Q 928 -128 1133 580
+Q 1338 1288 1338 2009
+Q 1338 2731 1133 3434
+Q 928 4138 513 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-3d" d="M 678 2906
+L 4684 2906
+L 4684 2381
+L 678 2381
+L 678 2906
+z
+M 678 1631
+L 4684 1631
+L 4684 1100
+L 678 1100
+L 678 1631
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-Oblique-77" d="M 544 3500
+L 1113 3500
+L 1259 684
+L 2566 3500
+L 3231 3500
+L 3425 684
+L 4666 3500
+L 5241 3500
+L 3641 0
+L 2969 0
+L 2797 2900
+L 1459 0
+L 781 0
+L 544 3500
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-Oblique-64" d="M 2675 525
+Q 2444 222 2128 65
+Q 1813 -91 1428 -91
+Q 903 -91 598 267
+Q 294 625 294 1247
+Q 294 1766 478 2236
+Q 663 2706 1013 3078
+Q 1244 3325 1534 3454
+Q 1825 3584 2144 3584
+Q 2481 3584 2739 3421
+Q 2997 3259 3138 2956
+L 3513 4863
+L 4091 4863
+L 3144 0
+L 2566 0
+L 2675 525
+z
+M 891 1350
+Q 891 897 1095 644
+Q 1300 391 1663 391
+Q 1931 391 2161 520
+Q 2391 650 2566 903
+Q 2750 1166 2856 1509
+Q 2963 1853 2963 2188
+Q 2963 2622 2758 2865
+Q 2553 3109 2194 3109
+Q 1922 3109 1687 2981
+Q 1453 2853 1288 2613
+Q 1106 2353 998 2009
+Q 891 1666 891 1350
+z
+" transform="scale(0.015625)"/>
+     <path id="progress-formula-DejaVuSans-Oblique-4c" d="M 1075 4666
+L 1709 4666
+L 909 525
+L 3181 525
+L 3078 0
+L 172 0
+L 1075 4666
+z
+" transform="scale(0.015625)"/>
+    </defs>
+    <use xlink:href="#progress-formula-DejaVuSans-3a6" transform="translate(0 0.782813)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-70" transform="translate(79.667969 -15.623437) scale(0.7)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-28" transform="translate(126.835938 0.782813)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-73" transform="translate(165.849609 0.782813)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-29" transform="translate(217.949219 0.782813)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-3d" transform="translate(276.445312 0.782813)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-77" transform="translate(379.716797 0.782813)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-70" transform="translate(461.503906 -15.623437) scale(0.7)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-64" transform="translate(508.671875 53.810938) scale(0.7)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-28" transform="translate(553.105469 53.810938) scale(0.7)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-73" transform="translate(580.415039 53.810938) scale(0.7)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-29" transform="translate(616.884766 53.810938) scale(0.7)"/>
+    <use xlink:href="#progress-formula-DejaVuSans-Oblique-4c" transform="translate(556.671875 -37.704687) scale(0.7)"/>
+    <path d="M 508.671875 19.579688
+L 508.671875 25.829688
+L 644.194336 25.829688
+L 644.194336 19.579688
+L 508.671875 19.579688
+z
+"/>
+   </g>
+  </g>
+ </g></svg>
+<text x="396.0" y="384.59999999999997" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="396.0" dy="0">Rewards changes in</tspan><tspan x="396.0" dy="22.5">progress potential.</tspan></text>
+</g>
+<g data-node="pace">
+<rect x="688" y="250" width="248" height="200" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M708,251 h32" stroke="#087d74" stroke-width="3"/>
+<text font-weight="600" x="708.0" y="310.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="708.0" dy="0">Pace potential</tspan></text>
+<svg data-formula="pace-formula" x="708.0" y="325.0" width="208" height="32.0" viewBox="0 0 191 26.6" preserveAspectRatio="xMinYMid meet">
+
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="pace-formula-figure_1">
+  <g id="pace-formula-patch_1">
+   <path d="M 0 26.6
+L 191 26.6
+L 191 0
+L 0 0
+L 0 26.6
+z
+" style="fill: none"/>
+  </g>
+  <g id="pace-formula-text_1">
+   <!-- $\Phi_{\mathrm{pace}}(s) = -w_d \widehat{\Delta t}(s)$ -->
+   <g style="fill: #152b43" transform="translate(0 20.4) scale(0.2 -0.2)">
+    <defs>
+     <path id="pace-formula-DejaVuSans-3a6" d="M 2206 3644
+Q 1738 3578 1431 3306
+Q 1025 2947 1025 2328
+Q 1025 1713 1431 1353
+Q 1738 1081 2206 1016
+L 2206 3644
+z
+M 2838 1016
+Q 3306 1081 3613 1353
+Q 4013 1713 4013 2328
+Q 4013 2947 3613 3306
+Q 3306 3578 2838 3644
+L 2838 1016
+z
+M 2206 494
+Q 1444 563 950 981
+Q 359 1481 359 2328
+Q 359 3175 950 3678
+Q 1441 4100 2206 4169
+L 2206 4666
+L 2838 4666
+L 2838 4169
+Q 3600 4097 4091 3678
+Q 4678 3175 4678 2328
+Q 4678 1484 4091 981
+Q 3600 563 2838 491
+L 2838 0
+L 2206 0
+L 2206 494
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-70" d="M 1159 525
+L 1159 -1331
+L 581 -1331
+L 581 3500
+L 1159 3500
+L 1159 2969
+Q 1341 3281 1617 3432
+Q 1894 3584 2278 3584
+Q 2916 3584 3314 3078
+Q 3713 2572 3713 1747
+Q 3713 922 3314 415
+Q 2916 -91 2278 -91
+Q 1894 -91 1617 61
+Q 1341 213 1159 525
+z
+M 3116 1747
+Q 3116 2381 2855 2742
+Q 2594 3103 2138 3103
+Q 1681 3103 1420 2742
+Q 1159 2381 1159 1747
+Q 1159 1113 1420 752
+Q 1681 391 2138 391
+Q 2594 391 2855 752
+Q 3116 1113 3116 1747
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-61" d="M 2194 1759
+Q 1497 1759 1228 1600
+Q 959 1441 959 1056
+Q 959 750 1161 570
+Q 1363 391 1709 391
+Q 2188 391 2477 730
+Q 2766 1069 2766 1631
+L 2766 1759
+L 2194 1759
+z
+M 3341 1997
+L 3341 0
+L 2766 0
+L 2766 531
+Q 2569 213 2275 61
+Q 1981 -91 1556 -91
+Q 1019 -91 701 211
+Q 384 513 384 1019
+Q 384 1609 779 1909
+Q 1175 2209 1959 2209
+L 2766 2209
+L 2766 2266
+Q 2766 2663 2505 2880
+Q 2244 3097 1772 3097
+Q 1472 3097 1187 3025
+Q 903 2953 641 2809
+L 641 3341
+Q 956 3463 1253 3523
+Q 1550 3584 1831 3584
+Q 2591 3584 2966 3190
+Q 3341 2797 3341 1997
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-63" d="M 3122 3366
+L 3122 2828
+Q 2878 2963 2633 3030
+Q 2388 3097 2138 3097
+Q 1578 3097 1268 2742
+Q 959 2388 959 1747
+Q 959 1106 1268 751
+Q 1578 397 2138 397
+Q 2388 397 2633 464
+Q 2878 531 3122 666
+L 3122 134
+Q 2881 22 2623 -34
+Q 2366 -91 2075 -91
+Q 1284 -91 818 406
+Q 353 903 353 1747
+Q 353 2603 823 3093
+Q 1294 3584 2113 3584
+Q 2378 3584 2631 3529
+Q 2884 3475 3122 3366
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-65" d="M 3597 1894
+L 3597 1613
+L 953 1613
+Q 991 1019 1311 708
+Q 1631 397 2203 397
+Q 2534 397 2845 478
+Q 3156 559 3463 722
+L 3463 178
+Q 3153 47 2828 -22
+Q 2503 -91 2169 -91
+Q 1331 -91 842 396
+Q 353 884 353 1716
+Q 353 2575 817 3079
+Q 1281 3584 2069 3584
+Q 2775 3584 3186 3129
+Q 3597 2675 3597 1894
+z
+M 3022 2063
+Q 3016 2534 2758 2815
+Q 2500 3097 2075 3097
+Q 1594 3097 1305 2825
+Q 1016 2553 972 2059
+L 3022 2063
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-28" d="M 1984 4856
+Q 1566 4138 1362 3434
+Q 1159 2731 1159 2009
+Q 1159 1288 1364 580
+Q 1569 -128 1984 -844
+L 1484 -844
+Q 1016 -109 783 600
+Q 550 1309 550 2009
+Q 550 2706 781 3412
+Q 1013 4119 1484 4856
+L 1984 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-Oblique-73" d="M 3200 3397
+L 3091 2853
+Q 2863 2978 2609 3040
+Q 2356 3103 2088 3103
+Q 1634 3103 1373 2948
+Q 1113 2794 1113 2528
+Q 1113 2219 1719 2053
+Q 1766 2041 1788 2034
+L 1972 1978
+Q 2547 1819 2739 1644
+Q 2931 1469 2931 1166
+Q 2931 609 2489 259
+Q 2047 -91 1331 -91
+Q 1053 -91 747 -37
+Q 441 16 72 128
+L 184 722
+Q 500 559 806 475
+Q 1113 391 1394 391
+Q 1816 391 2080 572
+Q 2344 753 2344 1031
+Q 2344 1331 1650 1516
+L 1591 1531
+L 1394 1581
+Q 956 1697 753 1886
+Q 550 2075 550 2369
+Q 550 2928 970 3256
+Q 1391 3584 2113 3584
+Q 2397 3584 2667 3537
+Q 2938 3491 3200 3397
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-29" d="M 513 4856
+L 1013 4856
+Q 1481 4119 1714 3412
+Q 1947 2706 1947 2009
+Q 1947 1309 1714 600
+Q 1481 -109 1013 -844
+L 513 -844
+Q 928 -128 1133 580
+Q 1338 1288 1338 2009
+Q 1338 2731 1133 3434
+Q 928 4138 513 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-3d" d="M 678 2906
+L 4684 2906
+L 4684 2381
+L 678 2381
+L 678 2906
+z
+M 678 1631
+L 4684 1631
+L 4684 1100
+L 678 1100
+L 678 1631
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-2212" d="M 678 2272
+L 4684 2272
+L 4684 1741
+L 678 1741
+L 678 2272
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-Oblique-77" d="M 544 3500
+L 1113 3500
+L 1259 684
+L 2566 3500
+L 3231 3500
+L 3425 684
+L 4666 3500
+L 5241 3500
+L 3641 0
+L 2969 0
+L 2797 2900
+L 1459 0
+L 781 0
+L 544 3500
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-Oblique-64" d="M 2675 525
+Q 2444 222 2128 65
+Q 1813 -91 1428 -91
+Q 903 -91 598 267
+Q 294 625 294 1247
+Q 294 1766 478 2236
+Q 663 2706 1013 3078
+Q 1244 3325 1534 3454
+Q 1825 3584 2144 3584
+Q 2481 3584 2739 3421
+Q 2997 3259 3138 2956
+L 3513 4863
+L 4091 4863
+L 3144 0
+L 2566 0
+L 2675 525
+z
+M 891 1350
+Q 891 897 1095 644
+Q 1300 391 1663 391
+Q 1931 391 2161 520
+Q 2391 650 2566 903
+Q 2750 1166 2856 1509
+Q 2963 1853 2963 2188
+Q 2963 2622 2758 2865
+Q 2553 3109 2194 3109
+Q 1922 3109 1687 2981
+Q 1453 2853 1288 2613
+Q 1106 2353 998 2009
+Q 891 1666 891 1350
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-STIXSizeThreeSym-Regular-302" d="M -960 3610
+L -1939 3610
+L -5632 4538
+L -9325 3610
+L -10304 3610
+L -5786 4973
+L -5478 4973
+L -960 3610
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-394" d="M 2188 4044
+L 906 525
+L 3472 525
+L 2188 4044
+z
+M 50 0
+L 1831 4666
+L 2547 4666
+L 4325 0
+L 50 0
+z
+" transform="scale(0.015625)"/>
+     <path id="pace-formula-DejaVuSans-Oblique-74" d="M 2706 3500
+L 2619 3053
+L 1472 3053
+L 1100 1153
+Q 1081 1047 1072 975
+Q 1063 903 1063 863
+Q 1063 663 1183 572
+Q 1303 481 1569 481
+L 2150 481
+L 2053 0
+L 1503 0
+Q 991 0 739 200
+Q 488 400 488 806
+Q 488 878 497 964
+Q 506 1050 525 1153
+L 897 3053
+L 409 3053
+L 500 3500
+L 978 3500
+L 1172 4494
+L 1747 4494
+L 1556 3500
+L 2706 3500
+z
+" transform="scale(0.015625)"/>
+    </defs>
+    <use xlink:href="#pace-formula-DejaVuSans-3a6" transform="translate(0 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-70" transform="translate(79.667969 -15.578125) scale(0.7)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-61" transform="translate(124.101562 -15.578125) scale(0.7)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-63" transform="translate(166.99707 -15.578125) scale(0.7)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-65" transform="translate(205.483398 -15.578125) scale(0.7)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-28" transform="translate(251.28418 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-Oblique-73" transform="translate(290.297852 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-29" transform="translate(342.397461 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-3d" transform="translate(400.893555 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-2212" transform="translate(504.165039 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-Oblique-77" transform="translate(587.954102 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-Oblique-64" transform="translate(669.741211 -15.578125) scale(0.7)"/>
+    <use xlink:href="#pace-formula-STIXSizeThreeSym-Regular-302" transform="translate(849.547852 44.5) scale(0.737104)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-394" transform="translate(716.90918 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-Oblique-74" transform="translate(785.317383 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-28" transform="translate(824.526367 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-Oblique-73" transform="translate(863.540039 0.828125)"/>
+    <use xlink:href="#pace-formula-DejaVuSans-29" transform="translate(915.639648 0.828125)"/>
+   </g>
+  </g>
+ </g></svg>
+<text x="708.0" y="383.0" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="708.0" dy="0">Clipped time debt</tspan><tspan x="708.0" dy="22.5">Reference lap</tspan></text>
+</g>
+<g data-node="total">
+<rect x="64" y="556" width="872" height="112" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M84,557 h32" stroke="#087d74" stroke-width="3"/>
+<text font-weight="600" x="84.0" y="604.25" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="84.0" dy="0">Total reward = ordinary + progress shaping + pace shaping</tspan></text>
+<text x="84.0" y="635.25" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="84.0" dy="0">RewardResult keeps the named terms and diagnostics alongside the scalar learner reward.</tspan></text>
+</g>
+<g data-node="nonterminal">
+<rect x="40" y="714" width="448" height="152" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M60,715 h32" stroke="#285cc4" stroke-width="3"/>
+<text font-weight="600" x="60.0" y="759.65" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="60.0" dy="0">On ordinary transitions</tspan></text>
+<svg data-formula="nonterminal-formula" x="60.0" y="774.65" width="408" height="35.2" viewBox="0 0 220.22 21.34" preserveAspectRatio="xMinYMid meet">
+
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="nonterminal-formula-figure_1">
+  <g id="nonterminal-formula-patch_1">
+   <path d="M 0 21.34
+L 220.22 21.34
+L 220.22 0
+L 0 0
+L 0 21.34
+z
+" style="fill: none"/>
+  </g>
+  <g id="nonterminal-formula-text_1">
+   <!-- $F_t = \gamma \Phi(s_{t+1}) - \Phi(s_t)$ -->
+   <g style="fill: #152b43" transform="translate(0 16.72) scale(0.22 -0.22)">
+    <defs>
+     <path id="nonterminal-formula-DejaVuSans-Oblique-46" d="M 1081 4666
+L 3756 4666
+L 3653 4134
+L 1606 4134
+L 1338 2759
+L 3188 2759
+L 3084 2228
+L 1234 2228
+L 800 0
+L 172 0
+L 1081 4666
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-Oblique-74" d="M 2706 3500
+L 2619 3053
+L 1472 3053
+L 1100 1153
+Q 1081 1047 1072 975
+Q 1063 903 1063 863
+Q 1063 663 1183 572
+Q 1303 481 1569 481
+L 2150 481
+L 2053 0
+L 1503 0
+Q 991 0 739 200
+Q 488 400 488 806
+Q 488 878 497 964
+Q 506 1050 525 1153
+L 897 3053
+L 409 3053
+L 500 3500
+L 978 3500
+L 1172 4494
+L 1747 4494
+L 1556 3500
+L 2706 3500
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-3d" d="M 678 2906
+L 4684 2906
+L 4684 2381
+L 678 2381
+L 678 2906
+z
+M 678 1631
+L 4684 1631
+L 4684 1100
+L 678 1100
+L 678 1631
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-Oblique-3b3" d="M 1491 2950
+L 1838 788
+L 3456 3500
+L 4066 3500
+L 1972 0
+L 1713 -1331
+L 1138 -1331
+L 1397 0
+L 988 2613
+Q 925 3006 628 3006
+L 475 3006
+L 569 3500
+L 788 3500
+Q 1403 3500 1491 2950
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-3a6" d="M 2206 3644
+Q 1738 3578 1431 3306
+Q 1025 2947 1025 2328
+Q 1025 1713 1431 1353
+Q 1738 1081 2206 1016
+L 2206 3644
+z
+M 2838 1016
+Q 3306 1081 3613 1353
+Q 4013 1713 4013 2328
+Q 4013 2947 3613 3306
+Q 3306 3578 2838 3644
+L 2838 1016
+z
+M 2206 494
+Q 1444 563 950 981
+Q 359 1481 359 2328
+Q 359 3175 950 3678
+Q 1441 4100 2206 4169
+L 2206 4666
+L 2838 4666
+L 2838 4169
+Q 3600 4097 4091 3678
+Q 4678 3175 4678 2328
+Q 4678 1484 4091 981
+Q 3600 563 2838 491
+L 2838 0
+L 2206 0
+L 2206 494
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-28" d="M 1984 4856
+Q 1566 4138 1362 3434
+Q 1159 2731 1159 2009
+Q 1159 1288 1364 580
+Q 1569 -128 1984 -844
+L 1484 -844
+Q 1016 -109 783 600
+Q 550 1309 550 2009
+Q 550 2706 781 3412
+Q 1013 4119 1484 4856
+L 1984 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-Oblique-73" d="M 3200 3397
+L 3091 2853
+Q 2863 2978 2609 3040
+Q 2356 3103 2088 3103
+Q 1634 3103 1373 2948
+Q 1113 2794 1113 2528
+Q 1113 2219 1719 2053
+Q 1766 2041 1788 2034
+L 1972 1978
+Q 2547 1819 2739 1644
+Q 2931 1469 2931 1166
+Q 2931 609 2489 259
+Q 2047 -91 1331 -91
+Q 1053 -91 747 -37
+Q 441 16 72 128
+L 184 722
+Q 500 559 806 475
+Q 1113 391 1394 391
+Q 1816 391 2080 572
+Q 2344 753 2344 1031
+Q 2344 1331 1650 1516
+L 1591 1531
+L 1394 1581
+Q 956 1697 753 1886
+Q 550 2075 550 2369
+Q 550 2928 970 3256
+Q 1391 3584 2113 3584
+Q 2397 3584 2667 3537
+Q 2938 3491 3200 3397
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-2b" d="M 2944 4013
+L 2944 2272
+L 4684 2272
+L 4684 1741
+L 2944 1741
+L 2944 0
+L 2419 0
+L 2419 1741
+L 678 1741
+L 678 2272
+L 2419 2272
+L 2419 4013
+L 2944 4013
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-31" d="M 794 531
+L 1825 531
+L 1825 4091
+L 703 3866
+L 703 4441
+L 1819 4666
+L 2450 4666
+L 2450 531
+L 3481 531
+L 3481 0
+L 794 0
+L 794 531
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-29" d="M 513 4856
+L 1013 4856
+Q 1481 4119 1714 3412
+Q 1947 2706 1947 2009
+Q 1947 1309 1714 600
+Q 1481 -109 1013 -844
+L 513 -844
+Q 928 -128 1133 580
+Q 1338 1288 1338 2009
+Q 1338 2731 1133 3434
+Q 928 4138 513 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="nonterminal-formula-DejaVuSans-2212" d="M 678 2272
+L 4684 2272
+L 4684 1741
+L 678 1741
+L 678 2272
+z
+" transform="scale(0.015625)"/>
+    </defs>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-46" transform="translate(0 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-74" transform="translate(57.519531 -16.28125) scale(0.7)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-3d" transform="translate(107.182617 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-3b3" transform="translate(210.454102 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-3a6" transform="translate(269.633789 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-28" transform="translate(348.344727 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-73" transform="translate(387.358398 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-74" transform="translate(439.458008 -16.28125) scale(0.7)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-2b" transform="translate(480.541992 -16.28125) scale(0.7)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-31" transform="translate(552.832031 -16.28125) scale(0.7)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-29" transform="translate(600.102539 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-2212" transform="translate(658.598633 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-3a6" transform="translate(761.870117 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-28" transform="translate(840.581055 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-73" transform="translate(879.594727 0.125)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-Oblique-74" transform="translate(931.694336 -16.28125) scale(0.7)"/>
+    <use xlink:href="#nonterminal-formula-DejaVuSans-29" transform="translate(961.875 0.125)"/>
+   </g>
+  </g>
+ </g></svg>
+<text x="60.0" y="835.85" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="60.0" dy="0">reward_gamma must match training.gamma.</tspan></text>
+</g>
+<g data-node="terminal">
+<rect x="512" y="714" width="448" height="168" rx="8" fill="#ffffff" stroke="#cdd7e2" stroke-width="1.5"/>
+<path d="M532,715 h32" stroke="#9b681f" stroke-width="3"/>
+<text font-weight="600" x="532.0" y="756.4" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#152b43"><tspan x="532.0" dy="0">On terminal transitions</tspan></text>
+<svg data-formula="terminal-formula" x="532.0" y="771.4" width="408" height="35.2" viewBox="0 0 309.54 21.291875" preserveAspectRatio="xMinYMid meet">
+
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="terminal-formula-figure_1">
+  <g id="terminal-formula-patch_1">
+   <path d="M 0 21.291875
+L 309.54 21.291875
+L 309.54 0
+L 0 0
+L 0 21.291875
+z
+" style="fill: none"/>
+  </g>
+  <g id="terminal-formula-text_1">
+   <!-- $\Phi(s_{t+1}) = 0 \quad \Rightarrow \quad F_t = -\Phi(s_t)$ -->
+   <g style="fill: #152b43" transform="translate(0 16.716563) scale(0.22 -0.22)">
+    <defs>
+     <path id="terminal-formula-DejaVuSans-3a6" d="M 2206 3644
+Q 1738 3578 1431 3306
+Q 1025 2947 1025 2328
+Q 1025 1713 1431 1353
+Q 1738 1081 2206 1016
+L 2206 3644
+z
+M 2838 1016
+Q 3306 1081 3613 1353
+Q 4013 1713 4013 2328
+Q 4013 2947 3613 3306
+Q 3306 3578 2838 3644
+L 2838 1016
+z
+M 2206 494
+Q 1444 563 950 981
+Q 359 1481 359 2328
+Q 359 3175 950 3678
+Q 1441 4100 2206 4169
+L 2206 4666
+L 2838 4666
+L 2838 4169
+Q 3600 4097 4091 3678
+Q 4678 3175 4678 2328
+Q 4678 1484 4091 981
+Q 3600 563 2838 491
+L 2838 0
+L 2206 0
+L 2206 494
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-28" d="M 1984 4856
+Q 1566 4138 1362 3434
+Q 1159 2731 1159 2009
+Q 1159 1288 1364 580
+Q 1569 -128 1984 -844
+L 1484 -844
+Q 1016 -109 783 600
+Q 550 1309 550 2009
+Q 550 2706 781 3412
+Q 1013 4119 1484 4856
+L 1984 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-Oblique-73" d="M 3200 3397
+L 3091 2853
+Q 2863 2978 2609 3040
+Q 2356 3103 2088 3103
+Q 1634 3103 1373 2948
+Q 1113 2794 1113 2528
+Q 1113 2219 1719 2053
+Q 1766 2041 1788 2034
+L 1972 1978
+Q 2547 1819 2739 1644
+Q 2931 1469 2931 1166
+Q 2931 609 2489 259
+Q 2047 -91 1331 -91
+Q 1053 -91 747 -37
+Q 441 16 72 128
+L 184 722
+Q 500 559 806 475
+Q 1113 391 1394 391
+Q 1816 391 2080 572
+Q 2344 753 2344 1031
+Q 2344 1331 1650 1516
+L 1591 1531
+L 1394 1581
+Q 956 1697 753 1886
+Q 550 2075 550 2369
+Q 550 2928 970 3256
+Q 1391 3584 2113 3584
+Q 2397 3584 2667 3537
+Q 2938 3491 3200 3397
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-Oblique-74" d="M 2706 3500
+L 2619 3053
+L 1472 3053
+L 1100 1153
+Q 1081 1047 1072 975
+Q 1063 903 1063 863
+Q 1063 663 1183 572
+Q 1303 481 1569 481
+L 2150 481
+L 2053 0
+L 1503 0
+Q 991 0 739 200
+Q 488 400 488 806
+Q 488 878 497 964
+Q 506 1050 525 1153
+L 897 3053
+L 409 3053
+L 500 3500
+L 978 3500
+L 1172 4494
+L 1747 4494
+L 1556 3500
+L 2706 3500
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-2b" d="M 2944 4013
+L 2944 2272
+L 4684 2272
+L 4684 1741
+L 2944 1741
+L 2944 0
+L 2419 0
+L 2419 1741
+L 678 1741
+L 678 2272
+L 2419 2272
+L 2419 4013
+L 2944 4013
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-31" d="M 794 531
+L 1825 531
+L 1825 4091
+L 703 3866
+L 703 4441
+L 1819 4666
+L 2450 4666
+L 2450 531
+L 3481 531
+L 3481 0
+L 794 0
+L 794 531
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-29" d="M 513 4856
+L 1013 4856
+Q 1481 4119 1714 3412
+Q 1947 2706 1947 2009
+Q 1947 1309 1714 600
+Q 1481 -109 1013 -844
+L 513 -844
+Q 928 -128 1133 580
+Q 1338 1288 1338 2009
+Q 1338 2731 1133 3434
+Q 928 4138 513 4856
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-3d" d="M 678 2906
+L 4684 2906
+L 4684 2381
+L 678 2381
+L 678 2906
+z
+M 678 1631
+L 4684 1631
+L 4684 1100
+L 678 1100
+L 678 1631
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-30" d="M 2034 4250
+Q 1547 4250 1301 3770
+Q 1056 3291 1056 2328
+Q 1056 1369 1301 889
+Q 1547 409 2034 409
+Q 2525 409 2770 889
+Q 3016 1369 3016 2328
+Q 3016 3291 2770 3770
+Q 2525 4250 2034 4250
+z
+M 2034 4750
+Q 2819 4750 3233 4129
+Q 3647 3509 3647 2328
+Q 3647 1150 3233 529
+Q 2819 -91 2034 -91
+Q 1250 -91 836 529
+Q 422 1150 422 2328
+Q 422 3509 836 4129
+Q 1250 4750 2034 4750
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-21d2" d="M 4113 1678
+L 4441 2006
+L 4113 2334
+L 366 2334
+L 366 2709
+L 3738 2709
+L 3447 3000
+L 3822 3375
+L 5050 2147
+L 5050 1866
+L 3822 638
+L 3447 1013
+L 3738 1303
+L 366 1303
+L 366 1678
+L 4113 1678
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-Oblique-46" d="M 1081 4666
+L 3756 4666
+L 3653 4134
+L 1606 4134
+L 1338 2759
+L 3188 2759
+L 3084 2228
+L 1234 2228
+L 800 0
+L 172 0
+L 1081 4666
+z
+" transform="scale(0.015625)"/>
+     <path id="terminal-formula-DejaVuSans-2212" d="M 678 2272
+L 4684 2272
+L 4684 1741
+L 678 1741
+L 678 2272
+z
+" transform="scale(0.015625)"/>
+    </defs>
+    <use xlink:href="#terminal-formula-DejaVuSans-3a6" transform="translate(0 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-28" transform="translate(78.710938 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-Oblique-73" transform="translate(117.724609 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-Oblique-74" transform="translate(169.824219 -16.28125) scale(0.7)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-2b" transform="translate(210.908203 -16.28125) scale(0.7)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-31" transform="translate(283.198242 -16.28125) scale(0.7)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-29" transform="translate(330.46875 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-3d" transform="translate(388.964844 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-30" transform="translate(492.236328 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-21d2" transform="translate(672.753906 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-Oblique-46" transform="translate(873.4375 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-Oblique-74" transform="translate(930.957031 -16.28125) scale(0.7)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-3d" transform="translate(980.620117 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-2212" transform="translate(1083.891602 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-3a6" transform="translate(1167.680664 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-28" transform="translate(1246.391602 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-Oblique-73" transform="translate(1285.405273 0.125)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-Oblique-74" transform="translate(1337.504883 -16.28125) scale(0.7)"/>
+    <use xlink:href="#terminal-formula-DejaVuSans-29" transform="translate(1367.685547 0.125)"/>
+   </g>
+  </g>
+ </g></svg>
+<text x="532.0" y="832.6" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#536579"><tspan x="532.0" dy="0">Use the absorbing zero potential for both</tspan><tspan x="532.0" dy="22.5">shaping terms.</tspan></text>
+</g>
+<g data-note="separation">
+<rect x="40" y="890" width="920" height="100" rx="8" fill="#f3f5f7" stroke="none" stroke-width="1.5"/>
+<text x="60" y="924" text-anchor="start" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#1f2937"><tspan font-weight="600" x="60" dy="0">INTERPRETATION</tspan><tspan x="60" dy="22.5">Direct distance progress remains an ordinary reward term. It is distinct from progress PBRS. Terminal</tspan><tspan x="60" dy="22.5">diagnostics do not add the base finish reward twice.</tspan></text>
+</g>
 </svg>
 </div></main>
 <button id="download">Download editable diagram</button>
-<script id="scene" type="application/json">{&quot;type&quot;: &quot;excalidraw&quot;, &quot;version&quot;: 2, &quot;source&quot;: &quot;https://excalidraw.com&quot;, &quot;elements&quot;: [{&quot;id&quot;: &quot;title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 55, &quot;y&quot;: 28, &quot;width&quot;: 1590, &quot;height&quot;: 40.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1374748832, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1262830143, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 32, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Trackmania reward decomposition and terminal-safe shaping&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Trackmania reward decomposition and terminal-safe shaping&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;subtitle&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 55, &quot;y&quot;: 76, &quot;width&quot;: 1590, &quot;height&quot;: 22.5, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#64748b&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1780698447, &quot;version&quot;: 1, &quot;versionNonce&quot;: 198401535, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Ordinary reward terms remain separate from two potential-based shaping terms; terminal transitions use an absorbing zero potential.&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Ordinary reward terms remain separate from two potential-based shaping terms; terminal transitions use an absorbing zero potential.&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;zone-signals&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 45, &quot;y&quot;: 130, &quot;width&quot;: 330, &quot;height&quot;: 790, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1864ab&quot;, &quot;backgroundColor&quot;: &quot;#dbeafe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 1.5, &quot;strokeStyle&quot;: &quot;dashed&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 32, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1215695133, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1916913738, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;zone-signals-label&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 63, &quot;y&quot;: 144, &quot;width&quot;: 294, &quot;height&quot;: 23.75, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1864ab&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 232979553, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1136122915, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 19, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Validated signals&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Validated signals&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;zone-ordinary&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 400, &quot;y&quot;: 130, &quot;width&quot;: 470, &quot;height&quot;: 790, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;#dcfce7&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 1.5, &quot;strokeStyle&quot;: &quot;dashed&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 32, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 158759886, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1248987941, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;zone-ordinary-label&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 418, &quot;y&quot;: 144, &quot;width&quot;: 434, &quot;height&quot;: 23.75, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 327163540, &quot;version&quot;: 1, &quot;versionNonce&quot;: 960591510, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 19, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Ordinary and terminal reward terms&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Ordinary and terminal reward terms&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;zone-shaping&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 895, &quot;y&quot;: 130, &quot;width&quot;: 385, &quot;height&quot;: 790, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;#ede9fe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 1.5, &quot;strokeStyle&quot;: &quot;dashed&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 32, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2099759193, &quot;version&quot;: 1, &quot;versionNonce&quot;: 317840186, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;zone-shaping-label&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 913, &quot;y&quot;: 144, &quot;width&quot;: 349, &quot;height&quot;: 23.75, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1198837269, &quot;version&quot;: 1, &quot;versionNonce&quot;: 289051401, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 19, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Potential-based shaping&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Potential-based shaping&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;zone-result&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 1305, &quot;y&quot;: 130, &quot;width&quot;: 350, &quot;height&quot;: 790, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;#ffedd5&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 1.5, &quot;strokeStyle&quot;: &quot;dashed&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 32, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 998466019, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1500355825, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;zone-result-label&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1323, &quot;y&quot;: 144, &quot;width&quot;: 314, &quot;height&quot;: 23.75, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 198203827, &quot;version&quot;: 1, &quot;versionNonce&quot;: 290869511, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 19, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Transition result&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Transition result&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;e-time-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 530, &quot;y&quot;: 280, &quot;width&quot;: 115, &quot;height&quot;: 545, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 310449111, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1899253099, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 525], [115, 525], [115, 545]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-progress-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 742, &quot;y&quot;: 280, &quot;width&quot;: -97, &quot;height&quot;: 545, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1993835575, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1359599204, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 525], [-97, 525], [-97, 545]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-projected-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 530, &quot;y&quot;: 450, &quot;width&quot;: 115, &quot;height&quot;: 375, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 252761090, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1723056371, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 355], [115, 355], [115, 375]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-control-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 742, &quot;y&quot;: 450, &quot;width&quot;: -97, &quot;height&quot;: 375, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 161639424, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1413366708, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 355], [-97, 355], [-97, 375]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-collision-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 530, &quot;y&quot;: 605, &quot;width&quot;: 115, &quot;height&quot;: 220, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 362663399, &quot;version&quot;: 1, &quot;versionNonce&quot;: 945273353, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 200], [115, 200], [115, 220]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-terminal-base-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 742, &quot;y&quot;: 605, &quot;width&quot;: -97, &quot;height&quot;: 220, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1727580305, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1379598622, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 200], [-97, 200], [-97, 220]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-time-attack-sum&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 640, &quot;y&quot;: 780, &quot;width&quot;: 0, &quot;height&quot;: 35, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 805582547, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1985284357, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 35]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-telemetry-time&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 242, &quot;width&quot;: 95, &quot;height&quot;: -7, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1864ab&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 925635041, &quot;version&quot;: 1, &quot;versionNonce&quot;: 469056271, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [50, 0], [50, -7], [95, -7]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-reference-progress&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 437, &quot;width&quot;: 402, &quot;height&quot;: -157, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2063611668, &quot;version&quot;: 1, &quot;versionNonce&quot;: 824879393, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [45, 0], [45, -122], [402, -122], [402, -157]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-terminal-base&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 637, &quot;width&quot;: 402, &quot;height&quot;: -32, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1620076839, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1714940889, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [45, 0], [45, 3], [402, 3], [402, -32]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-terminal-time-attack&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 637, &quot;width&quot;: 205, &quot;height&quot;: 90, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1222636887, &quot;version&quot;: 1, &quot;versionNonce&quot;: 314576373, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [50, 0], [50, 90], [205, 90]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-reference-progress-potential&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 437, &quot;width&quot;: 595, &quot;height&quot;: -202, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1129289263, &quot;version&quot;: 1, &quot;versionNonce&quot;: 2051958837, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [40, 0], [40, -117], [540, -117], [540, -202], [595, -202]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-reference-pace-potential&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 437, &quot;width&quot;: 595, &quot;height&quot;: -55, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1044583996, &quot;version&quot;: 1, &quot;versionNonce&quot;: 293797109, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [45, 0], [45, -112], [545, -112], [545, -55], [595, -55]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-progress-potential-step&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1087, &quot;y&quot;: 285, &quot;width&quot;: 0, &quot;height&quot;: 220, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1303386250, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1862244999, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 220]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-pace-potential-step&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1087, &quot;y&quot;: 435, &quot;width&quot;: 0, &quot;height&quot;: 70, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 940246104, &quot;version&quot;: 1, &quot;versionNonce&quot;: 99421525, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 70]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-progress-potential-terminal&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1240, &quot;y&quot;: 235, &quot;width&quot;: -153, &quot;height&quot;: 465, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;dashed&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1514798177, &quot;version&quot;: 1, &quot;versionNonce&quot;: 800829250, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [20, 0], [20, 435], [-153, 435], [-153, 465]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-pace-potential-terminal&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1240, &quot;y&quot;: 382, &quot;width&quot;: -153, &quot;height&quot;: 318, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;dashed&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 861898525, &quot;version&quot;: 1, &quot;versionNonce&quot;: 160485677, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [20, 0], [20, 288], [-153, 288], [-153, 318]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-terminal-reset&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 340, &quot;y&quot;: 637, &quot;width&quot;: 747, &quot;height&quot;: 198, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1297211323, &quot;version&quot;: 1, &quot;versionNonce&quot;: 968516172, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [40, 0], [40, 313], [747, 313], [747, 198]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-ordinary-total&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 755, &quot;y&quot;: 857, &quot;width&quot;: 595, &quot;height&quot;: -535, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1794269370, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1503682785, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [120, 0], [120, 78], [565, 78], [565, -535], [595, -535]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-step-total&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1240, &quot;y&quot;: 565, &quot;width&quot;: 110, &quot;height&quot;: -243, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 542354062, &quot;version&quot;: 1, &quot;versionNonce&quot;: 631734572, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [45, 0], [45, -243], [110, -243]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-terminal-total&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1240, &quot;y&quot;: 767, &quot;width&quot;: 110, &quot;height&quot;: -445, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 593513199, &quot;version&quot;: 1, &quot;versionNonce&quot;: 559029936, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [50, 0], [50, -445], [110, -445]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-total-breakdown&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1480, &quot;y&quot;: 390, &quot;width&quot;: 0, &quot;height&quot;: 115, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2085336620, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1252915895, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 115]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;e-breakdown-transition&quot;, &quot;type&quot;: &quot;arrow&quot;, &quot;x&quot;: 1480, &quot;y&quot;: 625, &quot;width&quot;: 0, &quot;height&quot;: 115, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1864ab&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2101381138, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1559511999, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;points&quot;: [[0, 0], [0, 115]], &quot;lastCommittedPoint&quot;: null, &quot;startBinding&quot;: null, &quot;endBinding&quot;: null, &quot;startArrowhead&quot;: null, &quot;endArrowhead&quot;: &quot;arrow&quot;}, {&quot;id&quot;: &quot;telemetry&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 80, &quot;y&quot;: 190, &quot;width&quot;: 260, &quot;height&quot;: 105, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1864ab&quot;, &quot;backgroundColor&quot;: &quot;#dbeafe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 11006824, &quot;version&quot;: 1, &quot;versionNonce&quot;: 928359795, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;telemetry-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 92, &quot;y&quot;: 205.0, &quot;width&quot;: 236, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1524064398, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1872418926, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Telemetry delta&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Telemetry delta&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;telemetry-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 94, &quot;y&quot;: 235.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1710049086, &quot;version&quot;: 1, &quot;versionNonce&quot;: 383097850, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Δt · path progress ·\nvelocity · steering&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Δt · path progress · velocity · steering&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;reference&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 80, &quot;y&quot;: 385, &quot;width&quot;: 260, &quot;height&quot;: 105, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;#cffafe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 876931498, &quot;version&quot;: 1, &quot;versionNonce&quot;: 519228228, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;reference-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 92, &quot;y&quot;: 400.0, &quot;width&quot;: 236, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 33403276, &quot;version&quot;: 1, &quot;versionNonce&quot;: 230023693, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Track references&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Track references&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;reference-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 94, &quot;y&quot;: 430.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1165252743, &quot;version&quot;: 1, &quot;versionNonce&quot;: 124945690, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;lap length · tangent ·\nhuman pace&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;lap length · tangent · human pace&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;terminal-signal&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 80, &quot;y&quot;: 580, &quot;width&quot;: 260, &quot;height&quot;: 115, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;#fee2e2&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1785565657, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1637299585, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;terminal-signal-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 92, &quot;y&quot;: 600.0, &quot;width&quot;: 236, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 641139097, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1536984512, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Terminal contract&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Terminal contract&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;terminal-signal-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 94, &quot;y&quot;: 630.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 268224511, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1144118499, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;finish · off-track ·\ntime or stall limit&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;finish · off-track · time or stall limit&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;configuration&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 80, &quot;y&quot;: 785, &quot;width&quot;: 260, &quot;height&quot;: 95, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;#f1f5f9&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 750761561, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1007606412, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;configuration-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 92, &quot;y&quot;: 795.0, &quot;width&quot;: 236, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 901888003, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1201568107, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Reward configuration&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Reward configuration&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;configuration-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 94, &quot;y&quot;: 825.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2069688087, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1463345828, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;finite scales · shared\nreward_gamma&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;finite scales · shared reward_gamma&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;time&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 435, &quot;y&quot;: 190, &quot;width&quot;: 190, &quot;height&quot;: 90, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;#ffedd5&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1782860706, &quot;version&quot;: 1, &quot;versionNonce&quot;: 388859958, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;time-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 447, &quot;y&quot;: 208.75, &quot;width&quot;: 166, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 286130721, &quot;version&quot;: 1, &quot;versionNonce&quot;: 608549471, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Time cost&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Time cost&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;time-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 449, &quot;y&quot;: 238.75, &quot;width&quot;: 162, &quot;height&quot;: 22.5, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 15755812, &quot;version&quot;: 1, &quot;versionNonce&quot;: 123567577, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;−time_scale · Δt&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;−time_scale · Δt&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;progress&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 650, &quot;y&quot;: 190, &quot;width&quot;: 185, &quot;height&quot;: 110, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;#dcfce7&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1112221300, &quot;version&quot;: 1, &quot;versionNonce&quot;: 396931463, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;progress-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 662, &quot;y&quot;: 197, &quot;width&quot;: 161, &quot;height&quot;: 50.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1828105229, &quot;version&quot;: 1, &quot;versionNonce&quot;: 785160721, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Direct\nprogress&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Direct progress&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;progress-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 664, &quot;y&quot;: 252, &quot;width&quot;: 157, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 413378933, &quot;version&quot;: 1, &quot;versionNonce&quot;: 770280793, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;lap_scale · Δd\n/ L&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;lap_scale · Δd / L&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;projected&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 435, &quot;y&quot;: 350, &quot;width&quot;: 190, &quot;height&quot;: 100, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;#cffafe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 825177133, &quot;version&quot;: 1, &quot;versionNonce&quot;: 573547823, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;projected-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 447, &quot;y&quot;: 361.25, &quot;width&quot;: 166, &quot;height&quot;: 50.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1682170553, &quot;version&quot;: 1, &quot;versionNonce&quot;: 320579957, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Projected\nvelocity&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Projected velocity&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;projected-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 449, &quot;y&quot;: 416.25, &quot;width&quot;: 162, &quot;height&quot;: 22.5, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1329103002, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1030137734, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;scale · v∥ · Δt&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;scale · v∥ · Δt&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;control&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 650, &quot;y&quot;: 350, &quot;width&quot;: 185, &quot;height&quot;: 110, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;#ede9fe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 93162040, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1286059880, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;control-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 662, &quot;y&quot;: 357, &quot;width&quot;: 161, &quot;height&quot;: 50.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 610015052, &quot;version&quot;: 1, &quot;versionNonce&quot;: 2093164505, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Speed and\nsteering&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Speed and steering&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;control-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 664, &quot;y&quot;: 412, &quot;width&quot;: 157, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 604515137, &quot;version&quot;: 1, &quot;versionNonce&quot;: 734631972, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;speed² bonus\nsteer Δ penalty&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;speed² bonus\nsteer Δ penalty&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;collision&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 435, &quot;y&quot;: 515, &quot;width&quot;: 190, &quot;height&quot;: 90, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;#fee2e2&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1566416362, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1742426854, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;collision-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 447, &quot;y&quot;: 522.5, &quot;width&quot;: 166, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1750035122, &quot;version&quot;: 1, &quot;versionNonce&quot;: 261280097, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Collision&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Collision&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;collision-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 449, &quot;y&quot;: 552.5, &quot;width&quot;: 162, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 963200476, &quot;version&quot;: 1, &quot;versionNonce&quot;: 760313400, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;cooldown-gated\npenalty&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;cooldown-gated penalty&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;terminal-base&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 650, &quot;y&quot;: 515, &quot;width&quot;: 185, &quot;height&quot;: 90, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;#fee2e2&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1796298369, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1007687886, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;terminal-base-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 662, &quot;y&quot;: 522.5, &quot;width&quot;: 161, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 283784968, &quot;version&quot;: 1, &quot;versionNonce&quot;: 2119732096, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Terminal base&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Terminal base&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;terminal-base-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 664, &quot;y&quot;: 552.5, &quot;width&quot;: 157, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 712504452, &quot;version&quot;: 1, &quot;versionNonce&quot;: 484309614, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;finish bonus or\nfailure penalty&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;finish bonus or failure penalty&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;time-attack&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 545, &quot;y&quot;: 675, &quot;width&quot;: 190, &quot;height&quot;: 105, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;#ffedd5&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1732153686, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1125660375, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;time-attack-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 557, &quot;y&quot;: 682, &quot;width&quot;: 166, &quot;height&quot;: 50.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 469918124, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1621385260, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Time-attack\nfinish term&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Time-attack finish term&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;time-attack-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 559, &quot;y&quot;: 737, &quot;width&quot;: 162, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 689433562, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1125130759, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;finish timing\nbonus&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;finish timing bonus&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;ordinary-sum&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 535, &quot;y&quot;: 815, &quot;width&quot;: 220, &quot;height&quot;: 85, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;#dcfce7&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 5152300, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1422384324, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;ordinary-sum-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 547, &quot;y&quot;: 822, &quot;width&quot;: 196, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1353716617, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1973871338, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Ordinary subtotal&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Ordinary subtotal&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;ordinary-sum-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 549, &quot;y&quot;: 852, &quot;width&quot;: 192, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1250138224, &quot;version&quot;: 1, &quot;versionNonce&quot;: 449675060, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;per-step + terminal\nterms&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;per-step + terminal terms&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;progress-potential&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 935, &quot;y&quot;: 185, &quot;width&quot;: 305, &quot;height&quot;: 100, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#7048e8&quot;, &quot;backgroundColor&quot;: &quot;#ede9fe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1943033720, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1707748428, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;progress-potential-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 947, &quot;y&quot;: 208.75, &quot;width&quot;: 281, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 587701566, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1324204286, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Progress potential&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Progress potential&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;progress-potential-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 949, &quot;y&quot;: 238.75, &quot;width&quot;: 277, &quot;height&quot;: 22.5, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 184384309, &quot;version&quot;: 1, &quot;versionNonce&quot;: 236574792, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Φp = wp · d / L&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Φp = wp · d / L&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;pace-potential&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 935, &quot;y&quot;: 330, &quot;width&quot;: 305, &quot;height&quot;: 105, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#087f8c&quot;, &quot;backgroundColor&quot;: &quot;#cffafe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1760652766, &quot;version&quot;: 1, &quot;versionNonce&quot;: 21473644, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;pace-potential-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 947, &quot;y&quot;: 345.0, &quot;width&quot;: 281, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 717146199, &quot;version&quot;: 1, &quot;versionNonce&quot;: 114714517, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Pace potential&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Pace potential&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;pace-potential-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 949, &quot;y&quot;: 375.0, &quot;width&quot;: 277, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1100326091, &quot;version&quot;: 1, &quot;versionNonce&quot;: 235302193, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Φpace(s) = −wd · clipped\ntime debt&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Φpace(s) = −wd · clipped time debt&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;nonterminal-pbrs&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 935, &quot;y&quot;: 505, &quot;width&quot;: 305, &quot;height&quot;: 120, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#2b8a3e&quot;, &quot;backgroundColor&quot;: &quot;#dcfce7&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 35780986, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1482557504, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;nonterminal-pbrs-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 947, &quot;y&quot;: 527.5, &quot;width&quot;: 281, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 582197194, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1348504909, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Non-terminal shaping&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Non-terminal shaping&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;nonterminal-pbrs-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 949, &quot;y&quot;: 557.5, &quot;width&quot;: 277, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 383500764, &quot;version&quot;: 1, &quot;versionNonce&quot;: 472843340, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;F = γ Φ(s′) − Φ(s), for\nboth potentials&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;F = γ Φ(s′) − Φ(s), for both potentials&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;terminal-zero&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 935, &quot;y&quot;: 700, &quot;width&quot;: 305, &quot;height&quot;: 135, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;#fee2e2&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1184307322, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1284789794, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;terminal-zero-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 947, &quot;y&quot;: 718.75, &quot;width&quot;: 281, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 822308722, &quot;version&quot;: 1, &quot;versionNonce&quot;: 488180199, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Terminal reset&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Terminal reset&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;terminal-zero-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 949, &quot;y&quot;: 748.75, &quot;width&quot;: 277, &quot;height&quot;: 67.5, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2039023183, &quot;version&quot;: 1, &quot;versionNonce&quot;: 220789167, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Φ(terminal) = 0; emit\n−Φ(previous) for both\npotentials&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Φ(terminal) = 0; emit −Φ(previous) for both potentials&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;total&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 1350, &quot;y&quot;: 255, &quot;width&quot;: 260, &quot;height&quot;: 135, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#d97706&quot;, &quot;backgroundColor&quot;: &quot;#ffedd5&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 15728982, &quot;version&quot;: 1, &quot;versionNonce&quot;: 2131290195, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;total-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1362, &quot;y&quot;: 285.0, &quot;width&quot;: 236, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 975380058, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1627588423, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Total reward&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Total reward&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;total-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1364, &quot;y&quot;: 315.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 90661276, &quot;version&quot;: 1, &quot;versionNonce&quot;: 68806801, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;ordinary + progress\nPBRS + pace PBRS&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;ordinary + progress\nPBRS + pace PBRS&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;breakdown&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 1350, &quot;y&quot;: 505, &quot;width&quot;: 260, &quot;height&quot;: 120, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1864ab&quot;, &quot;backgroundColor&quot;: &quot;#dbeafe&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 577691743, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1035752054, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;breakdown-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1362, &quot;y&quot;: 515.0, &quot;width&quot;: 236, &quot;height&quot;: 50.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1647375785, &quot;version&quot;: 1, &quot;versionNonce&quot;: 294344417, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;RewardResult\nbreakdown&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;RewardResult breakdown&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;breakdown-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1364, &quot;y&quot;: 570.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 404632206, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1644847399, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;named terms · potential\n· pace debt · collision&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;named terms · potential · pace debt · collision&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;transition&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 1350, &quot;y&quot;: 740, &quot;width&quot;: 260, &quot;height&quot;: 105, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;#f1f5f9&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1845912090, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1029464591, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;transition-title&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1362, &quot;y&quot;: 755.0, &quot;width&quot;: 236, &quot;height&quot;: 25.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#111827&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 340214467, &quot;version&quot;: 1, &quot;versionNonce&quot;: 351271941, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 20, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Learner transition&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Learner transition&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;transition-detail&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 1364, &quot;y&quot;: 785.0, &quot;width&quot;: 232, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2123153759, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1012907852, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;scalar reward ·\nterminated · reason&quot;, &quot;textAlign&quot;: &quot;center&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;scalar reward · terminated · reason&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;gamma-invariant&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 85, &quot;y&quot;: 970, &quot;width&quot;: 1530, &quot;height&quot;: 55, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#c92a2a&quot;, &quot;backgroundColor&quot;: &quot;#fee2e2&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 1.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 2021976142, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1706739108, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;gamma-invariant-text&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 99, &quot;y&quot;: 982, &quot;width&quot;: 1502, &quot;height&quot;: 22.5, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1f2937&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1102319015, &quot;version&quot;: 1, &quot;versionNonce&quot;: 613495562, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Runtime invariant: reward_gamma must equal training.gamma so the implemented PBRS difference uses the learner&#x27;s discount.&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Runtime invariant: reward_gamma must equal training.gamma so the implemented PBRS difference uses the learner&#x27;s discount.&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}, {&quot;id&quot;: &quot;diagnostic-separation&quot;, &quot;type&quot;: &quot;rectangle&quot;, &quot;x&quot;: 85, &quot;y&quot;: 1045, &quot;width&quot;: 1530, &quot;height&quot;: 58, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#475569&quot;, &quot;backgroundColor&quot;: &quot;#f1f5f9&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 1.5, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1965236979, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1710074969, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false}, {&quot;id&quot;: &quot;diagnostic-separation-text&quot;, &quot;type&quot;: &quot;text&quot;, &quot;x&quot;: 99, &quot;y&quot;: 1057, &quot;width&quot;: 1502, &quot;height&quot;: 45.0, &quot;angle&quot;: 0, &quot;strokeColor&quot;: &quot;#1f2937&quot;, &quot;backgroundColor&quot;: &quot;transparent&quot;, &quot;fillStyle&quot;: &quot;solid&quot;, &quot;strokeWidth&quot;: 2, &quot;strokeStyle&quot;: &quot;solid&quot;, &quot;roughness&quot;: 1, &quot;opacity&quot;: 100, &quot;groupIds&quot;: [], &quot;frameId&quot;: null, &quot;roundness&quot;: {&quot;type&quot;: 3}, &quot;seed&quot;: 1958403186, &quot;version&quot;: 1, &quot;versionNonce&quot;: 1850172945, &quot;isDeleted&quot;: false, &quot;boundElements&quot;: [], &quot;updated&quot;: 1, &quot;link&quot;: null, &quot;locked&quot;: false, &quot;fontSize&quot;: 18, &quot;fontFamily&quot;: 1, &quot;text&quot;: &quot;Direct progress is an intentional ordinary term. Progress PBRS is reported separately, and terminal/time-attack diagnostics do not double-count the\nbase finish reward.&quot;, &quot;textAlign&quot;: &quot;left&quot;, &quot;verticalAlign&quot;: &quot;middle&quot;, &quot;containerId&quot;: null, &quot;originalText&quot;: &quot;Direct progress is an intentional ordinary term. Progress PBRS is reported separately, and terminal/time-attack diagnostics do not double-count the base finish reward.&quot;, &quot;autoResize&quot;: false, &quot;lineHeight&quot;: 1.25}], &quot;appState&quot;: {&quot;gridSize&quot;: null, &quot;viewBackgroundColor&quot;: &quot;#ffffff&quot;}, &quot;files&quot;: {}}</script>
+<script id="scene" type="application/json">{"type": "excalidraw", "version": 2, "source": "https://excalidraw.com", "elements": [{"id": "eyebrow", "type": "text", "x": 40, "y": 20, "width": 920, "height": 22.5, "angle": 0, "strokeColor": "#087d74", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 10938666, "version": 1, "versionNonce": 1385532412, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "TRACKMANIARL / SYSTEM GUIDE / 07", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "TRACKMANIARL   /   SYSTEM GUIDE   /   07", "autoResize": false, "lineHeight": 1.25}, {"id": "title", "type": "text", "x": 40, "y": 57, "width": 920, "height": 42.5, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1374748832, "version": 1, "versionNonce": 1262830143, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 34, "fontFamily": 2, "text": "Understand the reward signal", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Understand the reward signal", "autoResize": false, "lineHeight": 1.25}, {"id": "subtitle", "type": "text", "x": 40, "y": 113, "width": 920, "height": 22.5, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1780698447, "version": 1, "versionNonce": 198401535, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "The scalar reward combines ordinary terms with two separately reported shaping terms.", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "The scalar reward combines ordinary terms with two separately reported shaping terms.", "autoResize": false, "lineHeight": 1.25}, {"id": "zone-term-40", "type": "rectangle", "x": 40, "y": 184, "width": 296, "height": 300, "angle": 0, "strokeColor": "transparent", "backgroundColor": "#f3f5f7", "fillStyle": "solid", "strokeWidth": 0, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 917365051, "version": 1, "versionNonce": 37935462, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "zone-term-40-label", "type": "text", "x": 64, "y": 204, "width": 248, "height": 22.5, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1954204222, "version": 1, "versionNonce": 295497256, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "01 Ordinary reward", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "01  Ordinary reward", "autoResize": false, "lineHeight": 1.25}, {"id": "zone-term-352", "type": "rectangle", "x": 352, "y": 184, "width": 296, "height": 300, "angle": 0, "strokeColor": "transparent", "backgroundColor": "#f3f5f7", "fillStyle": "solid", "strokeWidth": 0, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 467089407, "version": 1, "versionNonce": 2125062335, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "zone-term-352-label", "type": "text", "x": 376, "y": 204, "width": 248, "height": 22.5, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1472756819, "version": 1, "versionNonce": 1068008517, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "02 Progress PBRS", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "02  Progress PBRS", "autoResize": false, "lineHeight": 1.25}, {"id": "zone-term-664", "type": "rectangle", "x": 664, "y": 184, "width": 296, "height": 300, "angle": 0, "strokeColor": "transparent", "backgroundColor": "#f3f5f7", "fillStyle": "solid", "strokeWidth": 0, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 286087639, "version": 1, "versionNonce": 1852463393, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "zone-term-664-label", "type": "text", "x": 688, "y": 204, "width": 248, "height": 22.5, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1988452244, "version": 1, "versionNonce": 2114371631, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "03 Pace PBRS", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "03  Pace PBRS", "autoResize": false, "lineHeight": 1.25}, {"id": "e-ordinary-total", "type": "arrow", "x": 188, "y": 450, "width": 312, "height": 106, "angle": 0, "strokeColor": "#087d74", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 1.75, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1794269370, "version": 1, "versionNonce": 1503682785, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "points": [[0, 0], [0, 64], [312, 64], [312, 106]], "lastCommittedPoint": null, "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": "arrow"}, {"id": "e-progress-total", "type": "arrow", "x": 500, "y": 450, "width": 0, "height": 106, "angle": 0, "strokeColor": "#087d74", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 1.75, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 792426409, "version": 1, "versionNonce": 1935732979, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "points": [[0, 0], [0, 64], [0, 64], [0, 106]], "lastCommittedPoint": null, "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": "arrow"}, {"id": "e-pace-total", "type": "arrow", "x": 812, "y": 450, "width": 312, "height": 106, "angle": 0, "strokeColor": "#087d74", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 1.75, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 2064485993, "version": 1, "versionNonce": 497367544, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "points": [[0, 0], [0, 64], [-312, 64], [-312, 106]], "lastCommittedPoint": null, "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": "arrow"}, {"id": "ordinary", "type": "rectangle", "x": 64, "y": 250, "width": 248, "height": 200, "angle": 0, "strokeColor": "#cdd7e2", "backgroundColor": "#ffffff", "fillStyle": "solid", "strokeWidth": 1.5, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1731875685, "version": 1, "versionNonce": 1038020592, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "ordinary-title", "type": "text", "x": 84.0, "y": 311.0, "width": 208, "height": 25.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 997947329, "version": 1, "versionNonce": 2084416438, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "Base terms", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Base terms", "autoResize": false, "lineHeight": 1.25}, {"id": "ordinary-detail", "type": "text", "x": 84.0, "y": 344.0, "width": 208, "height": 45.0, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1653018288, "version": 1, "versionNonce": 787740293, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "Time + progress\nMotion + terminal terms", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Time + progress\nMotion + terminal terms", "autoResize": false, "lineHeight": 1.25}, {"id": "progress", "type": "rectangle", "x": 376, "y": 250, "width": 248, "height": 200, "angle": 0, "strokeColor": "#cdd7e2", "backgroundColor": "#ffffff", "fillStyle": "solid", "strokeWidth": 1.5, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1112221300, "version": 1, "versionNonce": 396931463, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "progress-title", "type": "text", "x": 396.0, "y": 288.4, "width": 208, "height": 25.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1828105229, "version": 1, "versionNonce": 785160721, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "Progress potential", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Progress potential", "autoResize": false, "lineHeight": 1.25}, {"id": "progress-formula", "type": "text", "x": 396.0, "y": 323.4, "width": 208, "height": 55.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1112784885, "version": 1, "versionNonce": 1956445950, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 22, "fontFamily": 2, "text": "Φp(s) = wp · d(s) /\nL", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Φp(s) = wp · d(s) / L", "autoResize": false, "lineHeight": 1.25}, {"id": "progress-detail", "type": "text", "x": 396.0, "y": 366.59999999999997, "width": 208, "height": 45.0, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 413378933, "version": 1, "versionNonce": 770280793, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "Rewards changes in\nprogress potential.", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Rewards changes in\nprogress potential.", "autoResize": false, "lineHeight": 1.25}, {"id": "pace", "type": "rectangle", "x": 688, "y": 250, "width": 248, "height": 200, "angle": 0, "strokeColor": "#cdd7e2", "backgroundColor": "#ffffff", "fillStyle": "solid", "strokeWidth": 1.5, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 548662521, "version": 1, "versionNonce": 1259590044, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "pace-title", "type": "text", "x": 708.0, "y": 290.0, "width": 208, "height": 25.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 554420148, "version": 1, "versionNonce": 544064047, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "Pace potential", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Pace potential", "autoResize": false, "lineHeight": 1.25}, {"id": "pace-formula", "type": "text", "x": 708.0, "y": 325.0, "width": 208, "height": 50.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1975758875, "version": 1, "versionNonce": 1309909593, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "Φpace(s) = -wd ·\nΔt̂(s)", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Φpace(s) = -wd · Δt̂(s)", "autoResize": false, "lineHeight": 1.25}, {"id": "pace-detail", "type": "text", "x": 708.0, "y": 365.0, "width": 208, "height": 45.0, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 351577758, "version": 1, "versionNonce": 1064885228, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "Clipped time debt\nReference lap", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Clipped time debt\nReference lap", "autoResize": false, "lineHeight": 1.25}, {"id": "total", "type": "rectangle", "x": 64, "y": 556, "width": 872, "height": 112, "angle": 0, "strokeColor": "#cdd7e2", "backgroundColor": "#ffffff", "fillStyle": "solid", "strokeWidth": 1.5, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 15728982, "version": 1, "versionNonce": 2131290195, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "total-title", "type": "text", "x": 84.0, "y": 584.25, "width": 832, "height": 25.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 975380058, "version": 1, "versionNonce": 1627588423, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "Total reward = ordinary + progress shaping + pace shaping", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Total reward = ordinary + progress shaping + pace shaping", "autoResize": false, "lineHeight": 1.25}, {"id": "total-detail", "type": "text", "x": 84.0, "y": 617.25, "width": 832, "height": 22.5, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 90661276, "version": 1, "versionNonce": 68806801, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "RewardResult keeps the named terms and diagnostics alongside the scalar learner reward.", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "RewardResult keeps the named terms and diagnostics alongside the scalar learner reward.", "autoResize": false, "lineHeight": 1.25}, {"id": "nonterminal", "type": "rectangle", "x": 40, "y": 714, "width": 448, "height": 152, "angle": 0, "strokeColor": "#cdd7e2", "backgroundColor": "#ffffff", "fillStyle": "solid", "strokeWidth": 1.5, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 513015402, "version": 1, "versionNonce": 1855883098, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "nonterminal-title", "type": "text", "x": 60.0, "y": 739.65, "width": 408, "height": 25.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1951710063, "version": 1, "versionNonce": 1982233790, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "On ordinary transitions", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "On ordinary transitions", "autoResize": false, "lineHeight": 1.25}, {"id": "nonterminal-formula", "type": "text", "x": 60.0, "y": 774.65, "width": 408, "height": 27.5, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 930462584, "version": 1, "versionNonce": 1201493346, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 22, "fontFamily": 2, "text": "Fₜ = γΦ(sₜ₊₁) - Φ(sₜ)", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Fₜ = γΦ(sₜ₊₁) - Φ(sₜ)", "autoResize": false, "lineHeight": 1.25}, {"id": "nonterminal-detail", "type": "text", "x": 60.0, "y": 817.85, "width": 408, "height": 22.5, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 844426028, "version": 1, "versionNonce": 649104573, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "reward_gamma must match training.gamma.", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "reward_gamma must match training.gamma.", "autoResize": false, "lineHeight": 1.25}, {"id": "terminal", "type": "rectangle", "x": 512, "y": 714, "width": 448, "height": 168, "angle": 0, "strokeColor": "#cdd7e2", "backgroundColor": "#ffffff", "fillStyle": "solid", "strokeWidth": 1.5, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1555687399, "version": 1, "versionNonce": 1408466413, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "terminal-title", "type": "text", "x": 532.0, "y": 736.4, "width": 408, "height": 25.0, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 150597311, "version": 1, "versionNonce": 545777027, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 20, "fontFamily": 2, "text": "On terminal transitions", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "On terminal transitions", "autoResize": false, "lineHeight": 1.25}, {"id": "terminal-formula", "type": "text", "x": 532.0, "y": 771.4, "width": 408, "height": 27.5, "angle": 0, "strokeColor": "#152b43", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1668638402, "version": 1, "versionNonce": 321334232, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 22, "fontFamily": 2, "text": "Φ(sₜ₊₁) = 0 ⇒ Fₜ = -Φ(sₜ)", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Φ(sₜ₊₁) = 0  ⇒  Fₜ = -Φ(sₜ)", "autoResize": false, "lineHeight": 1.25}, {"id": "terminal-detail", "type": "text", "x": 532.0, "y": 814.6, "width": 408, "height": 45.0, "angle": 0, "strokeColor": "#536579", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 1893865907, "version": 1, "versionNonce": 1468022305, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "Use the absorbing zero potential for both\nshaping terms.", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "Use the absorbing zero potential for both\nshaping terms.", "autoResize": false, "lineHeight": 1.25}, {"id": "separation", "type": "rectangle", "x": 40, "y": 890, "width": 920, "height": 100, "angle": 0, "strokeColor": "transparent", "backgroundColor": "#f3f5f7", "fillStyle": "solid", "strokeWidth": 0, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 426005316, "version": 1, "versionNonce": 505285793, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false}, {"id": "separation-text", "type": "text", "x": 60, "y": 906, "width": 880, "height": 67.5, "angle": 0, "strokeColor": "#1f2937", "backgroundColor": "transparent", "fillStyle": "solid", "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100, "groupIds": [], "frameId": null, "roundness": {"type": 3}, "seed": 177798278, "version": 1, "versionNonce": 558822008, "isDeleted": false, "boundElements": [], "updated": 1, "link": null, "locked": false, "fontSize": 18, "fontFamily": 2, "text": "INTERPRETATION\nDirect distance progress remains an ordinary reward term. It is distinct from progress PBRS. Terminal\ndiagnostics do not add the base finish reward twice.", "textAlign": "left", "verticalAlign": "middle", "containerId": null, "originalText": "INTERPRETATION\nDirect distance progress remains an ordinary reward term. It is distinct from progress PBRS. Terminal diagnostics do not add the base finish reward twice.", "autoResize": false, "lineHeight": 1.25}], "appState": {"gridSize": null, "viewBackgroundColor": "#ffffff"}, "files": {}}</script>
 <script>document.getElementById('download').onclick=()=>{const data=JSON.parse(document.getElementById('scene').textContent);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='reward-decomposition.excalidraw';a.click();};</script></body></html>

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.2 - 2026-09-09
+
+- Redesign all nine documentation diagrams with consistent reading order,
+  typography, spacing and connectors. Wrap labels within their cards.
+- Render mathematical expressions as vector paths in SVG previews and include
+  the equations in PNG exports, with editable text equivalents in Excalidraw.
+- Add a local diagram gallery, reproducible exports and browser layout checks.
+- Preserve the immutable README GIF URL for GitHub and PyPI rendering.
+
 ## 1.2.1 - 2026-09-08
 
 - Use an immutable GitHub URL for the README GIF so it renders on PyPI and move
