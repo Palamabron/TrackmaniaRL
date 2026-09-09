@@ -1,6 +1,6 @@
 # Camera vision and PPO
 
-This guide applies to TrackmaniaRL 1.2.4 with RunSpec 2.0.
+This guide applies to TrackmaniaRL 1.2.5 with RunSpec 2.0.
 
 PPO is a supported local on-policy algorithm. The Trackmania project template
 generates `run-ppo.yaml` (telemetry) and `run-ppo-vision.yaml` (camera), alongside

@@ -167,6 +167,18 @@ def _assert_release_workflow_publishes_without_rebuilding() -> None:
     assert "pypi-attestations verify attestation" in commands
 
 
+def _assert_release_workflow_publishes_readme_media() -> None:
+    release = _jobs()["github-release"]
+    commands = _commands(release)
+    assert release["needs"] == "attest-publish"
+    assert release["permissions"] == {"contents": "write"}
+    assert "docs/assets/trackmaniarl-neural-flow.gif" in commands
+    assert "docs/assets/trackmaniarl-logo.png" in commands
+    assert "gh release create" in commands
+    assert "gh release upload" in commands
+    assert "--clobber" in commands
+
+
 def _assert_pinned_actions(workflow: dict[str, object]) -> None:
     jobs = workflow["jobs"]
     for job in jobs.values():
@@ -199,6 +211,7 @@ def test_release_workflow_secures_and_publishes_canonical_artifacts() -> None:
     _assert_release_workflow_uploads_archives_and_spdx_sbom()
     _assert_release_workflow_attests_archives_and_sbom()
     _assert_release_workflow_publishes_without_rebuilding()
+    _assert_release_workflow_publishes_readme_media()
     _assert_pinned_actions(_workflow())
     _assert_ci_workflow_uses_least_privilege_and_pinned_actions()
 

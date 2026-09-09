@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.5 - 2026-09-09
+
+- Restore the full neural-drive animation to 30 FPS while keeping the complete
+  42.10-second run and result card.
+- Serve the README animation from a GitHub Release asset with the correct GIF
+  media type so PyPI can display it.
+- Use an absolute versioned URL for the README logo so it also renders on PyPI.
+- Test image URLs, animation timing, dimensions and the release-media contract.
+
 ## 1.2.4 - 2026-09-09
 
 - Reject incomplete distributed episode and timing summaries. Version 1.2.4
