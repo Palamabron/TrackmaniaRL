@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -59,3 +60,16 @@ def test_bc_encoder_warm_start_is_supported_and_failure_is_atomic(
     for name, value in model.state_dict().items():
         if name.startswith(("head.", "strategy.")):
             torch.testing.assert_close(value, before[name], rtol=0, atol=0)
+
+    valid = {name: tensor.clone() for name, tensor in model.state_dict().items()}
+    poisoned = deepcopy(learner.state_dict())
+    name = next(name for name in report.matched if poisoned["model"][name].is_floating_point())
+    poisoned["model"][name].fill_(float("nan"))
+    TorchCheckpointCodec().save(
+        {"schema_version": "trackmaniarl-bc-policy-v2", "learner": poisoned},
+        checkpoint,
+    )
+    with pytest.raises(ValueError, match="non-finite"):
+        warm_start_composite_model(model, checkpoint, WarmStartOptions())
+    for name, value in model.state_dict().items():
+        torch.testing.assert_close(value, valid[name], rtol=0, atol=0)

@@ -30,7 +30,22 @@ This is not a claim of exhaustive formal verification of every library module.
   The writer creates files exclusively and removes its own incomplete output on
   failure. It preserves pre-existing destinations.
 
-## Verification boundaries
+## Follow-up findings fixed
+
+- BC checkpoint restoration could partially replace model, optimizer or RNG state
+  before encountering a later error. Restoration now rolls back all captured
+  components on failure. Tests inject failures in model keys, optimizer groups
+  and RNG state and compare the complete pre-failure state.
+- BC restore and named warm starts accepted NaN/Inf tensors. They now reject
+  non-finite weights and, for BC restore, non-finite optimizer tensors before use.
+- Recovery metadata accepted boolean timing fields and fractional action repeat
+  counts through the Python API. Contracts now validate their types explicitly.
+- Recovery loading converted fractional labels and student actions into integers
+  and arbitrary numeric flags into booleans. It now checks stored dtypes before
+  conversion. The writer also rejects fractional labels. Even all-unknown student
+  metadata must have exactly one entry per frame.
+
+## Follow-up verification
 
 Integration tests exercise generated camera configurations, image gradients,
 training and checkpoint continuation across RL families. BC tests drive the real

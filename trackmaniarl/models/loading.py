@@ -88,6 +88,8 @@ def _apply_tensors(
         if expected.dtype != value.dtype or expected.shape != value.shape:
             mismatch.append(name)
             continue
+        if not bool(torch.isfinite(value).all()):
+            raise ValueError(f"warm-start tensor {name} contains non-finite values")
         expected.copy_(value.to(device=expected.device))
         matched.append(name)
     return _TensorMatches(matched, mismatch)

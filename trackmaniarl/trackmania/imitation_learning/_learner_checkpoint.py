@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 from collections.abc import Mapping
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
@@ -40,6 +41,15 @@ def capture_checkpoint(components: CheckpointComponents) -> Mapping[str, Any]:
 
 def restore_checkpoint(components: CheckpointComponents, state: Mapping[str, Any]) -> None:
     _validate_checkpoint_contract(components, state)
+    previous = deepcopy(capture_checkpoint(components))
+    try:
+        _restore_components(components, state)
+    except Exception:
+        _restore_components(components, previous)
+        raise
+
+
+def _restore_components(components: CheckpointComponents, state: Mapping[str, Any]) -> None:
     components.model.load_state_dict(state["model"])
     components.optimizer.load_state_dict(state["optimizer"])
     components.scheduler.load_state_dict(state["scheduler"])
@@ -53,6 +63,8 @@ def restore_checkpoint(components: CheckpointComponents, state: Mapping[str, Any
 def _validate_checkpoint_contract(
     components: CheckpointComponents, state: Mapping[str, Any]
 ) -> None:
+    _validate_finite_tensors(state.get("model"))
+    _validate_finite_tensors(state.get("optimizer"))
     if state["schema_version"] != "trackmaniarl-bc-checkpoint-v2":
         raise ValueError("unsupported behavior-cloning checkpoint schema")
     saved_action_ids = state["policy_action_ids"]
@@ -66,6 +78,18 @@ def _validate_checkpoint_contract(
         and saved_dataset != components.dataset_fingerprint
     ):
         raise ValueError("behavior-cloning checkpoint dataset fingerprint does not match")
+
+
+def _validate_finite_tensors(value: Any) -> None:
+    if isinstance(value, torch.Tensor):
+        if not bool(torch.isfinite(value).all()):
+            raise ValueError("behavior-cloning checkpoint contains non-finite tensors")
+    elif isinstance(value, Mapping):
+        for child in value.values():
+            _validate_finite_tensors(child)
+    elif isinstance(value, (list, tuple)):
+        for child in value:
+            _validate_finite_tensors(child)
 
 
 def _restore_scaler(components: CheckpointComponents, state: Mapping[str, Any]) -> None:

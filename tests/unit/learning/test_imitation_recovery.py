@@ -43,6 +43,32 @@ def _save_standard(path: Path) -> Path:
     return save_behavior_cloning_recovery(_recovery_save_request(path, _standard_arrays()))
 
 
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("labels", np.array([0.9])),
+        ("episode_starts", np.array([2])),
+        ("action_ids", np.array(_ACTION_IDS, dtype=float)),
+        ("student_action", np.array([0.9])),
+        ("student_action", np.array([len(_ACTION_IDS), len(_ACTION_IDS)])),
+        ("intervention", np.array([2])),
+        ("decision_interval_ms", np.array(True)),
+    ],
+)
+def test_recovery_rejects_lossy_coercions(tmp_path: Path, name: str, value: np.ndarray) -> None:
+    path = _save_standard(tmp_path / "invalid")
+    _rewrite_recovery_archive(path, {name: value})
+    with pytest.raises(ValueError, match="recovery"):
+        load_behavior_cloning_recovery(_load_request(path))
+
+
+def test_recovery_writer_does_not_truncate_fractional_labels(tmp_path: Path) -> None:
+    arrays = _standard_arrays()
+    invalid = RecoveryArrays(arrays.frames, np.array([0.9]), arrays.episode_starts, _ACTION_IDS)
+    with pytest.raises(ValueError, match="labels must be integers"):
+        save_behavior_cloning_recovery(_recovery_save_request(tmp_path / "invalid", invalid))
+
+
 def _load_request(
     paths: Path | list[Path], contract: RecoveryContract | None = None, source: str = "b" * 64
 ) -> RecoveryLoadRequest:

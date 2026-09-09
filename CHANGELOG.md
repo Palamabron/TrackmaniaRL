@@ -2,6 +2,8 @@
 
 ## 1.2.7 - 2026-09-09
 
+- Roll back failed BC checkpoint restoration, reject non-finite transferred weights
+  and optimizer tensors, and prevent lossy label/flag conversions in recovery data.
 - Add camera behavior cloning with validated RGB/action episode archives, shared
   training and checkpoint lifecycle, camera evaluation and a generated BC RunSpec.
 - Fix BC encoder/temporal warm starts into composite RL models and keep the target

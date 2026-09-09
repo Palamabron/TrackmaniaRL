@@ -118,7 +118,12 @@ def _load_recovery_arrays(data: Any, request: _RecoveryReadRequest) -> _Recovery
     missing = required - set(data.files)
     if missing:
         raise ValueError(f"recovery archive is missing data {sorted(missing)}: {request.path}")
-    stored_ids = tuple(int(value) for value in data["action_ids"].tolist())
+    raw_ids = _require_array_kind(data, "action_ids", "iu")
+    if raw_ids.ndim != 1:
+        raise ValueError("recovery action IDs must be one-dimensional")
+    _require_array_kind(data, "labels", "iu")
+    _require_array_kind(data, "episode_starts", "b")
+    stored_ids = tuple(int(value) for value in raw_ids.tolist())
     if stored_ids != request.action_ids:
         raise ValueError(f"recovery action IDs do not match the model: {request.path}")
     return _RecoveryArrays(
@@ -134,6 +139,8 @@ def _metadata_or_default(values: np.ndarray | None, default: np.ndarray) -> np.n
 
 
 def _validate_recovery_arrays(arrays: _RecoveryArrays) -> None:
+    if arrays.labels.dtype.kind not in "iu" or arrays.episode_starts.dtype.kind != "b":
+        raise ValueError("recovery labels must be integers and episode starts must be boolean")
     if arrays.frames.ndim != 2 or arrays.frames.shape[1] != 33:
         raise ValueError("recovery frames must have shape (steps, 33)")
     if not np.isfinite(arrays.frames).all():
@@ -152,7 +159,9 @@ def _validate_recovery_metadata(metadata: _RecoveryMetadata, arrays: _RecoveryAr
     sample_count = len(arrays.frames)
     _validate_sample_weights(metadata.sample_weights, sample_count)
     _validate_student_actions(metadata.student_actions, sample_count, len(arrays.action_ids))
-    if metadata.interventions is not None and metadata.interventions.shape != (sample_count,):
+    if metadata.interventions is not None and (
+        metadata.interventions.dtype.kind != "b" or metadata.interventions.shape != (sample_count,)
+    ):
         raise ValueError("recovery interventions must match frames")
     _validate_state_errors(metadata.state_errors, sample_count)
 
@@ -168,7 +177,10 @@ def _validate_student_actions(
     values: np.ndarray | None, sample_count: int, action_count: int
 ) -> None:
     if values is not None and (
-        values.shape != (sample_count,) or np.any(values < 0) or np.any(values >= action_count)
+        values.dtype.kind not in "iu"
+        or values.shape != (sample_count,)
+        or np.any(values < 0)
+        or np.any(values >= action_count)
     ):
         raise ValueError("recovery student actions must be compact actions matching frames")
 
@@ -185,6 +197,12 @@ def _load_recovery_metadata(data: Any, arrays: _RecoveryArrays) -> dict[str, np.
     missing = required - set(data.files)
     if missing:
         raise ValueError(f"recovery archive is missing metadata {sorted(missing)}")
+    for name in ("sample_weight", "state_error"):
+        _require_array_kind(data, name, "fiu")
+    students = _require_array_kind(data, "student_action", "iu")
+    _require_array_kind(data, "intervention", "b")
+    if students.shape != (len(arrays.frames),):
+        raise ValueError("recovery student actions must match frames")
     metadata = _loaded_metadata(data, len(arrays.action_ids))
     _validate_recovery_metadata(metadata, arrays)
     return {
@@ -245,14 +263,22 @@ def _recovery_action_repeat(raw_action_repeat: Any, path: Path) -> int:
 
 
 def _loaded_contract(data: Any, action_repeat: int) -> RecoveryContract:
+    _require_array_kind(data, "decision_interval_ms", "fiu")
     interval_ms = float(data["decision_interval_ms"].item())
     return RecoveryContract(
-        map_uid=str(data["map_uid"].item()),
-        geometry_sha256=str(data["geometry_sha256"].item()),
+        map_uid=data["map_uid"].item(),
+        geometry_sha256=data["geometry_sha256"].item(),
         action_repeat_frames=action_repeat,
         decision_interval_ms=interval_ms or None,
         control_alignment=str(data["control_alignment"].item()),
     )
+
+
+def _require_array_kind(data: Any, name: str, kinds: str) -> np.ndarray:
+    values = np.asarray(data[name])
+    if values.dtype.kind not in kinds:
+        raise ValueError(f"recovery {name} has an invalid dtype")
+    return values
 
 
 def _validate_recovery_contract(
