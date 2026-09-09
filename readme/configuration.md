@@ -33,7 +33,7 @@ and reward fields are derived in [Rewards](rewards.md).
 
 | YAML path | Type, default | Contract |
 | --- | --- | --- |
-| `api_version` | literal `"2.0"`, required | No implicit 1.x migration. |
+| `api_version` | literal `"2.0"`, required | Other API versions are rejected. |
 | `run_id` | non-empty safe identifier, required | Names the immutable artifact directory. Start a new ID after a contract-changing edit. |
 | `seed` | integer, `0` | Seeds model construction, samplers, actors and deterministic splits. |
 | `artifacts_dir` | path, `artifacts` | Root for manifests, events, replay/WAL state and checkpoints. |

@@ -20,7 +20,7 @@ supported learner/replay/model combinations.
 | `demo-benchmark`, `diagnose expert` | Diagnostic expert replay/policy comparison, distinct from learned-policy benchmarking |
 | `dagger-collect` | Supported teacher-labelled student collection, episode archives and subsequent BC training |
 | Trajectory tracking/stitching/synthetic recovery/optimisation | Supported map-specific tools. Configure timing and provenance explicitly. Synthetic labels and search results require live evaluation |
-| Graph IQN V1–V6, residual GRU, Mamba | Optional model families, older graph layers are implementation dependencies, not legacy import aliases |
+| Graph IQN V1–V6, residual GRU, Mamba | Optional model families whose graph layers are required implementation dependencies, not public aliases |
 | W&B | Optional projection of authoritative local logs, no account required for default workflow |
 | Gemini/Optuna orchestration | Optional experiment scheduling, no speed or reliability guarantee |
 | `experiments/sub37/` | Repository-only single-map benchmark reproduction, never a default policy |
@@ -31,6 +31,7 @@ Historical failed experiments and forensic reports stay in `experiments/` and
 remain ignored and are not distributed. Preserve them separately if reproducing
 an old result. No local training data was deleted for this release cleanup.
 
-RunSpec/checkpoint 1.x loading and private CLI helper aliases are not supported.
+Only the documented RunSpec and checkpoint schemas are accepted. Other versions
+and private CLI helper aliases are rejected.
 Version numbers belonging to other formats (for example JSONL events or geometry)
 are independent contracts, not reasons to remove working data support.

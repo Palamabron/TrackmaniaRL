@@ -46,6 +46,8 @@ def _close(coordinator: Coordinator) -> None:
 def _payload(sequence: int, state: _TransitionState) -> dict[str, Any]:
     spec = _TransitionSpec("actor", sequence, float(sequence), state)
     return {
+        "protocol_version": PROTOCOL_VERSION,
+        "fingerprint": "fingerprint",
         "actor_id": "actor",
         "session_id": "session",
         "sequence": sequence,
@@ -59,6 +61,8 @@ def _payload(sequence: int, state: _TransitionState) -> dict[str, Any]:
 
 def _empty_payload(sequence: int) -> dict[str, Any]:
     return {
+        "protocol_version": PROTOCOL_VERSION,
+        "fingerprint": "fingerprint",
         "actor_id": "actor",
         "session_id": "session",
         "sequence": sequence,

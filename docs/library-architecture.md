@@ -6,7 +6,7 @@ The supported entry points are `RunSpec`, `resolve_run`, `Trainer` and
 `__version__` from `trackmaniarl`, the contracts in `trackmaniarl.core` and the
 component paths documented in the [SDK](../readme/sdk.md). The CLI entry point
 is `trackmaniarl.cli:entrypoint`. Underscore-prefixed helpers are internal.
-the CLI no longer re-exports them as a compatibility facade.
+The CLI does not re-export them as a public facade.
 
 ## A decision and an update
 

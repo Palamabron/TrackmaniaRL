@@ -54,7 +54,7 @@ class ProgressWatchdog:
 
 
 def watchdog_of(runtime: object) -> ProgressWatchdog | None:
-    """Return the runtime's watchdog; test doubles and legacy runtimes may not carry one."""
+    """Return the runtime's watchdog, which minimal test doubles may omit."""
 
     watchdog = getattr(runtime, "watchdog", None)
     return watchdog if isinstance(watchdog, ProgressWatchdog) else None

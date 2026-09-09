@@ -172,7 +172,6 @@ together and the setup-to-evaluation workflow.
 - [Distributed runtime](readme/architecture.md)
 - [Supported features and contracts](docs/support-status.md)
 - [Troubleshooting](docs/troubleshooting.md)
-- [Migration to schema 2.0](readme/migration-2.0.md)
 - [Python API](readme/sdk.md)
 
 PPO is a supported local on-policy training path, with telemetry and camera-image

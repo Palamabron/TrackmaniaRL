@@ -26,10 +26,18 @@ _OBSERVABILITY_FIELDS = {
 
 
 def _validate_observability_summary(value: Mapping[str, Any], name: str, steps: int) -> None:
+    missing = (
+        _OBSERVABILITY_FIELDS
+        | {
+            "timing/step_race_measurements_valid",
+            "telemetry_steps_with_skipped_frames_fraction",
+        }
+    ) - value.keys()
+    if missing:
+        raise ValueError(f"{name} observability summary is missing {sorted(missing)}")
     observed = {
         key: _validate_nonnegative_number(value[key], f"{name} {key}")
         for key in _OBSERVABILITY_FIELDS
-        if key in value
     }
     fraction = _skipped_frame_fraction(value, name)
     brake_tap_fraction = _brake_tap_fraction(value, name)
@@ -42,8 +50,6 @@ def _validate_observability_summary(value: Mapping[str, Any], name: str, steps: 
 
 def _skipped_frame_fraction(value: Mapping[str, Any], name: str) -> float:
     key = "telemetry_steps_with_skipped_frames_fraction"
-    if key not in value:
-        return 0.0
     fraction = _validate_nonnegative_number(value[key], f"{name} {key}")
     if fraction > 1.0:
         raise ValueError(f"{name} {key} must be at most one")
@@ -52,8 +58,6 @@ def _skipped_frame_fraction(value: Mapping[str, Any], name: str) -> float:
 
 def _brake_tap_fraction(value: Mapping[str, Any], name: str) -> float:
     key = "control/brake_tap_fraction"
-    if key not in value:
-        return 0.0
     fraction = _validate_nonnegative_number(value[key], f"{name} {key}")
     if fraction > 1.0:
         raise ValueError(f"{name} {key} must be at most one")
@@ -61,20 +65,20 @@ def _brake_tap_fraction(value: Mapping[str, Any], name: str) -> float:
 
 
 def _validate_skipped_frame_counts(observed: Mapping[str, float], name: str) -> None:
-    total = observed.get("telemetry_skipped_frames_total")
-    maximum = observed.get("telemetry_skipped_frames_max")
-    if total is not None and not total.is_integer():
+    total = observed["telemetry_skipped_frames_total"]
+    maximum = observed["telemetry_skipped_frames_max"]
+    if not total.is_integer():
         raise ValueError(f"{name} skipped frame total must be an integer")
-    if maximum is not None and not maximum.is_integer():
+    if not maximum.is_integer():
         raise ValueError(f"{name} skipped frame maximum must be an integer")
-    if total is not None and maximum is not None and maximum > total:
+    if maximum > total:
         raise ValueError(f"{name} skipped frame maximum cannot exceed its total")
 
 
 def _validate_step_race_time_tail(observed: Mapping[str, float], name: str) -> None:
-    p99 = observed.get("timing/step_race_ms_p99")
-    maximum = observed.get("timing/step_race_ms_max")
-    if p99 is not None and maximum is not None and p99 > maximum:
+    p99 = observed["timing/step_race_ms_p99"]
+    maximum = observed["timing/step_race_ms_max"]
+    if p99 > maximum:
         raise ValueError(f"{name} step race-time p99 cannot exceed its maximum")
 
 
@@ -84,33 +88,26 @@ def _validate_step_race_time_metadata(value: Mapping[str, Any], name: str, steps
         _validate_step_race_time_coverage(count, name, steps)
 
 
-def _step_race_time_measurement_count(
-    value: Mapping[str, Any], name: str, steps: int
-) -> float | None:
-    raw_count = value.get("timing/step_race_measurement_count")
-    count = (
-        None
-        if raw_count is None
-        else _validate_nonnegative_number(raw_count, f"{name} step race-time measurement count")
+def _step_race_time_measurement_count(value: Mapping[str, Any], name: str, steps: int) -> float:
+    count = _validate_nonnegative_number(
+        value["timing/step_race_measurement_count"],
+        f"{name} step race-time measurement count",
     )
-    if count is not None:
-        if not count.is_integer():
-            raise ValueError(f"{name} step race-time measurement count must be an integer")
-        if count > steps:
-            raise ValueError(f"{name} step race-time measurement count cannot exceed steps")
+    if not count.is_integer():
+        raise ValueError(f"{name} step race-time measurement count must be an integer")
+    if count > steps:
+        raise ValueError(f"{name} step race-time measurement count cannot exceed steps")
     return count
 
 
 def _step_race_time_measurements_are_valid(value: Mapping[str, Any], name: str) -> bool:
     key = "timing/step_race_measurements_valid"
-    if key not in value:
-        return False
     _validate_binary_flag(value[key], f"{name} {key}")
     return float(value[key]) == 1.0
 
 
-def _validate_step_race_time_coverage(count: float | None, name: str, steps: int) -> None:
-    if count is None or count != steps or steps == 0:
+def _validate_step_race_time_coverage(count: float, name: str, steps: int) -> None:
+    if count != steps or steps == 0:
         raise ValueError(f"{name} valid step race-time measurements must cover every step")
 
 

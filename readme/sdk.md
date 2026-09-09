@@ -363,5 +363,4 @@ results are aggregated independently of training. Collector and asset helpers
 are lower-level building blocks for custom Trackmania workflows. The CLI is the
 recommended path for ordinary recording and evaluation.
 
-Older module locations are internal migration details, not documented runtime
-API or compatibility targets.
+Only the documented module locations are public runtime API.

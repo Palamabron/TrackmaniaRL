@@ -2,6 +2,8 @@
 
 ## 1.2.4 - 2026-09-09
 
+- Reject incomplete distributed episode and timing summaries. Version 1.2.4
+  supports only its documented current schemas.
 - Replace the short README animation with the full drive and result card.
 - Reject invalid project package names before writing files and close partially
   constructed logger stacks when run resolution fails.

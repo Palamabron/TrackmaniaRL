@@ -232,9 +232,13 @@ def _stale_evaluation_payload(coordinator: Coordinator) -> dict[str, Any]:
     maximum = coordinator.run.spec.distributed.hard_policy_lag_updates
     coordinator.counters.updates = maximum + 1
     payload = _base_payload(0)
-    payload["evaluations"] = [
-        {"finished": True, "finish_time_s": 36.0, "steps": 1, "policy_version": 0}
-    ]
+    evaluation = summarize_episode(
+        0.0,
+        {"policy_version": 0, "termination_reason": "finished", "race_time_ms": 36_000.0},
+        1,
+    )
+    evaluation.pop("termination")
+    payload["evaluations"] = [evaluation]
     payload["evaluation_snapshot"] = coordinator.codec.encode({"model": {}})
     return payload
 

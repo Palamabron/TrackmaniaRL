@@ -34,8 +34,7 @@ The [Python SDK](sdk.md) documents public contracts, component factories, PyTree
 model composition and checkpoint handling. [Imitation learning](imitation-learning.md)
 covers demonstration recording, BC, DAgger and recovery workflows.
 [Development](development.md) covers adding components, tests and release checks.
-[Migration](migration-2.0.md) explains schema changes, and the
-[support matrix](../docs/support-status.md) describes supported paths and their contracts.
+The [support matrix](../docs/support-status.md) describes supported paths and their contracts.
 
 Tests establish component and workflow behavior. Racing results require live
 experiments. Camera capture uses a visible desktop viewport and does not provide

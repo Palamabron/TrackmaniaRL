@@ -60,12 +60,10 @@ def _validate_episode_owners(
     for transition in transitions:
         _validate_episode_owner(transition["episode_id"], prefix)
     for summary in episodes:
-        _validate_episode_owner(summary.get("episode_id"), prefix)
+        _validate_episode_owner(summary["episode_id"], prefix)
 
 
 def _validate_episode_owner(episode_id: Any, prefix: str) -> None:
-    if episode_id is None:
-        return
     if not isinstance(episode_id, str) or not episode_id.startswith(prefix):
         raise ValueError("episode_id must belong to the submitting actor session")
     if len(episode_id) == len(prefix):
@@ -132,11 +130,10 @@ def _validate_transition_values(value: Mapping[str, Any]) -> None:
 def _validate_episode_summary(value: object) -> None:
     if not isinstance(value, Mapping):
         raise TypeError("episodes must contain mappings")
-    missing = ({"finished", "termination"} | _EPISODE_NUMERIC_FIELDS) - value.keys()
+    missing = ({"episode_id", "finished", "termination"} | _EPISODE_NUMERIC_FIELDS) - value.keys()
     if missing:
         raise ValueError(f"episode summary is missing {sorted(missing)}")
-    if "episode_id" in value:
-        _required_nonempty_string(value, "episode_id")
+    _required_nonempty_string(value, "episode_id")
     _validate_episode_fields(value)
     steps = _required_integer(value, "steps", minimum=1)
     _validate_observability_summary(value, "episode", steps)
