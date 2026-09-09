@@ -5,14 +5,14 @@ custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronou
 training, checkpoint resume and repeatable evaluation.
 
 The game integration runs on Windows. Training and analysis can also run on Linux.
-Version 1.2.2 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
+Version 1.2.3 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
 
 ## Installation
 
 Install [uv](https://docs.astral.sh/uv/), then create a project:
 
 ```powershell
-uv tool install "trackmaniarl==1.2.2"
+uv tool install "trackmaniarl==1.2.3"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -21,7 +21,7 @@ uv sync
 To install a locally built wheel instead:
 
 ```powershell
-uv tool install path\to\trackmaniarl-1.2.2-py3-none-any.whl
+uv tool install path\to\trackmaniarl-1.2.3-py3-none-any.whl
 ```
 
 To work from this repository, run `uv sync --group dev` and prefix commands with

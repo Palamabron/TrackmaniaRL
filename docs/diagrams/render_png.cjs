@@ -64,6 +64,10 @@ async function main() {
       const spec = JSON.parse(fs.readFileSync(path.join(__dirname, file), 'utf8'));
       const stem = file.replace('.spec.json', '');
       const svg = fs.readFileSync(path.join(__dirname, `${stem}-preview.svg`), 'utf8');
+      await page.setContent('<img id="standalone" src="data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64') + '">');
+      await page.waitForFunction(() => document.querySelector('#standalone').complete);
+      const imageWidth = await page.locator('#standalone').evaluate(img => img.naturalWidth);
+      if (imageWidth !== spec.width) throw new Error(`${stem}: invalid standalone SVG image`);
       await page.setViewportSize({ width: spec.width, height: spec.height });
       await page.setContent('<style>body{margin:0}</style>' + svg);
       await page.evaluate(() => document.fonts.ready);

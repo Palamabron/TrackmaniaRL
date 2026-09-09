@@ -4,6 +4,7 @@ import json
 import runpy
 import struct
 import sys
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from html.parser import HTMLParser
 from itertools import combinations
@@ -49,6 +50,17 @@ def test_diagram_set_is_deliberate() -> None:
     )
 
     assert stems == EXPECTED_STEMS
+
+
+def test_svg_previews_are_valid_standalone_images() -> None:
+    for stem in EXPECTED_STEMS:
+        root = ET.parse(DIAGRAMS / f"{stem}-preview.svg").getroot()
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
+        ids = {element.attrib["id"] for element in root.iter() if "id" in element.attrib}
+        for element in root.iter("{http://www.w3.org/2000/svg}use"):
+            target = element.attrib["{http://www.w3.org/1999/xlink}href"]
+            assert target.startswith("#")
+            assert target[1:] in ids
 
 
 def _assert_valid_spec(stem: str) -> None:

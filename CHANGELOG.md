@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.3 - 2026-09-09
+
+- Declare the SVG namespace used by formula glyphs so standalone images render
+  correctly in GitHub documentation.
+- Validate every SVG as XML and load each preview as an independent browser
+  image before checking layout and exporting PNGs.
+
 ## 1.2.2 - 2026-09-09
 
 - Redesign all nine documentation diagrams with consistent reading order,

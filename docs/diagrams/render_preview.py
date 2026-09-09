@@ -76,7 +76,9 @@ def _svg_header(spec: dict[str, Any]) -> list[str]:
     subtitle = TextLayout(40, 131, spec["width"] - 80, 18, "#536579", "start")
     return [
         (
-            f'<svg xmlns="http://www.w3.org/2000/svg" width="{spec["width"]}" '
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{spec["width"]}" '
             f'height="{spec["height"]}" viewBox="0 0 {spec["width"]} {spec["height"]}">'
         ),
         (
