@@ -8,12 +8,12 @@ from typing import Any
 import numpy as np
 import torch
 
-from trackmaniarl.trackmania.imitation_learning.model import LidarBehaviorCloningModel
+from trackmaniarl.trackmania.imitation_learning.model_contract import BehaviorCloningModel
 
 
 @dataclass(frozen=True, slots=True)
 class CheckpointComponents:
-    model: LidarBehaviorCloningModel
+    model: BehaviorCloningModel
     optimizer: torch.optim.Optimizer
     scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
     scaler: Any

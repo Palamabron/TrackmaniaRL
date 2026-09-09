@@ -116,6 +116,8 @@ Every RL family supports camera observations. The template also generates
 `run-q-vision.yaml`, `run-qr-vision.yaml`, `run-iqn-vision.yaml`,
 `run-fqf-vision.yaml`, `run-sac-vision.yaml`, `run-redq-vision.yaml`,
 `run-tqc-vision.yaml` and `run-discrete-sac-vision.yaml`.
+For supervised learning from aligned RGB demonstrations, use `run-bc-vision.yaml`
+and the [camera BC guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/vision-bc.md).
 
 For local on-policy PPO, use the generated `run-ppo.yaml` (telemetry) or
 `run-ppo-vision.yaml` (camera images). Configure the map in the chosen file.

@@ -44,6 +44,12 @@ from trackmaniarl.trackmania.imitation_learning import (
     load_behavior_cloning_recovery,
     split_behavior_cloning_laps,
 )
+from trackmaniarl.trackmania.imitation_learning.vision import VisionBehaviorCloningPipeline
+from trackmaniarl.trackmania.imitation_learning.vision_data import (
+    VisionLapLoadRequest,
+    load_vision_behavior_cloning_laps,
+)
+from trackmaniarl.trackmania.vision_environment import VisionEnvironmentFactory
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,13 +118,18 @@ def _behavior_context(run: ResolvedRun, spec: RunSpec, paths: tuple[Path, ...]) 
         raise ValueError("model action_ids must exactly match environment compact_action_ids")
     _validate_behavior_features(run)
     factory = run.environment_factory
-    if not isinstance(factory, OpenPlanetEnvironmentFactory):
-        raise ValueError("behavior cloning requires OpenPlanetEnvironmentFactory")
+    if not isinstance(factory, (OpenPlanetEnvironmentFactory, VisionEnvironmentFactory)):
+        raise ValueError("behavior cloning requires an Openplanet or vision environment factory")
+    camera = isinstance(run.feature_pipeline, VisionBehaviorCloningPipeline)
+    if camera != isinstance(factory, VisionEnvironmentFactory):
+        raise ValueError("BC camera features require a matching vision environment factory")
     return _BehaviorContext(run, spec, paths, action_ids, model, factory.config)
 
 
 def _validate_behavior_features(run: ResolvedRun) -> None:
     pipeline = run.feature_pipeline
+    if isinstance(pipeline, VisionBehaviorCloningPipeline):
+        return
     include_controls = bool(getattr(pipeline, "include_control_inputs", True))
     mask_controls = bool(getattr(pipeline, "mask_current_control_inputs", False))
     if include_controls and not mask_controls:
@@ -138,7 +149,9 @@ def _behavior_split(context: _BehaviorContext, args: argparse.Namespace) -> _Beh
     )
     if not use_flip:
         return split
-    if not getattr(context.run.feature_pipeline, "local_velocity_features", False):
+    if not isinstance(context.run.feature_pipeline, VisionBehaviorCloningPipeline) and not getattr(
+        context.run.feature_pipeline, "local_velocity_features", False
+    ):
         raise ValueError("horizontal flip augmentation requires local_velocity_features")
     augmented = augment_behavior_cloning_laps(split.training, context.action_ids)
     return _BehaviorSplit(augmented, split.validation, split.recovery_paths)
@@ -146,6 +159,27 @@ def _behavior_split(context: _BehaviorContext, args: argparse.Namespace) -> _Beh
 
 def _load_behavior_laps(context: _BehaviorContext) -> list[BehaviorCloningLap]:
     environment = context.environment
+    if isinstance(context.run.feature_pipeline, VisionBehaviorCloningPipeline):
+        if (
+            environment.demonstration_action_lead_ms
+            or environment.demonstration_control_aggregation
+        ):
+            raise ValueError(
+                "vision BC uses aligned labels without action lead or control aggregation"
+            )
+        geometry = BoundaryGeometry(
+            environment.geometry_path,
+            expected_map_uid=environment.expected_map_uid,
+        )
+        return load_vision_behavior_cloning_laps(
+            VisionLapLoadRequest(
+                context.paths,
+                context.run.feature_pipeline,
+                context.action_ids,
+                _recovery_contract(environment, geometry),
+                context.model.previous_action_conditioning,
+            )
+        )
     interval = environment.decision_interval_ms
     request = LapLoadRequest(
         paths=context.paths,

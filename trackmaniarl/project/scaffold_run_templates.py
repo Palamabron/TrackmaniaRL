@@ -268,3 +268,25 @@ def _trackmania_vision_config(algorithm: str = "iqn") -> str:
     components["replay_store"]["kwargs"] = {"capacity": 2048}
     config["training"].update(batch_size=32, warmup_transitions=512)
     return yaml.safe_dump(config, sort_keys=False)
+
+
+def _trackmania_bc_vision_config() -> str:
+    config = yaml.safe_load(_trackmania_vision_config("iqn"))
+    config.pop("distributed", None)
+    config["run_id"] = "trackmania-bc-vision"
+    components = config["components"]
+    components["learner"] = {
+        "class_path": "trackmaniarl.trackmania.imitation_learning:BehaviorCloningLearner",
+        "kwargs": {"max_steps": 20000, "validation_interval": 100},
+    }
+    prefix = "trackmaniarl.trackmania.imitation_learning.vision:"
+    components["model_factory"] = {
+        "class_path": prefix + "VisionBehaviorCloningModelFactory",
+        "kwargs": {"action_ids": list(range(78))},
+    }
+    components["feature_pipeline"] = {"class_path": prefix + "VisionBehaviorCloningPipeline"}
+    components["environment"]["kwargs"]["config"]["compact_action_ids"] = list(range(78))
+    components["environment"]["kwargs"]["config"]["demonstration_control_aggregation"] = False
+    components["sampler"] = {"class_path": "trackmaniarl.core.replay:UniformSampler"}
+    config["training"].update(batch_size=32, n_step=1, sequence_length=1)
+    return yaml.safe_dump(config, sort_keys=False)

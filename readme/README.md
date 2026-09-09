@@ -11,8 +11,9 @@ retain the versions and dates of the runs they describe.
    input, identify the map and build its geometry.
 2. Choose an [algorithm and supported model combination](algorithms.md).
    Generated `run.yaml` uses IQN/lidar, `run-ppo.yaml` uses PPO/telemetry, and
-   `run-ppo-vision.yaml` uses PPO/camera. The [vision guide](vision.md) explains
-   capture, frame stacking, CNNs, GAE and PPO optimization.
+   `run-ALGORITHM-vision.yaml` selects camera observations for each RL family.
+   The [vision guide](vision.md) explains capture, frame stacking and CNNs.
+   For supervised camera training use [vision BC](vision-bc.md).
 3. Use the [configuration reference](configuration.md) to set components, rollout
    or replay settings, execution device and evaluation rules. Run `validate` for a
    synthetic learner update and checkpoint round trip, then `smoke` with the game.

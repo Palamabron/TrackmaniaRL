@@ -2,7 +2,9 @@
 
 `trackmaniarl.trackmania.imitation_learning` is the public package for offline
 imitation workflows. Behavior cloning (BC) is its supervised training method.
-It shares the lidar
+For camera BC, use the generated `run-bc-vision.yaml` and the
+[RGB demonstration and training guide](vision-bc.md). The remaining lidar-specific
+examples below use telemetry demonstrations. Lidar BC shares the lidar
 encoder and temporal components with value-based models, but it does not write
 rollouts to WAL or replay. Use BC to initialize a policy, verify it in closed
 loop, then transfer compatible encoder and temporal weights into an RL run.

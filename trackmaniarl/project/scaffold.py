@@ -11,6 +11,7 @@ from pathlib import Path
 from trackmaniarl.project.scaffold_run_templates import (
     _config,
     _trackmania_actor_critic_config,
+    _trackmania_bc_vision_config,
     _trackmania_config,
     _trackmania_ppo_config,
     _trackmania_vision_config,
@@ -70,6 +71,7 @@ def _write_project_metadata(target: Path, package: str, template: str) -> None:
     (target / "run.yaml").write_text(config, encoding="utf-8")
     if template == "trackmania":
         (target / "run-ppo.yaml").write_text(_trackmania_ppo_config(), encoding="utf-8")
+        (target / "run-bc-vision.yaml").write_text(_trackmania_bc_vision_config(), encoding="utf-8")
         (target / "run-ppo-vision.yaml").write_text(
             _trackmania_ppo_config(vision=True), encoding="utf-8"
         )

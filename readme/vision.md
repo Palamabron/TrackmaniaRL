@@ -83,9 +83,10 @@ existing actor, critic or composite model contracts. It preserves batch and time
 axes, so value models can combine it with the available temporal cores. A model
 that explicitly expects lidar vectors or graph nodes must use an image encoder
 or explicitly combine both modalities. Raw images are not interchangeable with
-telemetry inputs to an already trained checkpoint. The built-in lidar BC, DAgger
-and graph-recovery data workflows still require their documented observations.
-Their telemetry-only archives cannot supply missing camera frames.
+telemetry inputs to an already trained checkpoint. Camera behavior cloning uses
+`run-bc-vision.yaml` and aligned RGB/action archives. See the
+[camera BC guide](vision-bc.md) for training, resume, evaluation and dataset import.
+Telemetry-only DAgger and graph-recovery archives cannot supply missing camera frames.
 
 Off-policy camera templates use a 2048-transition replay buffer, batch size 32
 and 512 warmup transitions. Increase capacity only after checking memory usage.

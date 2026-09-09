@@ -102,6 +102,10 @@ def horizontal_flip_observation(
 ) -> dict[str, torch.Tensor]:
     """Reflect the v59 local TrackMania observation across the car forward axis."""
 
+    if "images" in observation:
+        reflected = {key: value.clone() for key, value in observation.items()}
+        reflected["images"] = observation["images"].flip(-1)
+        return reflected
     lidar = observation["lidar"]
     telemetry = observation["telemetry"]
     if lidar.shape[-2] != 8 or telemetry.shape[-1] not in {46, 49}:

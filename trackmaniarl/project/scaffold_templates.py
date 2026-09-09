@@ -147,6 +147,13 @@ Camera observations work with every RL family. Complete image configurations are
 Select one for validation, training, resume and benchmarking. Off-policy camera
 templates use a 2048-transition replay buffer and batch size 32 to bound memory.
 
+`run-bc-vision.yaml` uses supervised camera behavior cloning. Supply at least three
+complete RGB/action archives from the `imitation_learning.vision_data` API, then
+run `bc-train run-bc-vision.yaml --demo demonstrations/vision`. Resume with
+`--resume artifacts/RUN/checkpoints/bc-latest.pt` and evaluate the selected
+`bc-best-validation.pt` with `bc-benchmark`. Telemetry-only recordings lack RGB
+frames and cannot train this model.
+
 `run-ppo.yaml` selects supported local on-policy PPO with telemetry.
 `run-ppo-vision.yaml` selects PPO with a CNN and four grayscale 84x84 camera frames.
 Set map UIDs and paths in the configuration you use. For camera training, install

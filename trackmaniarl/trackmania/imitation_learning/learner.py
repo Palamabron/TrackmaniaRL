@@ -44,8 +44,8 @@ from trackmaniarl.trackmania.imitation_learning._learner_metrics import (
 )
 from trackmaniarl.trackmania.imitation_learning.model import (
     BehaviorCloningPolicy,
-    LidarBehaviorCloningModel,
 )
+from trackmaniarl.trackmania.imitation_learning.model_contract import BehaviorCloningModel
 
 
 def _seed_everything(seed: int) -> None:
@@ -82,7 +82,7 @@ class BehaviorCloningLearner:
 
     def __init__(
         self,
-        model: LidarBehaviorCloningModel | None = None,
+        model: BehaviorCloningModel | None = None,
         **options: Unpack[LearnerOptions],
     ) -> None:
         self.model = model
@@ -110,13 +110,16 @@ class BehaviorCloningLearner:
         self.model.to(self.device)
         self._setup_optimizer()
 
-    def _resolve_model(self, context: Mapping[str, Any]) -> LidarBehaviorCloningModel:
+    def _resolve_model(self, context: Mapping[str, Any]) -> BehaviorCloningModel:
         if self.model is not None:
             return self.model
         factory = self.model_factory or context.get("model_factory")
         if factory is None:
             raise ValueError("BehaviorCloningLearner requires model_factory")
-        return cast(LidarBehaviorCloningModel, factory.build())
+        model = factory.build()
+        if not isinstance(model, BehaviorCloningModel):
+            raise TypeError("BC model_factory must build a BehaviorCloningModel")
+        return model
 
     def _setup_optimizer(self) -> None:
         assert self.model is not None
@@ -152,7 +155,7 @@ class BehaviorCloningLearner:
 
     def _training_components(
         self,
-    ) -> tuple[LidarBehaviorCloningModel, torch.optim.Optimizer]:
+    ) -> tuple[BehaviorCloningModel, torch.optim.Optimizer]:
         if self.model is None or self.optimizer is None:
             raise RuntimeError("BehaviorCloningLearner.setup must run before training")
         return self.model, self.optimizer
