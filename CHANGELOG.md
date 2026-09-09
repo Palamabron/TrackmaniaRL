@@ -2,6 +2,9 @@
 
 ## 1.2.4 - 2026-09-09
 
+- Replace the short README animation with the full drive and result card.
+- Reject invalid project package names before writing files and close partially
+  constructed logger stacks when run resolution fails.
 - Add first-party telemetry SAC, REDQ and stable discrete SAC models and generate
   complete SAC, REDQ, TQC and stable discrete SAC RunSpecs.
 - Verify actor-critic training, resume and evaluation, graph recovery archive

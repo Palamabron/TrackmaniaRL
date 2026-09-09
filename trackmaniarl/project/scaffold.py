@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import keyword
+import re
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
@@ -23,6 +25,12 @@ from trackmaniarl.project.scaffold_templates import (
 def create_project(directory: str | Path, package: str, *, template: str = "starter") -> Path:
     """Create an installable, editable project without overwriting user files."""
 
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", package) or keyword.iskeyword(package):
+        raise ValueError(
+            "Project package must be an ASCII Python identifier starting with a letter"
+        )
+    if package.lower() == "trackmaniarl":
+        raise ValueError("Project package must not shadow the installed trackmaniarl library")
     target, package_dir = _create_directories(directory, package, template)
     _write_project_metadata(target, package, template)
     if template == "trackmania":

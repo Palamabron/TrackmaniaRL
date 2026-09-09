@@ -27,6 +27,16 @@ For library development from a clone, follow
 the reusable package with one experiment: the generated project is the intended
 place for custom components and run configurations.
 
+The public `create_project(directory, package)` API validates the package name
+before creating files. Use an ASCII Python identifier starting with a letter,
+not a Python keyword or `trackmaniarl`. The latter would shadow the library.
+The CLI normalizes directory names such as `my-agent` to `my_agent` first.
+Project creation refuses to overwrite a non-empty directory.
+
+Run resolution closes every logger it has already opened if component construction
+or contract validation fails. A successfully resolved run transfers ownership to
+the caller, which must call `run.logger.close()` in a `finally` block.
+
 ## Start with bundled components
 
 Learners and composable models are selected through stable descriptive class

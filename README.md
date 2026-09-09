@@ -44,9 +44,9 @@ a compatible PyTorch build. See [platform and performance guidance](readme/perfo
 
 ## Neural inference in motion
 
-![Gameplay alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/7ccd15f74cf6a85ced5b4bb373904370a51affd8/docs/assets/trackmaniarl-neural-flow.gif)
+![Full drive alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/7913980e4dd4dccd0f2af3e5f529c512454355e7/docs/assets/trackmaniarl-neural-flow.gif)
 
-This excerpt visualizes the **best-performing model supplied for this release**.
+This full drive visualizes the **best-performing model supplied for this release**.
 The panel follows geometry, car and context inputs through model stages to action
 values and selected controls. The animated summaries are not a causal attribution
 of individual neurons. This selected lap uses the map-specific `neighbors` action
