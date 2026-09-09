@@ -26,15 +26,16 @@ path. Do not add the MP4 or its local sidecars to the source archive.
 The source is 1920 × 1080, H.264, 30 fps, 42.10 seconds, with no audio stream.
 Source SHA-256:
 `aea2e9f65458a48a6aea126971e09f5f983b1fa00c63e1a128475dd1fb98b03c`.
-Version 1.2.5 shows the **entire supplied film**, from the start through the finish
+Version 1.2.6 shows the **entire supplied film**, from the start through the finish
 and the result card, replacing the short excerpt. No seek, trim or speed changes
 are applied. GIF frame durations alternate between 30 and 40 ms because GIF
 timing has 10 ms resolution. The export has 1,263 frames, lasts 42.10 seconds
 and plays at 30 FPS.
-Output: **480 × 270, 15,112,358 bytes**, infinite loop.
-The 32-colour palette and reduced spatial resolution keep the complete
-recording below the distribution's 16 MiB per-file limit. Playback runs at its
-original pace, not fast-forward. The MP4 is unchanged.
+Output: **400 × 225, 9,032,652 bytes**, infinite loop.
+The 16-colour palette and reduced spatial resolution keep the complete
+recording below both the distribution's 16 MiB per-file limit and GitHub's
+inline-image threshold. Playback runs at its original pace, not fast-forward.
+The MP4 is unchanged.
 
 Exact conversion command (PowerShell. FFmpeg 7.1 from imageio-ffmpeg 0.6.0 on
 the review host):
@@ -42,8 +43,8 @@ the review host):
 ```powershell
 $Source = Join-Path $env:USERPROFILE 'Downloads/trackmaniarl-neural-flow-polished-compressed.mp4'
 $Palette = Join-Path $env:TEMP 'trackmaniarl-neural-flow-palette.png'
-ffmpeg -v error -y -i "$Source" -vf "fps=30,scale=480:-1:flags=lanczos,palettegen=stats_mode=diff:max_colors=32" -frames:v 1 -update 1 "$Palette"
-ffmpeg -v error -n -i "$Source" -i "$Palette" -an -map_metadata -1 -lavfi "fps=30,scale=480:-1:flags=lanczos,paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 docs/assets/trackmaniarl-neural-flow.gif
+ffmpeg -v error -y -i "$Source" -vf "fps=30,scale=400:-1:flags=lanczos,palettegen=stats_mode=diff:max_colors=16" -frames:v 1 -update 1 "$Palette"
+ffmpeg -v error -n -i "$Source" -i "$Palette" -an -map_metadata -1 -lavfi "fps=30,scale=400:-1:flags=lanczos,paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 docs/assets/trackmaniarl-neural-flow.gif
 Remove-Item -LiteralPath "$Palette"
 ```
 

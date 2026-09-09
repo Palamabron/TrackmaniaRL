@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.6 - 2026-09-09
+
+- Keep the complete 42.10-second neural-drive animation at 30 FPS while reducing
+  its file size below GitHub's inline-image threshold.
+- Serve the animation from a versioned raw URL that returns `image/gif` so it
+  renders on PyPI instead of downloading as a generic binary attachment.
+- Update all current package and documentation references to 1.2.6.
+
 ## 1.2.5 - 2026-09-09
 
 - Restore the full neural-drive animation to 30 FPS while keeping the complete

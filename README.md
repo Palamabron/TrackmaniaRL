@@ -1,20 +1,20 @@
 # TrackmaniaRL
 
-![TrackmaniaRL logo](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.5/docs/assets/trackmaniarl-logo.png)
+![TrackmaniaRL logo](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.6/docs/assets/trackmaniarl-logo.png)
 
 TrackmaniaRL is a Python library for training reinforcement-learning agents on
 custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronous
 training, checkpoint resume and repeatable evaluation.
 
 The game integration runs on Windows. Training and analysis can also run on Linux.
-Version 1.2.5 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
+Version 1.2.6 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
 
 ## Installation
 
 Install [uv](https://docs.astral.sh/uv/), then create a project:
 
 ```powershell
-uv tool install "trackmaniarl==1.2.5"
+uv tool install "trackmaniarl==1.2.6"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -23,7 +23,7 @@ uv sync
 To install a locally built wheel instead:
 
 ```powershell
-uv tool install path\to\trackmaniarl-1.2.5-py3-none-any.whl
+uv tool install path\to\trackmaniarl-1.2.6-py3-none-any.whl
 ```
 
 To work from this repository, run `uv sync --group dev` and prefix commands with
@@ -46,7 +46,7 @@ a compatible PyTorch build. See [platform and performance guidance](readme/perfo
 
 ## Neural inference in motion
 
-![Full drive alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://github.com/Palamabron/TrackmaniaRL/releases/download/v1.2.5/trackmaniarl-neural-flow.gif)
+![Full drive alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.6/docs/assets/trackmaniarl-neural-flow.gif)
 
 This full drive visualizes the **best-performing model supplied for this release**.
 The panel follows geometry, car and context inputs through model stages to action
@@ -158,7 +158,7 @@ More detail: [evaluation architecture](docs/library-architecture.md#checkpoints-
 
 ## Documentation
 
-Start with the [1.2.5 reading guide](readme/README.md) for how the components fit
+Start with the [1.2.6 reading guide](readme/README.md) for how the components fit
 together and the setup-to-evaluation workflow.
 
 - [Configuration](readme/configuration.md)
