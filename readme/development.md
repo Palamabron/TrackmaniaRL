@@ -166,6 +166,11 @@ PEP 740 publish attestations and publish the same wheel and source-archive
 bytes to PyPI. The publish job must not check out the repository or rebuild the
 package.
 
+After PyPI accepts the verified artifacts, a separate least-privilege job creates
+the GitHub Release. It attaches the canonical distribution, checksums, SBOM,
+README logo and full-drive GIF. The PyPI description uses the release GIF URL so
+the server returns `image/gif` instead of an unrenderable generic binary type.
+
 All release actions are pinned to full commit SHAs, checkout credentials remain
 disabled and the publish job receives only read-only repository metadata plus
 the OIDC and attestation write permissions it needs. Update those pins and the

@@ -26,12 +26,13 @@ path. Do not add the MP4 or its local sidecars to the source archive.
 The source is 1920 × 1080, H.264, 30 fps, 42.10 seconds, with no audio stream.
 Source SHA-256:
 `aea2e9f65458a48a6aea126971e09f5f983b1fa00c63e1a128475dd1fb98b03c`.
-Version 1.2.4 shows the **entire supplied film**, from the start through the finish
+Version 1.2.5 shows the **entire supplied film**, from the start through the finish
 and the result card, replacing the short excerpt. No seek, trim or speed changes
-are applied. GIF frame durations alternate between 120 and 130 ms because GIF
-timing has 10 ms resolution: 337 frames, 42.13 seconds, nominal 8 fps.
-Output: **640 × 360, 12,394,864 bytes**, infinite loop.
-The 96-colour palette and reduced spatial/frame resolution keep the complete
+are applied. GIF frame durations alternate between 30 and 40 ms because GIF
+timing has 10 ms resolution. The export has 1,263 frames, lasts 42.10 seconds
+and plays at 30 FPS.
+Output: **480 × 270, 15,112,358 bytes**, infinite loop.
+The 32-colour palette and reduced spatial resolution keep the complete
 recording below the distribution's 16 MiB per-file limit. Playback runs at its
 original pace, not fast-forward. The MP4 is unchanged.
 
@@ -40,12 +41,15 @@ the review host):
 
 ```powershell
 $Source = Join-Path $env:USERPROFILE 'Downloads/trackmaniarl-neural-flow-polished-compressed.mp4'
-ffmpeg -v error -n -i "$Source" -an -map_metadata -1 -filter_complex "fps=8,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff:max_colors=96[p];[b][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle" -loop 0 docs/assets/trackmaniarl-neural-flow.gif
+$Palette = Join-Path $env:TEMP 'trackmaniarl-neural-flow-palette.png'
+ffmpeg -v error -y -i "$Source" -vf "fps=30,scale=480:-1:flags=lanczos,palettegen=stats_mode=diff:max_colors=32" -frames:v 1 -update 1 "$Palette"
+ffmpeg -v error -n -i "$Source" -i "$Palette" -an -map_metadata -1 -lavfi "fps=30,scale=480:-1:flags=lanczos,paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" -loop 0 docs/assets/trackmaniarl-neural-flow.gif
+Remove-Item -LiteralPath "$Palette"
 ```
 
 Use the path to an installed FFmpeg executable in place of `ffmpeg` if needed.
 `-n` refuses to overwrite an existing export. The source is never changed.
-Palette generation and application share the same decoded film. Bayer
+Palette generation and application use the same source film. Bayer
 dithering and rectangle differencing limit animation noise and file size.
 
 ## Privacy and accessibility
@@ -62,6 +66,6 @@ provide the explanation without requiring the animation to be played.
 The existing `rollout-v107c-clean.gif` was also recompressed in full from
 29,340,096 to 8,376,597 bytes, keeping its 320 × 176 dimensions and approximately
 37.36-second playback. The original remains in the ignored local review evidence
-directory. The conversion used the same palette/dither settings, `fps=8`, no
+directory. That conversion used its recorded palette and dither settings, `fps=8`, no
 scaling, no seek/trim and `-map_metadata -1`. This is illustrative gameplay,
 not the neural-flow source or a new benchmark.
