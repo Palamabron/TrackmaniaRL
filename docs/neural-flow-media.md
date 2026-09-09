@@ -26,34 +26,33 @@ path. Do not add the MP4 or its local sidecars to the source archive.
 The source is 1920 × 1080, H.264, 30 fps, 42.10 seconds, with no audio stream.
 Source SHA-256:
 `aea2e9f65458a48a6aea126971e09f5f983b1fa00c63e1a128475dd1fb98b03c`.
-The continuous **10.0–14.0 second** segment covers changing steering/braking and
-model activity without the introductory/outro titles. No internal cuts or speed
-changes were applied. GIF frame durations alternate between 30 and 40 ms
-because GIF timing has 10 ms resolution: 120 frames, 4.00 seconds, nominal 30 fps.
-Output: **960 × 540, 9,904,640 bytes**, infinite loop.
-The requested 30 fps export uses the original MP4 frames. A four-second excerpt
-and 128-colour palette keep the asset below a deliberate 10 MiB web-media budget
-while preserving panel resolution. The earlier 8 fps export remains in ignored
-local review evidence. The MP4 is unchanged.
+Version 1.2.4 shows the **entire supplied film**, from the start through the finish
+and the result card, replacing the short excerpt. No seek, trim or speed changes
+are applied. GIF frame durations alternate between 120 and 130 ms because GIF
+timing has 10 ms resolution: 337 frames, 42.13 seconds, nominal 8 fps.
+Output: **640 × 360, 12,394,864 bytes**, infinite loop.
+The 96-colour palette and reduced spatial/frame resolution keep the complete
+recording below the distribution's 16 MiB per-file limit. Playback runs at its
+original pace, not fast-forward. The MP4 is unchanged.
 
 Exact conversion command (PowerShell. FFmpeg 7.1 from imageio-ffmpeg 0.6.0 on
 the review host):
 
 ```powershell
 $Source = Join-Path $env:USERPROFILE 'Downloads/trackmaniarl-neural-flow-polished-compressed.mp4'
-ffmpeg -v error -n -ss 10 -t 4 -i "$Source" -an -map_metadata -1 -filter_complex "fps=30,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff:max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle" -loop 0 docs/assets/trackmaniarl-neural-flow.gif
+ffmpeg -v error -n -i "$Source" -an -map_metadata -1 -filter_complex "fps=8,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff:max_colors=96[p];[b][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle" -loop 0 docs/assets/trackmaniarl-neural-flow.gif
 ```
 
 Use the path to an installed FFmpeg executable in place of `ffmpeg` if needed.
 `-n` refuses to overwrite an existing export. The source is never changed.
-Palette generation and application share the same decoded segment. Bayer
+Palette generation and application share the same decoded film. Bayer
 dithering and rectangle differencing limit animation noise and file size.
 
 ## Privacy and accessibility
 
 Metadata inspection found codec/container identifiers, with no location,
 account, comment or title metadata. Sampled source frames across the film and
-the selected excerpt showed gameplay, clocks and model/control displays. No
+the full-length export showed gameplay, clocks and model/control displays. No
 private messages, credentials or account names were observed. This is a visual
 review, not a guarantee against every possible identifier in every pixel.
 The published GIF has no comment or EXIF/XMP metadata. Only playback metadata
