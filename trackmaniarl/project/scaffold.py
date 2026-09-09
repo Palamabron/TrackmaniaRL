@@ -14,6 +14,7 @@ from trackmaniarl.project.scaffold_run_templates import (
     _trackmania_bc_vision_config,
     _trackmania_config,
     _trackmania_ppo_config,
+    _trackmania_sensor_config,
     _trackmania_vision_config,
 )
 from trackmaniarl.project.scaffold_templates import (
@@ -83,6 +84,12 @@ def _write_project_metadata(target: Path, package: str, template: str) -> None:
             (target / f"run-{algorithm}-vision.yaml").write_text(
                 _trackmania_vision_config(algorithm), encoding="utf-8"
             )
+        for algorithm in ("q", "qr", "iqn", "fqf", "sac", "redq", "tqc", "discrete-sac", "ppo"):
+            for fusion in (False, True):
+                suffix = "lidar-vision" if fusion else "lidar"
+                (target / f"run-{algorithm}-{suffix}.yaml").write_text(
+                    _trackmania_sensor_config(algorithm, fusion=fusion), encoding="utf-8"
+                )
 
 
 def _generated_pyproject(package: str, template: str) -> str:

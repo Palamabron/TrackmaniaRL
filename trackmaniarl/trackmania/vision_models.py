@@ -11,18 +11,14 @@ from torch import nn
 
 from trackmaniarl.core.contracts import ModelContract
 from trackmaniarl.models.actors import (
-    CategoricalActor,
-    GaussianActor,
     GaussianActorConfig,
     PpoGaussianActor,
 )
 from trackmaniarl.models.critics import (
-    ContinuousQCritic,
     ContinuousValueCritic,
-    QuantileCritic,
-    QuantileCriticConfig,
 )
 from trackmaniarl.models.encoders.convolutional import ConvolutionalSensorEncoder
+from trackmaniarl.models.sensor_actor_critic import SensorActorCriticModelFactory
 
 
 class VisionSensorEncoder(ConvolutionalSensorEncoder):
@@ -96,36 +92,17 @@ class VisionActorCriticModelFactory:
         self.critic_count, self.quantile_count = shape.critic_count, shape.quantile_count
         self.action_count = shape.action_count
 
-    def _encoder(self) -> VisionSensorEncoder:
-        return VisionSensorEncoder(self.channels, self.hidden_dim)
-
     def build(self) -> nn.Module:
-        model = nn.Module()
-        if self.algorithm == "discrete-sac":
-            model.actor = CategoricalActor(self._encoder(), self.hidden_dim, self.action_count)
-            model.q1 = nn.Sequential(self._encoder(), nn.Linear(self.hidden_dim, self.action_count))
-            model.q2 = nn.Sequential(self._encoder(), nn.Linear(self.hidden_dim, self.action_count))
-            return model
-        model.actor = GaussianActor(
-            self._encoder(),
-            GaussianActorConfig(
-                self.hidden_dim, 3, action_low=(0.0, 0.0, -1.0), action_high=(1.0, 1.0, 1.0)
-            ),
-        )
-        if self.algorithm == "sac":
-            model.q1 = ContinuousQCritic(self._encoder(), self.hidden_dim, 3)
-            model.q2 = ContinuousQCritic(self._encoder(), self.hidden_dim, 3)
-        elif self.algorithm == "redq":
-            model.critics = nn.ModuleList(
-                ContinuousQCritic(self._encoder(), self.hidden_dim, 3)
-                for _ in range(self.critic_count)
-            )
-        else:
-            model.critics = nn.ModuleList(
-                QuantileCritic(
-                    self._encoder(),
-                    QuantileCriticConfig(self.hidden_dim, 3, self.quantile_count),
-                )
-                for _ in range(self.critic_count)
-            )
-        return model
+        return SensorActorCriticModelFactory(
+            self.algorithm,
+            {
+                "class_path": "trackmaniarl.trackmania.vision_models:VisionSensorEncoder",
+                "kwargs": {"channels": self.channels, "output_dim": self.hidden_dim},
+            },
+            {
+                "feature_dim": self.hidden_dim,
+                "action_count": self.action_count,
+                "critic_count": self.critic_count,
+                "quantile_count": self.quantile_count,
+            },
+        ).build()

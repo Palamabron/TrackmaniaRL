@@ -2,6 +2,11 @@
 
 ## 1.2.7 - 2026-09-09
 
+- Add lidar and paired lidar/image configurations for all nine RL families with
+  independent actor/critic encoders and training/resume integration tests.
+- Unify actor observation arguments with critics and composite models, reject
+  non-finite or overflowing action bounds, and collate mappings independently of
+  their insertion order.
 - Roll back failed BC checkpoint restoration, reject non-finite transferred weights
   and optimizer tensors, and prevent lossy label/flag conversions in recovery data.
 - Add camera behavior cloning with validated RGB/action episode archives, shared

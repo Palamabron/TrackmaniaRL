@@ -47,6 +47,42 @@ This is not a claim of exhaustive formal verification of every library module.
 
 ## Follow-up verification
 
+### Sensor composability review
+
+- Actors unpacked mapping and tuple observations while critics and composite
+  models passed them as one argument. The same lidar encoder consequently worked
+  in a critic but raised TypeError in both actor types. All now use the one-argument
+  observation contract, including PPO. Tests use the real lidar encoder.
+- Gaussian action bounds accepted NaN/Inf and float32 overflow. Construction now
+  rejects unusable bounds before creating action scale and bias buffers.
+- PPO initialization assumed all custom linear encoders had bias tensors. Biasless
+  layers now initialize correctly and have a regression test.
+- Gymnasium dictionary collation required insertion order to match the space.
+  It now validates key sets and emits fields in the declared space order.
+- A configurable actor-critic factory and a lidar/image fusion encoder now support
+  all nine RL families. Generated lidar and paired configurations have integration
+  coverage for updates, nonzero sensor gradients, training and checkpoint resume.
+  The paired pipeline forwards evaluation-map changes to lidar geometry and resets
+  camera history. Encoders are independently constructed for actor and critics.
+- Paired BC archive import is not implemented by this RL extension. Existing
+  camera-only and lidar-only BC workflows remain separate and are documented as such.
+
+### Local runtime instability
+
+Unrestricted Windows test processes intermittently terminate with access violations
+or errors inside YAML and Python's regular-expression engine. The failure was also
+reproduced without importing the project or any third-party package, using Python
+3.12.11 and 3.13.5 with `-I`. This rules out a TrackmaniaRL import as a necessary
+condition, but does not establish a specific hardware or operating-system cause.
+
+The reproducer repeatedly calls `fullmatch("CartPole-v1")` on the standard-library
+pattern `r"^(?:(?P<namespace>[\w:-]+)/)?(?P<name>[\w:.-]+?)(?:-v(?P<version>\d+))?$"`
+one million times. Some executions pass and others raise
+`RuntimeError: internal error in regular expression engine`.
+No BIOS, operating-system or global Python settings were changed. Diagnostic test
+runs with process-local CPU affinity must not be represented as an unrestricted
+clean run. The release still needs validation on a stable host or CI.
+
 Integration tests exercise generated camera configurations, image gradients,
 training and checkpoint continuation across RL families. BC tests drive the real
 CLI with synthetic RGB archives through validation, training, a mid-run resume

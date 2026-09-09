@@ -88,6 +88,71 @@ telemetry inputs to an already trained checkpoint. Camera behavior cloning uses
 [camera BC guide](vision-bc.md) for training, resume, evaluation and dataset import.
 Telemetry-only DAgger and graph-recovery archives cannot supply missing camera frames.
 
+## Lidar and paired lidar + vision
+
+The Trackmania scaffold also generates `run-ALGORITHM-lidar.yaml` and
+`run-ALGORITHM-lidar-vision.yaml` for `q`, `qr`, `iqn`, `fqf`, `sac`, `redq`,
+`tqc`, `discrete-sac` and `ppo`. For example:
+
+```powershell
+uv run trackmaniarl validate run-sac-lidar-vision.yaml
+uv run trackmaniarl train run-sac-lidar-vision.yaml
+```
+
+Configure map geometry and the viewport crop before live training. The camera
+extra is needed only for live image capture. Lidar here means the project's
+geometry-derived boundary lookahead plus telemetry, not a physical laser scanner.
+
+Paired configurations set `VisionEnvironmentFactory.kwargs.include_telemetry: true`.
+Reset and step then return `{"telemetry": raw_telemetry, "images": rgb}`.
+`LidarVisionFeaturePipeline` applies the existing lidar and image pipelines to
+their respective inputs, producing `{"lidar": lidar_mapping, "images": image_stack}`.
+Its `kwargs.lidar` contains the ordinary lidar configuration and `kwargs.vision`
+contains the image configuration. It resets both pipelines between episodes.
+Batch collation uses prepared observations and never advances either history.
+
+`LidarVisionSensorEncoder` encodes each branch independently, concatenates the
+features and applies a learned linear projection with SiLU. Configure its
+`kwargs.lidar` using `LidarSensorConfig`, its `kwargs.channels` to match the image
+stack and its `kwargs.output_dim` to match the downstream model. It preserves batch
+and sequence axes. Paired pipelines require lidar `history_length: 1`. Use a
+temporal core in a composite value model for sequence learning. Image frame
+stacking remains configurable independently. The default templates are feedforward.
+
+For SAC, REDQ, TQC, discrete SAC and PPO,
+`trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory` accepts:
+
+```yaml
+algorithm: sac
+encoder:
+  class_path: trackmaniarl.trackmania.multimodal:LidarVisionSensorEncoder
+  kwargs:
+    lidar: {output_dim: 256}
+    channels: 4
+    output_dim: 256
+config:
+  feature_dim: 256
+  action_low: [0, 0, -1]
+  action_high: [1, 1, 1]
+```
+
+These fields belong under the factory's `kwargs`. Each actor and critic gets a
+separate encoder instance. `feature_dim` must equal encoder `output_dim`.
+For lidar alone, select `BatchedLidarSensorEncoder` with `kwargs.config` containing
+the lidar sensor configuration. For images alone, select `VisionSensorEncoder`.
+The composite Q/QR/IQN/FQF factory accepts the same encoder components.
+
+Every actor and critic calls `encoder(observation)` with one complete observation
+argument. Mapping and tuple unpacking belongs inside a custom encoder, not in the
+actor. Models with several sensors therefore share one observation contract.
+Action bounds must be finite, ordered and representable in float32.
+
+Integration tests exercise updates, both sensor gradients, training and checkpoint
+resume for all nine RL families with lidar and with paired inputs. This does not
+establish live driving performance or atomic camera/telemetry synchronization.
+The paired configurations are RL configurations. The supplied BC archive importer
+still supports lidar-only or camera-only episodes, not paired RGB/telemetry BC data.
+
 Off-policy camera templates use a 2048-transition replay buffer, batch size 32
 and 512 warmup transitions. Increase capacity only after checking memory usage.
 Their replay stores image stacks as float32, just like the PPO rollout below.

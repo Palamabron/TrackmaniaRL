@@ -270,6 +270,44 @@ def _trackmania_vision_config(algorithm: str = "iqn") -> str:
     return yaml.safe_dump(config, sort_keys=False)
 
 
+def _trackmania_sensor_config(algorithm: str, *, fusion: bool = False) -> str:
+    """Generate lidar or paired lidar/image configurations for every RL family."""
+    config = yaml.safe_load(
+        _trackmania_ppo_config(vision=True)
+        if algorithm == "ppo"
+        else _trackmania_vision_config(algorithm)
+    )
+    base = yaml.safe_load(_TRACKMANIA_CONFIG)["components"]
+    components = config["components"]
+    config["run_id"] = f"trackmania-{algorithm}-lidar" + ("-vision" if fusion else "")
+    prefix = "trackmaniarl.trackmania.multimodal:"
+    if fusion:
+        components["environment"]["kwargs"]["include_telemetry"] = True
+        components["feature_pipeline"] = {
+            "class_path": prefix + "LidarVisionFeaturePipeline",
+            "kwargs": {"lidar": base["feature_pipeline"]["kwargs"]["config"]},
+        }
+        encoder = {
+            "class_path": prefix + "LidarVisionSensorEncoder",
+            "kwargs": {"lidar": {"output_dim": 256}},
+        }
+    else:
+        components["environment"] = base["environment"]
+        components["feature_pipeline"] = base["feature_pipeline"]
+        encoder = {
+            "class_path": prefix + "BatchedLidarSensorEncoder",
+            "kwargs": {"config": {"output_dim": 256}},
+        }
+    if algorithm in {"q", "qr", "iqn", "fqf"}:
+        components["model_factory"]["kwargs"]["encoder"] = encoder
+    else:
+        components["model_factory"] = {
+            "class_path": "trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory",
+            "kwargs": {"algorithm": algorithm, "encoder": encoder},
+        }
+    return yaml.safe_dump(config, sort_keys=False)
+
+
 def _trackmania_bc_vision_config() -> str:
     config = yaml.safe_load(_trackmania_vision_config("iqn"))
     config.pop("distributed", None)

@@ -72,7 +72,7 @@ class GymnasiumObservationCollator:
         self, space: spaces.Dict, values: Sequence[Any], path: str
     ) -> dict[str, PyTree]:
         expected = tuple(space.spaces)
-        if not all(isinstance(value, Mapping) and tuple(value) == expected for value in values):
+        if not all(isinstance(value, Mapping) and set(value) == set(expected) for value in values):
             raise ValueError(f"{path} must match Dict keys {expected}")
         return {
             key: self._collate(
