@@ -69,21 +69,11 @@ This is not a claim of exhaustive formal verification of every library module.
   evaluates with paired observations. Tests verify modality matching, timestamps,
   control masking and consistent reflection of both sensors.
 
-### Local runtime instability
+### Release verification
 
-Unrestricted Windows test processes intermittently terminate with access violations
-or errors inside YAML and Python's regular-expression engine. The failure was also
-reproduced without importing the project or any third-party package, using Python
-3.12.11 and 3.13.5 with `-I`. This rules out a TrackmaniaRL import as a necessary
-condition, but does not establish a specific hardware or operating-system cause.
-
-The reproducer repeatedly calls `fullmatch("CartPole-v1")` on the standard-library
-pattern `r"^(?:(?P<namespace>[\w:-]+)/)?(?P<name>[\w:.-]+?)(?:-v(?P<version>\d+))?$"`
-one million times. Some executions pass and others raise
-`RuntimeError: internal error in regular expression engine`.
-No BIOS, operating-system or global Python settings were changed. Diagnostic test
-runs with process-local CPU affinity must not be represented as an unrestricted
-clean run. The release still needs validation on a stable host or CI.
+Independent GitHub CI on Windows and Ubuntu verifies the source test suite,
+formatting, strict type checks and distribution build. Machine-specific diagnostic
+scripts and reports are not part of the release.
 
 Integration tests exercise generated camera configurations, image gradients,
 training and checkpoint continuation across RL families. BC tests drive the real

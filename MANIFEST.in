@@ -8,7 +8,6 @@ recursive-include readme *.md
 recursive-include docs/assets *.png *.gif
 recursive-include docs/diagrams *.md *.spec.json *.py *.excalidraw *.svg *.png *.html
 recursive-include scripts *.py
-recursive-include scripts *.ps1
 recursive-include examples *.yaml
 include docs/*.md
 recursive-include docs/benchmarks *.md *.json
