@@ -33,7 +33,12 @@ class Encoder(nn.Module):
 
 
 class StructuredEncoder(nn.Module):
-    def forward(self, track: torch.Tensor, telemetry: torch.Tensor) -> torch.Tensor:
+    def forward(self, observation: Any) -> torch.Tensor:
+        track, telemetry = (
+            (observation["track"], observation["telemetry"])
+            if isinstance(observation, dict)
+            else observation
+        )
         return torch.cat((track, telemetry), dim=-1)
 
 
@@ -71,7 +76,7 @@ class StructuredValue(nn.Module):
         self.value = nn.Linear(4, 1)
 
     def forward(self, observation: dict[str, torch.Tensor]) -> torch.Tensor:
-        return self.value(self.encoder(**observation)).squeeze(-1)
+        return self.value(self.encoder(observation)).squeeze(-1)
 
 
 class StructuredPpoModel(nn.Module):

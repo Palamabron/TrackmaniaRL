@@ -63,7 +63,7 @@ class GaussianActor(nn.Module):
         return log_probability, entropy_sample
 
     def _distribution(self, observation: Any) -> Any:
-        features = _encode(self.encoder, observation)
+        features = self.encoder(observation)
         mean = self.mean(features)
         if not isinstance(self.log_std, nn.Linear):
             raise TypeError("GaussianActor requires an observation-dependent standard deviation")
@@ -92,7 +92,7 @@ class PpoGaussianActor(GaussianActor):
         self._initialize_weights()
 
     def _distribution(self, observation: Any) -> Any:
-        features = _encode(self.encoder, observation)
+        features = self.encoder(observation)
         mean = self.mean(features)
         if not isinstance(self.log_std, nn.Parameter):
             raise TypeError("PpoGaussianActor requires a state-independent standard deviation")
@@ -103,19 +103,10 @@ class PpoGaussianActor(GaussianActor):
         for module in self.encoder.modules():
             if isinstance(module, nn.Linear):
                 nn.init.orthogonal_(module.weight, math.sqrt(2.0))
-                nn.init.zeros_(module.bias)
+                if module.bias is not None:
+                    nn.init.zeros_(module.bias)
         nn.init.orthogonal_(self.mean.weight, 0.01)
         nn.init.zeros_(self.mean.bias)
-
-
-def _encode(encoder: nn.Module, observation: Any) -> torch.Tensor:
-    """Call encoders with tensor, tuple, or mapping observations."""
-
-    if isinstance(observation, tuple):
-        return cast(torch.Tensor, encoder(*observation))
-    if isinstance(observation, dict):
-        return cast(torch.Tensor, encoder(**observation))
-    return cast(torch.Tensor, encoder(observation))
 
 
 def _action_bounds(
@@ -129,6 +120,15 @@ def _action_bounds(
     high = torch.as_tensor(
         [1.0] * action_dim if action_high is None else action_high, dtype=torch.float32
     )
-    if low.shape != (action_dim,) or high.shape != (action_dim,) or torch.any(high <= low):
-        raise ValueError("action bounds must match action_dim and satisfy high > low")
+    if (
+        action_dim < 1
+        or low.shape != (action_dim,)
+        or high.shape != (action_dim,)
+        or not torch.isfinite(low).all()
+        or not torch.isfinite(high).all()
+        or not torch.isfinite(high - low).all()
+        or not torch.isfinite(high + low).all()
+        or torch.any((high - low) / 2 <= 0)
+    ):
+        raise ValueError("action bounds must be finite, match action_dim and satisfy high > low")
     return low, high

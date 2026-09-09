@@ -212,3 +212,131 @@ def _trackmania_actor_critic_config(algorithm: str) -> str:
     config["training"]["batch_size"] = 256
     config["training"]["sequence_length"] = 1
     return yaml.safe_dump(config, sort_keys=False)
+
+
+def _trackmania_vision_config(algorithm: str = "iqn") -> str:
+    """Complete image-observation RunSpec for each off-policy learner family."""
+    value_algorithms = {"q", "qr", "iqn", "fqf"}
+    config = yaml.safe_load(
+        _trackmania_config()
+        if algorithm in value_algorithms
+        else _trackmania_actor_critic_config(algorithm)
+    )
+    config["run_id"] = f"trackmania-{algorithm}-vision"
+    components = config["components"]
+    components["environment"]["class_path"] = (
+        "trackmaniarl.trackmania.vision_environment:VisionEnvironmentFactory"
+    )
+    components["environment"]["kwargs"]["capture"] = {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720,
+    }
+    components["feature_pipeline"] = {
+        "class_path": "trackmaniarl.trackmania.vision:VisionFeaturePipeline",
+    }
+    if algorithm in value_algorithms:
+        model = components["model_factory"]["kwargs"]
+        model["encoder"] = {
+            "class_path": "trackmaniarl.trackmania.vision_models:VisionSensorEncoder",
+        }
+        if algorithm == "q":
+            model["head"] = {
+                "class_path": "trackmaniarl.models.heads:ScalarQHead",
+                "kwargs": {"feature_dim": 256, "action_count": 78},
+            }
+            model["strategy"] = {"class_path": "trackmaniarl.models.strategies:ScalarValueStrategy"}
+        elif algorithm == "qr":
+            model["head"] = {
+                "class_path": "trackmaniarl.models.heads:FixedQuantileHead",
+                "kwargs": {"config": {"feature_dim": 256, "action_count": 78}},
+            }
+            model["strategy"] = {
+                "class_path": "trackmaniarl.models.strategies:FixedQuantileStrategy",
+            }
+        elif algorithm == "fqf":
+            model["strategy"] = {
+                "class_path": "trackmaniarl.models.strategies:LearnedFractionStrategy",
+                "kwargs": {"feature_dim": 256},
+            }
+    else:
+        components["model_factory"] = {
+            "class_path": "trackmaniarl.trackmania.vision_models:VisionActorCriticModelFactory",
+            "kwargs": {"algorithm": algorithm},
+        }
+    components["replay_store"]["kwargs"] = {"capacity": 2048}
+    config["training"].update(batch_size=32, warmup_transitions=512)
+    return yaml.safe_dump(config, sort_keys=False)
+
+
+def _trackmania_sensor_config(algorithm: str, *, fusion: bool = False) -> str:
+    """Generate lidar or paired lidar/image configurations for every RL family."""
+    config = yaml.safe_load(
+        _trackmania_ppo_config(vision=True)
+        if algorithm == "ppo"
+        else _trackmania_vision_config(algorithm)
+    )
+    base = yaml.safe_load(_TRACKMANIA_CONFIG)["components"]
+    components = config["components"]
+    config["run_id"] = f"trackmania-{algorithm}-lidar" + ("-vision" if fusion else "")
+    prefix = "trackmaniarl.trackmania.multimodal:"
+    if fusion:
+        components["environment"]["kwargs"]["include_telemetry"] = True
+        components["feature_pipeline"] = {
+            "class_path": prefix + "LidarVisionFeaturePipeline",
+            "kwargs": {"lidar": base["feature_pipeline"]["kwargs"]["config"]},
+        }
+        encoder = {
+            "class_path": prefix + "LidarVisionSensorEncoder",
+            "kwargs": {"lidar": {"output_dim": 256}},
+        }
+    else:
+        components["environment"] = base["environment"]
+        components["feature_pipeline"] = base["feature_pipeline"]
+        encoder = {
+            "class_path": prefix + "BatchedLidarSensorEncoder",
+            "kwargs": {"config": {"output_dim": 256}},
+        }
+    if algorithm in {"q", "qr", "iqn", "fqf"}:
+        components["model_factory"]["kwargs"]["encoder"] = encoder
+    else:
+        components["model_factory"] = {
+            "class_path": "trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory",
+            "kwargs": {"algorithm": algorithm, "encoder": encoder},
+        }
+    return yaml.safe_dump(config, sort_keys=False)
+
+
+def _trackmania_bc_vision_config(*, fusion: bool = False) -> str:
+    config = yaml.safe_load(_trackmania_vision_config("iqn"))
+    config.pop("distributed", None)
+    config["run_id"] = "trackmania-bc-vision"
+    components = config["components"]
+    components["learner"] = {
+        "class_path": "trackmaniarl.trackmania.imitation_learning:BehaviorCloningLearner",
+        "kwargs": {"max_steps": 20000, "validation_interval": 100},
+    }
+    prefix = "trackmaniarl.trackmania.imitation_learning.vision:"
+    components["model_factory"] = {
+        "class_path": prefix + "VisionBehaviorCloningModelFactory",
+        "kwargs": {"action_ids": list(range(78))},
+    }
+    components["feature_pipeline"] = {"class_path": prefix + "VisionBehaviorCloningPipeline"}
+    components["environment"]["kwargs"]["config"]["compact_action_ids"] = list(range(78))
+    components["environment"]["kwargs"]["config"]["demonstration_control_aggregation"] = False
+    components["sampler"] = {"class_path": "trackmaniarl.core.replay:UniformSampler"}
+    config["training"].update(batch_size=32, n_step=1, sequence_length=1)
+    if fusion:
+        config["run_id"] = "trackmania-bc-lidar-vision"
+        components["environment"]["kwargs"]["include_telemetry"] = True
+        components["model_factory"]["kwargs"]["config"] = {"lidar": {"output_dim": 256}}
+        lidar = yaml.safe_load(_TRACKMANIA_CONFIG)["components"]["feature_pipeline"]["kwargs"][
+            "config"
+        ]
+        lidar["mask_current_control_inputs"] = True
+        components["feature_pipeline"] = {
+            "class_path": prefix + "LidarVisionBehaviorCloningPipeline",
+            "kwargs": {"lidar": lidar},
+        }
+    return yaml.safe_dump(config, sort_keys=False)

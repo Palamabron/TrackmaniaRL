@@ -1,4 +1,4 @@
-# Support status for 1.2.6
+# Support status for 1.2.7
 
 Tests verify contracts and failure handling. They do not prove fast driving on
 unseen maps. The [algorithm matrix](../readme/algorithms.md) is authoritative for
@@ -11,7 +11,7 @@ supported learner/replay/model combinations.
 | `track check`, boundary/trajectory recording, geometry building | Supported own-map asset workflow |
 | `train`, `resume`, `smoke`, `learner`, `actor` | Supported asynchronous off-policy workflow |
 | PPO `train`, `resume`, `smoke`, `benchmark` | Supported local on-policy workflow with telemetry and CNN vision factories. Use local commands, not distributed actor/learner commands |
-| SAC, REDQ, TQC, stable discrete SAC | Supported telemetry actor-critic workflows with generated configurations and first-party model factories |
+| SAC, REDQ, TQC, stable discrete SAC | Supported telemetry and camera actor-critic workflows with generated configurations and first-party model factories |
 | RGB vision pipeline, frame stacking, CNN encoder | Supported library components, optional desktop capture via `[vision]`, see [vision setup](../readme/vision.md) |
 | `benchmark`, optional window recording | Supported checkpoint evaluation, Windows-only recorder |
 | `track record-demo`, `offline-pretrain`, `bc-train`, `bc-benchmark` | Supported demonstration and imitation workflows, subject to documented data contracts |

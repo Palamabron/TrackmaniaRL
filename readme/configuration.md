@@ -1,6 +1,6 @@
 # Configuration reference
 
-A RunSpec YAML file is the public runtime configuration boundary in 1.2.6.
+A RunSpec YAML file is the public runtime configuration boundary in 1.2.7.
 The generated choices are `run.yaml`, `run-sac.yaml`, `run-redq.yaml`,
 `run-tqc.yaml`, `run-discrete-sac.yaml`, `run-ppo.yaml` and `run-ppo-vision.yaml`.
 Each is parsed by

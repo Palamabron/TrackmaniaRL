@@ -26,7 +26,7 @@ class ContinuousQCritic(nn.Module):
             nn.Linear(feature_dim + action_dim, feature_dim), nn.SiLU(), nn.Linear(feature_dim, 1)
         )
 
-    def forward(self, observation: torch.Tensor, action: torch.Tensor) -> torch.Tensor:
+    def forward(self, observation: Any, action: torch.Tensor) -> torch.Tensor:
         return cast(
             torch.Tensor,
             self.value(torch.cat([self.encoder(observation), action], dim=-1)).squeeze(-1),
@@ -59,7 +59,7 @@ class QuantileCritic(nn.Module):
             nn.Linear(config.feature_dim, config.quantile_count),
         )
 
-    def forward(self, observation: torch.Tensor, action: torch.Tensor) -> torch.Tensor:
+    def forward(self, observation: Any, action: torch.Tensor) -> torch.Tensor:
         return cast(
             torch.Tensor, self.value(torch.cat([self.encoder(observation), action], dim=-1))
         )

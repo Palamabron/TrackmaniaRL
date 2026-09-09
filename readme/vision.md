@@ -1,6 +1,29 @@
-# Camera vision and PPO
+# Camera vision with every RL algorithm
 
-This guide applies to TrackmaniaRL 1.2.6 with RunSpec 2.0.
+This guide applies to TrackmaniaRL 1.2.7 with RunSpec 2.0.
+
+Camera observations are independent of the RL algorithm. All public RL learners
+support image models: Q/DQN, QR-DQN, IQN, FQF, SAC, REDQ, TQC, stable discrete SAC
+and PPO. The same `VisionFeaturePipeline` and `VisionSensorEncoder` supply images
+and CNN features across these families.
+
+The Trackmania template generates these complete camera configurations:
+
+| Algorithm | Configuration | Model |
+| --- | --- | --- |
+| Q/DQN | `run-q-vision.yaml` | Composite scalar Q |
+| QR-DQN | `run-qr-vision.yaml` | Composite fixed quantiles |
+| IQN | `run-iqn-vision.yaml` | Composite implicit quantiles |
+| FQF | `run-fqf-vision.yaml` | Composite learned fractions |
+| SAC | `run-sac-vision.yaml` | CNN actor and twin Q critics |
+| REDQ | `run-redq-vision.yaml` | CNN actor and Q ensemble |
+| TQC | `run-tqc-vision.yaml` | CNN actor and quantile ensemble |
+| Stable discrete SAC | `run-discrete-sac-vision.yaml` | Categorical CNN actor and twin Q critics |
+| PPO | `run-ppo-vision.yaml` | CNN actor and state-value critic |
+
+Use any filename from this table with `validate`, `train`, `resume` and `benchmark`.
+Off-policy camera models also use the distributed actor/learner runtime. Capture
+runs on each actor's desktop. PPO uses local on-policy collection.
 
 PPO is a supported local on-policy algorithm. The Trackmania project template
 generates `run-ppo.yaml` (telemetry) and `run-ppo-vision.yaml` (camera), alongside
@@ -46,6 +69,95 @@ CNN encoders for a bounded Gaussian actor and state-value critic. Actions are
 `VisionSensorEncoder` also implements the existing composite value encoder
 contract: use it with `CompositeValueModelFactory` and scalar Q, QR, IQN or FQF
 heads. Match `output_dim` to the temporal core's `input_dim`.
+
+For SAC, REDQ, TQC and stable discrete SAC, use
+`trackmaniarl.trackmania.vision_models:VisionActorCriticModelFactory` with
+`kwargs.algorithm` set to `sac`, `redq`, `tqc` or `discrete-sac`. Fields in `kwargs.config`
+are `channels` (4), `hidden_dim` (256), `critic_count` (10), `quantile_count` (25)
+and `action_count` (78). Ensemble size applies to REDQ/TQC, quantile count to TQC
+and action count to discrete SAC. Keep the standard 78 actions for Trackmania.
+Every actor and critic owns an independent CNN and optimizer gradients reach it.
+
+Custom models can reuse `VisionSensorEncoder` as an observation encoder in the
+existing actor, critic or composite model contracts. It preserves batch and time
+axes, so value models can combine it with the available temporal cores. A model
+that explicitly expects lidar vectors or graph nodes must use an image encoder
+or explicitly combine both modalities. Raw images are not interchangeable with
+telemetry inputs to an already trained checkpoint. Camera behavior cloning uses
+`run-bc-vision.yaml` and aligned RGB/action archives. See the
+[camera BC guide](vision-bc.md) for training, resume, evaluation and dataset import.
+Telemetry-only DAgger and graph-recovery archives cannot supply missing camera frames.
+
+## Lidar and paired lidar + vision
+
+The Trackmania scaffold also generates `run-ALGORITHM-lidar.yaml` and
+`run-ALGORITHM-lidar-vision.yaml` for `q`, `qr`, `iqn`, `fqf`, `sac`, `redq`,
+`tqc`, `discrete-sac` and `ppo`. For example:
+
+```powershell
+uv run trackmaniarl validate run-sac-lidar-vision.yaml
+uv run trackmaniarl train run-sac-lidar-vision.yaml
+```
+
+Configure map geometry and the viewport crop before live training. The camera
+extra is needed only for live image capture. Lidar here means the project's
+geometry-derived boundary lookahead plus telemetry, not a physical laser scanner.
+
+Paired configurations set `VisionEnvironmentFactory.kwargs.include_telemetry: true`.
+Reset and step then return `{"telemetry": raw_telemetry, "images": rgb}`.
+`LidarVisionFeaturePipeline` applies the existing lidar and image pipelines to
+their respective inputs, producing `{"lidar": lidar_mapping, "images": image_stack}`.
+Its `kwargs.lidar` contains the ordinary lidar configuration and `kwargs.vision`
+contains the image configuration. It resets both pipelines between episodes.
+Batch collation uses prepared observations and never advances either history.
+
+`LidarVisionSensorEncoder` encodes each branch independently, concatenates the
+features and applies a learned linear projection with SiLU. Configure its
+`kwargs.lidar` using `LidarSensorConfig`, its `kwargs.channels` to match the image
+stack and its `kwargs.output_dim` to match the downstream model. It preserves batch
+and sequence axes. Paired pipelines require lidar `history_length: 1`. Use a
+temporal core in a composite value model for sequence learning. Image frame
+stacking remains configurable independently. The default templates are feedforward.
+
+For SAC, REDQ, TQC, discrete SAC and PPO,
+`trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory` accepts:
+
+```yaml
+algorithm: sac
+encoder:
+  class_path: trackmaniarl.trackmania.multimodal:LidarVisionSensorEncoder
+  kwargs:
+    lidar: {output_dim: 256}
+    channels: 4
+    output_dim: 256
+config:
+  feature_dim: 256
+  action_low: [0, 0, -1]
+  action_high: [1, 1, 1]
+```
+
+These fields belong under the factory's `kwargs`. Each actor and critic gets a
+separate encoder instance. `feature_dim` must equal encoder `output_dim`.
+For lidar alone, select `BatchedLidarSensorEncoder` with `kwargs.config` containing
+the lidar sensor configuration. For images alone, select `VisionSensorEncoder`.
+The composite Q/QR/IQN/FQF factory accepts the same encoder components.
+
+Every actor and critic calls `encoder(observation)` with one complete observation
+argument. Mapping and tuple unpacking belongs inside a custom encoder, not in the
+actor. Models with several sensors therefore share one observation contract.
+Action bounds must be finite, ordered and representable in float32.
+
+Integration tests exercise updates, both sensor gradients, training and checkpoint
+resume for all nine RL families with lidar and with paired inputs. This does not
+establish live driving performance or atomic camera/telemetry synchronization.
+For paired behavior cloning use `run-bc-lidar-vision.yaml` and archives containing
+aligned RGB, telemetry and actions. See the [paired BC instructions](vision-bc.md#paired-lidar--vision).
+
+Off-policy camera templates use a 2048-transition replay buffer, batch size 32
+and 512 warmup transitions. Increase capacity only after checking memory usage.
+Their replay stores image stacks as float32, just like the PPO rollout below.
+Synthetic integration tests cover an update, training and checkpoint resume for
+every RL learner family. This verifies software compatibility, not lap times.
 
 ## Live frame source
 

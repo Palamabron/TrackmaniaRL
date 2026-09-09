@@ -35,12 +35,21 @@ class RecoveryContract:
     control_alignment: str
 
     def __post_init__(self) -> None:
-        if not self.map_uid or not is_sha256(self.geometry_sha256):
+        if (
+            not isinstance(self.map_uid, str)
+            or not self.map_uid
+            or not is_sha256(self.geometry_sha256)
+        ):
             raise ValueError("recovery map and geometry identity are invalid")
-        if self.action_repeat_frames < 1:
-            raise ValueError("recovery action repeat must be positive")
+        if type(self.action_repeat_frames) is not int or self.action_repeat_frames < 1:
+            raise ValueError("recovery action repeat must be a positive integer")
         interval = self.decision_interval_ms
-        if interval is not None and (not np.isfinite(interval) or interval <= 0.0):
+        if interval is not None and (
+            isinstance(interval, bool)
+            or not isinstance(interval, (int, float))
+            or not np.isfinite(interval)
+            or interval <= 0.0
+        ):
             raise ValueError("recovery decision interval must be finite and positive")
         if interval is not None and self.action_repeat_frames != 1:
             raise ValueError("recovery decision interval requires action repeat one")
@@ -85,7 +94,11 @@ class RecoveryProvenance:
 
 
 def is_sha256(value: str) -> bool:
-    return len(value) == 64 and all(character in "0123456789abcdef" for character in value)
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
 
 
 def demonstration_sha256(demonstration: Demonstration) -> str:

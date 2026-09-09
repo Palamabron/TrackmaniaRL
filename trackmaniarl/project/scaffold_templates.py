@@ -138,7 +138,27 @@ actor-critic models. `run-discrete-sac.yaml` uses a categorical actor with the
 78-action table. Configure your map in the selected file and use that filename
 for validation, training, resume and benchmarking. No custom model code is required.
 
-## PPO and camera vision
+## Camera vision and PPO
+
+Camera observations work with every RL family. Complete image configurations are
+`run-q-vision.yaml`, `run-qr-vision.yaml`, `run-iqn-vision.yaml`,
+`run-fqf-vision.yaml`, `run-sac-vision.yaml`, `run-redq-vision.yaml`,
+`run-tqc-vision.yaml`, `run-discrete-sac-vision.yaml` and `run-ppo-vision.yaml`.
+
+Every RL algorithm also has `run-ALGORITHM-lidar.yaml` and
+`run-ALGORITHM-lidar-vision.yaml`. The latter combines boundary lookahead and
+telemetry with a camera CNN. Configure the geometry path and capture rectangle.
+Both encoders receive gradients during training. `run-bc-lidar-vision.yaml` trains
+paired BC from RGB/action archives with aligned 33-field telemetry rows.
+Select one for validation, training, resume and benchmarking. Off-policy camera
+templates use a 2048-transition replay buffer and batch size 32 to bound memory.
+
+`run-bc-vision.yaml` uses supervised camera behavior cloning. Supply at least three
+complete RGB/action archives from the `imitation_learning.vision_data` API, then
+run `bc-train run-bc-vision.yaml --demo demonstrations/vision`. Resume with
+`--resume artifacts/RUN/checkpoints/bc-latest.pt` and evaluate the selected
+`bc-best-validation.pt` with `bc-benchmark`. Telemetry-only recordings lack RGB
+frames and cannot train this model.
 
 `run-ppo.yaml` selects supported local on-policy PPO with telemetry.
 `run-ppo-vision.yaml` selects PPO with a CNN and four grayscale 84x84 camera frames.

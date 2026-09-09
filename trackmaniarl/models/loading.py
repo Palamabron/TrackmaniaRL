@@ -56,12 +56,13 @@ def warm_start_composite_model(
 ) -> WarmStartReport:
     _validate_options(options, checkpoint)
     source = _source_state(TorchCheckpointCodec().load(checkpoint))
-    target = model.state_dict()
+    target = {name: value.detach().clone() for name, value in model.state_dict().items()}
     matches = _apply_tensors(target, source, options)
     if not matches.matched:
         raise ValueError("warm-start checkpoint has no compatible model tensors")
+    report = _warm_start_report(_WarmStartState(checkpoint, target, source, options), matches)
     model.load_state_dict(target, strict=True)
-    return _warm_start_report(_WarmStartState(checkpoint, target, source, options), matches)
+    return report
 
 
 def _validate_options(options: WarmStartOptions, checkpoint: Path) -> None:
@@ -87,6 +88,8 @@ def _apply_tensors(
         if expected.dtype != value.dtype or expected.shape != value.shape:
             mismatch.append(name)
             continue
+        if not bool(torch.isfinite(value).all()):
+            raise ValueError(f"warm-start tensor {name} contains non-finite values")
         expected.copy_(value.to(device=expected.device))
         matched.append(name)
     return _TensorMatches(matched, mismatch)
@@ -115,11 +118,28 @@ def _source_state(checkpoint: Mapping[str, Any]) -> Mapping[str, torch.Tensor]:
     learner = checkpoint["learner"]
     if not isinstance(learner, Mapping):
         raise ValueError("warm-start checkpoint has no learner mapping")
+    if checkpoint.get("schema_version") == "trackmaniarl-bc-policy-v2":
+        return _bc_encoder_state(learner)
     validate_policy_checkpoint_v2(learner)
     online = learner["online"]
     if not isinstance(online, Mapping):
         raise ValueError("warm-start checkpoint has no online composite model state")
     return _flatten_modules(online)
+
+
+def _bc_encoder_state(learner: Mapping[str, Any]) -> Mapping[str, torch.Tensor]:
+    if learner.get("schema_version") != "trackmaniarl-bc-checkpoint-v2":
+        raise ValueError("unsupported behavior-cloning learner checkpoint schema")
+    model = learner.get("model")
+    if not isinstance(model, Mapping):
+        raise ValueError("BC warm-start checkpoint has no model tensor mapping")
+    source: dict[str, torch.Tensor] = {}
+    for name, value in model.items():
+        if not isinstance(name, str) or not isinstance(value, torch.Tensor):
+            raise ValueError("BC warm-start model must contain named tensors")
+        if name.partition(".")[0] in {"encoder", "temporal"}:
+            source[name] = value
+    return source
 
 
 def _flatten_modules(online: Mapping[str, Any]) -> dict[str, torch.Tensor]:

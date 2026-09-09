@@ -7,6 +7,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+import torch
 import yaml
 
 from tests.integration.trackmania.test_scaffold_evaluation import _evaluation_suite, _patch_geometry
@@ -18,7 +19,11 @@ from trackmaniarl.core.spec import RunSpec
 from trackmaniarl.core.training import Trainer
 from trackmaniarl.core.training_loop import _close_session, _start_session, _TrainingSession
 from trackmaniarl.project.scaffold import create_project
-from trackmaniarl.project.scaffold_run_templates import _trackmania_config, _trackmania_ppo_config
+from trackmaniarl.project.scaffold_run_templates import (
+    _trackmania_config,
+    _trackmania_ppo_config,
+    _trackmania_vision_config,
+)
 from trackmaniarl.trackmania.evaluation import TrackmaniaEvaluator
 
 
@@ -31,9 +36,12 @@ class ImageEnvironment:
         return np.zeros((8, 8, 3), dtype=np.uint8), {}
 
     def step(self, action: Any) -> tuple[np.ndarray[Any, Any], float, bool, bool, dict[str, Any]]:
-        assert np.asarray(action).shape == (3,)
-        assert np.all(np.asarray(action) >= [0, 0, -1])
-        assert np.all(np.asarray(action) <= [1, 1, 1])
+        if np.asarray(action).ndim == 0:
+            assert 0 <= int(action) < 78
+        else:
+            assert np.asarray(action).shape == (3,)
+            assert np.all(np.asarray(action) >= [0, 0, -1])
+            assert np.all(np.asarray(action) <= [1, 1, 1])
         self.step_count += 1
         image = np.full((8, 8, 3), self.step_count * 20, dtype=np.uint8)
         return image, 1.0, False, self.step_count == 3, {}
@@ -45,6 +53,84 @@ class ImageEnvironment:
 class ImageEnvironmentFactory:
     def create(self, *, seed: int, evaluation_map: Any = None) -> ImageEnvironment:
         return ImageEnvironment()
+
+
+@pytest.mark.parametrize(
+    "algorithm", ["q", "qr", "iqn", "fqf", "sac", "redq", "tqc", "discrete-sac"]
+)
+def test_off_policy_vision_update_train_and_resume(tmp_path: Path, algorithm: str) -> None:
+    config = yaml.safe_load(_trackmania_vision_config(algorithm))
+    config["artifacts_dir"] = str(tmp_path)
+    config.pop("evaluation")
+    components = config["components"]
+    components.pop("evaluator")
+    components["environment"] = {"class_path": f"{__name__}:ImageEnvironmentFactory"}
+    components["feature_pipeline"]["kwargs"] = {"config": {"width": 8, "height": 8}}
+    components["replay_store"]["kwargs"] = {"capacity": 16}
+    components["learner"]["kwargs"]["execution"] = {"device": "cpu", "precision": "float32"}
+    if algorithm in {"sac", "redq", "tqc", "discrete-sac"}:
+        components["model_factory"]["kwargs"]["config"] = {"hidden_dim": 8, "critic_count": 2}
+    config["training"].update(
+        total_transitions=8,
+        batch_size=2,
+        n_step=1,
+        warmup_transitions=2,
+        updates_per_transition=1.0,
+        checkpoint_interval_updates=2,
+    )
+    spec = RunSpec.model_validate(config)
+    run = resolve_run(spec)
+    try:
+        metrics = validate_resolved_run(run)
+        assert all(np.isfinite(value) for value in metrics.values())
+    finally:
+        run.logger.close()
+    run = resolve_run(spec)
+    try:
+        result = Trainer(run).train()
+        assert result.transitions == 8
+        assert result.updates > 0
+        model = run.learner.model
+        image_gradients = [
+            parameter.grad
+            for name, parameter in model.named_parameters()
+            if "convolution" in name and parameter.grad is not None
+        ]
+        assert image_gradients
+        assert all(torch.isfinite(gradient).all() for gradient in image_gradients)
+        assert any(torch.count_nonzero(gradient) > 0 for gradient in image_gradients)
+    finally:
+        run.logger.close()
+    resumed = resolve_run(spec)
+    try:
+        continuation = Trainer(resumed, resume_checkpoint=result.checkpoints[0]).train()
+        assert continuation.transitions == result.transitions
+        assert continuation.updates == result.updates
+    finally:
+        resumed.logger.close()
+
+
+@pytest.mark.parametrize("algorithm", ["q", "qr", "iqn", "fqf"])
+def test_vision_value_models_support_recurrent_replay(tmp_path: Path, algorithm: str) -> None:
+    config = yaml.safe_load(_trackmania_vision_config(algorithm))
+    config["artifacts_dir"] = str(tmp_path)
+    config.pop("evaluation")
+    components = config["components"]
+    components.pop("evaluator")
+    components["feature_pipeline"]["kwargs"] = {"config": {"width": 8, "height": 8}}
+    components["model_factory"]["kwargs"]["temporal"] = {
+        "class_path": "trackmaniarl.models.temporal:GruTemporalCore",
+        "kwargs": {"input_dim": 256, "hidden_dim": 256},
+    }
+    components["learner"]["kwargs"]["execution"] = {"device": "cpu", "precision": "float32"}
+    components["learner"]["kwargs"]["burn_in"] = 1
+    config["training"].update(batch_size=2, sequence_length=4, n_step=1)
+    run = resolve_run(RunSpec.model_validate(config), base_dir=tmp_path)
+    try:
+        metrics = validate_resolved_run(run)
+        assert all(np.isfinite(value) for value in metrics.values())
+    finally:
+        run.logger.close()
 
 
 def _vision_spec(tmp_path: Path) -> RunSpec:

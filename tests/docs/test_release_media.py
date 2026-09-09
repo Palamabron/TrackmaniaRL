@@ -29,11 +29,11 @@ def test_neural_media_documentation_keeps_provenance_and_links() -> None:
     guide = (ROOT / "docs/neural-flow-media.md").read_text(encoding="utf-8")
     assert (
         "https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/"
-        "v1.2.6/docs/assets/trackmaniarl-neural-flow.gif"
+        "v1.2.7/docs/assets/trackmaniarl-neural-flow.gif"
     ) in readme
     assert (
         "https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/"
-        "v1.2.6/docs/assets/trackmaniarl-logo.png"
+        "v1.2.7/docs/assets/trackmaniarl-logo.png"
     ) in readme
     assert "best-performing model supplied for this release" in readme
     assert "map-specific" in readme

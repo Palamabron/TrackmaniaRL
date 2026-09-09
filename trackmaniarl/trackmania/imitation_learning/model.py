@@ -18,6 +18,7 @@ from trackmaniarl.trackmania.encoders import (
     LidarSensorEncoder,
     LidarSimbaSensorEncoder,
 )
+from trackmaniarl.trackmania.imitation_learning.model_contract import BehaviorCloningModel
 
 
 class ModelOptions(TypedDict):
@@ -83,7 +84,7 @@ class _FactorizedActionHead(nn.Module):
         return cast(torch.Tensor, steering + drive_mode)
 
 
-class LidarBehaviorCloningModel(nn.Module):
+class LidarBehaviorCloningModel(BehaviorCloningModel):
     """Categorical policy over an explicit compact action set and frame history."""
 
     def __init__(self, **options: Unpack[ModelOptions]) -> None:
@@ -159,7 +160,7 @@ class LidarBehaviorCloningModelFactory:
 
 
 class BehaviorCloningPolicy:
-    def __init__(self, model: LidarBehaviorCloningModel, device: torch.device) -> None:
+    def __init__(self, model: BehaviorCloningModel, device: torch.device) -> None:
         self.model = model
         self.device = device
         self.previous_action = model.previous_action_start

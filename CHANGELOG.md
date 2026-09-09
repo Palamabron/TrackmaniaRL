@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.2.7 - 2026-09-09
+
+- Add paired lidar/image BC archives, control-leakage protection, a generated
+  configuration and CLI training, exact resume and benchmark regression coverage.
+- Add lidar and paired lidar/image configurations for all nine RL families with
+  independent actor/critic encoders and training/resume integration tests.
+- Unify actor observation arguments with critics and composite models, reject
+  non-finite or overflowing action bounds, and collate mappings independently of
+  their insertion order.
+- Roll back failed BC checkpoint restoration, reject non-finite transferred weights
+  and optimizer tensors, and prevent lossy label/flag conversions in recovery data.
+- Add camera behavior cloning with validated RGB/action episode archives, shared
+  training and checkpoint lifecycle, camera evaluation and a generated BC RunSpec.
+- Fix BC encoder/temporal warm starts into composite RL models and keep the target
+  model unchanged when required warm-start tensors are missing.
+- Supply image-based SAC, REDQ, TQC and stable discrete SAC models plus complete
+  camera configurations for every RL learner family. Verify image training and
+  checkpoint continuation across Q, QR, IQN, FQF and all actor-critic algorithms.
+- Use versioned absolute repository links in the README so documentation and
+  source links resolve correctly on PyPI.
+- Replace broken or blocked research links with stable public sources and retain
+  access-restricted W&B records as non-clickable provenance IDs.
+
 ## 1.2.6 - 2026-09-09
 
 - Keep the complete 42.10-second neural-drive animation at 30 FPS while reducing

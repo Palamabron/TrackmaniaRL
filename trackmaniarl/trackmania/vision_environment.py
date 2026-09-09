@@ -53,9 +53,12 @@ class ScreenFrameSource:
 class VisionEnvironment:
     """Replace policy telemetry with RGB while retaining telemetry-based rewards."""
 
-    def __init__(self, environment: Any, frames: FrameSource) -> None:
+    def __init__(
+        self, environment: Any, frames: FrameSource, *, include_telemetry: bool = False
+    ) -> None:
         self.environment = environment
         self.frames = frames
+        self.include_telemetry = include_telemetry
 
     def _capture(self, info: dict[str, Any]) -> np.ndarray[Any, Any]:
         started = perf_counter()
@@ -63,13 +66,17 @@ class VisionEnvironment:
         info["vision/capture_ms"] = (perf_counter() - started) * 1000.0
         return frame
 
-    def reset(self, *, seed: int | None = None) -> tuple[np.ndarray[Any, Any], dict[str, Any]]:
-        _, info = self.environment.reset(seed=seed)
-        return self._capture(info), info
+    def _observation(self, telemetry: Any, info: dict[str, Any]) -> Any:
+        images = self._capture(info)
+        return {"telemetry": telemetry, "images": images} if self.include_telemetry else images
 
-    def step(self, action: Any) -> tuple[np.ndarray[Any, Any], float, bool, bool, dict[str, Any]]:
-        _, reward, terminated, truncated, info = self.environment.step(action)
-        return self._capture(info), reward, terminated, truncated, info
+    def reset(self, *, seed: int | None = None) -> tuple[Any, dict[str, Any]]:
+        telemetry, info = self.environment.reset(seed=seed)
+        return self._observation(telemetry, info), info
+
+    def step(self, action: Any) -> tuple[Any, float, bool, bool, dict[str, Any]]:
+        telemetry, reward, terminated, truncated, info = self.environment.step(action)
+        return self._observation(telemetry, info), reward, terminated, truncated, info
 
     def close(self) -> None:
         try:
@@ -79,16 +86,18 @@ class VisionEnvironment:
 
 
 class VisionEnvironmentFactory:
-    def __init__(
+    def __init__(  # noqa: PLR0913 - capture and observation mode are independent keyword options
         self,
         config: TrackmaniaEnvironmentConfig | dict[str, Any],
         *,
         capture: CaptureRegion | Mapping[str, Any] | None = None,
+        include_telemetry: bool = False,
         base_dir: str | Path = ".",
     ) -> None:
         self._factory = OpenPlanetEnvironmentFactory(config, base_dir=base_dir)
         self.config = self._factory.config
         self.capture = CaptureRegion.model_validate({} if capture is None else capture)
+        self.include_telemetry = include_telemetry
 
     def create(self, *, seed: int, evaluation_map: Any | None = None) -> VisionEnvironment:
         frames = ScreenFrameSource(self.capture)
@@ -97,7 +106,7 @@ class VisionEnvironmentFactory:
         except BaseException:
             frames.close()
             raise
-        return VisionEnvironment(environment, frames)
+        return VisionEnvironment(environment, frames, include_telemetry=self.include_telemetry)
 
     def load_demonstration(self, path: str | Path, pipeline: FeaturePipeline) -> list[Transition]:
         raise ValueError("Telemetry-only demonstrations have no RGB frames for vision training")
