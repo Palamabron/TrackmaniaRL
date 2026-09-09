@@ -1,4 +1,8 @@
-# TrackMania lidar training and release workflow
+# Trackmania training and release workflow for 1.2.4
+
+The default configuration below trains IQN from lidar and telemetry. The generated
+`run-ppo.yaml` trains PPO from telemetry, and `run-ppo-vision.yaml` trains PPO from
+camera frames. See [vision and PPO](vision.md) for those complete alternatives.
 
 For demonstration recording, behavior cloning, DAgger recovery, exact BC
 resume and the required closed-loop gate, see the
@@ -8,7 +12,7 @@ Install the released CLI, then create the game project only on a machine that
 has Trackmania, Openplanet and a virtual gamepad driver:
 
 ```powershell
-uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.0"
+uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.4"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -19,7 +23,7 @@ uv run trackmaniarl validate run.yaml
 > `vgamepad`, whose normal installer may install or repair the system-wide
 > ViGEmBus driver. Review the pinned `vgamepad` source before provisioning a
 > host. `VGAMEPAD_SKIP_VIGEMBUS_INSTALL=true` skips that driver installer for
-> CI or an already provisioned machine; it does not provide a driver, so the
+> CI or an already provisioned machine. It does not provide a driver, so the
 > gamepad backend still requires a compatible ViGEmBus installation. Use the
 > keyboard backend when no virtual gamepad driver should be installed.
 
@@ -53,7 +57,7 @@ Use `gamepad` for analog steering and rumble-based collision detection. Select
 `keyboard` when a virtual gamepad is unavailable. The keyboard backend converts
 analog model output to digital gas/brake and left/right input, with a steering
 dead zone and cannot provide rumble collision signals. The choice belongs to
-the environment, not the model, so the same policy can drive either backend;
+the environment, not the model, so the same policy can drive either backend.
 expect different driving dynamics after analog-to-digital conversion.
 
 Before starting separate `learner` or `actor` commands, generate one random
@@ -61,15 +65,15 @@ distributed token and store the same value as
 `TRACKMANIARL_DISTRIBUTED_TOKEN` in each project's ignored `.env` file:
 
 ```powershell
-uv run python -c "import secrets; print(secrets.token_urlsafe(32))"
+uv run python -c "print(__import__('secrets').token_urlsafe(32))"
 ```
 
 Local `train` and `smoke` still authenticate their actor/learner processes, but
-the launcher generates an ephemeral token internally; they do not require this
+the launcher generates an ephemeral token internally. They do not require this
 environment variable.
 
 Generated TrackMania agents select the project's tested PyTorch CUDA runtime by
-default on Windows and Linux; a newer NVIDIA driver stays compatible. macOS
+default on Windows and Linux. A newer NVIDIA driver stays compatible. macOS
 falls back to its normal PyPI/MPS Torch wheel. ROCm hosts require the matching
 AMD Torch build.
 
@@ -101,7 +105,7 @@ already loaded UID and protocol before every training, smoke and evaluation
 episode, then confirms a ready local player after controller reset. A timeout,
 disconnect, UID mismatch or readiness rejection terminates the actor with a
 failing process status. The protocol does not expose the plugin package's
-signature or version; verify those properties in Plugin Manager.
+signature or version. Verify those properties in Plugin Manager.
 
 The reference baseline is a 78-action dueling IQN (`13` steering levels × `2`
 gas levels × no brake, full brake, or timed brake tap), not TQC. With default
@@ -109,7 +113,7 @@ feature settings, each observation contains 20 normalized telemetry values, a
 `[4, 60]` car-local boundary tensor and a 60-element validity mask, all derived
 from the documented 33-field `SAC_GetData` packet and the geometry
 asset. The four lidar channels are the lateral/forward coordinates of the left
-and right boundaries. The local frame comes from `api.Position` and `vis.Dir`;
+and right boundaries. The local frame comes from `api.Position` and `vis.Dir`.
 it does not require aim-yaw telemetry. TQC remains an optional example only.
 
 Model factories publish their train-time contract and learners publish the
@@ -117,7 +121,7 @@ contracts they accept. Composed Q/QR-DQN/IQN/FQF models expose `discrete_value`,
 TQC baseline exposes `continuous_quantile_actor_critic` and behavior cloning
 exposes `categorical_policy`. `trackmaniarl validate` rejects a mismatched pair
 before model setup instead of failing later on a missing head. Models remain
-interchangeable between algorithms that consume the same contract; algorithms
+interchangeable between algorithms that consume the same contract. Algorithms
 with different objectives require a matching model head.
 
 ## Value algorithm selection
@@ -156,7 +160,7 @@ after recording an identical GRU baseline with the same seed, replay, update
 budget and evaluation suite.
 
 The `torch` backend is portable across Windows, Linux, CPU and CUDA. The
-`native` backend requires a working `mamba-ssm` selective-scan kernel; `auto`
+`native` backend requires a working `mamba-ssm` selective-scan kernel. `auto`
 probes native forward/backward and records the Pure PyTorch fallback reason.
 Both backends use the same model parameters and checkpoint fingerprint.
 
@@ -202,7 +206,7 @@ training:
 ```
 
 The sensor encoder processes the 16 replay frames as one vectorized `B*T`
-batch. The Mamba core consumes `[B,T,D]`; `burn_in: 4` builds its initial
+batch. The Mamba core consumes `[B,T,D]`. `burn_in: 4` builds its initial
 recurrent state without gradients and excludes those positions from losses and
 priorities.
 
@@ -210,7 +214,7 @@ The optional dependency is imported only when the native backend is probed, so
 normal imports, GRU runs and Pure PyTorch Mamba remain independent of
 `mamba-ssm`. On Windows, CPU or an unsupported CUDA build, use `backend: torch`
 or let `auto` record its fallback. Treat every new deployment platform as
-unsupported until it passes the bounded live smoke test on that exact host;
+unsupported until it passes the bounded live smoke test on that exact host.
 offline contract tests alone are not evidence of game compatibility.
 
 Every run writes `manifest.json`, versioned `events.jsonl`, compressed episode
@@ -226,7 +230,7 @@ W&B is optional. The generated project logs locally until you run
 `uv add "trackmaniarl[trackmania,distributed,wandb]"` and add an
 explicit `WandbTracker` under `components.additional_loggers`. Supply
 `WANDB_API_KEY` only through a private environment or ignored `.env` file.
-The generated project retains its vetted `vgamepad` source during this update;
+The generated project retains its vetted `vgamepad` source during this update.
 an existing project must retain the same direct source pin documented in the
 [installation guide](../README.md#installation).
 
@@ -271,17 +275,51 @@ The reliable checkpoint leader then ranks qualifying candidates by finish
 rate, mean and median. The separate fastest leader remains based on the best
 single lap, so an exploratory sub-36 result is retained without allowing one
 fast lap to hide a slow tail. When the race-clock runtime guard is configured,
-every evaluated control step must report a finite, positive measurement; a
+every evaluated control step must report a finite, positive measurement. A
 valid maximum cannot hide a missing or invalid step.
 
 ## Human recovery fine-tuning
+
+This workflow requires a graph V6 source model, not the default lidar IQN or
+a PPO checkpoint. To configure a graph source, copy the generated `run.yaml`
+and replace the following component blocks. Keep the complete environment,
+replay, logging and evaluation configuration for your own map.
+
+```yaml
+feature_pipeline:
+  class_path: trackmaniarl.experiments.graph_iqn_v5:BoundaryGraphFeaturePipelineV5
+  kwargs:
+    geometry_path: assets/my-map.geometry.npz
+    expected_map_uid: REPLACE_WITH_YOUR_MAP_UID
+model_factory:
+  class_path: trackmaniarl.models.factory:CompositeValueModelFactory
+  kwargs:
+    encoder:
+      class_path: trackmaniarl.experiments.graph_iqn_v6:IncidentGatedTrackGnnSimbaEncoderV6
+    temporal:
+      class_path: trackmaniarl.models.temporal:IdentityTemporalCore
+      kwargs: {input_dim: 192}
+    head:
+      class_path: trackmaniarl.experiments.graph_iqn:DuelingImplicitQuantileHead
+    strategy:
+      class_path: trackmaniarl.models.strategies:RandomQuantileStrategy
+```
+
+These are keys under `components`. First train and benchmark the source with
+`DiscreteValueLearner`. For recovery collection and fine-tuning, keep the same
+architecture and change `components.learner.class_path` to
+`trackmaniarl.experiments.graph_iqn_v6:IncidentRecoveryOnlyDiscreteValueLearner`.
+Use the matching source checkpoint for both commands. The `experiments` module
+name is retained for import and checkpoint compatibility, not an unsupported
+feature designation. The pipeline reconstructs causal graph/recovery features
+from telemetry. Only the incident-gated adapter is trained by `recovery-finetune`.
 
 `track record-recovery` creates targeted recovery supervision without changing
 the proven nominal policy. The checkpoint drives deterministically to a seeded
 progress point, the collector applies one short full-steer perturbation, then
 waits until the virtual input is observably neutral before sounding an alert.
 The human takes over, recovers and finishes the lap. The injected action and
-human reaction delay are retained only as causal context; the first clear
+human reaction delay are retained only as causal context. The first clear
 physical input starts the expert labels. Unfinished laps, restarts and
 kinematically implausible respawn/teleport jumps are discarded. The requested
 impulse is not trusted blindly: its start, duration and control are reconstructed
@@ -307,10 +345,10 @@ Keep hands off the controls until the audible `TAKE OVER NOW` notification.
 The default 36-lap session balances three progress windows from 55% to 83%,
 three perturbation windows from 50 to 200 ms and both planned directions, with
 two attempts per cell. On a bend, the applied steer is chosen opposite to the
-policy's current steer to create a meaningful deviation; the actual control is
+policy's current steer to create a meaningful deviation. The actual control is
 stored. A rejected attempt is resampled inside the same coverage cell.
 Only completed laps are saved. Each archive embeds the source checkpoint's
-SHA-256; fine-tuning rejects mixed or stale policy data. It reconstructs the
+SHA-256. Fine-tuning rejects mixed or stale policy data. It reconstructs the
 full causal feature history, selects only post-takeover samples for which the
 incident gate is active, removes episodes with too little gated supervision or
 implausibly slow normalized recovery and derives progress, severity and direction
@@ -348,18 +386,18 @@ uv run trackmaniarl benchmark "$Config" "$Candidate" `
 The candidate is deliberately a `policy_only` checkpoint: it is valid for
 benchmarking and later warm-start initialization, but not for `trackmaniarl resume`.
 This prevents weights from the selected validation update being paired with stale
-optimizer momentum from a later update. The output path must be new; the command
+optimizer momentum from a later update. The output path must be new. The command
 will not overwrite an existing candidate.
 
 Do not follow this phase automatically with unrestricted online TD updates.
 First compare the candidate with its unchanged source checkpoint. Promote only
-after 10/10 finishes and a mean below 37 seconds; confirm a passing screen with
+after 10/10 finishes and a mean below 37 seconds. Confirm a passing screen with
 a fresh 30-trial benchmark and screen recording.
 
 For a TrackMania-facing release, run the Windows smoke preflight and the
 configured benchmark on the real game. Treat telemetry or controller errors as
 a release blocker. A multi-hour Windows soak with a resumed checkpoint is
-recommended when changing runtime, transport or checkpointing behavior; use
+recommended when changing runtime, transport or checkpointing behavior. Use
 `scripts/verify_soak.py` to produce `soak-report.json` for that extended
 evidence.
 
@@ -375,6 +413,6 @@ evidence.
 - **The active UID differs:** use the UID printed by `track check`, replace all
   three UID settings and rebuild geometry from that exact `.Map.Gbx`.
 - **Geometry checksum is missing or different:** re-run `track build-geometry`
-  with `--map-path`; the generated `.npz` is intentionally only a placeholder.
+  with `--map-path`. The generated `.npz` is intentionally only a placeholder.
 - **Reset times out:** confirm that the configured `gamepad` or `keyboard`
   backend actually restarts the race timer before increasing any timeout.

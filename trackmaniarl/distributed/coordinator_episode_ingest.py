@@ -29,10 +29,8 @@ def _record_episode_outcome(coordinator: Coordinator, summary: Mapping[str, Any]
         return 0
     coordinator.counters.finishes += 1
     finish_time_s = float(summary["finish_time_s"])
-    episode_id = summary.get("episode_id")
-    labeled = 0
-    if isinstance(episode_id, str) and episode_id:
-        labeled = _label_episode_sampling_pace(coordinator, episode_id, finish_time_s)
+    episode_id = str(summary["episode_id"])
+    labeled = _label_episode_sampling_pace(coordinator, episode_id, finish_time_s)
     best = coordinator.counters.best_finish_time_s
     if best == 0.0 or finish_time_s < best:
         coordinator.counters.best_finish_time_s = finish_time_s

@@ -20,12 +20,18 @@ an encrypted tunnel. Actors collect continuously and spool rollouts durably.
 The learner authenticates chunks, commits them to WAL, ingests replay, samples
 batches, updates the model and publishes immutable policy tensor snapshots.
 Accepted rows are applied strictly by SQLite row ID. A checkpoint captures only
-the contiguous applied frontier; pruning happens after its durable write, so a
+the contiguous applied frontier. Pruning happens after its durable write, so a
 later accepted row can never cause an earlier delayed row to disappear.
 
 PPO follows a separate, single-process on-policy lifecycle through
-`trackmaniarl.Trainer` and `OnPolicySequenceSampler`; it does not use the
+`trackmaniarl.Trainer` and `OnPolicySequenceSampler`. It does not use the
 distributed WAL/replay protocol shown here.
+
+Both telemetry PPO and camera PPO use that supported local lifecycle. The
+[library architecture](../docs/library-architecture.md#ppo-and-vision-data-flow)
+explains collection snapshots, episode boundaries and image tensor shapes.
+The [vision guide](vision.md#how-a-ppo-update-works) explains GAE and the clipped
+update and provides complete generated configuration commands.
 
 The actor–learner protocol, replay records and WAL format are algorithm-neutral.
 Changing scalar Q, QR-DQN, IQN or FQF changes composed model components and the
@@ -50,14 +56,14 @@ FrameBatchAdapter → SensorEncoder → TemporalCore → ValueHead + ValueStrate
   restores `[B,T,D]` before temporal processing.
 - `SensorEncoder` sees independent frames only. Lidar MLP/CNN encoders cannot
   accidentally mix timesteps.
-- `TemporalCore` is `Identity`, `GRU` or `Mamba`; it owns recurrent execution,
+- `TemporalCore` is `Identity`, `GRU` or `Mamba`. It owns recurrent execution,
   burn-in and streaming state transitions.
 - `ValueHead` maps representations to scalar or quantile values.
 - `ValueStrategy` creates scalar/fixed/random/learned support, expectations,
   risk distortion and regression/auxiliary losses.
 
 `DiscreteValueLearner` trains Standard Q, QR-DQN, IQN and FQF. Current and
-target selected actions use `evaluate_actions`; full action distributions are
+target selected actions use `evaluate_actions`. Full action distributions are
 materialized only for Double-DQN action selection or an objective that requests
 them. FQF uses a separate fraction optimizer, detached midpoint quantile loss,
 an analytical 1-Wasserstein fraction gradient and a target-side FPN.
@@ -83,7 +89,7 @@ trained with weighted supervised losses and attributed through an immutable
 dataset manifest. Exact BC resume restores RNG and trainer-selection state.
 
 Closed-loop `bc-benchmark` is a required promotion gate. Compatible encoder and
-temporal weights may then warm-start a composed IQN/FQF model; categorical heads
+temporal weights may then warm-start a composed IQN/FQF model. Categorical heads
 are not transferred into value heads. See [imitation learning](imitation-learning.md).
 
 ## Package ownership
@@ -112,13 +118,13 @@ injects supported runtime values and validates structural/model contracts.
 Configuration is trusted dependency injection, not a sandbox. Importing a
 component executes Python module code. The lifecycle is:
 
-1. parse RunSpec and resolve paths;
-2. instantiate components and validate contracts;
-3. seed Python, NumPy and Torch before model construction;
-4. create or validate the immutable config manifest before learner setup;
-5. append resolved environment/execution provenance for the initialized attempt;
-6. collect or ingest data and perform the appropriate update lifecycle;
-7. evaluate, checkpoint and publish policy state;
+1. parse RunSpec and resolve paths.
+2. instantiate components and validate contracts.
+3. seed Python, NumPy and Torch before model construction.
+4. create or validate the immutable config manifest before learner setup.
+5. append resolved environment/execution provenance for the initialized attempt.
+6. collect or ingest data and perform the appropriate update lifecycle.
+7. evaluate, checkpoint and publish policy state.
 8. close files, processes, sockets and game controls.
 
 `validate` uses `Learner.update` for RL and
@@ -135,8 +141,8 @@ perform a deterministic synthetic state round trip without starting the game.
 [local preview](../docs/diagrams/checkpoint-resume-preview.html)
 
 The asynchronous off-policy checkpoint schema 2.0 separates online/target
-encoder, temporal, head and strategy state; main/strategy optimizers; objective
-state; counters, schedules and RNG; and resolved runtime metadata. Resume
+encoder, temporal, head and strategy state. Main/strategy optimizers. Objective
+state. Counters, schedules and RNG. And resolved runtime metadata. Resume
 requires an exact architecture fingerprint and complete state. A Mamba kernel
 backend may differ because `native` and `torch` share parameters and the backend
 is excluded from the architecture fingerprint.
@@ -158,14 +164,14 @@ resume restores the checkpoint state directly and does not require the original
 warm-start file to remain present.
 
 BC checkpoints use their own v2 schema and bind to an immutable dataset
-fingerprint. `bc-best-validation.pt` is a policy candidate;
+fingerprint. `bc-best-validation.pt` is a policy candidate.
 `bc-latest.pt` is the exact-resume artifact.
 
 ## Mamba portability
 
 `MambaTemporalCore` owns one Mamba-1 parameter set. `backend: native` requires a
-working `mamba-ssm` kernel; `backend: torch` uses the local Pure PyTorch
-selective scan; `backend: auto` runs a forward/backward probe and records the
+working `mamba-ssm` kernel. `backend: torch` uses the local Pure PyTorch
+selective scan. `backend: auto` runs a forward/backward probe and records the
 selected backend plus fallback reason. Streaming `step()` uses the same PyTorch
 recurrence regardless of the training backend. There is no silent Mamba-to-GRU
 fallback because that would change the architecture and invalidate checkpoints.
@@ -182,7 +188,7 @@ fallback because that would change the architecture and invalidate checkpoints.
 Rollout chunks are persisted before ingestion, sequence IDs make retries
 idempotent and policy state uses safetensors-compatible tensor trees. The
 codec enforces compressed and decompressed limits. A bearer token authenticates
-participants but does not encrypt transport; remote operation requires an SSH,
+participants but does not encrypt transport. Remote operation requires an SSH,
 WireGuard or equivalent encrypted tunnel.
 
 Distributed participants must match protocol version, architecture/run
@@ -197,7 +203,7 @@ fingerprint, map UID, semantic asset contents and feature/action contracts.
 [Editable source](../docs/diagrams/trackmania-integration.excalidraw) ·
 [local preview](../docs/diagrams/trackmania-integration-preview.html)
 
-The signed Openplanet plugin supplies the fixed telemetry and session protocols;
+The signed Openplanet plugin supplies the fixed telemetry and session protocols.
 it does not own control or exact track geometry. The adapter verifies schema,
 map UID, readiness and immutable geometry identity before collection. A
 map-bound, checksummed boundary asset remains the source of drivable geometry,

@@ -77,7 +77,7 @@ class _DiscreteUpdate:
 
 
 class StableDiscreteSoftActorCritic(TorchLearnerBase):
-    """Experimental SD-SAC-inspired learner using target-policy entropy anchoring."""
+    """SD-SAC-inspired learner using target-policy entropy anchoring."""
 
     accepted_model_contracts = frozenset({ModelContract.DISCRETE_ACTOR_CRITIC})
     supports_sequence_training = False

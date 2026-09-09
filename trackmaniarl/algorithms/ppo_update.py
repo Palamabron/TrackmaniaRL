@@ -125,8 +125,10 @@ class PPOUpdater:
         next_observations = _float_tensor_tree(batch.next_observations, "next_observations")
         rewards = _tensor(batch.rewards, "rewards").float()
         discounts = _tensor(batch.bootstrap_discounts, "bootstrap_discounts").float()
-        ends = _tensor(batch.terminated, "terminated").bool()
-        ends |= _tensor(batch.truncated, "truncated").bool()
+        ends = (
+            _tensor(batch.terminated, "terminated").bool()
+            | _tensor(batch.truncated, "truncated").bool()
+        )
         sample_dimensions = rewards.ndim
         normalized = self.owner.observation_normalizer.normalize(observations, sample_dimensions)
         normalized_next = self.owner.observation_normalizer.normalize(

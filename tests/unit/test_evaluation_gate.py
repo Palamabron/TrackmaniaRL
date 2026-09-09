@@ -70,7 +70,9 @@ def test_optional_mean_gate_is_strict(times: list[float]) -> None:
         _apply_benchmark_gate(_finished_trials(times), _metrics(times), _suite(37.0))
 
 
-def test_legacy_gate_does_not_require_a_mean_metric(capsys: pytest.CaptureFixture[str]) -> None:
+def test_gate_without_optional_mean_target_does_not_require_mean_metric(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     metrics = {"eval/median_finish_time_s": 36.6}
     _apply_benchmark_gate(_finished_trials([36.6] * 10), metrics, _suite(None))
     assert "median 36.600s" in capsys.readouterr().out

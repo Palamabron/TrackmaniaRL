@@ -23,7 +23,6 @@ from trackmaniarl.distributed.actor_evaluation import EvaluationPlan, _evaluatio
 from trackmaniarl.distributed.actor_requests import EvaluationEpisodeRequest
 from trackmaniarl.distributed.coordinator import Coordinator
 from trackmaniarl.distributed.coordinator_checkpoint import EvaluationCheckpointKind
-from trackmaniarl.distributed.coordinator_evaluation import _evaluation_batch_stats
 from trackmaniarl.distributed.coordinator_support import _Counters
 from trackmaniarl.distributed.coordinator_validation import _validate_evaluation_summary
 
@@ -245,29 +244,18 @@ def test_evaluation_summary_rejects_incoherent_outcomes(
 
 
 def test_evaluation_summary_accepts_boolean_timing_validity() -> None:
-    _validate_evaluation_summary(
-        {
-            "finished": False,
-            "finish_time_s": 0.0,
-            "policy_version": 0,
-            "steps": 1,
-            "timing/step_race_ms_max": 50.0,
-            "timing/step_race_measurement_count": 1.0,
-            "timing/step_race_measurements_valid": True,
-        }
-    )
+    summary = _finished_evaluation(36.0)
+    summary["timing/step_race_measurements_valid"] = True
+    _validate_evaluation_summary(summary)
 
 
-def test_legacy_actor_summary_without_timing_metadata_is_runtime_gate_ineligible() -> None:
+def test_evaluation_summary_requires_complete_timing_metadata() -> None:
     summary = _finished_evaluation(36.0)
     summary.pop("timing/step_race_measurement_count")
     summary.pop("timing/step_race_measurements_valid")
 
-    stats = _evaluation_batch_stats([summary], (40.0,))
-
-    assert stats["step_race_time_measurement_count"] == 0.0
-    assert stats["step_race_time_expected_measurement_count"] == 10.0
-    assert stats["step_race_time_measurements_valid"] == 0.0
+    with pytest.raises(ValueError, match="observability summary is missing"):
+        _validate_evaluation_summary(summary)
 
 
 def test_evaluation_stop_requires_consecutive_successful_batches() -> None:

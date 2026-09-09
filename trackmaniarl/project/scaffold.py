@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+import keyword
+import re
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
 
-from trackmaniarl.project.scaffold_run_templates import _config, _trackmania_config
+from trackmaniarl.project.scaffold_run_templates import (
+    _config,
+    _trackmania_actor_critic_config,
+    _trackmania_config,
+    _trackmania_ppo_config,
+)
 from trackmaniarl.project.scaffold_templates import (
     COMPONENTS,
     _project_readme,
@@ -18,6 +25,12 @@ from trackmaniarl.project.scaffold_templates import (
 def create_project(directory: str | Path, package: str, *, template: str = "starter") -> Path:
     """Create an installable, editable project without overwriting user files."""
 
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", package) or keyword.iskeyword(package):
+        raise ValueError(
+            "Project package must be an ASCII Python identifier starting with a letter"
+        )
+    if package.lower() == "trackmaniarl":
+        raise ValueError("Project package must not shadow the installed trackmaniarl library")
     target, package_dir = _create_directories(directory, package, template)
     _write_project_metadata(target, package, template)
     if template == "trackmania":
@@ -54,6 +67,15 @@ def _write_project_metadata(target: Path, package: str, template: str) -> None:
     (target / "README.md").write_text(_project_readme(template), encoding="utf-8")
     config = _config(package) if template == "starter" else _trackmania_config()
     (target / "run.yaml").write_text(config, encoding="utf-8")
+    if template == "trackmania":
+        (target / "run-ppo.yaml").write_text(_trackmania_ppo_config(), encoding="utf-8")
+        (target / "run-ppo-vision.yaml").write_text(
+            _trackmania_ppo_config(vision=True), encoding="utf-8"
+        )
+        for algorithm in ("sac", "redq", "tqc", "discrete-sac"):
+            (target / f"run-{algorithm}.yaml").write_text(
+                _trackmania_actor_critic_config(algorithm), encoding="utf-8"
+            )
 
 
 def _generated_pyproject(package: str, template: str) -> str:

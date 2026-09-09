@@ -101,11 +101,11 @@ Dependencies used only by generated projects belong in the generated
 
 A public component should have:
 
-- one clear responsibility and full type annotations;
-- an existing `trackmaniarl.core` protocol, or a justified minimal new one;
-- a stable import path documented in the SDK guide or built-in catalogue;
-- deterministic contract and state round-trip tests;
-- no hidden global configuration or mandatory network tracker;
+- one clear responsibility and full type annotations.
+- an existing `trackmaniarl.core` protocol, or a justified minimal new one.
+- a stable import path documented in the SDK guide or built-in catalogue.
+- deterministic contract and state round-trip tests.
+- no hidden global configuration or mandatory network tracker.
 - checkpoint state for everything required to resume correctly.
 
 Value-model additions must also declare their representation contract, validate
@@ -118,7 +118,7 @@ Temporal-core additions need `unroll`, `step`, initial-state and burn-in tests.
 Backend substitutions may change kernels but must not silently change model
 parameters or architecture fingerprints.
 
-Add experimental algorithms or encoders as importable, opt-in blocks. Compare
+Add new algorithms or encoders as importable, opt-in blocks. Compare
 one variable at a time against an identical seeded baseline before promoting a
 new default.
 
@@ -186,7 +186,7 @@ uvx --from pypi-attestations==0.0.30 pypi-attestations verify pypi --repository 
 Run this extended validation on a real Windows TrackMania host with the first-party
 `OpenPlanetEnvironmentFactory`, the signed plugin in School Mode and the map UID
 and geometry used by deterministic evaluation. Use it for changes to runtime,
-transport or checkpoint durability; it is not required for every library
+transport or checkpoint durability. It is not required for every library
 release. Do not substitute fake actors or the bounded smoke test.
 
 1. Start a normal local run and keep the same code revision and `run_id` for the
@@ -210,12 +210,12 @@ release. Do not substitute fake actors or the bounded smoke test.
 The verifier fails closed on malformed inputs and checks the immutable manifest,
 per-attempt Windows environment snapshots and complete JSONL event stream. Its
 report binds the run, process segments, accepted 64-character run fingerprint,
-stable actor IDs and fresh session IDs;
-adds the observed runtime; proves the resumed policy version against a completed
-checkpoint; records monotonic transition and WAL checkpoint frontiers; hashes
-the resume and post-resume checkpoint artifacts; binds the final benchmark and
-its artifact hash to the post-resume checkpoint SHA-256; checks every benchmark
-trial for controller/telemetry errors; and requires no runtime, transport,
+stable actor IDs and fresh session IDs.
+adds the observed runtime. Proves the resumed policy version against a completed
+checkpoint. Records monotonic transition and WAL checkpoint frontiers. Hashes
+the resume and post-resume checkpoint artifacts. Binds the final benchmark and
+its artifact hash to the post-resume checkpoint SHA-256. Checks every benchmark
+trial for controller/telemetry errors. And requires no runtime, transport,
 telemetry or checkpoint failure events. It never loads checkpoint contents or
 starts, stops or connects to TrackMania.
 

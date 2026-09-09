@@ -70,9 +70,13 @@ def _start_session(trainer: Trainer) -> _TrainingSession:
         trainer.run.run_dir / "episodes", max_artifacts=training.max_episode_artifacts
     )
     session = _TrainingSession(writer)
-    _resume_session(trainer, session)
-    if trainer.on_policy:
-        _start_on_policy_collection(trainer, session)
+    try:
+        _resume_session(trainer, session)
+        if trainer.on_policy:
+            _start_on_policy_collection(trainer, session)
+    except BaseException:
+        _close_session(session)
+        raise
     return session
 
 
@@ -358,8 +362,10 @@ def _log_exception(trainer: Trainer, session: _TrainingSession, failure: _Failur
 
 
 def _close_session(session: _TrainingSession) -> None:
-    if session.rollout_environment is not None:
-        close = getattr(session.rollout_environment, "close", None)
-        if callable(close):
-            close()
-    session.writer.close()
+    try:
+        if session.rollout_environment is not None:
+            close = getattr(session.rollout_environment, "close", None)
+            if callable(close):
+                close()
+    finally:
+        session.writer.close()

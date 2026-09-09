@@ -32,11 +32,6 @@ class _EpisodeOutcome(StrEnum):
     FAILED = "time_limit"
 
 
-class _SummaryIdentity(StrEnum):
-    IDENTIFIED = "identified"
-    LEGACY = "legacy"
-
-
 _INVALID_EPISODE_UPDATES: tuple[dict[str, object], ...] = (
     {"episode_id": ""},
     {"episode_id": 7},
@@ -123,15 +118,14 @@ def test_invalid_episode_outcome_is_rejected_before_wal(
         _close(coordinator)
 
 
-def test_legacy_summary_without_identity_is_accepted_without_relabel(tmp_path: Path) -> None:
-    coordinator = _coordinator(tmp_path, "legacy-finished-summary")
+def test_summary_without_identity_is_rejected_before_wal(tmp_path: Path) -> None:
+    coordinator = _coordinator(tmp_path, "missing-identity-summary")
     payload = _summary_payload(0, _EpisodeOutcome.FINISHED, 36.0)
     payload["episodes"][0].pop("episode_id")
     try:
-        response = _submit(coordinator, _request(coordinator, payload))
-        assert coordinator.codec.decode(response.value)["accepted"]
-        coordinator._drain_rollouts(1)
-        assert _episode_event(coordinator)["replay/labeled_transitions"] == 0
+        with pytest.raises(RuntimeError, match="INVALID_ARGUMENT"):
+            _submit(coordinator, _request(coordinator, payload))
+        assert not coordinator.journal.has_rows()
     finally:
         _close(coordinator)
 
@@ -182,9 +176,11 @@ def test_summary_first_only_labels_finished(tmp_path: Path, outcome: _EpisodeOut
 
 def _failed_evaluation_payload(coordinator: Coordinator) -> dict[str, Any]:
     payload = _summary_payload(2, _EpisodeOutcome.FAILED, 0.0)
-    payload["evaluations"] = [
-        {"finished": True, "finish_time_s": 35.0, "policy_version": 0, "steps": 1}
-    ]
+    evaluation = _episode_summary(_EPISODE_ID, _EpisodeOutcome.FINISHED, 35.0)
+    evaluation.pop("episode_id")
+    evaluation.pop("termination")
+    evaluation["policy_version"] = 0
+    payload["evaluations"] = [evaluation]
     payload["evaluation_snapshot"] = coordinator.codec.encode({"model": {}})
     return payload
 
@@ -203,28 +199,39 @@ def test_failed_and_eval_summaries_do_not_relabel(tmp_path: Path) -> None:
         _close(coordinator)
 
 
-def _append_recovery_rows(coordinator: Coordinator, identity: _SummaryIdentity) -> None:
+def _append_recovery_rows(coordinator: Coordinator, *, include_episode_id: bool) -> None:
     transition_payload = _base_payload(0)
     transition = _transition(_TransitionSpec("actor", 0, 1.0))
     transition_payload["transitions"] = [transition_to_wire(transition)]
     summary_payload = _summary_payload(1, _EpisodeOutcome.FINISHED, 36.25)
-    if identity is _SummaryIdentity.LEGACY:
+    if not include_episode_id:
         summary_payload["episodes"][0].pop("episode_id")
     codec = coordinator.codec
     coordinator.journal.append("session", 0, codec.encode(transition_payload))
     coordinator.journal.append("session", 1, codec.encode(summary_payload))
 
 
-@pytest.mark.parametrize("identity", tuple(_SummaryIdentity))
-def test_wal_recovery_requires_episode_id(tmp_path: Path, identity: _SummaryIdentity) -> None:
-    coordinator = _elite_coordinator(tmp_path, f"recovered-episode-pace-{identity}")
-    _append_recovery_rows(coordinator, identity)
+def test_wal_recovery_accepts_current_episode_schema(tmp_path: Path) -> None:
+    coordinator = _elite_coordinator(tmp_path, "recovered-current-episode")
+    _append_recovery_rows(coordinator, include_episode_id=True)
     try:
         coordinator._recover_journal(0)
         pace = coordinator.run.replay_store.sampling_pace_s(0)
-        expected = pytest.approx(36.25) if identity is _SummaryIdentity.IDENTIFIED else np.inf
-        assert pace == expected
+        assert pace == pytest.approx(36.25)
         assert "train/episode" not in coordinator.run.logger.events
         assert coordinator.counters.journal_applied_frontier == 2
+    finally:
+        _close(coordinator)
+
+
+def test_wal_recovery_rejects_summary_without_episode_id(tmp_path: Path) -> None:
+    coordinator = _elite_coordinator(tmp_path, "recovered-invalid-episode")
+    _append_recovery_rows(coordinator, include_episode_id=False)
+    try:
+        with pytest.raises(ValueError, match="episode summary is missing"):
+            coordinator._recover_journal(0)
+        assert coordinator.counters.journal_applied_frontier == 1
+        incident = dict(coordinator.run.logger.records)["distributed/wal_error"]
+        assert incident["operation"] == "recovery_validation"
     finally:
         _close(coordinator)

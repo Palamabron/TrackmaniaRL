@@ -63,9 +63,13 @@ def _trackmania_factory(config_path: Path) -> OpenPlanetEnvironmentFactory:
     spec = RunSpec.from_yaml(config_path)
     component = spec.components.environment
     expected = "trackmaniarl.trackmania.environment:OpenPlanetEnvironmentFactory"
-    if component is None or component.class_path != expected:
+    vision = "trackmaniarl.trackmania.vision_environment:VisionEnvironmentFactory"
+    if component is None or component.class_path not in {expected, vision}:
         raise ValueError("command requires the first-party TrackMania environment")
-    return OpenPlanetEnvironmentFactory(**component.kwargs, base_dir=config_path.parent)
+    kwargs = dict(component.kwargs)
+    if component.class_path == vision:
+        kwargs.pop("capture", None)
+    return OpenPlanetEnvironmentFactory(**kwargs, base_dir=config_path.parent)
 
 
 def _record_demo(args: argparse.Namespace) -> None:

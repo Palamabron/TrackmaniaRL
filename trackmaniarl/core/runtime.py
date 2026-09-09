@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import random
+from contextlib import ExitStack
 from dataclasses import dataclass
 from math import isclose
 from pathlib import Path
@@ -100,6 +101,11 @@ def _validate_training_contract(spec: RunSpec, components: _TrainingComponents) 
     _validate_history_contract(spec, components.pipeline)
     if getattr(components.learner, "on_policy", False) and spec.training.n_step != 1:
         raise ValueError("on-policy training requires training.n_step=1")
+    if getattr(components.learner, "on_policy", False):
+        if not getattr(components.sampler, "on_policy_rollouts", False):
+            raise ValueError("On-policy learners require OnPolicySequenceSampler")
+        if spec.training.total_transitions % spec.training.sequence_length:
+            raise ValueError("On-policy total_transitions must be divisible by sequence_length")
 
 
 def _validate_sequence_contract(spec: RunSpec, components: _TrainingComponents) -> None:
@@ -143,9 +149,11 @@ def _validate_history_contract(spec: RunSpec, pipeline: object) -> None:
 
 
 def _validate_reward_discount(spec: RunSpec, environment_factory: object | None) -> None:
-    if environment_factory is None or (
-        type(environment_factory).__module__ != "trackmaniarl.trackmania.environment"
-        or type(environment_factory).__name__ != "OpenPlanetEnvironmentFactory"
+    from trackmaniarl.trackmania.environment import OpenPlanetEnvironmentFactory
+    from trackmaniarl.trackmania.vision_environment import VisionEnvironmentFactory
+
+    if not isinstance(
+        environment_factory, (OpenPlanetEnvironmentFactory, VisionEnvironmentFactory)
     ):
         return
     factory: Any = environment_factory
@@ -191,7 +199,13 @@ class ResolvedRun:
 
 def resolve_run(spec: RunSpec, *, base_dir: str | Path = ".") -> ResolvedRun:
     project_dir = Path(base_dir)
-    return _RunResolver(_resolve_evaluation_paths(spec, project_dir), project_dir).resolve()
+    with ExitStack() as resources:
+        resolver = _RunResolver(
+            _resolve_evaluation_paths(spec, project_dir), project_dir, resources
+        )
+        run = resolver.resolve()
+        resources.pop_all()
+        return run
 
 
 def _resolve_evaluation_paths(spec: RunSpec, project_dir: Path) -> RunSpec:
@@ -216,8 +230,9 @@ def _project_path(path: Path, project_dir: Path) -> Path:
 
 
 class _RunResolver:
-    def __init__(self, spec: RunSpec, project_dir: Path) -> None:
+    def __init__(self, spec: RunSpec, project_dir: Path, resources: ExitStack) -> None:
         self.spec = spec
+        self.resources = resources
         self.project_dir = project_dir
         self.run_dir = project_dir / spec.artifacts_dir / spec.run_id
         self.pipeline = _instantiate(spec.components.feature_pipeline, base_dir=project_dir)
@@ -253,6 +268,7 @@ class _RunResolver:
         logger = _instantiate(
             self.spec.components.logger, run_dir=self.run_dir, run_id=self.spec.run_id
         )
+        self._register_logger_cleanup(logger)
         if not self.spec.components.additional_loggers:
             return logger
         from trackmaniarl.core.builtins import CompositeRunLogger
@@ -270,7 +286,14 @@ class _RunResolver:
             "config": _redact_config(self.spec.model_dump(mode="json")),
         }
         kwargs = injected | component.kwargs
-        return _instantiate(component.model_copy(update={"kwargs": kwargs}))
+        logger = _instantiate(component.model_copy(update={"kwargs": kwargs}))
+        self._register_logger_cleanup(logger)
+        return logger
+
+    def _register_logger_cleanup(self, logger: Any) -> None:
+        close = getattr(logger, "close", None)
+        if callable(close):
+            self.resources.callback(close)
 
     def _instantiate_evaluator(self) -> Any | None:
         component = self.spec.components.evaluator

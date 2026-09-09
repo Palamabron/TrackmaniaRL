@@ -74,3 +74,25 @@ def test_training_checkpoint_does_not_accept_legacy_schema() -> None:
     with pytest.raises(ValueError, match="unsupported training checkpoint schema"):
         _training_learner_state({"schema_version": "1.0", "learner": {}})
     assert _training_learner_state({"schema_version": "2.0", "learner": {}}) == {}
+
+
+@pytest.mark.parametrize(
+    "package",
+    [
+        "../escape",
+        "/escape",
+        "class",
+        "",
+        "my-agent",
+        "_agent",
+        "trackmaniarl",
+        "TrackmaniaRL",
+        "1agent",
+    ],
+)
+def test_project_rejects_invalid_package_before_writing(tmp_path: Path, package: str) -> None:
+    target = tmp_path / "project"
+    with pytest.raises(ValueError, match="Project package"):
+        create_project(target, package)
+    assert not target.exists()
+    assert not list(tmp_path.iterdir())

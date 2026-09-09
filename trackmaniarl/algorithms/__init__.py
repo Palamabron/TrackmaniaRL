@@ -1,4 +1,4 @@
-"""First-class RunSpec 2.0 off-policy learners."""
+"""First-class RunSpec 2.0 off-policy and on-policy learners."""
 
 from trackmaniarl.algorithms.execution import ResolvedTorchExecution, TorchExecutionConfig
 from trackmaniarl.algorithms.optimization import AdaptiveGradientClipper, GradientClipStats

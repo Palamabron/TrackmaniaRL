@@ -30,10 +30,10 @@ Record at least three complete laps on one map. Each demonstration records its
 map UID, geometry hash, action timing, telemetry frames, controls and finish
 time. `bc-train` rejects:
 
-- a different map, geometry, action set or decision interval;
+- a different map, geometry, action set or decision interval.
 - recordings that start late, have sparse telemetry or use non-frame-start
-  control alignment;
-- demonstrations containing actions outside `compact_action_ids`;
+  control alignment.
+- demonstrations containing actions outside `compact_action_ids`.
 - fewer than three complete human laps.
 
 The split is deterministic by seed and occurs at lap level. The fastest lap is
@@ -51,7 +51,7 @@ configuration, split membership and a dataset fingerprint.
 The current archive format stores `frames` with one more row than `actions`,
 continuous `controls` with shape `(transitions, 3)`, `finish_time_s`,
 `action_repeat_frames`, optional `decision_interval_ms` and
-`control_alignment`. Controls are `[gas, brake, steer]`; the discrete action
+`control_alignment`. Controls are `[gas, brake, steer]`. The discrete action
 must equal deterministic quantization of that row. Race timestamps must be
 strictly increasing, only the final frame may carry the finish flag and the
 finish metadata must agree with it within 50 ms.
@@ -118,7 +118,7 @@ training:
 pipeline output. The minimal configuration above produces 17 telemetry values
 and four lidar channels. If
 `previous_action_conditioning` is enabled, human and recovery data use expert
-previous actions during training; inference uses the policy's previous
+previous actions during training. Inference uses the policy's previous
 prediction. DAgger collection deliberately requires conditioning to be off.
 
 ### Behavior-cloning learner `kwargs`
@@ -133,38 +133,38 @@ prediction. DAgger collection deliberately requires conditioning to be off.
 | `lr_scheduler_factor` / `lr_scheduler_patience` | `0.3` / `5` | ReduceLROnPlateau factor in `(0,1)` and positive interval patience. |
 | `min_learning_rate` | `1e-6` | Non-negative scheduler floor. |
 | `gradient_clip_norm` | `5` | Positive gradient-norm cap. |
-| `action_transition_weight` | `1` | Weight for action-change samples; at least one. |
+| `action_transition_weight` | `1` | Weight for action-change samples, at least one. |
 | `class_weight_power` | `0.5` | Class-frequency correction exponent in `[0,1]`. |
-| `focal_gamma` | `0` | Non-negative focal-loss exponent; zero disables focal modulation. |
+| `focal_gamma` | `0` | Non-negative focal-loss exponent, zero disables focal modulation. |
 | `steering_auxiliary_loss_weight` | `0` | Non-negative factorized steering-loss weight. |
 | `horizontal_flip_augmentation` | `false` | Enables the strict mirrored schema described below. |
-| `execution` | auto/auto/deterministic | Torch execution policy; see the configuration reference. |
+| `execution` | auto/auto/deterministic | Torch execution policy, see the configuration reference. |
 
-The runtime injects `model_factory` and the RunSpec root `seed`; keep those as
+The runtime injects `model_factory` and the RunSpec root `seed`. Keep those as
 top-level component/root choices rather than duplicating them in learner kwargs.
 
 ### `LidarBehaviorCloningModelFactory` `kwargs`
 
 | Field | Default | Effect and constraint |
 | --- | --- | --- |
-| `action_ids` | required | Ordered unique compact global actions; must exactly match the environment. |
+| `action_ids` | required | Ordered unique compact global actions, must exactly match the environment. |
 | `telemetry_dim` / `lidar_channels` | `26` / `4` | Exact feature tensor dimensions. |
 | `history_length` / `burn_in` | `1` / `0` | Feed-forward history or GRU sequence length and its non-learning prefix. |
 | `spatial_bins` | `12` | Lidar encoder spatial pooling bins. |
 | `telemetry_group_dims` | null | Optional group widths whose sum must equal `telemetry_dim`. |
 | `encoder_hidden_dim` / `encoder_output_dim` | `192` / `256` | Positive lidar encoder widths. |
-| `previous_action_conditioning` | `false` | Adds the previous compact action embedding; unavailable for DAgger collection. |
+| `previous_action_conditioning` | `false` | Adds the previous compact action embedding, unavailable for DAgger collection. |
 | `previous_action_embedding_dim` | `16` | Positive embedding width when conditioning is enabled. |
 | `minimum_action_hold_steps` | `1` | Positive inference hysteresis duration. |
 | `switch_logit_margin` | `0` | Non-negative confidence margin required before switching action. |
 | `masked_telemetry_indices` | empty | Unique in-range telemetry fields zeroed before encoding. |
-| `simba_backbone` | null | Optional mapping for the experimental feed-forward SimBaV2 backbone; mutually exclusive with recurrent history. |
+| `simba_backbone` | null | Optional mapping for the feed-forward SimBaV2 backbone, mutually exclusive with recurrent history. |
 | `factorized_action_head` | `false` | Represents compact action logits as steering plus drive-mode factors. |
 
 Horizontal reflection is opt-in and only accepts the versioned local
 8-channel lidar/46-feature telemetry schema. That schema requires local
 velocity, track-relative, pace, racing-line, finish, dynamics and goal features
-with control inputs excluded; set the model to `lidar_channels: 8`,
+with control inputs excluded. Set the model to `lidar_channels: 8`,
 `telemetry_dim: 46` and `telemetry_group_dims: [23, 5, 4, 14]`. It mirrors
 steering labels and known directional fields, preserves other tensor fields,
 and fails explicitly for an incompatible schema.
@@ -191,17 +191,17 @@ batch size does not change the result.
 
 ## Artifacts and metrics
 
-- `manifest.json`: immutable redacted RunSpec and execution environment;
-- `bc-dataset-manifest.json`: data and preprocessing attribution;
-- `events.jsonl`: interval training and validation metrics;
+- `manifest.json`: immutable redacted RunSpec and execution environment.
+- `bc-dataset-manifest.json`: data and preprocessing attribution.
+- `events.jsonl`: interval training and validation metrics.
 - `checkpoints/bc-latest.pt`: exact-resume state, including RNG and trainer
-  selection state;
+  selection state.
 - `checkpoints/bc-best-validation.pt`: best open-loop policy candidate.
 
 Accuracy is exact compact-action accuracy. Balanced accuracy averages recall
 over observed actions. Transition metrics cover action changes, steering
 metrics collapse actions to left/neutral/right and intervention metrics cover
-teacher interventions. The control score ranks eligible open-loop candidates;
+teacher interventions. The control score ranks eligible open-loop candidates.
 it is not evidence that the car drives safely or finishes.
 
 Always run `bc-benchmark` before promotion. Compare finish rate first, then
@@ -226,7 +226,7 @@ label time = t + L
 A positive lead chooses a future expert command as the label for the current
 observation, so the learned policy switches earlier. `0` keeps the command
 aligned to the transition's start frame. The parameter is a manual, constant
-calibration; the library does not estimate control latency automatically.
+calibration. The library does not estimate control latency automatically.
 Without aggregation, lookup uses the first recorded timestamp at or after
 `t + L`. Beyond the recorded tail it deliberately holds the final action.
 
@@ -236,15 +236,15 @@ steering over `[t + L, t + decision_interval_ms + L)` and quantizes the mean
 control. Brake taps use their physical duty duration. A shifted tail holds the
 last recorded control. Aggregation requires:
 
-- `control_alignment: frame_start` in the demonstration;
-- `action_repeat_frames: 1`;
-- a positive `decision_interval_ms` no greater than 250 ms;
-- the `gamepad` controller backend;
+- `control_alignment: frame_start` in the demonstration.
+- `action_repeat_frames: 1`.
+- a positive `decision_interval_ms` no greater than 250 ms.
+- the `gamepad` controller backend.
 - the same decision interval for online training and data preparation.
 
 `demo-benchmark --action-offset-ms O` is a separate open-loop diagnostic. It
 adds `O` to the timestamps at which replay switches actions. A positive offset
-delays switching; a negative offset advances it. It does not rewrite training
+delays switching. A negative offset advances it. It does not rewrite training
 labels and it cannot be combined with phase-locked or trajectory-tracking
 replay. Once the best diagnostic offset is understood, express an anticipatory
 training correction with the non-negative label lead and record the decision,
@@ -257,7 +257,7 @@ A reproducible calibration procedure is:
    open-loop trials at offsets such as `-40`, `-20`, `0`, `+20`, `+40` ms.
 3. Compare finish rate first, then median finish time and action-transition
    agreement. Expand around the best signed offset with a finer grid.
-4. Repeat on the retained laps; reject a value that works for only one lap.
+4. Repeat on the retained laps. Reject a value that works for only one lap.
 5. Configure a non-negative `demonstration_action_lead_ms`, rebuild the BC
    dataset, train with the same seed/budget and run the closed-loop BC gate.
 6. Keep the zero-lead baseline and report the exact grid, trial count and
@@ -275,17 +275,17 @@ uv run trackmaniarl demo-benchmark run.yaml demonstrations/lap-01.npz --trials 3
 Four mechanisms must not be conflated:
 
 - **timestamp replay** selects commands only from race time and exposes timing
-  drift directly;
-- **phase locking** matches current feature state to a nearby reference phase;
+  drift directly.
+- **phase locking** matches current feature state to a nearby reference phase.
 - **trajectory tracking** finds a nearby forward world-space reference state,
   takes feed-forward expert controls at an optional lead and adds steering
-  feedback from lateral, heading and lateral-velocity error;
+  feedback from lateral, heading and lateral-velocity error.
 - **DAgger** visits student-induced states and asks the closed-loop trajectory
   teacher for labels.
 
 Phase locking and trajectory tracking can recover from state drift, but that
 can hide a raw timestamp error. Use them as separate diagnostic comparisons.
-Action-label lead changes the supervised dataset; DAgger changes the state
+Action-label lead changes the supervised dataset. DAgger changes the state
 distribution.
 
 ## DAgger, recovery and trajectory tools
@@ -300,12 +300,12 @@ a configured evaluation map:
 uv run trackmaniarl dagger-collect run.yaml artifacts/my-bc-run/checkpoints/bc-best-validation.pt demonstrations/lap-01.npz recovery/dagger.npz --episodes 10
 ```
 
-`--teacher-probability` mixes teacher control into collection;
-`--intervention-error` triggers an intervention from tracking error; and
+`--teacher-probability` mixes teacher control into collection.
+`--intervention-error` triggers an intervention from tracking error. And
 `--action-lead-ms` controls the teacher's non-negative feed-forward look-ahead.
 The resulting recovery episodes can be passed repeatedly with `--recovery` to
 `bc-train`. Recovery splitting is episode-level when at least three episodes
-exist; one or two episodes remain train-only.
+exist. One or two episodes remain train-only.
 
 Recovery archives use the fail-closed `trackmaniarl-bc-recovery-v3` contract.
 Every archive records the map UID, geometry SHA-256, action-repeat or decision
@@ -317,7 +317,7 @@ the canonical source digest to match one of its `--demo` inputs, before
 building any observations. It cannot independently re-hash the historical
 student checkpoint unless that file is retained. Version 1 and 2 archives lack
 sufficient provenance and are rejected with an instruction to regenerate
-them; they are not silently upgraded.
+them. They are not silently upgraded.
 
 Synthetic recovery perturbs states around an expert trajectory and produces
 deterministic counterfactual labels. It is useful coverage, not evidence that
@@ -340,7 +340,7 @@ uv run trackmaniarl trajectory-stitch run.yaml demonstrations/stitched.npz --dem
 ```
 
 Trajectory optimization evaluates bounded coast/brake schedule changes in the
-live environment. Keep its baseline, confirmation trials and safety limits; an
+live environment. Keep its baseline, confirmation trials and safety limits. An
 optimized schedule is not a human demonstration and needs its own provenance:
 
 ```powershell
@@ -356,7 +356,7 @@ uv run trackmaniarl diagnose expert run.yaml artifacts/my-rl-run/checkpoints/lat
 ```
 
 The public `DemonstrationMarginObjective` and
-`DemonstrationCrossEntropyObjective` are DQfD-inspired auxiliary losses; they
+`DemonstrationCrossEntropyObjective` are DQfD-inspired auxiliary losses. They
 respect `policy_action_ids`, but TrackmaniaRL does not claim an exact
 reproduction of [Deep Q-learning from
 Demonstrations](https://ojs.aaai.org/index.php/AAAI/article/view/11757).
@@ -364,7 +364,7 @@ Demonstrations](https://ojs.aaai.org/index.php/AAAI/article/view/11757).
 ## RL handoff and limitations
 
 Warm-start only named compatible submodules. Encoder and temporal weights can
-move into IQN/FQF or another composed model; a categorical BC head is not a
+move into IQN/FQF or another composed model. A categorical BC head is not a
 quantile head. Warm-start reports must show matched tensors, while RL resume
 still requires an exact 2.0 architecture fingerprint.
 
@@ -372,7 +372,7 @@ The default BC-to-RL warm start transfers only `encoder` and `temporal` named
 submodules. It never copies the categorical action head into a scalar,
 quantile, fraction-proposal or actor-critic head. Use
 `trackmaniarl train run.yaml --model-initialization-checkpoint ...` for a named
-warm start; use `resume` only for an exact checkpoint from the same immutable
+warm start. Use `resume` only for an exact checkpoint from the same immutable
 run contract.
 
 BC remains sensitive to expert quality, class imbalance and covariate shift.

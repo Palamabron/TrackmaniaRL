@@ -49,6 +49,11 @@ class Trainer:
         training = self.run.spec.training
         if self.on_policy and training.total_transitions % training.sequence_length:
             raise ValueError("On-policy total_transitions must be divisible by sequence_length")
+        capacity = getattr(self.run.replay_store, "capacity", None)
+        if self.on_policy and capacity is not None and capacity < training.sequence_length:
+            raise ValueError(
+                "On-policy replay capacity must hold a complete sequence_length rollout"
+            )
 
     def train(self) -> TrainingResult:
         return run_training(self)

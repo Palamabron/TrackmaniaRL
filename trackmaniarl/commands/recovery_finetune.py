@@ -57,7 +57,7 @@ class _CommandRequest:
 
 
 def _recovery_finetune(args: argparse.Namespace) -> None:
-    """Fine-tune the experimental incident adapter on human takeover labels."""
+    """Fine-tune the incident adapter on human takeover labels."""
 
     config = args.config.resolve()
     request = _command_request(args)

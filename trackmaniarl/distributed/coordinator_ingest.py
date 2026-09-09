@@ -13,6 +13,7 @@ from trackmaniarl.distributed.coordinator_evaluation import (
     _progress_bin_metrics,
 )
 from trackmaniarl.distributed.coordinator_support import snapshot_value
+from trackmaniarl.distributed.coordinator_validation import _validate_submit_payload
 from trackmaniarl.distributed.protocol import transition_from_wire
 
 if TYPE_CHECKING:
@@ -73,6 +74,16 @@ def decode_journal_payload(
         coordinator._log_wal_error(operation, exc)
         raise
     return value
+
+
+def validate_journal_payload(
+    coordinator: Coordinator, value: Mapping[str, Any], operation: str
+) -> None:
+    try:
+        _validate_submit_payload(value, coordinator.codec)
+    except Exception as exc:
+        coordinator._log_wal_error(operation, exc)
+        raise
 
 
 def ingest(coordinator: Coordinator, value: Mapping[str, Any], row_id: int) -> None:
@@ -327,6 +338,7 @@ def _recover_rows(coordinator: Coordinator, watermark: int) -> tuple[int, int]:
     transitions = 0
     for row_id, payload in coordinator._journal_rows(watermark, "recovery"):
         value = coordinator._decode_journal_payload(payload, "recovery_decode")
+        validate_journal_payload(coordinator, value, "recovery_validation")
         coordinator._ingest(value, row_id)
         rows += 1
         transitions += len(value["transitions"])

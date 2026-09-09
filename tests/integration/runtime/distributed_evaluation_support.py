@@ -230,13 +230,17 @@ def _evaluation_timing(case: _EvaluationCase) -> dict[str, float]:
     finished = case.result is _EvaluationResult.FINISHED
     return {
         "timing/policy_inference_ms_mean": case.policy_latency,
+        "timing/policy_inference_ms_max": case.policy_latency + 1.0,
         "timing/step_race_ms_p99": 52.0 if finished else 58.0,
         "timing/step_race_ms_max": 60.0 if finished else 75.0,
         "timing/step_race_measurement_count": float(case.steps),
         "timing/step_race_measurements_valid": 1.0,
         "controller_apply_ms_mean": 2.0 if finished else 4.0,
+        "controller_apply_ms_max": 3.0 if finished else 5.0,
         "telemetry_wait_ms_mean": 5.0 if finished else 7.0,
+        "telemetry_wait_ms_max": 6.0 if finished else 8.0,
         "telemetry_skipped_frames_total": 2.0 if finished else 3.0,
+        "telemetry_skipped_frames_mean": 0.2 if finished else 0.1,
         "telemetry_skipped_frames_max": 2.0 if finished else 3.0,
         "telemetry_steps_with_skipped_frames_fraction": 0.2 if finished else 0.1,
     }

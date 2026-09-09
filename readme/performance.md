@@ -56,7 +56,7 @@ path, which re-pinned and recopied complete batches, produced:
 
 An earlier interleaved repeat under a different momentary GPU load measured
 53.69→82.22 updates/s and 31.42→42.38 updates/s respectively. Both repeats
-agree on the direction; their spread is why the absolute rates are not treated
+agree on the direction. Their spread is why the absolute rates are not treated
 as stable hardware benchmarks. The final lidar profile reduced self CPU time
 from 197.0 ms to 137.6 ms across five updates while CUDA time remained about
 21 ms.
@@ -73,7 +73,7 @@ while producing the same 49,969 valid windows.
 The W&B projection path was measured separately with 50,000 update events and
 a local no-network fake run: 7.25 µs enqueue time per event, 7.67 µs including
 worker drain and zero drops. This verifies the application-side projection and
-queue overhead; it does not estimate remote service latency. The bounded worker
+queue overhead. It does not estimate remote service latency. The bounded worker
 isolates that latency and reports drops/errors while local JSONL remains the
 authority.
 
@@ -83,7 +83,7 @@ authority.
   and fails when accelerator hardware is visible through driver tools but the
   Torch build cannot use it.
 - `precision: auto` probes supported precision. Float16 CUDA/ROCm uses a
-  checkpointed `GradScaler`; bfloat16 does not require scaling. Resume restores
+  checkpointed `GradScaler`. Bfloat16 does not require scaling. Resume restores
   scaler state rather than restarting its dynamic range.
 - Non-blocking CUDA transfer is used only after pinning and on the learner's
   transfer stream. A second generic prefetch/copy layer is deliberately not
@@ -102,17 +102,17 @@ not a blind rewrite.
 For every performance change:
 
 1. use the same seed, replay contents, batch request, model, precision and update
-   count;
+   count.
 2. warm up kernels before timing and report wall-clock updates/s, not only CUDA
-   kernel time;
+   kernel time.
 3. record replay wait, transfer, forward, backward, optimizer, synchronization
-   and checkpoint timing;
+   and checkpoint timing.
 4. repeat in a fresh process because loaded Python code does not change when the
-   worktree changes;
+   worktree changes.
 5. run `trackmaniarl benchmark` on the same checkpoint policy and evaluation
    suite before claiming a Trackmania improvement.
 
-Experimental Mamba, SimBaV2 and adaptive clipping remain one-variable-at-a-time
+Optional Mamba, SimBaV2 and adaptive clipping remain one-variable-at-a-time
 experiments. A throughput win cannot promote them without deterministic resume
 coverage and a bounded live comparison of finish rate, median finish time,
 pace and safety.
