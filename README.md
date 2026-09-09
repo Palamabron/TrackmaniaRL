@@ -1,5 +1,7 @@
 # TrackmaniaRL
 
+![TrackmaniaRL logo](docs/assets/trackmaniarl-logo.png)
+
 TrackmaniaRL is a Python library for training reinforcement-learning agents on
 custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronous
 training, checkpoint resume and repeatable evaluation.
