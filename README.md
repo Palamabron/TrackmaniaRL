@@ -112,6 +112,11 @@ For continuous off-policy control, use the generated `run-sac.yaml`,
 `run-redq.yaml` or `run-tqc.yaml`. `run-discrete-sac.yaml` provides a categorical
 actor-critic with the 78-action table. All four include first-party telemetry models.
 
+Every RL family supports camera observations. The template also generates
+`run-q-vision.yaml`, `run-qr-vision.yaml`, `run-iqn-vision.yaml`,
+`run-fqf-vision.yaml`, `run-sac-vision.yaml`, `run-redq-vision.yaml`,
+`run-tqc-vision.yaml` and `run-discrete-sac-vision.yaml`.
+
 For local on-policy PPO, use the generated `run-ppo.yaml` (telemetry) or
 `run-ppo-vision.yaml` (camera images). Configure the map in the chosen file.
 The [vision and PPO guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/vision.md) explains camera setup, CNN input,

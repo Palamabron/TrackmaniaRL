@@ -138,7 +138,14 @@ actor-critic models. `run-discrete-sac.yaml` uses a categorical actor with the
 78-action table. Configure your map in the selected file and use that filename
 for validation, training, resume and benchmarking. No custom model code is required.
 
-## PPO and camera vision
+## Camera vision and PPO
+
+Camera observations work with every RL family. Complete image configurations are
+`run-q-vision.yaml`, `run-qr-vision.yaml`, `run-iqn-vision.yaml`,
+`run-fqf-vision.yaml`, `run-sac-vision.yaml`, `run-redq-vision.yaml`,
+`run-tqc-vision.yaml`, `run-discrete-sac-vision.yaml` and `run-ppo-vision.yaml`.
+Select one for validation, training, resume and benchmarking. Off-policy camera
+templates use a 2048-transition replay buffer and batch size 32 to bound memory.
 
 `run-ppo.yaml` selects supported local on-policy PPO with telemetry.
 `run-ppo-vision.yaml` selects PPO with a CNN and four grayscale 84x84 camera frames.

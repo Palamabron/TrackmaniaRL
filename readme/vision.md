@@ -1,6 +1,29 @@
-# Camera vision and PPO
+# Camera vision with every RL algorithm
 
 This guide applies to TrackmaniaRL 1.2.7 with RunSpec 2.0.
+
+Camera observations are independent of the RL algorithm. All public RL learners
+support image models: Q/DQN, QR-DQN, IQN, FQF, SAC, REDQ, TQC, stable discrete SAC
+and PPO. The same `VisionFeaturePipeline` and `VisionSensorEncoder` supply images
+and CNN features across these families.
+
+The Trackmania template generates these complete camera configurations:
+
+| Algorithm | Configuration | Model |
+| --- | --- | --- |
+| Q/DQN | `run-q-vision.yaml` | Composite scalar Q |
+| QR-DQN | `run-qr-vision.yaml` | Composite fixed quantiles |
+| IQN | `run-iqn-vision.yaml` | Composite implicit quantiles |
+| FQF | `run-fqf-vision.yaml` | Composite learned fractions |
+| SAC | `run-sac-vision.yaml` | CNN actor and twin Q critics |
+| REDQ | `run-redq-vision.yaml` | CNN actor and Q ensemble |
+| TQC | `run-tqc-vision.yaml` | CNN actor and quantile ensemble |
+| Stable discrete SAC | `run-discrete-sac-vision.yaml` | Categorical CNN actor and twin Q critics |
+| PPO | `run-ppo-vision.yaml` | CNN actor and state-value critic |
+
+Use any filename from this table with `validate`, `train`, `resume` and `benchmark`.
+Off-policy camera models also use the distributed actor/learner runtime. Capture
+runs on each actor's desktop. PPO uses local on-policy collection.
 
 PPO is a supported local on-policy algorithm. The Trackmania project template
 generates `run-ppo.yaml` (telemetry) and `run-ppo-vision.yaml` (camera), alongside
@@ -46,6 +69,29 @@ CNN encoders for a bounded Gaussian actor and state-value critic. Actions are
 `VisionSensorEncoder` also implements the existing composite value encoder
 contract: use it with `CompositeValueModelFactory` and scalar Q, QR, IQN or FQF
 heads. Match `output_dim` to the temporal core's `input_dim`.
+
+For SAC, REDQ, TQC and stable discrete SAC, use
+`trackmaniarl.trackmania.vision_models:VisionActorCriticModelFactory` with
+`kwargs.algorithm` set to `sac`, `redq`, `tqc` or `discrete-sac`. Fields in `kwargs.config`
+are `channels` (4), `hidden_dim` (256), `critic_count` (10), `quantile_count` (25)
+and `action_count` (78). Ensemble size applies to REDQ/TQC, quantile count to TQC
+and action count to discrete SAC. Keep the standard 78 actions for Trackmania.
+Every actor and critic owns an independent CNN and optimizer gradients reach it.
+
+Custom models can reuse `VisionSensorEncoder` as an observation encoder in the
+existing actor, critic or composite model contracts. It preserves batch and time
+axes, so value models can combine it with the available temporal cores. A model
+that explicitly expects lidar vectors or graph nodes must use an image encoder
+or explicitly combine both modalities. Raw images are not interchangeable with
+telemetry inputs to an already trained checkpoint. The built-in lidar BC, DAgger
+and graph-recovery data workflows still require their documented observations.
+Their telemetry-only archives cannot supply missing camera frames.
+
+Off-policy camera templates use a 2048-transition replay buffer, batch size 32
+and 512 warmup transitions. Increase capacity only after checking memory usage.
+Their replay stores image stacks as float32, just like the PPO rollout below.
+Synthetic integration tests cover an update, training and checkpoint resume for
+every RL learner family. This verifies software compatibility, not lap times.
 
 ## Live frame source
 

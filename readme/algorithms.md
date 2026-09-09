@@ -26,7 +26,10 @@ then pass the same filename to `train`, `resume` and `benchmark`.
 
 SAC, REDQ and TQC use continuous gas, brake and steering. Stable discrete SAC
 uses the environment's 78-action table. Their generated feature pipeline is
-33-field telemetry. PPO has separate telemetry and camera configurations.
+33-field telemetry. All RL families also have generated camera configurations
+named `run-ALGORITHM-vision.yaml`, with `q`, `qr`, `iqn`, `fqf`, `sac`, `redq`,
+`tqc`, `discrete-sac` and `ppo` as algorithm names. See the
+[camera vision guide](vision.md) for model factories and memory requirements.
 The default IQN project continues to use lidar features.
 
 ## Support matrix

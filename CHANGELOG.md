@@ -2,6 +2,9 @@
 
 ## 1.2.7 - 2026-09-09
 
+- Supply image-based SAC, REDQ, TQC and stable discrete SAC models plus complete
+  camera configurations for every RL learner family. Verify image training and
+  checkpoint continuation across Q, QR, IQN, FQF and all actor-critic algorithms.
 - Use versioned absolute repository links in the README so documentation and
   source links resolve correctly on PyPI.
 - Replace broken or blocked research links with stable public sources and retain

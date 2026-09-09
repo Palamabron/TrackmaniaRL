@@ -13,6 +13,7 @@ from trackmaniarl.project.scaffold_run_templates import (
     _trackmania_actor_critic_config,
     _trackmania_config,
     _trackmania_ppo_config,
+    _trackmania_vision_config,
 )
 from trackmaniarl.project.scaffold_templates import (
     COMPONENTS,
@@ -75,6 +76,10 @@ def _write_project_metadata(target: Path, package: str, template: str) -> None:
         for algorithm in ("sac", "redq", "tqc", "discrete-sac"):
             (target / f"run-{algorithm}.yaml").write_text(
                 _trackmania_actor_critic_config(algorithm), encoding="utf-8"
+            )
+        for algorithm in ("q", "qr", "iqn", "fqf", "sac", "redq", "tqc", "discrete-sac"):
+            (target / f"run-{algorithm}-vision.yaml").write_text(
+                _trackmania_vision_config(algorithm), encoding="utf-8"
             )
 
 

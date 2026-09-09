@@ -212,3 +212,59 @@ def _trackmania_actor_critic_config(algorithm: str) -> str:
     config["training"]["batch_size"] = 256
     config["training"]["sequence_length"] = 1
     return yaml.safe_dump(config, sort_keys=False)
+
+
+def _trackmania_vision_config(algorithm: str = "iqn") -> str:
+    """Complete image-observation RunSpec for each off-policy learner family."""
+    value_algorithms = {"q", "qr", "iqn", "fqf"}
+    config = yaml.safe_load(
+        _trackmania_config()
+        if algorithm in value_algorithms
+        else _trackmania_actor_critic_config(algorithm)
+    )
+    config["run_id"] = f"trackmania-{algorithm}-vision"
+    components = config["components"]
+    components["environment"]["class_path"] = (
+        "trackmaniarl.trackmania.vision_environment:VisionEnvironmentFactory"
+    )
+    components["environment"]["kwargs"]["capture"] = {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720,
+    }
+    components["feature_pipeline"] = {
+        "class_path": "trackmaniarl.trackmania.vision:VisionFeaturePipeline",
+    }
+    if algorithm in value_algorithms:
+        model = components["model_factory"]["kwargs"]
+        model["encoder"] = {
+            "class_path": "trackmaniarl.trackmania.vision_models:VisionSensorEncoder",
+        }
+        if algorithm == "q":
+            model["head"] = {
+                "class_path": "trackmaniarl.models.heads:ScalarQHead",
+                "kwargs": {"feature_dim": 256, "action_count": 78},
+            }
+            model["strategy"] = {"class_path": "trackmaniarl.models.strategies:ScalarValueStrategy"}
+        elif algorithm == "qr":
+            model["head"] = {
+                "class_path": "trackmaniarl.models.heads:FixedQuantileHead",
+                "kwargs": {"config": {"feature_dim": 256, "action_count": 78}},
+            }
+            model["strategy"] = {
+                "class_path": "trackmaniarl.models.strategies:FixedQuantileStrategy",
+            }
+        elif algorithm == "fqf":
+            model["strategy"] = {
+                "class_path": "trackmaniarl.models.strategies:LearnedFractionStrategy",
+                "kwargs": {"feature_dim": 256},
+            }
+    else:
+        components["model_factory"] = {
+            "class_path": "trackmaniarl.trackmania.vision_models:VisionActorCriticModelFactory",
+            "kwargs": {"algorithm": algorithm},
+        }
+    components["replay_store"]["kwargs"] = {"capacity": 2048}
+    config["training"].update(batch_size=32, warmup_transitions=512)
+    return yaml.safe_dump(config, sort_keys=False)

@@ -1,13 +1,27 @@
-"""First-party CNN actor-value model for image-based Trackmania PPO."""
+"""Reusable image encoder and first-party Trackmania actor-critic models."""
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from typing import Any
+
 import torch
+from pydantic import BaseModel, ConfigDict, Field
 from torch import nn
 
 from trackmaniarl.core.contracts import ModelContract
-from trackmaniarl.models.actors import GaussianActorConfig, PpoGaussianActor
-from trackmaniarl.models.critics import ContinuousValueCritic
+from trackmaniarl.models.actors import (
+    CategoricalActor,
+    GaussianActor,
+    GaussianActorConfig,
+    PpoGaussianActor,
+)
+from trackmaniarl.models.critics import (
+    ContinuousQCritic,
+    ContinuousValueCritic,
+    QuantileCritic,
+    QuantileCriticConfig,
+)
 from trackmaniarl.models.encoders.convolutional import ConvolutionalSensorEncoder
 
 
@@ -47,3 +61,71 @@ class VisionPpoModelFactory:
 
     def build(self) -> VisionPpoModel:
         return VisionPpoModel(self.channels, self.hidden_dim)
+
+
+class VisionActorCriticConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    channels: int = Field(default=4, ge=1)
+    hidden_dim: int = Field(default=256, ge=1)
+    critic_count: int = Field(default=10, ge=2)
+    quantile_count: int = Field(default=25, ge=2)
+    action_count: int = Field(default=78, ge=2)
+
+
+class VisionActorCriticModelFactory:
+    """Build independent CNN actor/critic branches for off-policy algorithms."""
+
+    def __init__(
+        self,
+        algorithm: str,
+        config: VisionActorCriticConfig | Mapping[str, Any] | None = None,
+    ) -> None:
+        contracts = {
+            "sac": ModelContract.CONTINUOUS_ACTOR_CRITIC,
+            "redq": ModelContract.ENSEMBLE_ACTOR_CRITIC,
+            "tqc": ModelContract.CONTINUOUS_QUANTILE_ACTOR_CRITIC,
+            "discrete-sac": ModelContract.DISCRETE_ACTOR_CRITIC,
+        }
+        if algorithm not in contracts:
+            raise ValueError(f"unknown vision actor-critic algorithm: {algorithm}")
+        shape = VisionActorCriticConfig.model_validate({} if config is None else config)
+        self.model_contract = contracts[algorithm]
+        self.algorithm = algorithm
+        self.channels, self.hidden_dim = shape.channels, shape.hidden_dim
+        self.critic_count, self.quantile_count = shape.critic_count, shape.quantile_count
+        self.action_count = shape.action_count
+
+    def _encoder(self) -> VisionSensorEncoder:
+        return VisionSensorEncoder(self.channels, self.hidden_dim)
+
+    def build(self) -> nn.Module:
+        model = nn.Module()
+        if self.algorithm == "discrete-sac":
+            model.actor = CategoricalActor(self._encoder(), self.hidden_dim, self.action_count)
+            model.q1 = nn.Sequential(self._encoder(), nn.Linear(self.hidden_dim, self.action_count))
+            model.q2 = nn.Sequential(self._encoder(), nn.Linear(self.hidden_dim, self.action_count))
+            return model
+        model.actor = GaussianActor(
+            self._encoder(),
+            GaussianActorConfig(
+                self.hidden_dim, 3, action_low=(0.0, 0.0, -1.0), action_high=(1.0, 1.0, 1.0)
+            ),
+        )
+        if self.algorithm == "sac":
+            model.q1 = ContinuousQCritic(self._encoder(), self.hidden_dim, 3)
+            model.q2 = ContinuousQCritic(self._encoder(), self.hidden_dim, 3)
+        elif self.algorithm == "redq":
+            model.critics = nn.ModuleList(
+                ContinuousQCritic(self._encoder(), self.hidden_dim, 3)
+                for _ in range(self.critic_count)
+            )
+        else:
+            model.critics = nn.ModuleList(
+                QuantileCritic(
+                    self._encoder(),
+                    QuantileCriticConfig(self.hidden_dim, 3, self.quantile_count),
+                )
+                for _ in range(self.critic_count)
+            )
+        return model
