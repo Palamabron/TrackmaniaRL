@@ -14,8 +14,7 @@ and include:
 
 Do not access other users' systems or data while investigating. The maintainer
 will acknowledge a complete report, assess severity and coordinate a fix and
-disclosure. Security fixes target the `1.2` release line once 1.2.0 is published;
-until then, `1.1` remains the current published line.
+disclosure. Security fixes target the current `1.2` release line.
 
 ## Trust boundaries
 

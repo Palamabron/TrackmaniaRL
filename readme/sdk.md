@@ -1,6 +1,6 @@
 # TrackmaniaRL SDK Guide
 
-This guide describes the public SDK in package version 1.2.7.
+This guide describes the public SDK in package version 1.2.8.
 
 For image observations, use `trackmaniarl.trackmania.vision:VisionFeaturePipeline`
 and `trackmaniarl.trackmania.vision_models:VisionSensorEncoder`. The encoder fits
@@ -15,7 +15,7 @@ or offline-supervised lifecycle is executed. The same commands work in
 PowerShell, bash, WSL and CI.
 
 ```bash
-uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.7"
+uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.8"
 trackmaniarl init my-trackmania-agent --template trackmania
 cd my-trackmania-agent
 uv sync

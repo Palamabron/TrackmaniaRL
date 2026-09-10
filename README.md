@@ -1,20 +1,20 @@
 # TrackmaniaRL
 
-![TrackmaniaRL logo](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.7/docs/assets/trackmaniarl-logo.png)
+![TrackmaniaRL logo](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.8/docs/assets/trackmaniarl-logo.png)
 
 TrackmaniaRL is a Python library for training reinforcement-learning agents on
 custom Trackmania 2020 maps. It covers map geometry, demonstrations, asynchronous
 training, checkpoint resume and repeatable evaluation.
 
 The game integration runs on Windows. Training and analysis can also run on Linux.
-Version 1.2.7 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
+Version 1.2.8 requires Python 3.12 and uses RunSpec 2.0 and checkpoint schema 2.0.
 
 ## Installation
 
 Install [uv](https://docs.astral.sh/uv/), then create a project:
 
 ```powershell
-uv tool install "trackmaniarl==1.2.7"
+uv tool install "trackmaniarl==1.2.8"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -23,7 +23,7 @@ uv sync
 To install a locally built wheel instead:
 
 ```powershell
-uv tool install path\to\trackmaniarl-1.2.7-py3-none-any.whl
+uv tool install path\to\trackmaniarl-1.2.8-py3-none-any.whl
 ```
 
 To work from this repository, run `uv sync --group dev` and prefix commands with
@@ -42,19 +42,23 @@ uv run trackmaniarl validate run.yaml
 Validation executes trusted component code and a synthetic update. It does not
 drive the game or establish driving performance. CPU execution is sufficient for
 this check. Live neural inference and training benefit from an NVIDIA GPU with
-a compatible PyTorch build. See [platform and performance guidance](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/performance.md).
+a compatible PyTorch build. See [platform and performance guidance](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/performance.md).
 
 ## Neural inference in motion
 
-![Full drive alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.7/docs/assets/trackmaniarl-neural-flow.gif)
+![Full drive alongside road, car and context branches, residual blocks, action values and changing steering and pedal controls](https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/v1.2.8/docs/assets/trackmaniarl-neural-flow.gif)
 
-This full drive visualizes the **best-performing model supplied for this release**.
-The panel follows geometry, car and context inputs through model stages to action
-values and selected controls. The animated summaries are not a causal attribution
-of individual neurons. This selected lap uses the map-specific `neighbors` action
-filter. It is neither an unassisted-policy benchmark nor evidence of generalization.
-See [the model and recording explanation](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/activation-film.md) for provenance,
-the five-attempt film series and [GIF reproduction](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/neural-flow-media.md).
+This full drive shows a selected evaluation lap from the contributor's strongest
+checkpoint for this map. The contributor reports approximately 12 wall-clock hours
+of training before the recording; capturing and rendering the film did not update
+its weights. The panel is an architecture showcase: it follows map-relative road
+geometry, a 60-value car/physics vector and 29 engineered driving-context values
+through the model to action scores and selected controls. The changing activation
+colours show real tensor values, but they are not feature attribution and individual
+cells are not intended to explain a decision by themselves. This selected lap uses
+the map-specific `neighbors` action filter. It is neither an unassisted-policy
+benchmark nor evidence of generalization. See [the model and recording explanation](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/activation-film.md)
+for provenance, the five-attempt film series and [GIF reproduction](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/neural-flow-media.md).
 
 ## Game setup
 
@@ -67,7 +71,7 @@ You need:
 
 The plugin uses TCP ports 9000 (telemetry) and 9001 (session and map status) on
 localhost. The setup guide explains plugin installation and controller setup:
-[Trackmania setup](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/trackmania.md).
+[Trackmania setup](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/trackmania.md).
 
 Check the connection before recording data or training:
 
@@ -90,7 +94,7 @@ uv run trackmaniarl track build-geometry assets/my-map.geometry.npz `
 ```
 
 Copy the map to `maps/`, then replace `REPLACE_WITH_YOUR_MAP_UID` in `run.yaml`
-with the UID printed by `track check`. See [examples/own-map.yaml](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/examples/own-map.yaml)
+with the UID printed by `track check`. See [examples/own-map.yaml](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/examples/own-map.yaml)
 for a complete configuration. TrackmaniaRL verifies the open map but does not
 select it for you.
 
@@ -117,11 +121,11 @@ Every RL family supports camera observations. The template also generates
 `run-fqf-vision.yaml`, `run-sac-vision.yaml`, `run-redq-vision.yaml`,
 `run-tqc-vision.yaml` and `run-discrete-sac-vision.yaml`.
 For supervised learning from aligned RGB demonstrations, use `run-bc-vision.yaml`
-and the [camera BC guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/vision-bc.md).
+and the [camera BC guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/vision-bc.md).
 
 For local on-policy PPO, use the generated `run-ppo.yaml` (telemetry) or
 `run-ppo-vision.yaml` (camera images). Configure the map in the chosen file.
-The [vision and PPO guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/vision.md) explains camera setup, CNN input,
+The [vision and PPO guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/vision.md) explains camera setup, CNN input,
 fresh rollouts and the PPO update cycle.
 
 Demonstrations are optional:
@@ -160,32 +164,32 @@ them together with the finish rate. Telemetry drops are recorded because they ca
 delay observations and control decisions. `--reject-telemetry-skips` rejects the
 whole evaluation. It never removes individual slow attempts.
 
-More detail: [evaluation architecture](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/library-architecture.md#checkpoints-and-evaluation),
-[recording](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/recording.md) and [troubleshooting](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/troubleshooting.md).
+More detail: [evaluation architecture](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/library-architecture.md#checkpoints-and-evaluation),
+[recording](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/recording.md) and [troubleshooting](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/troubleshooting.md).
 
 ## Documentation
 
-Start with the [1.2.7 reading guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/README.md) for how the components fit
+Start with the [1.2.8 reading guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/README.md) for how the components fit
 together and the setup-to-evaluation workflow.
 
-- [Configuration](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/configuration.md)
-- [Algorithms and supported combinations](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/algorithms.md)
-- [Camera vision and PPO](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/vision.md)
-- [Metrics and observability](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/observability.md)
-- [Platforms and performance](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/performance.md)
-- [Model, observations, actions and evaluation](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/library-architecture.md)
-- [Neural activation film and repeatable export](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/activation-film.md)
-- [Reward function](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/reward-function.md)
-- [Demonstrations and recovery](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/imitation-learning.md)
-- [Replay and sequences](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/replay-and-sequences.md)
-- [Distributed runtime](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/architecture.md)
-- [Supported features and contracts](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/support-status.md)
-- [Troubleshooting](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/docs/troubleshooting.md)
-- [Python API](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/sdk.md)
+- [Configuration](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/configuration.md)
+- [Algorithms and supported combinations](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/algorithms.md)
+- [Camera vision and PPO](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/vision.md)
+- [Metrics and observability](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/observability.md)
+- [Platforms and performance](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/performance.md)
+- [Model, observations, actions and evaluation](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/library-architecture.md)
+- [Neural activation film and repeatable export](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/activation-film.md)
+- [Reward function](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/reward-function.md)
+- [Demonstrations and recovery](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/imitation-learning.md)
+- [Replay and sequences](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/replay-and-sequences.md)
+- [Distributed runtime](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/architecture.md)
+- [Supported features and contracts](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/support-status.md)
+- [Troubleshooting](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/docs/troubleshooting.md)
+- [Python API](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/sdk.md)
 
 PPO is a supported local on-policy training path, with telemetry and camera-image
 models. `init --template trackmania` also generates `run-ppo.yaml` and
-`run-ppo-vision.yaml`. See [camera vision and PPO](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/readme/vision.md) for setup.
+`run-ppo-vision.yaml`. See [camera vision and PPO](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/readme/vision.md) for setup.
 Graph-based recovery supports incident-gated adapter training. Configuration files
 and PyTorch checkpoints can execute Python. Only use files you trust.
 
@@ -201,5 +205,5 @@ uv build
 uv run python scripts/check_distribution.py
 ```
 
-TrackmaniaRL is released under the [MIT license](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/LICENSE). It originated from TMRL.
-Attribution is in [NOTICE](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.7/NOTICE). It is not affiliated with Ubisoft or Nadeo.
+TrackmaniaRL is released under the [MIT license](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/LICENSE). It originated from TMRL.
+Attribution is in [NOTICE](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.8/NOTICE). It is not affiliated with Ubisoft or Nadeo.

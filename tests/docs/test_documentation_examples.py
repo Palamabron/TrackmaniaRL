@@ -27,11 +27,21 @@ from trackmaniarl.trackmania.environment_config import TrackmaniaEnvironmentConf
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLES = ROOT / "readme" / "examples"
-MARKDOWN_FILES = (
+CURRENT_DOCUMENTATION_FILES = (
     ROOT / "README.md",
     *sorted((ROOT / "readme").glob("*.md")),
     *sorted((ROOT / "docs").glob("*.md")),
     ROOT / "docs" / "diagrams" / "README.md",
+)
+ALL_MARKDOWN_FILES = (
+    ROOT / "README.md",
+    ROOT / "CHANGELOG.md",
+    ROOT / "CONTRIBUTING.md",
+    ROOT / "SECURITY.md",
+    *sorted((ROOT / "readme").rglob("*.md")),
+    *sorted((ROOT / "docs").rglob("*.md")),
+    *sorted((ROOT / "experiments").rglob("*.md")),
+    *sorted((ROOT / "trackmaniarl" / "project" / "openplanet").glob("*.md")),
 )
 YAML_EXAMPLES = tuple(sorted((*EXAMPLES.glob("*.yaml"), *EXAMPLES.glob("*.yml"))))
 FULL_RUN_EXAMPLES = tuple(path for path in YAML_EXAMPLES if ".fragment." not in path.name)
@@ -107,7 +117,7 @@ def _assert_component_kwargs(spec: Mapping[str, Any], location: str) -> None:
 
 
 def _assert_markdown_component_examples() -> None:
-    for path in MARKDOWN_FILES:
+    for path in CURRENT_DOCUMENTATION_FILES:
         markdown = path.read_text(encoding="utf-8")
         for match in YAML_FENCE.finditer(markdown):
             payload = yaml.safe_load(match.group(1))
@@ -276,7 +286,7 @@ def test_full_yaml_example_resolves_and_completes_validation(path: Path, tmp_pat
 def test_repository_relative_markdown_links_and_anchors_resolve() -> None:
     failures = [
         failure
-        for source in MARKDOWN_FILES
+        for source in ALL_MARKDOWN_FILES
         for destination in _markdown_destinations(source.read_text(encoding="utf-8"))
         if (failure := _check_destination(source, destination)) is not None
     ]

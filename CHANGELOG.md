@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.8 - 2026-09-10
+
+- Clarify that the neural-flow film evaluates a checkpoint trained for
+  approximately 12 hours and that capture, tensor verification and rendering do
+  not perform additional training or fine-tuning.
+- Define the film's road, car/physics, context and recovery inputs and distinguish
+  engineered look-ahead and incident signals from Transformer context or recurrent
+  hidden state.
+- Describe the activation display as an architecture showcase rather than
+  neuron-level attribution and identify the pedal placement as a presentation
+  choice.
+- Remove a stale pre-1.2 statement from the security policy and keep current
+  documentation, installation commands and immutable README links aligned with
+  release 1.2.8.
+- Make the release-media documentation regression test derive immutable asset
+  URLs from the package version and retain the clarified provenance statements.
+  Extend relative-link and anchor checks across every repository Markdown file,
+  including historical benchmarks, reviews and experiment notes.
+
 ## 1.2.7 - 2026-09-09
 
 - Add paired lidar/image BC archives, control-leakage protection, a generated
