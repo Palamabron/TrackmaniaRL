@@ -4,7 +4,10 @@ The finished local film is
 `artifacts/activation-film/trackmaniarl-neural-flow-polished.mp4`.
 It shows a newly recorded lap without the in-game ghost. Output is 1920 by 1080,
 30 fps, H.264/yuv420p and 42.1 seconds long. The English titles are intended for
-a general audience and the video has no audio. No training was performed.
+a general audience and the video has no audio. The contributor reports that the
+checkpoint had already been trained for approximately 12 wall-clock hours. No
+additional training or fine-tuning was performed while capturing or rendering this
+film.
 
 The game overlay reports 36.658 s and that value appears in the outro. Telemetry
 reports 36.650 s. Both clocks are retained in the evidence.
@@ -93,6 +96,20 @@ Numbered sections and arrowheads show the processing order:
    value and advantage streams over 32 evaluation quantiles into 78 action scores.
    The runtime action filter and selection produce the displayed controls.
 
+The labels summarize concrete inputs rather than generic hidden state. `ROAD
+GEOMETRY / 264` is a map-relative tensor of 44 ordered boundary nodes with left,
+center and right road information. `CAR / 60` contains current motion and control
+features: total, forward and lateral speed, route progress, yaw rate, acceleration,
+heading relative to the road, pitch, front-wheel slip, the previous throttle,
+brake and steering commands, 44 upcoming curvature samples and a skidding-wheel
+count. `CONTEXT / 29` contains lateral road position, clearance to both edges, road
+width, sideslip, rear-wheel slip, RPM, adherence, airtime, cyclic route-progress
+features and speed-dependent curvature/lateral-demand previews at six horizons.
+These context values describe the present state and upcoming road. They are not a
+Transformer context window or a recurrent memory. The policy used for the film has
+an `IdentityTemporalCore`; its only short memory is the explicitly engineered,
+decaying incident signal in the eight-value recovery input.
+
 The diagram abbreviates the input projection as `384 to 192`. Internally it has
 385 inputs because of the constant shift channel. Inside each SimBa block, the
 purple skip route bypasses expansion, ReLU and projection. The diamond merge symbol
@@ -116,8 +133,9 @@ indicator of the normalized command, not a measured steering-wheel angle. Pedals
 show commanded throttle and brake. A brake-tap sentinel is labelled `TAP` and shown
 as active rather than being incorrectly clamped to zero. These are recorded agent
 commands held until the next decision, with no smoothing or invented intermediate
-controls. The replay-based action restriction remains documented in provenance
-and intentionally has no project-specific caption in the film.
+controls. Their left-to-right placement is a presentation choice, not a simulated
+physical pedal layout. The replay-based action restriction remains documented in
+provenance and intentionally has no project-specific caption in the film.
 
 All 733 observations were reprocessed and all original recorded activations and
 actions matched exactly. The new `path-tensors.npz` also contains the Conv1D

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 from PIL import Image
@@ -27,16 +28,26 @@ def test_neural_gif_is_bounded_looping_and_has_no_private_metadata() -> None:
 def test_neural_media_documentation_keeps_provenance_and_links() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     guide = (ROOT / "docs/neural-flow-media.md").read_text(encoding="utf-8")
+    film = (ROOT / "docs/activation-film.md").read_text(encoding="utf-8")
+    readme_prose = " ".join(readme.split())
+    film_prose = " ".join(film.split())
+    with (ROOT / "pyproject.toml").open("rb") as file:
+        version = tomllib.load(file)["project"]["version"]
     assert (
         "https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/"
-        "v1.2.7/docs/assets/trackmaniarl-neural-flow.gif"
+        f"v{version}/docs/assets/trackmaniarl-neural-flow.gif"
     ) in readme
     assert (
         "https://raw.githubusercontent.com/Palamabron/TrackmaniaRL/"
-        "v1.2.7/docs/assets/trackmaniarl-logo.png"
+        f"v{version}/docs/assets/trackmaniarl-logo.png"
     ) in readme
-    assert "best-performing model supplied for this release" in readme
+    assert "reports approximately 12 wall-clock hours" in readme_prose
+    assert "capturing and rendering the film did not update its" in readme_prose
+    assert "not feature attribution" in readme_prose
     assert "map-specific" in readme
+    assert "No additional training or" in film_prose
+    assert "IdentityTemporalCore" in film_prose
+    assert "CONTEXT / 29" in film_prose
     assert "-map_metadata -1" in guide
     assert "No seek, trim or speed changes" in guide
     assert "fps=30,scale=400" in guide

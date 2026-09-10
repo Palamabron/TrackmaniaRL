@@ -2,18 +2,21 @@
 
 ![Neural model stage summaries and steering, throttle and brake controls beside the recorded drive](assets/trackmaniarl-neural-flow.gif)
 
-This visualizes the **best-performing model supplied for this release**, as
-identified by the contributor. It does not establish a new ranking of models.
-The supplied film is a selected demonstration with a map-specific action filter.
-Its five-attempt collection and tensor verification are described in
+This visualizes a selected evaluation lap from the contributor's strongest
+checkpoint for this map. The contributor reports approximately 12 wall-clock hours
+of training before capture; no training or fine-tuning occurred during capture,
+tensor verification or rendering. This does not establish a new ranking of models.
+The supplied film uses a map-specific action filter. Its five-attempt collection
+and tensor verification are described in
 [Neural network in action](activation-film.md). The historical 30-attempt
 benchmark is a separate experiment.
 
 The visible branches summarize road geometry, car features and context, followed
 by residual blocks, an IQN action-value head and chosen steering/pedals. Colours
-and links summarize recorded activations. Links are not individual synapses or
-proof of causality. Geometry is supplied for the map, not inferred from the
-gameplay pixels. The [static model diagram](../readme/architecture.md#composed-value-model)
+and links summarize recorded activations. The visualization is an architecture
+showcase, not a neuron-level explanation or feature-attribution tool. Links are not
+individual synapses or proof of causality. Geometry is supplied for the map, not
+inferred from the gameplay pixels. The [static model diagram](../readme/architecture.md#composed-value-model)
 explains the supported compositional API. The film depicts an opt-in graph model,
 not the default starter architecture.
 
@@ -26,7 +29,7 @@ path. Do not add the MP4 or its local sidecars to the source archive.
 The source is 1920 × 1080, H.264, 30 fps, 42.10 seconds, with no audio stream.
 Source SHA-256:
 `aea2e9f65458a48a6aea126971e09f5f983b1fa00c63e1a128475dd1fb98b03c`.
-Version 1.2.7 shows the **entire supplied film**, from the start through the finish
+The published GIF shows the **entire supplied film**, from the start through the finish
 and the result card, replacing the short excerpt. No seek, trim or speed changes
 are applied. GIF frame durations alternate between 30 and 40 ms because GIF
 timing has 10 ms resolution. The export has 1,263 frames, lasts 42.10 seconds
