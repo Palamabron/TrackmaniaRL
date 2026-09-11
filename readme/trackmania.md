@@ -1,4 +1,4 @@
-# Trackmania training and release workflow for 1.2.8
+# Trackmania training and release workflow for 1.2.9
 
 The default configuration below trains IQN from lidar and telemetry. The generated
 `run-ppo.yaml` trains PPO from telemetry, and `run-ppo-vision.yaml` trains PPO from
@@ -12,7 +12,7 @@ Install the released CLI, then create the game project only on a machine that
 has Trackmania, Openplanet and a virtual gamepad driver:
 
 ```powershell
-uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.8"
+uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.9"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -26,6 +26,56 @@ uv run trackmaniarl validate run.yaml
 > CI or an already provisioned machine. It does not provide a driver, so the
 > gamepad backend still requires a compatible ViGEmBus installation. Use the
 > keyboard backend when no virtual gamepad driver should be installed.
+
+### Linux game host (experimental)
+
+Trackmania has no native Linux build and Ubisoft Nadeo does not officially support
+it on Linux. TrackmaniaRL supports the complete local pipeline on a desktop Linux
+session by running the game and Openplanet through Steam/Proton while the Python
+process and virtual controller run natively. WSL is not a supported game host.
+
+1. Install Trackmania from [Steam](https://store.steampowered.com/app/2225070/Trackmania/).
+   If Steam does not offer the game, enable Steam Play for all titles in
+   **Settings > Compatibility** and select Proton Experimental.
+2. Install Protontricks using your distribution's package manager or Flatpak.
+   Download the current Openplanet installer, launch it with
+   `protontricks-launch Openplanet*.exe`, select Trackmania when prompted and
+   install into Trackmania's directory.
+3. In Trackmania's Steam properties, set this launch option so Proton loads
+   Openplanet's `dinput8.dll`:
+
+   ```text
+   WINEDLLOVERRIDES="dinput8=n,b" %command%
+   ```
+
+4. Install the native libevdev runtime (`libevdev2` on Debian/Ubuntu,
+   `libevdev` on Fedora/Arch), load `uinput` and grant the logged-in desktop user
+   access with a udev rule:
+
+   ```bash
+   sudo modprobe uinput
+   printf 'KERNEL=="uinput", TAG+="uaccess"\n' | \
+     sudo tee /etc/udev/rules.d/50-uinput.rules
+   sudo udevadm control --reload-rules
+   sudo udevadm trigger /dev/uinput
+   ```
+
+   Log out and back in if `/dev/uinput` is still inaccessible. Do not run the
+   trainer as root.
+5. Follow the project installation above, then verify the native controller
+   before opening a training session:
+
+   ```bash
+   uv run python -c "import vgamepad as vg; g = vg.VX360Gamepad(); g.reset(); g.update(); print('virtual gamepad ready')"
+   uv run trackmaniarl track check --config run.yaml
+   ```
+
+Install **TrackmaniaRL Connect** from Openplanet's in-game Plugin Manager just as
+on Windows. The native Python process and the Proton game share localhost, so no
+port forwarding is required. If Openplanet stops loading after a Trackmania
+update, rerun the latest Openplanet installer in the same Proton prefix and check
+the DLL override. Linux game integration is supported by the project but remains
+experimental because the game and compatibility layer can change independently.
 
 In Openplanet's **Plugin Manager**, install the signed
 [**TrackmaniaRL Connect**](https://openplanet.dev/plugin/sac_getdata) plugin

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.9 - 2026-09-11
+
+- Document the supported desktop Linux game pipeline using Steam/Proton,
+  Openplanet in the Trackmania prefix and native `uinput`/`libevdev` control.
+- Clarify that Linux game hosting is experimental because Trackmania has no
+  official native Linux support, and distinguish it from unsupported WSL use.
+
 ## 1.2.8 - 2026-09-10
 
 - Clarify that the neural-flow film evaluates a checkpoint trained for

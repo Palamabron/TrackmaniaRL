@@ -1,6 +1,6 @@
-# TrackmaniaRL 1.2.8 documentation
+# TrackmaniaRL 1.2.9 documentation
 
-The package version is 1.2.8. Configuration and checkpoint schemas are 2.0.
+The package version is 1.2.9. Configuration and checkpoint schemas are 2.0.
 These numbers describe different contracts. Historical benchmark and review pages
 retain the versions and dates of the runs they describe.
 
