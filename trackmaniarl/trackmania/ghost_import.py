@@ -27,6 +27,11 @@ from typing import Any
 
 import numpy as np
 
+from trackmaniarl.trackmania.actions import (
+    build_brake_tap_action_table,
+    continuous_control_to_discrete_indices_batch,
+)
+from trackmaniarl.trackmania.demonstration_data import Demonstration
 from trackmaniarl.trackmania.geometry import BoundaryGeometry, build_geometry_asset
 from trackmaniarl.trackmania.geometry_types import GeometryBuildRequest
 from trackmaniarl.trackmania.telemetry import DEFAULT_TELEMETRY_FIELD_COUNT
@@ -49,6 +54,9 @@ class GhostLap:
     slipping_wheels: np.ndarray
     checkpoint_times_ms: np.ndarray
     finish_time_ms: float
+    input_times_ms: np.ndarray
+    """When each input change reached the car; ``input_controls`` holds the new state."""
+    input_controls: np.ndarray
 
 
 def load_ghost_lap(path: Path, map_uid: str | None = None) -> GhostLap:
@@ -83,7 +91,29 @@ def load_ghost_lap(path: Path, map_uid: str | None = None) -> GhostLap:
         ),
         checkpoint_times_ms=np.asarray([c["time_ms"] for c in checkpoints[:-1]], dtype=np.float64),
         finish_time_ms=finish_time_ms,
+        **_input_events(document.get("inputs") or [], samples, extras),
     )
+
+
+def _input_events(
+    events: list[dict[str, Any]], samples: list[dict[str, Any]], extras: list[dict[str, Any]]
+) -> dict[str, np.ndarray]:
+    """Tick-exact input changes, or the sampled inputs when the export has none."""
+
+    if not events:
+        times = [s["time_ms"] for s in samples]
+        return {
+            "input_times_ms": np.asarray(times, dtype=np.float64),
+            "input_controls": np.asarray([_control(e) for e in extras], dtype=np.float64),
+        }
+    controls = [
+        (float(e.get("throttle", 0.0)), float(e.get("brake", 0.0)), float(e.get("steer", 0.0)))
+        for e in events
+    ]
+    return {
+        "input_times_ms": np.asarray([e["time_ms"] for e in events], dtype=np.float64),
+        "input_controls": np.asarray(controls, dtype=np.float64),
+    }
 
 
 def _control(extras: dict[str, Any]) -> tuple[float, float, float]:
@@ -212,6 +242,7 @@ def build_ghost_assets(request: GhostAssetRequest) -> GhostAssets:
             lap.map_uid,
             request.map_path,
             request.spacing_m,
+            already_paired=True,
         )
     )
     geometry = BoundaryGeometry(geometry_path, expected_map_uid=lap.map_uid)
@@ -224,3 +255,66 @@ def build_ghost_assets(request: GhostAssetRequest) -> GhostAssets:
         finish_time_s=np.asarray(lap.finish_time_ms / 1_000.0),
     )
     return GhostAssets(lap.map_uid, geometry_path, pace_path, lap.finish_time_ms / 1_000.0)
+
+
+DEMONSTRATION_STEP_MS = 10.0
+"""One physics tick: the cadence the demonstration quality gate expects of native telemetry."""
+
+
+def ghost_demonstration(lap: GhostLap, geometry_sha256: str) -> Demonstration:
+    """A demonstration archive for ``lap`` on the geometry with ``geometry_sha256``.
+
+    Ghost samples are 50 ms apart, too sparse for the demonstration gate and for
+    short taps. Frames are rebuilt every 10 ms tick: position by cubic Hermite
+    interpolation between samples (each sample's velocity is its slope), the
+    other motion fields linearly, and the controls from the ghost's tick-exact
+    input changes rather than from the samples.
+    """
+
+    samples = ghost_frames(lap)
+    times = np.append(np.arange(0.0, lap.finish_time_ms, DEMONSTRATION_STEP_MS), lap.finish_time_ms)
+    frames = _interpolated_frames(samples, times)
+    frames[:, 0] = np.searchsorted(lap.checkpoint_times_ms, times, side="right")
+    frames[:, 2] = 0.0
+    frames[-1, 2] = 1.0
+    change = np.searchsorted(lap.input_times_ms, times, side="right") - 1
+    controls = np.where(change[:, None] >= 0, lap.input_controls[np.maximum(change, 0)], 0.0)
+    frames[:, 30] = controls[:, 2]
+    frames[:, 31] = controls[:, 0]
+    frames[:, 32] = controls[:, 1] > 0.5
+    _, table = build_brake_tap_action_table()
+    applied = controls[:-1].astype(np.float32)
+    return Demonstration(
+        map_uid=lap.map_uid,
+        geometry_sha256=geometry_sha256,
+        action_repeat_frames=1,
+        frames=frames,
+        actions=continuous_control_to_discrete_indices_batch(applied, table),
+        controls=applied,
+        finish_time_s=lap.finish_time_ms / 1_000.0,
+    )
+
+
+def _interpolated_frames(samples: np.ndarray, times: np.ndarray) -> np.ndarray:
+    sample_times = samples[:, 3].astype(np.float64)
+    left = np.clip(np.searchsorted(sample_times, times, side="right") - 1, 0, len(samples) - 2)
+    span_s = (sample_times[left + 1] - sample_times[left]) / 1_000.0
+    u = np.clip((times - sample_times[left]) / 1_000.0 / np.maximum(span_s, 1e-9), 0.0, 1.0)
+    before, after = samples[left].astype(np.float64), samples[left + 1].astype(np.float64)
+    frames = before + (after - before) * u[:, None]
+    u = u[:, None]
+    h00, h10 = 2 * u**3 - 3 * u**2 + 1, u**3 - 2 * u**2 + u
+    h01, h11 = -2 * u**3 + 3 * u**2, u**3 - u**2
+    frames[:, 4:7] = (
+        h00 * before[:, 4:7]
+        + h10 * span_s[:, None] * before[:, 7:10]
+        + h01 * after[:, 4:7]
+        + h11 * span_s[:, None] * after[:, 7:10]
+    )
+    for start in (10, 13):
+        vectors = frames[:, start : start + 3]
+        frames[:, start : start + 3] = vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
+    held = u[:, 0] < 1.0
+    frames[:, 19:28] = np.where(held[:, None], before[:, 19:28], after[:, 19:28])
+    frames[:, 3] = times
+    return frames.astype(np.float32)

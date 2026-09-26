@@ -6,14 +6,20 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from trackmaniarl.trackmania.demonstration_data import save_demonstration
+from trackmaniarl.trackmania.demonstration_processing import validate_recording_quality
+from trackmaniarl.trackmania.environment import OpenPlanetEnvironmentFactory
+from trackmaniarl.trackmania.features import LidarFeaturePipeline
 from trackmaniarl.trackmania.geometry import BoundaryGeometry
 from trackmaniarl.trackmania.ghost_import import (
     GhostAssetRequest,
     build_ghost_assets,
     corridor_boundaries,
+    ghost_demonstration,
     ghost_frames,
     load_ghost_lap,
 )
+from trackmaniarl.trackmania.lidar_feature_setup import LidarFeatureConfig
 from trackmaniarl.trackmania.pace import PaceDemonstrationRequest, ReferencePaceProfile
 from trackmaniarl.trackmania.reward import TrajectoryReward
 from trackmaniarl.trackmania.reward_config import RewardConfig
@@ -112,3 +118,69 @@ def test_ghost_assets_load_as_geometry_pace_and_a_finishing_reward(tmp_path: Pat
             TransitionInput(frame[4:7], bool(frame[2]), frame[7:10], float(frame[3]), False, 0.0)
         )
     assert result.reason == "finished"
+
+
+def _with_input_events(path: Path) -> Path:
+    """Add tick-exact input changes that fall between the 50 ms samples."""
+
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["inputs"] = [
+        {"time_ms": -900, "steer": 0.0, "throttle": 1, "brake": 0},
+        {"time_ms": 1_230, "steer": -0.4, "throttle": 1, "brake": 0},
+        {"time_ms": 2_510, "steer": -0.4, "throttle": 1, "brake": 1},
+        {"time_ms": 2_540, "steer": -0.4, "throttle": 1, "brake": 0},
+    ]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    return path
+
+
+def test_demonstration_rebuilds_ticks_with_exact_input_changes(tmp_path: Path) -> None:
+    lap = load_ghost_lap(_with_input_events(_left_turn_ghost(tmp_path / "ghost.json")))
+
+    demonstration = ghost_demonstration(lap, "0" * 64)
+
+    validate_recording_quality(demonstration)
+    times = demonstration.frames[:, 3]
+    steer = demonstration.controls[:, 2]
+    brake = demonstration.controls[:, 1]
+    assert steer[times[:-1] < 1_230].tolist() == pytest.approx(
+        [0.0] * int(np.sum(times[:-1] < 1_230))
+    )
+    assert steer[(times[:-1] >= 1_230)] == pytest.approx(-0.4)
+    assert np.flatnonzero(brake).tolist() == [251, 252, 253]
+    positions = demonstration.frames[:-1, 4:7]
+    radius = np.linalg.norm((positions - [RADIUS_M, 12.0, 0.0])[:, [0, 2]], axis=1)
+    assert np.allclose(radius, RADIUS_M, atol=0.01)
+
+
+def test_ghost_demonstration_loads_as_finishing_transitions(tmp_path: Path) -> None:
+    ghost = _with_input_events(_left_turn_ghost(tmp_path / "ghost.json"))
+    map_path = tmp_path / "map.Map.Gbx"
+    map_path.write_bytes(b"map")
+    assets = build_ghost_assets(GhostAssetRequest(ghost, map_path, tmp_path / "assets"))
+    geometry = BoundaryGeometry(assets.geometry_path, expected_map_uid="ghost-test-map")
+    path = save_demonstration(
+        tmp_path / "demo", ghost_demonstration(load_ghost_lap(ghost), geometry.sha256)
+    )
+    factory = OpenPlanetEnvironmentFactory(
+        {
+            "geometry_path": str(assets.geometry_path),
+            "expected_map_uid": "ghost-test-map",
+            "decision_interval_ms": 50.0,
+            "action_repeat_frames": 1,
+            "demonstration_control_aggregation": True,
+            "minimum_finish_steps": 1,
+        }
+    )
+    pipeline = LidarFeaturePipeline(
+        LidarFeatureConfig(
+            assets.geometry_path,
+            expected_map_uid="ghost-test-map",
+            include_control_inputs=False,
+        )
+    )
+
+    transitions = factory.load_demonstration(path, pipeline)
+
+    assert len(transitions) == int(np.ceil(FINISH_MS / 50.0))
+    assert transitions[-1].terminated
