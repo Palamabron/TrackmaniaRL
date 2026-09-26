@@ -14,7 +14,7 @@ from typing import Any
 from trackmaniarl.core.spec import RunSpec
 
 _FINGERPRINTED_ASSET_PATHS = frozenset(
-    {"geometry_path", "pace_reference_path", "reward_points_path"}
+    {"geometry_path", "pace_reference_path", "reward_points_path", "steering_curve_path"}
 )
 
 

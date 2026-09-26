@@ -110,6 +110,28 @@ dead zone and cannot provide rumble collision signals. The choice belongs to
 the environment, not the model, so the same policy can drive either backend.
 expect different driving dynamics after analog-to-digital conversion.
 
+### Check the gamepad's steering curve
+
+Trackmania bends the virtual stick through its own **Analog Sensitivity** and
+**Analog Dead Zone** (Settings > Controls, per car) before the car steers. At a
+low sensitivity the smaller steering levels all drive straight: on one measured
+install at sensitivity 0.1 and dead zone 0.05, 7 of the 13 default levels steered
+identically, so the policy could not tell them apart. With the car sitting on a
+loaded map and no gas, measure it:
+
+```powershell
+uv run trackmaniarl track check-steering --output assets/steering-curve.json
+```
+
+The command reports how many steering levels steer differently. Either set the
+sensitivity to 1.0 and the dead zone to its minimum and measure again, or keep the
+measured curve and point the environment at it. The gamepad backend then sends
+the stick position that produces each requested steer:
+
+```yaml
+        steering_curve_path: assets/steering-curve.json
+```
+
 Before starting separate `learner` or `actor` commands, generate one random
 distributed token and store the same value as
 `TRACKMANIARL_DISTRIBUTED_TOKEN` in each project's ignored `.env` file:

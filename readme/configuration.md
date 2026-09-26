@@ -190,6 +190,7 @@ LiDAR observations, racing-line optimization or a reference pace profile.
 | `action_repeat_frames` | `4` | Native telemetry frames per decision, `1..20`. Must be `1` when `decision_interval_ms` is set. |
 | `decision_interval_ms` | null | Physical decision grid `(0,250]` ms. The generated Trackmania template uses 50 ms and repeat 1. |
 | `control_backend` | `gamepad` | `gamepad` preserves analog controls, `keyboard` digitizes them. |
+| `steering_curve_path` | null | Measured stick-to-steer curve from `track check-steering`; the gamepad sends the stick that produces each requested steer. |
 | `compact_action_ids` | null | Explicit subset of the 78-action brake-tap table, model and BC IDs must match exactly. |
 | `position_indices`, `velocity_indices` | protocol defaults | Three unique telemetry indices each. |
 | `expected_map_uid` | null | Optional active-map UID assertion for training/smoke. Configure it for every release run. |
