@@ -231,6 +231,10 @@ def _interpolate_guidance_positions(
     ).astype(np.float32)
 
 
+MAX_CAR_SPEED_MPS = 280.0
+"""Trackmania's top speed, 1000 km/h, bounds how far a lap can move between frames."""
+
+
 def _monotonic_projection(
     positions: np.ndarray, trajectory: np.ndarray, race_times_s: np.ndarray
 ) -> np.ndarray:
@@ -241,7 +245,9 @@ def _monotonic_projection(
         elapsed_s = (
             0.0 if frame_index == 0 else race_times_s[frame_index] - race_times_s[frame_index - 1]
         )
-        max_distance = cumulative_distance[previous] + 100.0 * max(0.0, elapsed_s) + 2.0
+        max_distance = (
+            cumulative_distance[previous] + MAX_CAR_SPEED_MPS * max(0.0, elapsed_s) + 2.0
+        )
         stop = min(
             len(trajectory),
             int(np.searchsorted(cumulative_distance, max_distance, side="right")),

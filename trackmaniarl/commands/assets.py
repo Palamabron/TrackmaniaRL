@@ -288,7 +288,9 @@ def _print_steering_curve(curve: SteeringCurve) -> None:
 
 def _build_from_ghost(args: argparse.Namespace) -> None:
     assets = build_ghost_assets(
-        GhostAssetRequest(args.ghost, args.map_path, args.output_dir, args.half_width, args.spacing)
+        GhostAssetRequest(
+            args.ghost, args.map_path, args.output_dir, args.half_width, args.spacing, args.map_uid
+        )
     )
     print(f"Built geometry asset: {assets.geometry_path}")
     print(f"Built pace reference: {assets.pace_path} ({assets.finish_time_s:.3f} s)")

@@ -233,4 +233,5 @@ def _register_ghost_import(commands: CommandParsers) -> None:
         "--half-width", type=float, default=8.0, help="metres of corridor either side of the line"
     )
     parser.add_argument("--spacing", type=float, default=2.0)
+    parser.add_argument("--map-uid", help="required for a .Ghost.Gbx export, which has no UID")
     parser.set_defaults(handler=_build_from_ghost)

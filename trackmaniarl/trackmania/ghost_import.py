@@ -51,10 +51,16 @@ class GhostLap:
     finish_time_ms: float
 
 
-def load_ghost_lap(path: Path) -> GhostLap:
-    """Read a ``tmai-gbx`` JSON export and keep the samples up to the finish."""
+def load_ghost_lap(path: Path, map_uid: str | None = None) -> GhostLap:
+    """Read a ``tmai-gbx`` JSON export and keep the samples up to the finish.
+
+    A ``.Ghost.Gbx`` carries no map UID; pass the map's UID for one.
+    """
 
     document = json.loads(path.read_text(encoding="utf-8"))
+    map_uid = map_uid or str(document.get("map_uid") or "")
+    if not map_uid:
+        raise ValueError(f"{path} has no map UID; pass the map's UID")
     checkpoints = document.get("checkpoints") or []
     if not checkpoints:
         raise ValueError(f"{path} has no checkpoint times, so its finish is unknown")
@@ -65,7 +71,7 @@ def load_ghost_lap(path: Path) -> GhostLap:
         raise ValueError(f"{path} has fewer than two samples before the finish")
     extras = [s.get("extras") or {} for s in samples]
     return GhostLap(
-        map_uid=str(document["map_uid"]),
+        map_uid=map_uid,
         times_ms=np.asarray([s["time_ms"] for s in samples], dtype=np.float64),
         positions=np.asarray([s["position"] for s in samples], dtype=np.float64),
         velocities=np.asarray([s["velocity"] for s in samples], dtype=np.float64),
@@ -177,6 +183,7 @@ class GhostAssetRequest:
     output_dir: Path
     half_width_m: float = 8.0
     spacing_m: float = 2.0
+    map_uid: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -190,7 +197,7 @@ class GhostAssets:
 def build_ghost_assets(request: GhostAssetRequest) -> GhostAssets:
     """Write corridor walls, a geometry asset and a pace reference for the ghost's map."""
 
-    lap = load_ghost_lap(request.ghost_path)
+    lap = load_ghost_lap(request.ghost_path, request.map_uid)
     request.output_dir.mkdir(parents=True, exist_ok=True)
     stem = request.output_dir / lap.map_uid
     left, right = corridor_boundaries(lap, request.half_width_m)
