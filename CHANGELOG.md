@@ -7,6 +7,13 @@
   A saved curve set as `steering_curve_path` makes the gamepad backend send the stick
   position that produces each requested steer. The curve file is part of the run
   fingerprint.
+- Default `velocity_to_mps_scale` to `1.0`. The supported plugin sends m/s, and the
+  old `0.001` default left every velocity and speed observation channel near zero for
+  template users (the project's own benchmark configurations already set `1`).
+- Bound kinematically limited reward progress per step instead of by total distance
+  driven. A racing line is shorter than the centre line, so a corner-cutting lap could
+  never reach `finish_progress` and its finish was refused.
+
 
 ## 1.2.11 - 2026-09-28
 
