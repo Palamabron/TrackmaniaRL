@@ -233,7 +233,7 @@ These paths are under `components.feature_pipeline.kwargs.config` for
 | `mask_current_control_inputs` | `false` | Zeros current controls and requires them to be present. |
 | `local_velocity_features` | `false` | Rotates velocity into car coordinates, required by horizontal BC reflection. |
 | `use_racing_line` | `false` | Uses the asset racing line instead of reward center where supported. |
-| `max_speed_mps`, `velocity_to_mps_scale` | `80`, `.001` | Physical speed normalization and native velocity-unit conversion. |
+| `max_speed_mps`, `velocity_to_mps_scale` | `80`, `1` | Physical speed normalization and native velocity-unit conversion. |
 | `max_time_delta_s` | `1` s | Rejects stale finite-difference dynamics. |
 | `limit_progress_by_kinematics` | `false` | Opt-in physical bound for feature progress projection. Reward projection has the independent environment setting above. |
 | `nearest_forward_points`, `nearest_backward_points` | `128`, `10` | Feature projection search window. |
