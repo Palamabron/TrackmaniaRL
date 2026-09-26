@@ -39,6 +39,11 @@ def _register_benchmark(commands: CommandParsers) -> None:
     parser.add_argument("--target-mean", type=float)
     parser.add_argument("--max-step-race-time-ms", type=float)
     parser.add_argument("--min-finish-rate", type=float)
+    parser.add_argument(
+        "--stop-file",
+        type=Path,
+        help="cancel evaluation when this file is created, preserving partial trial results",
+    )
     _add_recording_options(parser)
     parser.add_argument(
         "--reject-telemetry-skips",

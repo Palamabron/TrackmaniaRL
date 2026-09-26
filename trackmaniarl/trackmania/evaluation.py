@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+from collections.abc import Callable, Iterator
 from dataclasses import asdict, dataclass, field, replace
 from datetime import UTC, datetime
+from math import isfinite
+from numbers import Real
 from pathlib import Path
 from statistics import median
-from time import perf_counter
+from time import perf_counter, sleep
 from typing import Any, cast
 
 from trackmaniarl.core.contracts import (
@@ -17,6 +21,7 @@ from trackmaniarl.core.contracts import (
     Policy,
     PolicyMode,
 )
+from trackmaniarl.core.environment_errors import EnvironmentPausedError
 from trackmaniarl.core.spec import EvaluationMapSpec, EvaluationSuiteSpec
 from trackmaniarl.experiments.evaluation import EvaluationResult, aggregate_results
 from trackmaniarl.trackmania.diagnostics import (
@@ -35,9 +40,18 @@ _TRIAL_FIELDS = (
     "steps",
     "finished",
     "finish_time_s",
+    "finish_time_source",
+    "termination_reason",
     "crashed",
     "reward",
     "action_latency_ms",
+    "action_latency_ms_p95",
+    "vision_capture_ms",
+    "vision_capture_ms_p95",
+    "vision_capture_measurement_count",
+    "vision_pairing_delay_ms",
+    "vision_pairing_delay_ms_p95",
+    "vision_pairing_measurement_count",
     "controller_apply_ms",
     "telemetry_wait_ms",
     "control_brake_tap_fraction",
@@ -55,6 +69,10 @@ _TRIAL_FIELDS = (
     "controller_error",
     "progress_bins",
 )
+
+
+class EvaluationCancelledError(RuntimeError):
+    """The operator stopped an incomplete suite; retained trials are not a full benchmark."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,6 +94,7 @@ class _EpisodeState:
     finish_time_s: float | None = None
     progress_pct: float = 0.0
     telemetry_error: str | None = None
+    termination_reason: str = "unknown"
 
 
 @dataclass(slots=True)
@@ -132,27 +151,50 @@ class TrackmaniaEvaluator:
         self.max_episode_steps = request.max_episode_steps
         self.run_dir = Path(request.run_dir) if request.run_dir is not None else None
         self.checkpoint: str | None = None
+        self.checkpoint_sha256: str | None = None
+        self._stop_requested: Callable[[], bool] = lambda: False
+
+    def set_stop_requested(self, stop_requested: Callable[[], bool]) -> None:
+        """Set an optional cancellation check, including while the game is unavailable."""
+
+        self._stop_requested = stop_requested
+
+    def _check_stop_requested(self) -> None:
+        if self._stop_requested():
+            raise EvaluationCancelledError("Evaluation stopped; the suite is incomplete")
 
     def set_checkpoint(self, checkpoint: str | Path) -> None:
         """Attach the exact policy checkpoint to the next versioned evaluation artifact."""
 
         self.checkpoint = str(checkpoint)
+        self.checkpoint_sha256 = _checkpoint_sha256(Path(checkpoint))
 
     def evaluate(self, policy: Policy) -> dict[str, float]:
         """Run the fixed suite and return the standard comparable metric set."""
 
-        results = self._evaluation_results(policy)
+        results: list[EvaluationResult] = []
+        try:
+            for result in self._evaluation_results(policy):
+                results.append(result)
+            self._check_stop_requested()
+        except EvaluationCancelledError:
+            if self.run_dir is not None:
+                metrics = self._evaluation_metrics(results) if results else {}
+                self._write_artifact(results, metrics, status="cancelled")
+            raise
         metrics = self._evaluation_metrics(results)
         if self.run_dir is not None:
             self._write_artifact(results, metrics)
         return metrics
 
-    def _evaluation_results(self, policy: Policy) -> list[EvaluationResult]:
-        return [
-            result for map_spec in self.suite.maps for result in self._map_results(policy, map_spec)
-        ]
+    def _evaluation_results(self, policy: Policy) -> Iterator[EvaluationResult]:
+        for map_spec in self.suite.maps:
+            self._check_stop_requested()
+            yield from self._map_results(policy, map_spec)
 
-    def _map_results(self, policy: Policy, map_spec: EvaluationMapSpec) -> list[EvaluationResult]:
+    def _map_results(
+        self, policy: Policy, map_spec: EvaluationMapSpec
+    ) -> Iterator[EvaluationResult]:
         geometry = BoundaryGeometry(
             map_spec.geometry_path, expected_map_uid=map_spec.expected_map_uid
         )
@@ -160,10 +202,11 @@ class TrackmaniaEvaluator:
         self._set_evaluation_map(map_spec)
         environment = self._create_environment(map_spec, seed=0)
         try:
-            return [
-                self._evaluate_episode(_EpisodeRequest(policy, map_spec, index, 0, environment))
-                for index in range(self.suite.trials_per_map)
-            ]
+            for index in range(self.suite.trials_per_map):
+                self._check_stop_requested()
+                yield self._evaluate_episode(
+                    _EpisodeRequest(policy, map_spec, index, 0, environment)
+                )
         finally:
             self._close_environment(environment)
 
@@ -198,8 +241,24 @@ class TrackmaniaEvaluator:
                 context.started = perf_counter()
             self._write_trial_event(request, "start")
             self._run_episode(request, context, state)
+        except EnvironmentPausedError:
+            # Retain this interrupted trial as a DNF; never retry away a failure.
+            state.termination_reason = "capture_interruption"
+            state.finished = False
+            state.finish_time_s = None
+        except EvaluationCancelledError:
+            if state.steps == 0:
+                # A cancelled reset has not produced a policy-controlled trial.
+                self._write_trial_event(request, "cancelled")
+                raise
+            state.termination_reason = "operator_interruption"
+            state.finished = False
+            state.finish_time_s = None
         except (TimeoutError, ConnectionError) as exc:
             state.telemetry_error = f"{type(exc).__name__}: {exc}"
+            state.termination_reason = "telemetry_error"
+            state.finished = False
+            state.finish_time_s = None
         result = self._episode_result(_EpisodeOutcome(request, context, state))
         self._write_trial_event(request, "end", result)
         return result
@@ -232,12 +291,15 @@ class TrackmaniaEvaluator:
     ) -> None:
         loop = self._start_episode(request, context)
         for _ in range(self.max_episode_steps):
+            self._check_stop_requested()
             step = self._take_step(loop)
             if self._record_step(loop, state, step):
                 break
+        else:
+            state.termination_reason = "max_steps"
 
     def _start_episode(self, request: _EpisodeRequest, context: _EpisodeContext) -> _EpisodeLoop:
-        observation, _ = context.environment.reset(seed=request.seed)
+        observation, _ = self._reset_available(request)
         self._reset_component(self.feature_pipeline)
         self._reset_component(request.policy)
         prepared = self.feature_pipeline.transform_observation(observation)
@@ -246,7 +308,7 @@ class TrackmaniaEvaluator:
         )
 
     def _prewarm_policy(self, request: _EpisodeRequest) -> None:
-        observation, _ = request.environment.reset(seed=request.seed)
+        observation, _ = self._reset_available(request)
         self._reset_component(self.feature_pipeline)
         self._reset_component(request.policy)
         prepared = self.feature_pipeline.transform_observation(observation)
@@ -258,6 +320,14 @@ class TrackmaniaEvaluator:
         finally:
             self._reset_component(self.feature_pipeline)
             self._reset_component(request.policy)
+
+    def _reset_available(self, request: _EpisodeRequest) -> Any:
+        while True:
+            self._check_stop_requested()
+            try:
+                return request.environment.reset(seed=request.seed)
+            except EnvironmentPausedError:
+                sleep(0.5)
 
     @staticmethod
     def _reset_component(component: Any) -> None:
@@ -291,7 +361,11 @@ class TrackmaniaEvaluator:
             float(step.info.get("progress_pct", state.progress_pct)),
             step.action,
             loop.policy,
-            step.info,
+            (
+                None
+                if "race_time_ms" in step.info and _race_time_seconds(step.info) is None
+                else step.info
+            ),
         )
         loop.diagnostics.record(record)
         loop.observation = step.observation
@@ -299,11 +373,15 @@ class TrackmaniaEvaluator:
         state.reward_sum += step.reward
         state.steps += 1
         self._record_outcome(state, step.info)
+        if (step.terminated or step.truncated) and not step.info.get("termination_reason"):
+            state.termination_reason = "truncated" if step.truncated else "terminated"
         return step.terminated or step.truncated
 
     @staticmethod
     def _record_outcome(state: _EpisodeState, info: dict[str, Any]) -> None:
         termination_reason = str(info.get("termination_reason", ""))
+        if termination_reason:
+            state.termination_reason = termination_reason
         state.progress_pct = float(info.get("progress_pct", state.progress_pct))
         state.finished = termination_reason == "finished"
         collision = bool(info.get("collision", False)) or bool(
@@ -318,9 +396,8 @@ class TrackmaniaEvaluator:
                 "off_track",
             }
         )
-        race_time_ms = info.get("race_time_ms")
-        if state.finished and isinstance(race_time_ms, (float, int)) and race_time_ms > 0.0:
-            state.finish_time_s = float(race_time_ms) / 1_000.0
+        if state.finished:
+            state.finish_time_s = _race_time_seconds(info)
 
     def _episode_result(self, outcome: _EpisodeOutcome) -> EvaluationResult:
         context, state = outcome.context, outcome.state
@@ -333,6 +410,12 @@ class TrackmaniaEvaluator:
             action_latency_ms=state.observability.mean_action_latency_ms(state.steps),
             throughput_fps=state.steps / elapsed_s if elapsed_s > 0.0 else 0.0,
             progress_pct=state.progress_pct,
+            termination_reason=state.termination_reason,
+            finish_time_source=(
+                ("race_clock" if state.finish_time_s is not None else "elapsed_fallback")
+                if state.finished
+                else None
+            ),
         )
         return self._annotated_result(result, outcome)
 
@@ -361,10 +444,18 @@ class TrackmaniaEvaluator:
         factory = cast(Any, self.environment_factory)
         return factory.create(seed=seed, evaluation_map=map_spec)
 
-    def _write_artifact(self, results: list[EvaluationResult], metrics: dict[str, float]) -> None:
+    def _write_artifact(
+        self,
+        results: list[EvaluationResult],
+        metrics: dict[str, float],
+        *,
+        status: str = "complete",
+    ) -> None:
         assert self.run_dir is not None
         target = self.run_dir / "evaluation.json"
         payload = self._artifact_payload(results, metrics)
+        payload["status"] = status
+        payload["expected_trials"] = len(self.suite.maps) * self.suite.trials_per_map
         target.parent.mkdir(parents=True, exist_ok=True)
         temporary = target.with_suffix(".json.tmp")
         temporary.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
@@ -373,11 +464,17 @@ class TrackmaniaEvaluator:
     def _artifact_payload(
         self, results: list[EvaluationResult], metrics: dict[str, float]
     ) -> dict[str, Any]:
+        if (
+            self.checkpoint is not None
+            and _checkpoint_sha256(Path(self.checkpoint)) != self.checkpoint_sha256
+        ):
+            raise RuntimeError("Checkpoint changed during evaluation; refusing a false binding")
         return {
             "schema_version": "1",
             "plugin_protocol_version": PLUGIN_PROTOCOL_VERSION,
             "suite": {"name": self.suite.name, "version": self.suite.version},
             "checkpoint": self.checkpoint,
+            "checkpoint_sha256": self.checkpoint_sha256,
             "metrics": metrics,
             "trials": [self._trial_payload(result) for result in results],
         }
@@ -393,3 +490,17 @@ def _policy_action_count(policy: Policy) -> int:
     if not isinstance(count, int) or count < 2:
         raise ValueError("TrackMania policy must expose at least two actions")
     return count
+
+
+def _checkpoint_sha256(path: Path) -> str:
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def _race_time_seconds(info: dict[str, Any]) -> float | None:
+    value = info.get("race_time_ms")
+    if isinstance(value, Real) and not isinstance(value, bool):
+        milliseconds = float(value)
+        if isfinite(milliseconds) and milliseconds > 0.0:
+            return milliseconds / 1_000.0
+    return None
