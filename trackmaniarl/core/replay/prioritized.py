@@ -34,6 +34,7 @@ class _PrioritizedOptions(TypedDict):
     expert_fraction_final: NotRequired[float | None]
     expert_fraction_anneal_transitions: NotRequired[int | None]
     uniform_mix: NotRequired[float]
+    allow_padded_history: NotRequired[bool]
     seed: NotRequired[int]
 
 
@@ -49,6 +50,7 @@ class _PrioritizedConfig:
     expert_fraction_final: float | None = None
     expert_fraction_anneal_transitions: int | None = None
     uniform_mix: float = 0.0
+    allow_padded_history: bool = False
     seed: int = 0
 
     @classmethod
@@ -125,6 +127,7 @@ class PrioritizedSampler:
         self.expert_fraction_final = config.expert_fraction_final
         self.expert_fraction_anneal_transitions = config.expert_fraction_anneal_transitions
         self.uniform_mix = config.uniform_mix
+        self.allow_padded_history = config.allow_padded_history
 
     def _expert_fraction_at(self, transition_count: int) -> float:
         if self.expert_fraction_final is None:
@@ -150,6 +153,7 @@ class PrioritizedSampler:
 
     def _initialize_tracking(self, seed: int) -> None:
         self._rng = random.Random(seed)
+        self._replay_store: ReplayStore | None = None
         self._active_count = 0
         self._elite_active_count = 0
         self._expert_active_count = 0
@@ -158,6 +162,15 @@ class PrioritizedSampler:
         self._sequence_length: int | None = None
         self._maximum_priority = 1.0
         self._lock = RLock()
+
+    def _bind_store(self, store: ReplayStore) -> None:
+        """Keep local transition IDs from inheriting another store's priorities."""
+        if self._replay_store is not None and self._replay_store is not store:
+            self._initialize_arrays()
+            prioritized_state._reset_runtime_index(self)
+            self._maximum_priority = 1.0
+        # First binding after checkpoint restore keeps the restored priorities.
+        self._replay_store = store
 
     def sample(self, store: ReplayStore, request: BatchRequest) -> TrainingBatch:
         if _is_incremental_store(store):

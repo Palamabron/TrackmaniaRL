@@ -49,7 +49,8 @@ class _ValidationReplay:
 
 
 def _populate_validation_replay(run: ResolvedRun, request: BatchRequest) -> None:
-    count = max(8, request.batch_size + request.sequence_length - 1)
+    # Both halves need complete sequences when the sampler reserves expert slots.
+    count = max(8, 2 * (request.batch_size + request.sequence_length + request.n_step - 2))
     context = _ValidationReplay(run, run.learner.policy(), count)
     for step in range(count):
         run.replay_store.append(_validation_transition(context, step))

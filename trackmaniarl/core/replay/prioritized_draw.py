@@ -37,6 +37,7 @@ def _sample_incremental_ids(
     request: BatchRequest,
 ) -> tuple[list[TransitionId], tuple[float, ...], float, dict[str, float]]:
     with sampler._lock:
+        sampler._bind_store(store)
         sampler._synchronize_incremental_store(store, request.n_step, request.sequence_length)
         _validate_active_count(sampler, request.batch_size)
         transition_ids, probabilities = _incremental_choices(sampler, request)

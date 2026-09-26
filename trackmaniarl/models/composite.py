@@ -49,6 +49,17 @@ class BatchLayout(Enum):
     SEQUENCE = "sequence"
 
 
+def history_padding(masks: torch.Tensor, shape: tuple[int, int]) -> torch.Tensor:
+    """Validate episode-prefix padding and return the missing count for each row."""
+    if masks.shape != shape:
+        raise ValueError("history masks must match batch and time axes")
+    if masks.dtype != torch.bool:
+        raise ValueError("history masks must be boolean")
+    if not shape[1] or not bool(masks[:, -1].all()) or bool((masks[:, :-1] & ~masks[:, 1:]).any()):
+        raise ValueError("history masks must contain only a missing prefix")
+    return (~masks).sum(dim=1)
+
+
 def _flatten_sequence(observation: PyTree, batch_size: int, time_steps: int) -> PyTree:
     def flatten_leaf(leaf: Any) -> Any:
         if not isinstance(leaf, torch.Tensor):
@@ -128,6 +139,36 @@ class CompositeValueModel(nn.Module):
         batch = FrameBatchAdapter.flatten(observation, layout)
         frame_features = batch.restore(self.encode_frames(batch.frames))
         return cast(torch.Tensor, self.temporal.unroll(frame_features, burn_in))
+
+    def encode_masked_sequence(  # noqa: PLR0913 - sequence layout, burn-in and validity are independent
+        self,
+        observation: PyTree,
+        layout: BatchLayout,
+        burn_in: int,
+        *,
+        masks: torch.Tensor | None,
+    ) -> torch.Tensor:
+        """Exclude synthetic history from recurrent state, retaining loss alignment."""
+        if masks is None or layout is BatchLayout.FRAMES:
+            return self.encode_sequence(observation, layout, burn_in)
+        batch = FrameBatchAdapter.flatten(observation, layout)
+        padding = history_padding(masks, (batch.batch_size, batch.time_steps))
+        if not 0 <= burn_in < batch.time_steps:
+            raise ValueError("burn_in must be in [0, time)")
+        if not bool(padding.any()):
+            return self.encode_sequence(observation, layout, burn_in)
+        features = batch.restore(self.encode_frames(batch.frames))
+        rows = []
+        outputs = []
+        for start in torch.unique(padding).tolist():
+            indices = (padding == start).nonzero(as_tuple=True)[0]
+            values = self.temporal.unroll(features[indices, start:], max(0, burn_in - start))
+            # Invalid output positions still exist for the existing loss mask.
+            values = torch.nn.functional.pad(values, (0, 0, max(0, start - burn_in), 0))
+            rows.append(indices)
+            outputs.append(values)
+        order = torch.cat(rows).argsort()
+        return torch.cat(outputs)[order]
 
     def support(
         self,
