@@ -16,7 +16,13 @@
 - Add `track from-ghost`, which builds a map's geometry and pace reference from the
   `tmai-gbx` JSON export of one finished lap: the lap's line inside a corridor of
   virtual walls replaces both hand-driven boundaries, and its timing becomes the
-  pace reference and `time_attack_target_s`.## 1.2.9 - 2026-09-11
+  pace reference and `time_attack_target_s`. A `.Ghost.Gbx` export carries no map UID,
+  so the command takes `--map-uid`.
+- Bound pace-reference projection and the default `max_projected_speed_mps` by
+  Trackmania's 1000 km/h top speed instead of 100 m/s. A lap faster than 360 km/h
+  outran the projection, so its pace reference was rejected as not reaching the end.
+
+## 1.2.9 - 2026-09-11
 
 
 
