@@ -18,6 +18,13 @@
   virtual walls replaces both hand-driven boundaries, and its timing becomes the
   pace reference and `time_attack_target_s`. A `.Ghost.Gbx` export carries no map UID,
   so the command takes `--map-uid`.
+- Add `ghost_demonstration`, which rebuilds a ghost lap as a native 10 ms demonstration
+  (Hermite-interpolated motion between the 50 ms samples, controls from the ghost's
+  tick-exact input changes) that passes the demonstration quality gate, so leaderboard
+  ghosts can seed demonstration replay.
+- Build ghost corridors from already-paired walls (`GeometryBuildRequest.already_paired`).
+  Proximity pairing picked the wrong section where a track passes over itself, and 7 of
+  88 record laps then failed their pace reference.
 - Bound pace-reference projection and the default `max_projected_speed_mps` by
   Trackmania's 1000 km/h top speed instead of 100 m/s. A lap faster than 360 km/h
   outran the projection, so its pace reference was rejected as not reaching the end.
