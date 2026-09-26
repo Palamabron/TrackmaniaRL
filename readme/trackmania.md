@@ -1,4 +1,4 @@
-# Trackmania training and release workflow for 1.2.9
+# Trackmania training and release workflow for 1.2.10
 
 The default configuration below trains IQN from lidar and telemetry. The generated
 `run-ppo.yaml` trains PPO from telemetry, and `run-ppo-vision.yaml` trains PPO from
@@ -12,7 +12,7 @@ Install the released CLI, then create the game project only on a machine that
 has Trackmania, Openplanet and a virtual gamepad driver:
 
 ```powershell
-uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.9"
+uv tool install --index https://download.pytorch.org/whl/cpu --with "torch==2.11.0+cpu" "trackmaniarl==1.2.10"
 trackmaniarl init my-agent --template trackmania
 cd my-agent
 uv sync
@@ -304,6 +304,17 @@ acceptance threshold is missed:
 uv run trackmaniarl benchmark run.yaml artifacts/trackmania-iqn-lidar/checkpoints/distributed-update-XXXXXXXX.pt
 ```
 
+With the first-party evaluator, add `--stop-file PATH` to cancel a benchmark
+without a console interrupt. The path must not already exist. Creating it stops
+the evaluation between control steps or during a window-availability pause, then
+closes the environment. The resulting `evaluation.json` has `status: cancelled`,
+retains completed trials and any active trial as an `operator_interruption` DNF,
+and leaves unstarted trials absent. It cannot pass as a completed benchmark.
+Native environment calls must return before cancellation can be observed.
+Successful artifacts use `status: complete`; both include the expected trial
+count and the evaluated checkpoint's SHA-256 digest. Checkpoint replacement
+during evaluation is rejected.
+
 For a diagnostic run that rejects every lap containing one or more skipped
 telemetry frames, add `--reject-telemetry-skips`. This is intentionally stricter
 than the normal runtime-health gate and is useful for measuring the effect of
@@ -466,3 +477,22 @@ evidence.
   with `--map-path`. The generated `.npz` is intentionally only a placeholder.
 - **Reset times out:** confirm that the configured `gamepad` or `keyboard`
   backend actually restarts the race timer before increasing any timeout.
+
+### Window-aware vision capture (Windows)
+
+For `VisionEnvironmentFactory`, replace the fixed `capture` argument with
+`window_capture: {title: Trackmania, client_width: 1280, client_height: 720}`.
+The two capture modes are mutually exclusive. Window capture measures the client
+area in physical pixels, restores the configured client size at each episode,
+and follows its screen position. The feature pipeline still determines the
+model's image dimensions. Telemetry-only environments do not resize windows.
+
+Keep the game visible and in the foreground. Losing focus or minimizing it
+releases controls and pauses collection; returning to the game starts a fresh
+episode and observation history. An interrupted evaluation trial remains a DNF.
+Frames captured while the window moves are discarded. The runtime does not steal
+focus. This mode requires Windows; fixed-region capture remains available.
+
+Training and resume also accept `--stop-file PATH`. Use a path that does not
+already exist, then create the file to request orderly shutdown. Blocking native
+calls must return before the request can be observed.

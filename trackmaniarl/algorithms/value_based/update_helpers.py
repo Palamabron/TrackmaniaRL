@@ -114,13 +114,20 @@ def features(
 def _encoded_features(learner: DiscreteValueLearner, view: ValueBatchView) -> _EncodedFeatures:
     assert isinstance(learner.model, CompositeValueModel)
     layout = BatchLayout.SEQUENCE if view.sequence else BatchLayout.FRAMES
-    online = learner.model.encode_sequence(view.batch.observations, layout, learner.burn_in)
-    target = learner.target_model.encode_sequence(view.batch.observations, layout, learner.burn_in)
-    final_online = learner.model.encode_sequence(
-        view.batch.next_observations, layout, learner.burn_in
+    next_masks = view.batch.metadata.get("next_observation_masks")
+    if next_masks is not None:
+        next_masks = torch.as_tensor(next_masks, device=learner.device, dtype=torch.bool)
+    online = learner.model.encode_masked_sequence(
+        view.batch.observations, layout, learner.burn_in, masks=view.masks
+    )
+    target = learner.target_model.encode_masked_sequence(
+        view.batch.observations, layout, learner.burn_in, masks=view.masks
+    )
+    final_online = learner.model.encode_masked_sequence(
+        view.batch.next_observations, layout, learner.burn_in, masks=next_masks
     )[:, -1]
-    final_target = learner.target_model.encode_sequence(
-        view.batch.next_observations, layout, learner.burn_in
+    final_target = learner.target_model.encode_masked_sequence(
+        view.batch.next_observations, layout, learner.burn_in, masks=next_masks
     )[:, -1]
     return _EncodedFeatures(online, target, final_online, final_target)
 

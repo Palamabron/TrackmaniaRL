@@ -198,7 +198,9 @@ class TorchLearnerBase:
         self._validate_batch_layout(batch)
         event = batch.metadata.get("_trackmaniarl_transfer_event")
         if event is not None:
-            torch.cuda.current_stream(self.device).wait_event(event)
+            stream = torch.cuda.current_stream(self.device)
+            stream.wait_event(event)
+            self._record_batch_stream(batch, stream)
             return replace(
                 batch,
                 metadata={
@@ -212,6 +214,21 @@ class TorchLearnerBase:
                 },
             )
         return self._move_batch(batch, "blocking")
+
+    @staticmethod
+    def _record_batch_stream(batch: TrainingBatch, stream: torch.cuda.Stream) -> None:
+        """Prevent transfer-stream storage reuse while consumer kernels still run."""
+
+        def record_leaf(leaf: Any) -> Any:
+            if isinstance(leaf, torch.Tensor) and leaf.is_cuda:
+                leaf.record_stream(stream)
+            return leaf
+
+        def record(value: Any) -> Any:
+            return tree_map(record_leaf, value)
+
+        transform_batch(batch, record)
+        record(batch.metadata)
 
     def _validate_batch_layout(self, batch: TrainingBatch) -> None:
         if getattr(self, "supports_sequence_training", None) is not False:

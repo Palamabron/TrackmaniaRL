@@ -22,14 +22,30 @@ class EvaluationObservability:
     telemetry_skipped_frames_total: int = 0
     telemetry_skipped_frames_max: int = 0
     telemetry_steps_with_skipped_frames: int = 0
+    action_latencies_ms: list[float] = field(default_factory=list)
+    vision_capture_times_ms: list[float] = field(default_factory=list)
+    vision_pairing_delays_ms: list[float] = field(default_factory=list)
 
     def record(self, info: Mapping[str, Any], action_duration_ms: float) -> None:
         self.action_latency_ms += action_duration_ms
+        self.action_latencies_ms.append(action_duration_ms)
+        self._record_vision_timing(info)
         self.controller_apply_ms += float(info.get("controller_apply_ms", 0.0))
         self.telemetry_wait_ms += float(info.get("telemetry_wait_ms", 0.0))
         self.control_brake_taps += int(bool(info.get("control_brake_tap", False)))
         self._record_step_race_time(info)
         self._record_skipped_frames(info)
+
+    def _record_vision_timing(self, info: Mapping[str, Any]) -> None:
+        for key, destination in (
+            ("vision/capture_ms", self.vision_capture_times_ms),
+            ("vision/pairing_delay_ms", self.vision_pairing_delays_ms),
+        ):
+            value = info.get(key)
+            if isinstance(value, Real) and not isinstance(value, bool):
+                measurement = float(value)
+                if isfinite(measurement) and measurement >= 0:
+                    destination.append(measurement)
 
     def _record_step_race_time(self, info: Mapping[str, Any]) -> None:
         if _same_clock_finish(info):
@@ -53,7 +69,20 @@ class EvaluationObservability:
     def annotated_result(self, result: EvaluationResult, step_count: int) -> EvaluationResult:
         steps = max(step_count, 1)
         measured = self._control_result(result, steps)
-        return self._telemetry_result(measured, steps)
+        return self._vision_result(self._telemetry_result(measured, steps))
+
+    def _vision_result(self, result: EvaluationResult) -> EvaluationResult:
+        capture, pairing = self.vision_capture_times_ms, self.vision_pairing_delays_ms
+        return replace(
+            result,
+            action_latency_ms_p95=_percentile(self.action_latencies_ms, 0.95),
+            vision_capture_ms=sum(capture) / len(capture) if capture else 0.0,
+            vision_capture_ms_p95=_percentile(capture, 0.95),
+            vision_capture_measurement_count=len(capture),
+            vision_pairing_delay_ms=sum(pairing) / len(pairing) if pairing else 0.0,
+            vision_pairing_delay_ms_p95=_percentile(pairing, 0.95),
+            vision_pairing_measurement_count=len(pairing),
+        )
 
     def _control_result(self, result: EvaluationResult, steps: int) -> EvaluationResult:
         race_p99, race_max = _race_time_tail(self.step_race_times_ms)
@@ -93,6 +122,11 @@ def _race_time_tail(values: list[float]) -> tuple[float, float]:
     ordered = sorted(values)
     p99_index = ceil(0.99 * len(ordered)) - 1
     return ordered[p99_index], ordered[-1]
+
+
+def _percentile(values: list[float], quantile: float) -> float:
+    """Use the nearest-rank empirical percentile within one episode."""
+    return sorted(values)[ceil(quantile * len(values)) - 1] if values else 0.0
 
 
 def _positive_finite_measurement(value: object) -> float | None:

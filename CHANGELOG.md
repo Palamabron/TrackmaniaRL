@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.10 - 2026-09-26
+
+- Protect prefetched CUDA tensors until their consumer stream finishes.
+- Reset replay priorities when binding a different store and correctly mask padded recurrent histories.
+- Respect forbidden actions during exploration.
+- Make actor cleanup and process stop signals robust; support stop files for training and benchmarks.
+- Add opt-in Windows client-area capture with neutral-control pauses on focus loss.
+- Preserve interrupted benchmark trials, record timer sources and bind artifacts to checkpoint hashes.
+- Exclude window-availability pauses and reset latency from benchmark throughput and fallback finish times.
+- Allow explicit CPU thread limits and validate synthetic replay with expert slots.
+
 ## 1.2.9 - 2026-09-11
 
 - Document the supported desktop Linux game pipeline using Steam/Proton,

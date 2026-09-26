@@ -126,13 +126,22 @@ class ActorRuntime:
         )
 
     def run_forever(self) -> None:
-        pipeline, environment_factory = self._components()
-        initial = self._register()
-        self._initialize_policy(initial)
-        senders = actor_background.start_background_workers(self)
-        environment = environment_factory.create(seed=self._actor_seed())
-        self._collect_environment(environment, pipeline, senders)
-        self._raise_background_failure()
+        senders: list[threading.Thread] = []
+        try:
+            pipeline, environment_factory = self._components()
+            initial = self._register()
+            self._initialize_policy(initial)
+            senders = actor_background.start_background_workers(self)
+            environment = environment_factory.create(seed=self._actor_seed())
+            self._collect_environment(environment, pipeline)
+            self._raise_background_failure()
+        finally:
+            self.stop.set()
+            try:
+                self._join_senders(senders)
+            finally:
+                self.client.close()
+                logger.info("Actor %s stopped: %s", self.actor_id, self.stop_reason)
 
     def _initialize_policy(self, initial: Mapping[str, Any]) -> None:
         logger.info(
@@ -149,17 +158,11 @@ class ActorRuntime:
         for path in sorted(self.spool_dir.glob("*.rollout")):
             self.queue.put(path)
 
-    def _collect_environment(
-        self, environment: Any, pipeline: Any, senders: list[threading.Thread]
-    ) -> None:
+    def _collect_environment(self, environment: Any, pipeline: Any) -> None:
         try:
             self._collect(environment, pipeline)
         finally:
             self._close_environment(environment)
-            self.stop.set()
-            self._join_senders(senders)
-            self.client.close()
-            logger.info("Actor %s stopped: %s", self.actor_id, self.stop_reason)
 
     @staticmethod
     def _close_environment(environment: Any) -> None:

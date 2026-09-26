@@ -317,7 +317,7 @@ class _SpawnProcess:
 
 def _spawn_context(captured: dict[str, object]) -> SimpleNamespace:
     return SimpleNamespace(
-        Event=lambda: SimpleNamespace(set=lambda: None),
+        RawValue=lambda typecode, value: SimpleNamespace(value=value),
         Process=lambda **values: _SpawnProcess(captured, values["args"], values["name"]),
     )
 

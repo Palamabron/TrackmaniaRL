@@ -18,6 +18,13 @@ STANDARD_METRICS = (
     "eval/crash_rate",
     "eval/reward",
     "eval/action_latency_ms",
+    "eval/action_latency_ms_p95_max",
+    "eval/vision_capture_ms",
+    "eval/vision_capture_ms_p95_max",
+    "eval/vision_capture_measurement_count",
+    "eval/vision_pairing_delay_ms",
+    "eval/vision_pairing_delay_ms_p95_max",
+    "eval/vision_pairing_measurement_count",
     "eval/controller_apply_ms",
     "eval/telemetry_wait_ms",
     "eval/control_brake_tap_fraction",
@@ -63,6 +70,15 @@ class EvaluationResult:
     telemetry_skipped_frames_mean: float = 0.0
     telemetry_skipped_frames_max: int = 0
     telemetry_steps_with_skipped_frames_fraction: float = 0.0
+    termination_reason: str = "unknown"
+    finish_time_source: str | None = None
+    action_latency_ms_p95: float = 0.0
+    vision_capture_ms: float = 0.0
+    vision_capture_ms_p95: float = 0.0
+    vision_capture_measurement_count: int = 0
+    vision_pairing_delay_ms: float = 0.0
+    vision_pairing_delay_ms_p95: float = 0.0
+    vision_pairing_measurement_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,6 +124,7 @@ def _finish_metrics(summary: _EvaluationSummary) -> dict[str, float]:
 def _step_metrics(summary: _EvaluationSummary) -> dict[str, float]:
     metrics = _control_loop_metrics(summary)
     metrics.update(_skipped_frame_metrics(summary))
+    metrics.update(_vision_timing_metrics(summary.values))
     return metrics
 
 
@@ -116,6 +133,7 @@ def _control_loop_metrics(summary: _EvaluationSummary) -> dict[str, float]:
     steps = summary.total_steps
     return {
         "eval/action_latency_ms": _step_weighted_mean(values, "action_latency_ms", steps),
+        "eval/action_latency_ms_p95_max": max(item.action_latency_ms_p95 for item in values),
         "eval/controller_apply_ms": _step_weighted_mean(values, "controller_apply_ms", steps),
         "eval/telemetry_wait_ms": _step_weighted_mean(values, "telemetry_wait_ms", steps),
         "eval/control_brake_tap_fraction": _step_weighted_mean(
@@ -123,6 +141,25 @@ def _control_loop_metrics(summary: _EvaluationSummary) -> dict[str, float]:
         ),
         **_step_race_time_metrics(values, steps),
     }
+
+
+def _vision_timing_metrics(values: list[EvaluationResult]) -> dict[str, float]:
+    """Report measured means and worst episode tails; absent cameras have zero counts."""
+    metrics = {}
+    for prefix, count_field in (
+        ("vision_capture", "vision_capture_measurement_count"),
+        ("vision_pairing_delay", "vision_pairing_measurement_count"),
+    ):
+        count = sum(getattr(item, count_field) for item in values)
+        measured_sum = sum(
+            getattr(item, f"{prefix}_ms") * getattr(item, count_field) for item in values
+        )
+        metrics[f"eval/{prefix}_ms"] = measured_sum / count if count else 0.0
+        metrics[f"eval/{prefix}_ms_p95_max"] = max(
+            getattr(item, f"{prefix}_ms_p95") for item in values
+        )
+        metrics[f"eval/{count_field}"] = float(count)
+    return metrics
 
 
 def _step_race_time_metrics(values: list[EvaluationResult], steps: int) -> dict[str, float]:
