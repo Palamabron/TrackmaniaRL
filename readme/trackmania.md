@@ -282,7 +282,7 @@ explicit `WandbTracker` under `components.additional_loggers`. Supply
 `WANDB_API_KEY` only through a private environment or ignored `.env` file.
 The generated project retains its vetted `vgamepad` source during this update.
 an existing project must retain the same direct source pin documented in the
-[installation guide](../README.md#installation).
+[installation guide](quickstart.md#installation).
 
 `trackmaniarl smoke` is the required Windows preflight. It collects a bounded number of
 real actions, completes at least one update, verifies a live policy refresh,
