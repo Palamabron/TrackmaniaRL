@@ -22,3 +22,5 @@ global-exclude *.npz *.npy *.mp4 *.mkv *.sqlite3 *.log *.pyc *.pyo
 prune artifacts
 prune wandb
 prune .venv
+
+recursive-include examples *.py *.md

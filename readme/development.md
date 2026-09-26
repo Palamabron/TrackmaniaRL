@@ -6,7 +6,7 @@ Requirements are Git, Python 3.12 and
 [uv](https://docs.astral.sh/uv/). From a clone:
 
 ```bash
-git clone https://github.com/Palamabron/TrackmaniaRL.git
+git clone https://github.com/TrackmaniaRL/TrackmaniaRL.git
 cd TrackmaniaRL
 uv sync --group dev
 uv run trackmaniarl --help
@@ -65,6 +65,26 @@ library boundary. Generated projects and their artifacts are ignored source-tree
 state, not release contents.
 
 ## Change workflow
+
+### README media and package metadata
+
+The root README is also the PyPI package description. Keep its links absolute
+HTTPS URLs. Repository documentation uses `blob/main/` and media uses
+`raw.githubusercontent.com/TrackmaniaRL/TrackmaniaRL/main/` so bumping the package
+version before creating a release tag does not break the published page.
+These links follow the current documentation and artwork; they are not frozen
+release snapshots. Historical benchmark evidence keeps its own provenance.
+
+Before publishing, verify that every new linked file has been pushed to `main`.
+Check image URLs with an unauthenticated request and confirm the response is an
+image, not an HTML page or a Git LFS pointer. The documentation tests check local
+targets and prevent version-derived media links from returning.
+
+Build the package and check the wheel's `METADATA` description as well as the
+repository README. Changing the repository does not update the description of an
+already published PyPI release; the correction ships with a new package release.
+
+### Code changes
 
 1. Decide whether the behavior is reusable library code or application-specific
    experiment code. Prefer the generated agent project for the latter.
