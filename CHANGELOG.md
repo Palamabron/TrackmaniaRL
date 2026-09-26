@@ -25,6 +25,10 @@
 - Build ghost corridors from already-paired walls (`GeometryBuildRequest.already_paired`).
   Proximity pairing picked the wrong section where a track passes over itself, and 7 of
   88 record laps then failed their pace reference.
+- Run value heads and bootstrap targets in float32 while the encoder keeps the configured
+  reduced precision. Under bfloat16 autocast the head's matrix products rounded TD targets
+  by 0.013 on average (0.045 at most) at Q values near 80 and flipped the double-Q greedy
+  action on about half the states; the float32 head leaves under 0.001.
 - Bound pace-reference projection and the default `max_projected_speed_mps` by
   Trackmania's 1000 km/h top speed instead of 100 m/s. A lap faster than 360 km/h
   outran the projection, so its pace reference was rejected as not reaching the end.
