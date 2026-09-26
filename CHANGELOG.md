@@ -13,6 +13,7 @@
 - Bound kinematically limited reward progress per step instead of by total distance
   driven. A racing line is shorter than the centre line, so a corner-cutting lap could
   never reach `finish_progress` and its finish was refused.
+- Run value heads and bootstrap targets in float32 under reduced-precision autocast.
 
 
 ## 1.2.9 - 2026-09-11
