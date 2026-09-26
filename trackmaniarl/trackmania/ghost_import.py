@@ -271,6 +271,10 @@ def ghost_demonstration(lap: GhostLap, geometry_sha256: str) -> Demonstration:
     input changes rather than from the samples.
     """
 
+    if not np.any(lap.input_controls):
+        # A line-only export (no input events, no inputs in the samples) reads as a
+        # lap driven with nothing pressed. It still gives geometry and pace.
+        raise ValueError("ghost records no inputs, so it cannot be a demonstration")
     samples = ghost_frames(lap)
     times = np.append(np.arange(0.0, lap.finish_time_ms, DEMONSTRATION_STEP_MS), lap.finish_time_ms)
     frames = _interpolated_frames(samples, times)

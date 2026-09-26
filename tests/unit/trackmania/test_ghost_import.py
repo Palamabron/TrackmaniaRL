@@ -153,6 +153,19 @@ def test_demonstration_rebuilds_ticks_with_exact_input_changes(tmp_path: Path) -
     assert np.allclose(radius, RADIUS_M, atol=0.01)
 
 
+def test_line_only_ghost_gives_assets_but_no_demonstration(tmp_path: Path) -> None:
+    path = _left_turn_ghost(tmp_path / "ghost.json")
+    document = json.loads(path.read_text(encoding="utf-8"))
+    for sample in document["samples"]:
+        sample["extras"] = {"wheel_slip": [0, 0, 0, 0]}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    lap = load_ghost_lap(path)
+
+    assert len(corridor_boundaries(lap, 8.0)[0]) > 0
+    with pytest.raises(ValueError, match="no inputs"):
+        ghost_demonstration(lap, "0" * 64)
+
+
 def test_ghost_demonstration_loads_as_finishing_transitions(tmp_path: Path) -> None:
     ghost = _with_input_events(_left_turn_ghost(tmp_path / "ghost.json"))
     map_path = tmp_path / "map.Map.Gbx"

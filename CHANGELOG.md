@@ -21,7 +21,8 @@
 - Add `ghost_demonstration`, which rebuilds a ghost lap as a native 10 ms demonstration
   (Hermite-interpolated motion between the 50 ms samples, controls from the ghost's
   tick-exact input changes) that passes the demonstration quality gate, so leaderboard
-  ghosts can seed demonstration replay.
+  ghosts can seed demonstration replay. A ghost that records no inputs is refused,
+  since it would read as a lap driven with nothing pressed.
 - Build ghost corridors from already-paired walls (`GeometryBuildRequest.already_paired`).
   Proximity pairing picked the wrong section where a track passes over itself, and 7 of
   88 record laps then failed their pace reference.
