@@ -17,6 +17,7 @@ from trackmaniarl.trackmania.keyboard_control import (
     restart_trackmania_editor_validation,
     restart_trackmania_race,
 )
+from trackmaniarl.trackmania.steering_curve import SteeringCurve
 
 
 @runtime_checkable
@@ -74,7 +75,12 @@ def _vgamepad_module() -> Any:
 
 
 class GamepadController:
-    """Virtual XInput controller with an explicit TrackMania restart action."""
+    """Virtual XInput controller with an explicit TrackMania restart action.
+
+    With a measured ``steering_curve`` the requested steer is what the game applies:
+    the controller sends the stick position that the game's own analog curve turns
+    into that steer. Without one, steer is sent as a raw stick position.
+    """
 
     _CONFIRM_BUTTON = 0x1000  # Xbox A; menu Select binding.
     _RESTART_BUTTON = 0x2000  # Xbox B; TrackMania's default Give Up binding.
@@ -83,8 +89,10 @@ class GamepadController:
         self,
         *,
         restart_input: Literal["gamepad", "keyboard", "editor_validation"] = "gamepad",
+        steering_curve: SteeringCurve | None = None,
     ) -> None:
         self._gamepad = _vgamepad_module().VX360Gamepad()
+        self._steering_curve = steering_curve
         self._tap_lock = RLock()
         self._collision_lock = RLock()
         self._collision_detected = False
@@ -109,9 +117,12 @@ class GamepadController:
         gas, brake, steer = np.clip(
             np.nan_to_num(action, nan=0.0), [-0.0, 0.0, -1.0], [1.0, 1.0, 1.0]
         )
+        stick = float(steer)
+        if self._steering_curve is not None:
+            stick = self._steering_curve.stick_for(stick)
         self._gamepad.right_trigger_float(float(gas))
         self._gamepad.left_trigger_float(float(brake))
-        self._gamepad.left_joystick_float(float(steer), 0.0)
+        self._gamepad.left_joystick_float(stick, 0.0)
         self._gamepad.update()
 
     def apply(self, action: np.ndarray) -> None:

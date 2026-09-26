@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Add `track check-steering`, which measures how Trackmania's Analog Sensitivity and
+  Dead Zone bend the virtual stick and reports steering levels that drive identically.
+  A saved curve set as `steering_curve_path` makes the gamepad backend send the stick
+  position that produces each requested steer. The curve file is part of the run
+  fingerprint.
+
 ## 1.2.11 - 2026-09-28
 
 - Link the latest release, PyPI package and all release tags at the top of the README.

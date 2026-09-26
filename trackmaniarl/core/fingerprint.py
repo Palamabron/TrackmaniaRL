@@ -13,7 +13,9 @@ from typing import Any
 
 from trackmaniarl.core.spec import RunSpec
 
-_FINGERPRINTED_ASSET_PATHS = frozenset({"geometry_path", "pace_reference_path"})
+_FINGERPRINTED_ASSET_PATHS = frozenset(
+    {"geometry_path", "pace_reference_path", "steering_curve_path"}
+)
 
 
 def run_fingerprint(spec: RunSpec, base_dir: Path) -> str:
