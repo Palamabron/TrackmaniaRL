@@ -238,7 +238,6 @@ class TrackmaniaEvaluator:
         try:
             if request.trial_index == 0:
                 self._prewarm_policy(request)
-                context.started = perf_counter()
             self._write_trial_event(request, "start")
             self._run_episode(request, context, state)
         except EnvironmentPausedError:
@@ -300,6 +299,8 @@ class TrackmaniaEvaluator:
 
     def _start_episode(self, request: _EpisodeRequest, context: _EpisodeContext) -> _EpisodeLoop:
         observation, _ = self._reset_available(request)
+        # Window availability and reset latency are not policy-controlled driving.
+        context.started = perf_counter()
         self._reset_component(self.feature_pipeline)
         self._reset_component(request.policy)
         prepared = self.feature_pipeline.transform_observation(observation)

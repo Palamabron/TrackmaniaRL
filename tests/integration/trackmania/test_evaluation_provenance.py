@@ -155,3 +155,45 @@ def test_evaluation_waits_for_visibility_before_reset(
     result = evaluator._reset_available(SimpleNamespace(environment=environment, seed=0))
     assert result == ("ready", {})
     assert waits == [0.5, 0.5]
+
+
+@pytest.mark.parametrize("trial_index", [0, 1])
+@pytest.mark.parametrize("race_clock", [None, 1000.0])
+def test_reset_pause_is_excluded_from_trial_timing(  # noqa: PLR0913 - fixtures and independent timing cases
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, trial_index: int, race_clock: float | None
+) -> None:
+    from trackmaniarl.trackmania.evaluation import _EpisodeRequest
+
+    now = [0.0]
+
+    class PausedEnvironment(_ScenarioEnvironment):
+        reset_calls = 0
+
+        def reset(self, *, seed: int | None = None) -> tuple[float, dict[str, Any]]:
+            self.reset_calls += 1
+            if self.reset_calls % 2:
+                raise EnvironmentPausedError("background")
+            return super().reset(seed=seed)
+
+        def step(self, action: Any) -> tuple[float, float, bool, bool, dict[str, Any]]:
+            now[0] += 1.0
+            return super().step(action)
+
+    def wait(seconds: float) -> None:
+        del seconds
+        now[0] += 600.0
+
+    monkeypatch.setattr("trackmaniarl.trackmania.evaluation.perf_counter", lambda: now[0])
+    monkeypatch.setattr("trackmaniarl.trackmania.evaluation.sleep", wait)
+    suite = _evaluation_suite(tmp_path)
+    evaluator = TrackmaniaEvaluator(
+        EvaluatorRuntimeRequest(suite, _ScenarioFactory("finished"), _IdentityPipeline())
+    )
+    environment = PausedEnvironment("finished", race_clock)
+    result = evaluator._evaluate_episode(
+        _EpisodeRequest(_EvaluationPolicy(), suite.maps[0], trial_index, 0, environment)
+    )
+    assert now[0] >= 601.0
+    assert result.finish_time_s == 1.0
+    assert result.throughput_fps == 1.0
+    assert result.finish_time_source == ("elapsed_fallback" if race_clock is None else "race_clock")
