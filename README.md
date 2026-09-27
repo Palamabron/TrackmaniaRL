@@ -1,5 +1,9 @@
 # TrackmaniaRL
 
+[![Latest release](https://img.shields.io/github/v/release/TrackmaniaRL/TrackmaniaRL)](https://github.com/TrackmaniaRL/TrackmaniaRL/releases/latest)
+[![PyPI version](https://img.shields.io/pypi/v/trackmaniarl)](https://pypi.org/project/TrackmaniaRL/)
+[All release tags](https://github.com/TrackmaniaRL/TrackmaniaRL/tags)
+
 ![TrackmaniaRL logo](https://raw.githubusercontent.com/TrackmaniaRL/TrackmaniaRL/main/docs/assets/trackmaniarl-logo.png)
 
 TrackmaniaRL is a Python library for building and training reinforcement-learning
@@ -28,6 +32,31 @@ Optional integrations are available as extras, for example
 `pip install "trackmaniarl[vision,wandb,distributed]"`.
 See [platform and PyTorch setup](https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/readme/performance.md)
 for CPU and GPU installation details.
+
+## Train across computers
+
+For off-policy algorithms such as IQN and SAC, one learner can train the model
+while multiple actors collect Trackmania rollouts asynchronously on separate
+computers. Install the `distributed` extra on every machine and use the same
+RunSpec, model code, map assets and distributed token on each one. Give each actor
+a unique ID. On the learner computer, run:
+
+```bash
+trackmaniarl learner run.yaml --bind 127.0.0.1:8787
+```
+
+On each actor computer, forward its local port 8787 to the learner through an
+encrypted tunnel, then run:
+
+```bash
+trackmaniarl actor run.yaml --connect 127.0.0.1:8787 --actor-id ACTOR_ID
+```
+
+The learner accepts loopback connections only; the bearer token does not encrypt
+traffic. The [distributed architecture](https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/readme/architecture.md)
+and [configuration guide](https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/readme/configuration.md)
+cover tunnels, tokens and matching run fingerprints. PPO uses local on-policy
+training rather than this distributed workflow.
 
 ## Use from Python
 
