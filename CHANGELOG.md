@@ -3,7 +3,7 @@
 ## 1.2.11 - 2026-09-28
 
 - Link the latest release, PyPI package and all release tags at the top of the README.
-- Document how off-policy actors on multiple computers feed one asynchronous learner.
+- Add a multi-computer setup guide for asynchronous off-policy actors and one learner.
 
 ## 1.2.10 - 2026-09-26
 
