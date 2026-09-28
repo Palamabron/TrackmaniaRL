@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.11 - 2026-09-28
+
+- Link the latest release, PyPI package and all release tags at the top of the README.
+- Add a multi-computer setup guide for asynchronous off-policy actors and one learner.
+
 ## 1.2.10 - 2026-09-26
 
 - Protect prefetched CUDA tensors until their consumer stream finishes.

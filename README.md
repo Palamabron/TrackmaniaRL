@@ -1,5 +1,9 @@
 # TrackmaniaRL
 
+[![Latest release](https://img.shields.io/github/v/release/TrackmaniaRL/TrackmaniaRL)](https://github.com/TrackmaniaRL/TrackmaniaRL/releases/latest)
+[![PyPI version](https://img.shields.io/pypi/v/trackmaniarl)](https://pypi.org/project/TrackmaniaRL/)
+[All release tags](https://github.com/TrackmaniaRL/TrackmaniaRL/tags)
+
 ![TrackmaniaRL logo](https://raw.githubusercontent.com/TrackmaniaRL/TrackmaniaRL/main/docs/assets/trackmaniarl-logo.png)
 
 TrackmaniaRL is a Python library for building and training reinforcement-learning
@@ -28,6 +32,15 @@ Optional integrations are available as extras, for example
 `pip install "trackmaniarl[vision,wandb,distributed]"`.
 See [platform and PyTorch setup](https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/readme/performance.md)
 for CPU and GPU installation details.
+
+## Train across computers
+
+For off-policy algorithms such as IQN and SAC, multiple Trackmania actors on
+separate computers can send rollouts asynchronously to one learner that trains
+the model and publishes policy updates. Follow the
+[multi-computer setup guide](https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/readme/distributed-setup.md)
+for installation, matching assets, authentication, encrypted tunneling and
+commands; PPO training remains local.
 
 ## Use from Python
 

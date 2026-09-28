@@ -310,6 +310,11 @@ def test_pypi_readme_uses_absolute_links_independent_of_release_tags() -> None:
         elif parsed.hostname == "github.com" and parsed.path.startswith(
             "/TrackmaniaRL/TrackmaniaRL/"
         ):
+            if parsed.path in {
+                "/TrackmaniaRL/TrackmaniaRL/releases/latest",
+                "/TrackmaniaRL/TrackmaniaRL/tags",
+            }:
+                continue
             if not parsed.path.startswith(expected_blob_prefix):
                 failures.append(f"{label}: repository link depends on a tag: {destination.value}")
             else:
