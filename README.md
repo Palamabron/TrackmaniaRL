@@ -1,8 +1,5 @@
-# TrackmaniaRL
-
 [![Latest release](https://img.shields.io/github/v/release/TrackmaniaRL/TrackmaniaRL)](https://github.com/TrackmaniaRL/TrackmaniaRL/releases/latest)
 [![PyPI version](https://img.shields.io/pypi/v/trackmaniarl)](https://pypi.org/project/TrackmaniaRL/)
-[All release tags](https://github.com/TrackmaniaRL/TrackmaniaRL/tags)
 
 ![TrackmaniaRL logo](https://raw.githubusercontent.com/TrackmaniaRL/TrackmaniaRL/main/docs/assets/trackmaniarl-logo.png)
 
