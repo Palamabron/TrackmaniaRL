@@ -21,6 +21,7 @@ from trackmaniarl.trackmania.geometry import BoundaryGeometry
 from trackmaniarl.trackmania.pace import PaceDemonstrationRequest, ReferencePaceProfile
 from trackmaniarl.trackmania.reward import TrajectoryReward
 from trackmaniarl.trackmania.session import OpenPlanetSessionClient
+from trackmaniarl.trackmania.steering_curve import SteeringCurve
 from trackmaniarl.trackmania.telemetry import (
     OpenPlanetClient,
     OpenPlanetClientConfig,
@@ -232,7 +233,10 @@ class OpenPlanetEnvironmentFactory:
             controller = (
                 KeyboardController()
                 if self.config.control_backend == "keyboard"
-                else GamepadController(restart_input=self.config.restart_input)
+                else GamepadController(
+                    restart_input=self.config.restart_input,
+                    steering_curve=_steering_curve(self.config),
+                )
             )
         return OpenPlanetEnvironment(self.config, controller, evaluation_map=evaluation_map)
 
@@ -253,8 +257,13 @@ def _resolve_environment_paths(
     config: TrackmaniaEnvironmentConfig, base_dir: Path
 ) -> TrackmaniaEnvironmentConfig:
     resolved = config
-    for name in ("geometry_path", "pace_reference_path"):
+    for name in ("geometry_path", "pace_reference_path", "steering_curve_path"):
         path = getattr(resolved, name)
         if path is not None and not path.is_absolute():
             resolved = resolved.model_copy(update={name: (base_dir / path).resolve()})
     return resolved
+
+
+def _steering_curve(config: TrackmaniaEnvironmentConfig) -> SteeringCurve | None:
+    path = config.steering_curve_path
+    return None if path is None else SteeringCurve.load(path)

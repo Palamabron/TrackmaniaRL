@@ -1,5 +1,43 @@
 # Changelog
 
+## Unreleased
+
+- Add `track check-steering`, which measures how Trackmania's Analog Sensitivity and
+  Dead Zone bend the virtual stick and reports steering levels that drive identically.
+  A saved curve set as `steering_curve_path` makes the gamepad backend send the stick
+  position that produces each requested steer. The curve file is part of the run
+  fingerprint.
+- Default `velocity_to_mps_scale` to `1.0`. The supported plugin sends m/s, and the
+  old `0.001` default left every velocity and speed observation channel near zero for
+  template users (the project's own benchmark configurations already set `1`).
+- Bound kinematically limited reward progress per step instead of by total distance
+  driven. A racing line is shorter than the centre line, so a corner-cutting lap could
+  never reach `finish_progress` and its finish was refused.
+- Add `track from-ghost`, which builds a map's geometry and pace reference from a
+  JSON export of one finished lap (format in the Trackmania guide): the lap's line inside a corridor of
+  virtual walls replaces both hand-driven boundaries, and its timing becomes the
+  pace reference and `time_attack_target_s`. A `.Ghost.Gbx` export carries no map UID,
+  so the command takes `--map-uid`.
+- Add `ghost_demonstration`, which rebuilds a ghost lap as a native 10 ms demonstration
+  (Hermite-interpolated motion between the 50 ms samples, controls from the ghost's
+  tick-exact input changes) that passes the demonstration quality gate, so leaderboard
+  ghosts can seed demonstration replay. A ghost that records no inputs is refused,
+  since it would read as a lap driven with nothing pressed.
+- Build ghost corridors from already-paired walls (`GeometryBuildRequest.already_paired`).
+  Proximity pairing picked the wrong section where a track passes over itself, and 7 of
+  88 record laps then failed their pace reference.
+- Run value heads and bootstrap targets in float32 while the encoder keeps the configured
+  reduced precision. Under bfloat16 autocast the head's matrix products rounded TD targets
+  by 0.013 on average (0.045 at most) at Q values near 80 and flipped the double-Q greedy
+  action on about half the states; the float32 head leaves under 0.001.
+- Bound pace-reference projection and the default `max_projected_speed_mps` by
+  Trackmania's 1000 km/h top speed instead of 100 m/s. A lap faster than 360 km/h
+  outran the projection, so its pace reference was rejected as not reaching the end.
+
+## 1.2.9 - 2026-09-11
+
+
+
 ## 1.2.11 - 2026-09-28
 
 - Link the latest release, PyPI package and all release tags at the top of the README.

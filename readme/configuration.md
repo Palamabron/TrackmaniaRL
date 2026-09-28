@@ -176,6 +176,7 @@ The paths below are under `components.environment.kwargs.config`.
 | `action_repeat_frames` | `4` | Native telemetry frames per decision, `1..20`. Must be `1` when `decision_interval_ms` is set. |
 | `decision_interval_ms` | null | Physical decision grid `(0,250]` ms. The generated Trackmania template uses 50 ms and repeat 1. |
 | `control_backend` | `gamepad` | `gamepad` preserves analog controls, `keyboard` digitizes them. |
+| `steering_curve_path` | null | Measured stick-to-steer curve from `track check-steering`; the gamepad sends the stick that produces each requested steer. |
 | `compact_action_ids` | null | Explicit subset of the 78-action brake-tap table, model and BC IDs must match exactly. |
 | `position_indices`, `velocity_indices` | protocol defaults | Three unique telemetry indices each. |
 | `expected_map_uid` | null | Optional active-map UID assertion for training/smoke. Configure it for every release run. |
@@ -218,7 +219,7 @@ These paths are under `components.feature_pipeline.kwargs.config` for
 | `mask_current_control_inputs` | `false` | Zeros current controls and requires them to be present. |
 | `local_velocity_features` | `false` | Rotates velocity into car coordinates, required by horizontal BC reflection. |
 | `use_racing_line` | `false` | Uses the asset racing line instead of reward center where supported. |
-| `max_speed_mps`, `velocity_to_mps_scale` | `80`, `.001` | Physical speed normalization and native velocity-unit conversion. |
+| `max_speed_mps`, `velocity_to_mps_scale` | `80`, `1` | Physical speed normalization and native velocity-unit conversion. |
 | `max_time_delta_s` | `1` s | Rejects stale finite-difference dynamics. |
 | `limit_progress_by_kinematics` | `false` | Opt-in physical bound for feature progress projection. Reward projection has the independent environment setting above. |
 | `nearest_forward_points`, `nearest_backward_points` | `128`, `10` | Feature projection search window. |

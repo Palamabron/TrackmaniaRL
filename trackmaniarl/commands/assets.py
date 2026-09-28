@@ -8,13 +8,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from trackmaniarl.core.spec import RunSpec
+from trackmaniarl.trackmania.actions import BRAKE_TAP_TABLE_N_STEER
 from trackmaniarl.trackmania.assets import (
     BoundaryRecordingRequest,
     TrajectoryRecordingRequest,
     record_boundary,
     record_trajectory,
 )
+from trackmaniarl.trackmania.control import GamepadController
 from trackmaniarl.trackmania.demonstrations import (
     Demonstration,
     DemonstrationSessionConfig,
@@ -30,7 +34,14 @@ from trackmaniarl.trackmania.environment import (
 )
 from trackmaniarl.trackmania.geometry import BoundaryGeometry, build_geometry_asset
 from trackmaniarl.trackmania.geometry_types import GeometryBuildRequest
+from trackmaniarl.trackmania.ghost_import import GhostAssetRequest, build_ghost_assets
 from trackmaniarl.trackmania.session import OpenPlanetSessionClient
+from trackmaniarl.trackmania.steering_curve import (
+    SteeringCurve,
+    SteeringMeasurement,
+    distinct_steering_levels,
+    measure_steering_curve,
+)
 from trackmaniarl.trackmania.telemetry import (
     OpenPlanetClient,
     OpenPlanetClientConfig,
@@ -245,3 +256,46 @@ def _print_track_check(result: _TrackCheck) -> None:
         f"session_protocol={active.protocol_version}; map_uid={active.map_uid!r}; ready=true; "
         f"position={position}; finished={finished}; race_time_ms={race_time}"
     )
+
+
+def _check_steering(args: argparse.Namespace) -> None:
+    client = OpenPlanetClient(OpenPlanetClientConfig(args.host, args.port, args.timeout))
+    controller = GamepadController()
+    try:
+        curve = measure_steering_curve(SteeringMeasurement(controller, client, args.points))
+    finally:
+        controller.close()
+        client.close()
+    _print_steering_curve(curve)
+    if args.output is not None:
+        print(f"Saved steering curve: {curve.save(args.output)}")
+
+
+def _print_steering_curve(curve: SteeringCurve) -> None:
+    levels = np.linspace(-1.0, 1.0, BRAKE_TAP_TABLE_N_STEER)
+    print("stick  -> game steer")
+    for level in levels[levels >= 0.0]:
+        print(f"{level:5.3f}  -> {curve.steer_at(float(level)):5.3f}")
+    distinct = distinct_steering_levels(curve, levels)
+    print(f"{distinct} of {len(levels)} steering levels steer differently.")
+    if distinct < len(levels):
+        print(
+            "Some levels drive identically. In Trackmania, Settings > Controls, set the "
+            "gamepad's Analog Sensitivity to 1.0 and Analog Dead Zone to its minimum, "
+            "then measure again; or save this curve and set steering_curve_path."
+        )
+
+
+def _build_from_ghost(args: argparse.Namespace) -> None:
+    assets = build_ghost_assets(
+        GhostAssetRequest(
+            args.ghost, args.map_path, args.output_dir, args.half_width, args.spacing, args.map_uid
+        )
+    )
+    print(f"Built geometry asset: {assets.geometry_path}")
+    print(f"Built pace reference: {assets.pace_path} ({assets.finish_time_s:.3f} s)")
+    print("Set these in run.yaml (components.environment.kwargs.config):")
+    print(f"  expected_map_uid: {assets.map_uid}")
+    print(f"  geometry_path: {assets.geometry_path.as_posix()}")
+    print(f"  pace_reference_path: {assets.pace_path.as_posix()}")
+    print(f"  time_attack_target_s: {assets.finish_time_s:.3f}")

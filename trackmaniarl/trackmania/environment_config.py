@@ -96,6 +96,7 @@ class TrackmaniaEnvironmentConfig(BaseModel):
     demonstration_control_aggregation: bool = False
     compact_action_ids: tuple[int, ...] | None = None
     control_backend: Literal["gamepad", "keyboard"] = "gamepad"
+    steering_curve_path: Path | None = None
     position_indices: tuple[int, int, int] = DEFAULT_POSITION_INDICES
     velocity_indices: tuple[int, int, int] = DEFAULT_VELOCITY_INDICES
     crash_distance: float = Field(default=25.0, gt=0)
@@ -116,8 +117,8 @@ class TrackmaniaEnvironmentConfig(BaseModel):
     progress_reward_full_lap: float = Field(default=10.0, ge=0.0)
     finish_reward: float = Field(default=30.0, ge=0.0)
     potential_progress_weight: float = Field(default=2.0, ge=0.0)
-    max_projected_speed_mps: float = Field(default=100.0, gt=0.0)
-    velocity_to_mps_scale: float = Field(default=0.001, gt=0.0)
+    max_projected_speed_mps: float = Field(default=280.0, gt=0.0)
+    velocity_to_mps_scale: float = Field(default=1.0, gt=0.0)
     projected_velocity_scale: float = Field(default=0.0, ge=0.0)
     projected_speed_bonus_scale: float = Field(default=0.0, ge=0.0)
     steering_delta_penalty: float = Field(default=0.0, ge=0.0)
@@ -170,6 +171,8 @@ class TrackmaniaEnvironmentConfig(BaseModel):
             raise ValueError("demonstration control aggregation requires decision_interval_ms")
         if self.demonstration_control_aggregation and self.control_backend != "gamepad":
             raise ValueError("demonstration control aggregation requires the gamepad backend")
+        if self.steering_curve_path is not None and self.control_backend != "gamepad":
+            raise ValueError("steering_curve_path requires the gamepad backend")
 
     def _validate_pace(self) -> None:
         if self.pace_reward_scale and self.pace_reference_path is None:
