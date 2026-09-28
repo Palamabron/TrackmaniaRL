@@ -163,10 +163,11 @@ uv run trackmaniarl track build-geometry assets/my-map.geometry.npz --left asset
 
 A replay or ghost of one finished lap can replace both hand-driven boundaries.
 Convert it to JSON with a [GBX.NET](https://github.com/BigBang1112/gbx-net)
-exporter such as `tmai-gbx`: a `map_uid`, `checkpoints` with `time_ms` (the last
-one is the finish), and `samples` every 50 ms with `time_ms`, `position`,
-`velocity`, `rotation` (`[x, y, z, w]`), `speed` and optional `extras` holding
-`steer`, `gas`, `brake` and `wheel_slip`. Then run:
+based exporter, in this shape: a `map_uid`, `checkpoints` with `time_ms` (the last
+one is the finish), `samples` every 50 ms with `time_ms`, `position`, `velocity`,
+`rotation` (`[x, y, z, w]`), `speed` and optional `extras` holding `steer`, `gas`,
+`brake` and `wheel_slip`, and, to use the lap as a demonstration, `inputs`: every
+input change with `time_ms`, `steer`, `throttle` and `brake`. Then run:
 
 ```powershell
 uv run trackmaniarl track from-ghost record.json --map-path maps/my-map.Map.Gbx

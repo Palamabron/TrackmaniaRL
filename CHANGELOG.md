@@ -13,8 +13,8 @@
 - Bound kinematically limited reward progress per step instead of by total distance
   driven. A racing line is shorter than the centre line, so a corner-cutting lap could
   never reach `finish_progress` and its finish was refused.
-- Add `track from-ghost`, which builds a map's geometry and pace reference from the
-  `tmai-gbx` JSON export of one finished lap: the lap's line inside a corridor of
+- Add `track from-ghost`, which builds a map's geometry and pace reference from a
+  JSON export of one finished lap (format in the Trackmania guide): the lap's line inside a corridor of
   virtual walls replaces both hand-driven boundaries, and its timing becomes the
   pace reference and `time_attack_target_s`. A `.Ghost.Gbx` export carries no map UID,
   so the command takes `--map-uid`.

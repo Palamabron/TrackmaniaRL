@@ -224,9 +224,9 @@ def _register_steering_check(commands: CommandParsers) -> None:
 def _register_ghost_import(commands: CommandParsers) -> None:
     parser = commands.add_parser(
         "from-ghost",
-        help="build geometry and a pace reference from a ghost's tmai-gbx JSON export",
+        help="build geometry and a pace reference from a ghost's JSON export",
     )
-    parser.add_argument("ghost", type=Path, help="tmai-gbx JSON of a .Replay.Gbx or .Ghost.Gbx")
+    parser.add_argument("ghost", type=Path, help="JSON export of a .Replay.Gbx or .Ghost.Gbx")
     parser.add_argument("--map-path", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=Path("assets"))
     parser.add_argument(

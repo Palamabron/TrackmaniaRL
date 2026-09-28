@@ -8,9 +8,9 @@ A ghost of a fast lap already holds what the agent needs to start on that map:
 - its timing, which becomes the pace reference, so the reward can say how far
   ahead of or behind the record the car is at every point of the track.
 
-The input is the JSON that ``tmai-gbx`` (GBX.NET) exports from a ``.Replay.Gbx`` or
-``.Ghost.Gbx``: samples every 50 ms with position, velocity, rotation, speed and the
-applied inputs, plus checkpoint times.
+The input is a JSON export of a ``.Replay.Gbx`` or ``.Ghost.Gbx`` (any GBX.NET-based
+exporter; the format is in readme/trackmania.md): samples every 50 ms with position,
+velocity, rotation, speed and the applied inputs, plus checkpoint times.
 
 Engine RPM, gear, surface material and adherence are not recorded exactly in a
 ghost. Frames built here leave the RPM, material and adherence fields at zero and
@@ -60,7 +60,7 @@ class GhostLap:
 
 
 def load_ghost_lap(path: Path, map_uid: str | None = None) -> GhostLap:
-    """Read a ``tmai-gbx`` JSON export and keep the samples up to the finish.
+    """Read a ghost's JSON export and keep the samples up to the finish.
 
     A ``.Ghost.Gbx`` carries no map UID; pass the map's UID for one.
     """
