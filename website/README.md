@@ -80,3 +80,12 @@ node scripts/article_themes.cjs
 The theme generator changes paint values only. Chart measurements, text and
 geometry stay the same. Both image variants use CSS visibility so the saved theme
 applies without a diagram flash or reliance on JavaScript to display the figures.
+
+## Illustrated learning loop
+
+`assets/rl-learning-dark.png` and `assets/rl-learning-light.png` replace the
+original box diagram in the article. Both are 1536 by 1024 pixels, generated
+with the built-in GPT Image tool. The exact prompts are preserved in
+`scripts/rl-learning-prompts.json`. The original SVG stays available as source
+material. The six connections were checked in both variants before publication.
+The illustrated game scenes and telemetry are not experimental evidence.
