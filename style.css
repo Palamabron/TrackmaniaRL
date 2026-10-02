@@ -164,3 +164,9 @@ footer span:nth-child(2) { max-width: 360px; }
   img.theme-figure-dark { display: none !important; }
   img.theme-figure-light { display: block !important; }
 }
+
+/* Short source excerpts remain readable without widening the article. */
+.code-example pre { margin: 0; padding: 18px 20px; overflow-x: auto; background: var(--soft); border-left: 2px solid var(--line); font: 14px/1.7 var(--mono); tab-size: 4; }
+.code-example code { font: inherit; overflow-wrap: normal; }
+.reference-equation { margin: -4px 0 22px; }
+.reference-equation .katex-display { padding-block: 18px; }
