@@ -1,37 +1,5 @@
 {
   "retrieved_on": "2026-10-02",
-  "projects": [
-    {
-      "project": "tmrl",
-      "logging_runs": 65,
-      "distinct_names_after_trainer_worker_suffix_removed": 37,
-      "first_created_at_utc": "2026-05-13T14:23:29.0000000Z",
-      "last_created_at_utc": "2026-06-07T11:59:39.0000000Z",
-      "first_date_warsaw": "2026-05-13",
-      "last_date_warsaw": "2026-06-07",
-      "runs_with_recorded_commit": 0
-    },
-    {
-      "project": "tmrlv2",
-      "logging_runs": 141,
-      "distinct_names_after_trainer_worker_suffix_removed": 71,
-      "first_created_at_utc": "2026-05-16T07:54:57.0000000Z",
-      "last_created_at_utc": "2026-06-12T14:26:43.0000000Z",
-      "first_date_warsaw": "2026-05-16",
-      "last_date_warsaw": "2026-06-12",
-      "runs_with_recorded_commit": 0
-    },
-    {
-      "project": "my-trackmania-agent",
-      "logging_runs": 475,
-      "distinct_names_after_trainer_worker_suffix_removed": 358,
-      "first_created_at_utc": "2026-07-18T13:22:03.0000000Z",
-      "last_created_at_utc": "2026-09-08T11:34:46.0000000Z",
-      "first_date_warsaw": "2026-07-18",
-      "last_date_warsaw": "2026-09-08",
-      "runs_with_recorded_commit": 469
-    }
-  ],
   "notes": [
     "Logging runs include training, evaluation, validation, smoke and restarted records; count is not independent experiment count.",
     "Trainer/worker suffix normalization is a naming summary, not a proof that each remaining name is a unique scientific experiment.",
@@ -39,308 +7,264 @@
   ],
   "selected_runs": [
     {
-      "project": "tmrl",
-      "id": "gtn-baseline TRAINER",
-      "name": "gtn-baseline TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrl/runs/gtn-baseline+TRAINER",
       "created_at_warsaw": "2026-05-13 16:23:29",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Graph encoder baseline"
     },
     {
-      "project": "tmrl",
-      "id": "stable-learning-with-strict-clip TRAINER",
-      "name": "stable-learning-with-strict-clip TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrl/runs/stable-learning-with-strict-clip+TRAINER",
       "created_at_warsaw": "2026-05-15 10:20:21",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Stronger gradient clipping"
     },
     {
-      "project": "tmrlv2",
-      "id": "deeper-model-for-complex-tracks TRAINER",
-      "name": "deeper-model-for-complex-tracks TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/deeper-model-for-complex-tracks+TRAINER",
       "created_at_warsaw": "2026-05-16 21:53:50",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Deeper network"
     },
     {
-      "project": "tmrlv2",
-      "id": "gtn-current-best-params-finish-line-fix-test TRAINER",
-      "name": "gtn-current-best-params-finish-line-fix-test TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/gtn-current-best-params-finish-line-fix-test+TRAINER",
       "created_at_warsaw": "2026-05-18 21:31:58",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Finish-line detection fix"
     },
     {
-      "project": "tmrlv2",
-      "id": "new_lidar_pointsv1 TRAINER",
-      "name": "new_lidar_pointsv1 TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/new_lidar_pointsv1+TRAINER",
       "created_at_warsaw": "2026-05-31 18:30:19",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Different road samples"
     },
     {
-      "project": "tmrlv2",
-      "id": "longer_lookaheadv1 TRAINER",
-      "name": "longer_lookaheadv1 TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/longer_lookaheadv1+TRAINER",
       "created_at_warsaw": "2026-06-01 09:36:17",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Longer road lookahead"
     },
     {
-      "project": "tmrlv2",
-      "id": "longer_lookaheadv9_noisynets TRAINER",
-      "name": "longer_lookaheadv9_noisynets TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/longer_lookaheadv9_noisynets+TRAINER",
       "created_at_warsaw": "2026-06-06 15:53:59",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "NoisyNet exploration"
     },
     {
-      "project": "tmrlv2",
-      "id": "phase0_baseline_recovery TRAINER",
-      "name": "phase0_baseline_recovery TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/phase0_baseline_recovery+TRAINER",
       "created_at_warsaw": "2026-06-07 15:37:39",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Recovery baseline"
     },
     {
-      "project": "tmrlv2",
-      "id": "phase0_demo_driven_v5 TRAINER",
-      "name": "phase0_demo_driven_v5 TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/phase0_demo_driven_v5+TRAINER",
       "created_at_warsaw": "2026-06-11 23:45:18",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Demonstration-driven training"
     },
     {
-      "project": "tmrlv2",
-      "id": "phase0_pipelinefix_v10 TRAINER",
-      "name": "phase0_pipelinefix_v10 TRAINER",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/tmrlv2/runs/phase0_pipelinefix_v10+TRAINER",
       "created_at_warsaw": "2026-06-12 16:26:37",
-      "recorded_commit": null
+      "recorded_commit": null,
+      "label": "Training pipeline fixes"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "hfs1n6n8",
-      "name": "trackmania-iqn-lidar-v26-pace-replay-fix",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/hfs1n6n8",
       "created_at_warsaw": "2026-07-23 20:30:09",
-      "recorded_commit": "65fa3afcdcb4dd7877a64ac659a62da03971c146"
+      "recorded_commit": "65fa3afcdcb4dd7877a64ac659a62da03971c146",
+      "label": "Replay and training pace"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "ajarqst2",
-      "name": "trackmania-iqn-lidar-v27-deterministic-stability",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/ajarqst2",
       "created_at_warsaw": "2026-07-24 00:12:24",
-      "recorded_commit": "3293970b93d2821b784c36e29e4be3eedffa98b3"
+      "recorded_commit": "3293970b93d2821b784c36e29e4be3eedffa98b3",
+      "label": "Frozen-policy stability"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "iyg82kjh",
-      "name": "trackmania-bc-simba-v96a",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/iyg82kjh",
       "created_at_warsaw": "2026-08-22 13:43:46",
-      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c"
+      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c",
+      "label": "Behavior cloning baseline"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "8b9spi81",
-      "name": "trackmania-bc-simba-v96f",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/8b9spi81",
       "created_at_warsaw": "2026-08-22 16:10:30",
-      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c"
+      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c",
+      "label": "Behavior cloning variant"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "tomr6uq1",
-      "name": "trackmania-iqn-simba-racing-v97a",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/tomr6uq1",
       "created_at_warsaw": "2026-08-22 21:43:50",
-      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c"
+      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c",
+      "label": "Exploration investigation"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "8xi45jc3",
-      "name": "trackmania-iqn-simba-racing-v99a",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/8xi45jc3",
       "created_at_warsaw": "2026-08-23 13:56:30",
-      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c"
+      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c",
+      "label": "Replay-sampling investigation"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "efpjkrqj",
-      "name": "trackmania-iqn-simba-racing-v100a",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/efpjkrqj",
       "created_at_warsaw": "2026-08-23 16:14:51",
-      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c"
+      "recorded_commit": "48ada5f147ce1c19ecd104661f6c295bbda2f64c",
+      "label": "Subsequent IQN training"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "4yq4dvlm",
-      "name": "sub37-iqn-gnn-simba-v105a-s17-online-scratch",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/4yq4dvlm",
       "created_at_warsaw": "2026-09-02 23:18:20",
-      "recorded_commit": "7254afc18f92385ecd15aaf3cbd093aa21ec527b"
+      "recorded_commit": "7254afc18f92385ecd15aaf3cbd093aa21ec527b",
+      "label": "Initial geometry model, from scratch"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "x7qn7426",
-      "name": "sub37-iqn-gnn-simba-v105b-s17-time-attack-finetune-2",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/x7qn7426",
       "created_at_warsaw": "2026-09-03 10:58:15",
-      "recorded_commit": "7254afc18f92385ecd15aaf3cbd093aa21ec527b"
+      "recorded_commit": "7254afc18f92385ecd15aaf3cbd093aa21ec527b",
+      "label": "Finish-time reward, warm start"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "azad6l00",
-      "name": "sub37-iqn-gnn-simba-v105c-s17-elite-replay-finetune",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/azad6l00",
       "created_at_warsaw": "2026-09-04 01:20:30",
-      "recorded_commit": "7254afc18f92385ecd15aaf3cbd093aa21ec527b"
+      "recorded_commit": "7254afc18f92385ecd15aaf3cbd093aa21ec527b",
+      "label": "Elite replay fine-tuning"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "hfyraiws",
-      "name": "sub37-iqn-gnn-simba-v106a-s17-conservative-mean-finetune",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/hfyraiws",
       "created_at_warsaw": "2026-09-04 18:04:08",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Conservative fine-tuning"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "66se3dlg",
-      "name": "sub37-iqn-gnn-simba-v106b-s17-ultra-conservative-mean-finetune",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/66se3dlg",
       "created_at_warsaw": "2026-09-04 18:31:39",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "More conservative fine-tuning"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "il7rr7dx",
-      "name": "sub37-iqn-gnn-simba-v106b-s17-ultra-conservative-mean-finetune",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/il7rr7dx",
       "created_at_warsaw": "2026-09-05 16:29:14",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "More conservative fine-tuning"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "9mkt8zfa",
-      "name": "sub37-iqn-gnn-simba-v107a-s17-context-v3",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/9mkt8zfa",
       "created_at_warsaw": "2026-09-05 17:44:09",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Additional road context"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "nsl8jpyf",
-      "name": "sub37-iqn-gnn-simba-v107b-s17-adapter-only",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/nsl8jpyf",
       "created_at_warsaw": "2026-09-05 22:05:26",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Context adapter only"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "66ke5exp",
-      "name": "sub37-iqn-gnn-simba-v107c-s17-bounded-adapter",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/66ke5exp",
       "created_at_warsaw": "2026-09-05 23:13:08",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Bounded context adapter"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "doqwzzf1",
-      "name": "sub37-iqn-gnn-simba-v106b-s17-ultra-conservative-mean-finetune",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/doqwzzf1",
       "created_at_warsaw": "2026-09-06 10:45:39",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Baseline comparison"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "ic7bgbj3",
-      "name": "sub37-iqn-gnn-simba-v107c-s17-bounded-adapter",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/ic7bgbj3",
       "created_at_warsaw": "2026-09-06 11:07:36",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Bounded context comparison"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "dhwsc0ux",
-      "name": "sub37-iqn-gnn-simba-v107c-s17-bounded-adapter",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/dhwsc0ux",
       "created_at_warsaw": "2026-09-06 11:21:12",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Bounded context comparison"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "tedopdkz",
-      "name": "sub37-iqn-gnn-simba-v107d-s17-nstep20-tail-credit",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/tedopdkz",
       "created_at_warsaw": "2026-09-06 13:29:03",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Longer learning target"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "kj4es4xq",
-      "name": "sub37-iqn-gnn-simba-v107e-s17-targeted-recovery",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/kj4es4xq",
       "created_at_warsaw": "2026-09-06 17:54:55",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Targeted recovery training"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "054n2n95",
-      "name": "sub37-iqn-gnn-simba-v107f-s17-ordered-spatial-adapter",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/054n2n95",
       "created_at_warsaw": "2026-09-07 00:19:04",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Ordered spatial adapter"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "ujuk8k6d",
-      "name": "sub37-iqn-gnn-simba-v107g-s17-recovery-memory",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/ujuk8k6d",
       "created_at_warsaw": "2026-09-07 09:22:13",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Recovery memory"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "ngsj0h5v",
-      "name": "sub37-iqn-gnn-simba-v107h-s17-online-recovery-memory",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/ngsj0h5v",
       "created_at_warsaw": "2026-09-07 09:35:11",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Recurrent recovery training"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "mnhje6t7",
-      "name": "sub37-iqn-gnn-simba-v107i-s17-incident-gated-recovery",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/mnhje6t7",
       "created_at_warsaw": "2026-09-07 12:12:52",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Incident-gated recovery"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "a8ekowuh",
-      "name": "sub37-iqn-gnn-simba-v107i-s17-incident-gated-recovery",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/a8ekowuh",
       "created_at_warsaw": "2026-09-07 13:59:25",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Incident-gated recovery"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "d1s2lcwd",
-      "name": "sub37-iqn-gnn-simba-v107j-s17-human-recovery",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/d1s2lcwd",
       "created_at_warsaw": "2026-09-07 19:39:27",
-      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741"
+      "recorded_commit": "e4de10e440b70990c22881d82a372a9d10458741",
+      "label": "Human recovery demonstrations"
     },
     {
-      "project": "my-trackmania-agent",
-      "id": "9sjaghc2",
-      "name": "sub37-iqn-gnn-simba-v107j-s17-human-recovery",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/9sjaghc2",
       "created_at_warsaw": "2026-09-08 13:34:46",
-      "recorded_commit": "e854e2b82f7ee0fb1362af9597461cfffe72d929"
+      "recorded_commit": "e854e2b82f7ee0fb1362af9597461cfffe72d929",
+      "label": "Human recovery demonstrations"
+    }
+  ],
+  "collections": [
+    {
+      "logging_runs": 65,
+      "distinct_names_after_trainer_worker_suffix_removed": 37,
+      "first_created_at_utc": "2026-05-13T14:23:29.0000000Z",
+      "last_created_at_utc": "2026-06-07T11:59:39.0000000Z",
+      "first_date_warsaw": "2026-05-13",
+      "last_date_warsaw": "2026-06-07",
+      "runs_with_recorded_commit": 0,
+      "collection_label": "Early tuning"
+    },
+    {
+      "logging_runs": 141,
+      "distinct_names_after_trainer_worker_suffix_removed": 71,
+      "first_created_at_utc": "2026-05-16T07:54:57.0000000Z",
+      "last_created_at_utc": "2026-06-12T14:26:43.0000000Z",
+      "first_date_warsaw": "2026-05-16",
+      "last_date_warsaw": "2026-06-12",
+      "runs_with_recorded_commit": 0,
+      "collection_label": "Observation and model experiments"
+    },
+    {
+      "logging_runs": 475,
+      "distinct_names_after_trainer_worker_suffix_removed": 358,
+      "first_created_at_utc": "2026-07-18T13:22:03.0000000Z",
+      "last_created_at_utc": "2026-09-08T11:34:46.0000000Z",
+      "first_date_warsaw": "2026-07-18",
+      "last_date_warsaw": "2026-09-08",
+      "runs_with_recorded_commit": 469,
+      "collection_label": "Runtime and driving evaluations"
     }
   ]
 }

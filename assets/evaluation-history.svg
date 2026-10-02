@@ -278,7 +278,7 @@ L 286.575601 248.1471
 " style="fill: none; stroke: #c7d3ca; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_15">
-    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="38.643678" y="12.118365" transform="rotate(-0 38.643678 12.118365)">V105A: from scratch</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="38.643678" y="12.118365" transform="rotate(-0 38.643678 12.118365)">Initial model: from scratch</text>
    </g>
   </g>
   <g id="axes_2">
@@ -468,7 +468,7 @@ L 571.423919 248.1471
 " style="fill: none; stroke: #c7d3ca; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_25">
-    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="323.491996" y="12.118365" transform="rotate(-0 323.491996 12.118365)">V105B: time-aware reward, warm start</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="323.491996" y="12.118365" transform="rotate(-0 323.491996 12.118365)">Finish-time reward: warm start</text>
    </g>
   </g>
   <g id="axes_3">
@@ -676,7 +676,7 @@ L 860.99976 248.1471
 " style="fill: none; stroke: #c7d3ca; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_38">
-    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="613.067837" y="12.118365" transform="rotate(-0 613.067837 12.118365)">V107H: recurrent recovery experiment</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="613.067837" y="12.118365" transform="rotate(-0 613.067837 12.118365)">Recurrent recovery experiment</text>
    </g>
   </g>
   <g id="axes_4">

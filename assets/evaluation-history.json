@@ -2,17 +2,17 @@
   "source": "Full W&B scan_history export, not sampled chart history",
   "notes": [
     "Evaluation only. Training episodes are separate in the numeric-history source files.",
-    "V105A and V105B each use 5-trial evaluation batches. V107H uses 10.",
+    "the initial model and the finish-time reward run each use 5-trial evaluation batches. the recurrent recovery run uses 10.",
     "Mean/median/best are conditional on finishing; always display finished/trials alongside them.",
     "Zero finishes is represented as null time, never as a zero-second lap.",
     "The x axis is the W&B logged environment-transition counter, which can be ahead of the evaluated policy snapshot.",
-    "V105B is a warm start from V105A policy161118; its counter restarts at zero. Do not present it as a matched scratch comparison.",
-    "These are adaptive development evaluations, not the independent V108 30-trial confirmation."
+    "the finish-time reward run is a warm start from the initial model policy161118; its counter restarts at zero. Do not present it as a matched scratch comparison.",
+    "These are adaptive development evaluations, not the independent reference-action filter 30-trial confirmation."
   ],
   "series": [
     {
       "run_id": "4yq4dvlm",
-      "label": "V105A: from scratch",
+      "label": "Initial model: from scratch",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/4yq4dvlm",
       "points": [
         {
@@ -199,7 +199,7 @@
     },
     {
       "run_id": "x7qn7426",
-      "label": "V105B: time-aware reward, warm start",
+      "label": "Finish-time reward: warm start",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/x7qn7426",
       "points": [
         {
@@ -306,7 +306,7 @@
     },
     {
       "run_id": "ngsj0h5v",
-      "label": "V107H: recurrent recovery experiment",
+      "label": "Recurrent recovery experiment",
       "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/ngsj0h5v",
       "points": [
         {

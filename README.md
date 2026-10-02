@@ -35,6 +35,24 @@ hashes, benchmark selection, raw-history extraction and media provenance.
 The first-person text is a draft assembled from the author's records; personal
 motives or memories beyond those records can be added in editorial review.
 
+## Explanations and figures
+
+The article explains the RL loop, the practical choice of IQN, and the differences
+from DQN, SAC, TQC and PPO. It does not claim a controlled ranking of these methods.
+Visible experiment names are descriptive; source URLs retain their real targets.
+The narrative credits the original TMRL authors and the author's subsequent work.
+
+Original figures from the IQN (Figure 1), TQC (Figure 2) and SimbaV2 (Figure 3)
+papers were rendered from the published PDFs at 360 dpi and cropped to the figures.
+Their captions cite the authors, PMLR papers and CC BY 4.0 license; full credits and
+crop dimensions are in `evidence.html#paper-figures`. The paper architecture is
+explicitly distinguished from the adapted backbone in the racing model.
+
+The RL loop and return-distribution illustration are local SVGs. The latter uses
+invented values, not measured results. The architecture now uses explicit addition
+and concatenation nodes with arrows ending at node boundaries. The header logo and
+favicon use unchanged repository branding assets.
+
 ## Original-resolution media
 
 - `assets/neural-flow.mp4`: complete original 1080p, 30fps, 42.1-second film,
