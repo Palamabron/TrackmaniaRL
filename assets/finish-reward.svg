@@ -93,7 +93,34 @@ L 0 3.5
      </g>
     </g>
     <g id="text_6">
-     <text style="font-size: 12px; font-family: 'Segoe UI', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #202c27" x="385.2" y="279.2075" transform="rotate(-0 385.2 279.2075)">Finish time (seconds)</text>
+     <!-- Finish time $T$ (seconds) -->
+     <g style="fill: #202c27" transform="translate(324.72 279.2075)">
+      <text>
+       <tspan x="0" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">F</tspan>
+       <tspan x="5.859375" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">i</tspan>
+       <tspan x="8.765625" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">n</tspan>
+       <tspan x="15.556641" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">i</tspan>
+       <tspan x="18.462891" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">s</tspan>
+       <tspan x="23.554688" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">h</tspan>
+       <tspan x="30.345703" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="33.632812" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">t</tspan>
+       <tspan x="37.699219" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">i</tspan>
+       <tspan x="40.605469" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">m</tspan>
+       <tspan x="50.941406" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">e</tspan>
+       <tspan x="57.216797" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="67.511719" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="70.798828" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">(</tspan>
+       <tspan x="74.419922" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">s</tspan>
+       <tspan x="79.511719" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">e</tspan>
+       <tspan x="85.787109" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">c</tspan>
+       <tspan x="91.330078" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">o</tspan>
+       <tspan x="98.361328" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">n</tspan>
+       <tspan x="105.152344" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">d</tspan>
+       <tspan x="112.21875" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">s</tspan>
+       <tspan x="117.310547" y="-0.109375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">)</tspan>
+       <tspan x="60.503906" y="-0.109375" style="font-size: 12px; font-family: 'cmmi10'; fill: #202c27">T</tspan>
+      </text>
+     </g>
     </g>
    </g>
    <g id="matplotlib.axis_2">
@@ -178,7 +205,50 @@ L 698.4 46.305391
      </g>
     </g>
     <g id="text_12">
-     <text style="font-size: 12px; font-family: 'Segoe UI', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #202c27" x="45.3025" y="142.416" transform="rotate(-90 45.3025 142.416)">Extra reward at a valid finish</text>
+     <!-- Extra reward at a valid finish, $r_{\mathrm{finish}}$ -->
+     <g style="fill: #202c27" transform="translate(45.3025 232.416) rotate(-90)">
+      <text>
+       <tspan x="0" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">E</tspan>
+       <tspan x="6.070312" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">x</tspan>
+       <tspan x="11.578125" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">t</tspan>
+       <tspan x="15.644531" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">r</tspan>
+       <tspan x="19.816406" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">a</tspan>
+       <tspan x="25.921875" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="29.208984" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">r</tspan>
+       <tspan x="33.380859" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">e</tspan>
+       <tspan x="39.65625" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">w</tspan>
+       <tspan x="48.328125" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">a</tspan>
+       <tspan x="54.433594" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">r</tspan>
+       <tspan x="58.605469" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">d</tspan>
+       <tspan x="65.671875" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="68.958984" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">a</tspan>
+       <tspan x="75.064453" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">t</tspan>
+       <tspan x="79.130859" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="82.417969" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">a</tspan>
+       <tspan x="88.523438" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="91.810547" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">v</tspan>
+       <tspan x="97.558594" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">a</tspan>
+       <tspan x="103.664062" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">l</tspan>
+       <tspan x="106.570312" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">i</tspan>
+       <tspan x="109.476562" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">d</tspan>
+       <tspan x="116.542969" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="119.830078" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">f</tspan>
+       <tspan x="123.585938" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">i</tspan>
+       <tspan x="126.492188" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">n</tspan>
+       <tspan x="133.283203" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">i</tspan>
+       <tspan x="136.189453" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">s</tspan>
+       <tspan x="141.28125" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">h</tspan>
+       <tspan x="148.072266" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27">,</tspan>
+       <tspan x="150.673828" y="-0.984375" style="font-size: 12px; font-family: 'Segoe UI'; fill: #202c27"> </tspan>
+       <tspan x="153.960938" y="-0.984375" style="font-size: 12px; font-family: 'cmmi10'; fill: #202c27">r</tspan>
+       <tspan x="159.375" y="1.056375" style="font-size: 8.4px; font-family: 'cmr10'; fill: #202c27">f</tspan>
+       <tspan x="161.938477" y="1.056375" style="font-size: 8.4px; font-family: 'cmr10'; fill: #202c27">i</tspan>
+       <tspan x="164.264062" y="1.056375" style="font-size: 8.4px; font-family: 'cmr10'; fill: #202c27">n</tspan>
+       <tspan x="168.927539" y="1.056375" style="font-size: 8.4px; font-family: 'cmr10'; fill: #202c27">i</tspan>
+       <tspan x="171.253125" y="1.056375" style="font-size: 8.4px; font-family: 'cmr10'; fill: #202c27">s</tspan>
+       <tspan x="174.563086" y="1.056375" style="font-size: 8.4px; font-family: 'cmr10'; fill: #202c27">h</tspan>
+      </text>
+     </g>
     </g>
    </g>
    <g id="line2d_16">
@@ -232,7 +302,31 @@ z
     </g>
    </g>
    <g id="text_15">
-    <text style="font-size: 12px; font-family: 'Segoe UI', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #225541" x="334.56" y="133.685913" transform="rotate(-0 334.56 133.685913)">37 s -&gt; 66 units</text>
+    <!-- $T=37\,\mathrm{s}$ -->
+    <g style="fill: #225541" transform="translate(334.56 105.265413)">
+     <text>
+      <tspan x="0" y="-0.796875" style="font-size: 12px; font-family: 'cmmi10'; fill: #225541">T</tspan>
+      <tspan x="9.114844" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">=</tspan>
+      <tspan x="20.544141" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">3</tspan>
+      <tspan x="26.544141" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">7</tspan>
+      <tspan x="34.300035" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">s</tspan>
+     </text>
+    </g>
+    <!-- $r_{\mathrm{finish}}=66$ -->
+    <g style="fill: #225541" transform="translate(334.56 118.685913)">
+     <text>
+      <tspan x="0" y="-0" style="font-size: 12px; font-family: 'cmmi10'; fill: #225541">r</tspan>
+      <tspan x="5.414062" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">f</tspan>
+      <tspan x="7.977539" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">i</tspan>
+      <tspan x="10.303125" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">n</tspan>
+      <tspan x="14.966602" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">i</tspan>
+      <tspan x="17.292188" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">s</tspan>
+      <tspan x="20.602148" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">h</tspan>
+      <tspan x="28.137937" y="-0" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">=</tspan>
+      <tspan x="39.567234" y="-0" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">6</tspan>
+      <tspan x="45.567234" y="-0" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">6</tspan>
+     </text>
+    </g>
    </g>
    <g id="PathCollection_2">
     <g clip-path="url(#pf74247f4cf)">
@@ -240,7 +334,31 @@ z
     </g>
    </g>
    <g id="text_16">
-    <text style="font-size: 12px; font-family: 'Segoe UI', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #225541" x="459.84" y="170.299478" transform="rotate(-0 459.84 170.299478)">39 s -&gt; 62 units</text>
+    <!-- $T=39\,\mathrm{s}$ -->
+    <g style="fill: #225541" transform="translate(459.84 141.878978)">
+     <text>
+      <tspan x="0" y="-0.796875" style="font-size: 12px; font-family: 'cmmi10'; fill: #225541">T</tspan>
+      <tspan x="9.114844" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">=</tspan>
+      <tspan x="20.544141" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">3</tspan>
+      <tspan x="26.544141" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">9</tspan>
+      <tspan x="34.300035" y="-0.796875" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">s</tspan>
+     </text>
+    </g>
+    <!-- $r_{\mathrm{finish}}=62$ -->
+    <g style="fill: #225541" transform="translate(459.84 155.299478)">
+     <text>
+      <tspan x="0" y="-0" style="font-size: 12px; font-family: 'cmmi10'; fill: #225541">r</tspan>
+      <tspan x="5.414062" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">f</tspan>
+      <tspan x="7.977539" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">i</tspan>
+      <tspan x="10.303125" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">n</tspan>
+      <tspan x="14.966602" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">i</tspan>
+      <tspan x="17.292188" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">s</tspan>
+      <tspan x="20.602148" y="2.04075" style="font-size: 8.4px; font-family: 'cmr10'; fill: #225541">h</tspan>
+      <tspan x="28.137937" y="-0" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">=</tspan>
+      <tspan x="39.567234" y="-0" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">6</tspan>
+      <tspan x="45.567234" y="-0" style="font-size: 12px; font-family: 'cmr10'; fill: #225541">2</tspan>
+     </text>
+    </g>
    </g>
    <g id="text_17">
     <text style="font-size: 15px; font-family: 'Segoe UI', 'DejaVu Sans', sans-serif; text-anchor: start" x="72" y="25.152" transform="rotate(-0 72 25.152)">Finish bonus + signed time correction</text>
