@@ -1,0 +1,149 @@
+<svg fill="#e7eee9" xmlns="http://www.w3.org/2000/svg" width="1200" height="1740" viewBox="0 0 1200 1740" role="img" aria-labelledby="title desc">
+<title id="title">Inside the geometry-based controller</title>
+<desc id="desc">Four ordered environmental tensors contain 264 road coordinates, 60 car features, 29 context features and 8 recovery indicators. Parallel road encoders merge by addition, as do car and context. Concatenation feeds four normalized SimbaV2 blocks. Gated recovery precedes the identity core. Thirty-two internal quantile levels enter dueling IQN. The map-specific reference filter selects controls after the network.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#9eb8a9"/></marker></defs>
+<rect width="1200" height="1740" fill="#18221e"/>
+<g font-family="Segoe UI,Arial,sans-serif">
+<rect x="0" y="0" width="1200" height="112" rx="0" fill="#202d26" stroke="#202d26"/>
+<text x="42" y="49" font-size="34" fill="#e7eee9" font-weight="650" text-anchor="start">Inside the geometry-based controller</text>
+<text x="42" y="85" font-size="21" fill="#adbbb2" font-weight="400" text-anchor="start">Exact recorded architecture - four input tensors, one driving decision</text>
+<text x="42" y="150" font-size="15" fill="#9ed5b9" font-weight="700" text-anchor="start">01</text>
+<text x="72" y="150" font-size="15" fill="#adbbb2" font-weight="600" text-anchor="start">OBSERVE</text>
+<path d="M155 145H1158" stroke="#2d3c34"/>
+<rect x="42" y="174" width="412" height="154" rx="12" fill="#20372c" stroke="#43574b"/>
+<path d="M60 200V302" stroke="#9ed5b9" stroke-width="3" stroke-linecap="round"/>
+<text x="76" y="211" font-size="24" fill="#9ed5b9" font-weight="600" text-anchor="start">Road geometry · 264</text>
+<text x="76" y="246" font-size="19" fill="#adbbb2" font-weight="400" text-anchor="start">44 stations × 6 coordinates</text>
+<text x="76" y="274" font-size="19" fill="#adbbb2" font-weight="400" text-anchor="start">Left, center and right positions</text>
+<text x="76" y="302" font-size="19" fill="#adbbb2" font-weight="400" text-anchor="start">Horizontal car frame · metres / 50</text>
+<rect x="486" y="174" width="302" height="154" rx="12" fill="#202f3a" stroke="#43574b"/>
+<path d="M504 200V302" stroke="#99c8ed" stroke-width="3" stroke-linecap="round"/>
+<text x="520" y="211" font-size="22" fill="#99c8ed" font-weight="600" text-anchor="start">Car motion · 60</text>
+<text x="520" y="246" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">15 motion and input values</text>
+<text x="520" y="274" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">44 curvature samples</text>
+<text x="520" y="302" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">1 skidding-wheel count</text>
+<rect x="822" y="174" width="336" height="154" rx="12" fill="#373122" stroke="#43574b"/>
+<path d="M840 200V302" stroke="#e6c17c" stroke-width="3" stroke-linecap="round"/>
+<text x="856" y="211" font-size="22" fill="#e6c17c" font-weight="600" text-anchor="start">Context · 29</text>
+<text x="856" y="246" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Position, clearance and grip</text>
+<text x="856" y="274" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Cyclic route phase</text>
+<text x="856" y="302" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">6 time-based preview horizons</text>
+<text x="42" y="382" font-size="15" fill="#9ed5b9" font-weight="700" text-anchor="start">02</text>
+<text x="72" y="382" font-size="15" fill="#adbbb2" font-weight="600" text-anchor="start">ENCODE EACH BRANCH</text>
+<path d="M254 377H1158" stroke="#2d3c34"/>
+<path d="M248 328V399H138V420" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M248 399H358V420" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M637 328V420" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M990 328V420" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="42" y="420" width="192" height="160" rx="12" fill="#18221e" stroke="#43574b"/>
+<path d="M60 446V554" stroke="#9ed5b9" stroke-width="3" stroke-linecap="round"/>
+<text x="76" y="457" font-size="22" fill="#9ed5b9" font-weight="600" text-anchor="start">Road GNN</text>
+<text x="76" y="492" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">6 → 128 / node</text>
+<text x="76" y="520" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">2 message steps</text>
+<text x="76" y="548" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Mean pool → 192</text>
+<rect x="262" y="420" width="192" height="160" rx="12" fill="#18221e" stroke="#43574b"/>
+<path d="M280 446V554" stroke="#9ed5b9" stroke-width="3" stroke-linecap="round"/>
+<text x="296" y="457" font-size="22" fill="#9ed5b9" font-weight="600" text-anchor="start">Conv1D</text>
+<text x="296" y="492" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">7 channels → 64</text>
+<text x="296" y="520" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">4 dilated blocks</text>
+<text x="296" y="548" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">0.02 × tanh</text>
+<path d="M138 580V630H232" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M358 580V630H264" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="6 6" marker-end="url(#arrow)"/>
+<circle cx="248" cy="630" r="16" fill="#18221e" stroke="#9eb8a9" stroke-width="2"/>
+<text x="248" y="637" font-size="25" fill="#9ed5b9" font-weight="400" text-anchor="middle">+</text>
+<text x="374" y="614" font-size="14" fill="#adbbb2" font-weight="400" text-anchor="start">Zero in this lap</text>
+<rect x="486" y="420" width="302" height="160" rx="12" fill="#18221e" stroke="#43574b"/>
+<path d="M504 446V554" stroke="#99c8ed" stroke-width="3" stroke-linecap="round"/>
+<text x="520" y="457" font-size="22" fill="#99c8ed" font-weight="600" text-anchor="start">Car MLP</text>
+<text x="520" y="492" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">60 → 192</text>
+<text x="520" y="520" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">LayerNorm + SiLU</text>
+<text x="520" y="548" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Previous input echo retained</text>
+<rect x="822" y="420" width="336" height="160" rx="12" fill="#18221e" stroke="#43574b"/>
+<path d="M840 446V554" stroke="#e6c17c" stroke-width="3" stroke-linecap="round"/>
+<text x="856" y="457" font-size="22" fill="#e6c17c" font-weight="600" text-anchor="start">Context MLP</text>
+<text x="856" y="492" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">29 → 192 → 192</text>
+<text x="856" y="520" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">LayerNorm + SiLU</text>
+<text x="856" y="548" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Bounded: 0.02 × tanh</text>
+<path d="M637 580V630H790" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M990 580V630H822" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="806" cy="630" r="16" fill="#18221e" stroke="#9eb8a9" stroke-width="2"/>
+<text x="806" y="637" font-size="25" fill="#9ed5b9" font-weight="400" text-anchor="middle">+</text>
+<path d="M248 646V680" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M806 646V680" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="42" y="680" width="412" height="65" rx="12" fill="#20372c" stroke="#43574b"/>
+<text x="248" y="721" font-size="23" fill="#9ed5b9" font-weight="600" text-anchor="middle">Road representation · 192</text>
+<rect x="486" y="680" width="672" height="65" rx="12" fill="#202f3a" stroke="#43574b"/>
+<text x="822" y="721" font-size="23" fill="#99c8ed" font-weight="600" text-anchor="middle">Car + context representation · 192</text>
+<text x="42" y="795" font-size="15" fill="#9ed5b9" font-weight="700" text-anchor="start">03</text>
+<text x="72" y="795" font-size="15" fill="#adbbb2" font-weight="600" text-anchor="start">FUSE AND REFINE</text>
+<path d="M227 790H1158" stroke="#2d3c34"/>
+<path d="M248 745V810H520V830" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M822 745V810H680V830" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="440" y="830" width="320" height="65" rx="12" fill="#18221e" stroke="#43574b"/>
+<text x="600" y="871" font-size="24" fill="#9ed5b9" font-weight="600" text-anchor="middle">Concatenate · 384</text>
+<path d="M600 895V935" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="356" y="935" width="488" height="150" rx="12" fill="#18221e" stroke="#43574b"/>
+<path d="M374 961V1059" stroke="#9ed5b9" stroke-width="3" stroke-linecap="round"/>
+<text x="390" y="972" font-size="24" fill="#9ed5b9" font-weight="600" text-anchor="start">SimbaV2 input projection</text>
+<text x="390" y="1007" font-size="19" fill="#adbbb2" font-weight="400" text-anchor="start">Append constant 1 · 384 → 385</text>
+<text x="390" y="1035" font-size="19" fill="#adbbb2" font-weight="400" text-anchor="start">Unit normalization → 385-to-192 projection</text>
+<text x="390" y="1063" font-size="19" fill="#adbbb2" font-weight="400" text-anchor="start">Normalize the 192-value result</text>
+<path d="M600 1085V1130" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="356" y="1130" width="488" height="112" rx="12" fill="#1c6552" stroke="#1c6552"/>
+<text x="390" y="1167" font-size="24" fill="white" font-weight="600" text-anchor="start">SimbaV2 · 4 residual blocks</text>
+<text x="390" y="1202" font-size="19" fill="#e1eee8" font-weight="400" text-anchor="start">192 → 768 → 192 in each block</text>
+<text x="390" y="1230" font-size="19" fill="#e1eee8" font-weight="400" text-anchor="start">Learned interpolation + unit normalization</text>
+<rect x="42" y="935" width="270" height="150" rx="12" fill="#30283c" stroke="#43574b"/>
+<path d="M60 961V1059" stroke="#c3afd9" stroke-width="3" stroke-linecap="round"/>
+<text x="76" y="972" font-size="22" fill="#c3afd9" font-weight="600" text-anchor="start">Recovery input · 8</text>
+<text x="76" y="1007" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Previous-frame changes</text>
+<text x="76" y="1035" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Speed, route and clearance</text>
+<text x="76" y="1063" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Speed deficit + memory</text>
+<path d="M177 1085V1130" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="42" y="1130" width="270" height="112" rx="12" fill="#18221e" stroke="#43574b"/>
+<path d="M60 1156V1216" stroke="#c3afd9" stroke-width="3" stroke-linecap="round"/>
+<text x="76" y="1167" font-size="22" fill="#c3afd9" font-weight="600" text-anchor="start">Recovery MLP + gate</text>
+<text x="76" y="1202" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">8 → 64 → 192 · 0.01 × tanh</text>
+<text x="76" y="1230" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Gate: recovery[6] and [7]</text>
+<path d="M600 1242V1254" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M177 1242V1270H584" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="600" cy="1270" r="16" fill="#18221e" stroke="#9eb8a9" stroke-width="2"/>
+<text x="600" y="1277" font-size="25" fill="#9ed5b9" font-weight="400" text-anchor="middle">+</text>
+<path d="M600 1286V1320" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="426" y="1320" width="348" height="65" rx="12" fill="#18221e" stroke="#43574b"/>
+<text x="600" y="1361" font-size="23" fill="#9ed5b9" font-weight="600" text-anchor="middle">Identity core · 192 · no GRU</text>
+<text x="42" y="1420" font-size="15" fill="#9ed5b9" font-weight="700" text-anchor="start">04</text>
+<text x="72" y="1420" font-size="15" fill="#adbbb2" font-weight="600" text-anchor="start">SCORE AND SELECT</text>
+<path d="M236 1415H1158" stroke="#2d3c34"/>
+<path d="M600 1385V1450" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="42" y="1450" width="330" height="150" rx="12" fill="#202f3a" stroke="#43574b"/>
+<path d="M60 1476V1574" stroke="#99c8ed" stroke-width="3" stroke-linecap="round"/>
+<text x="76" y="1487" font-size="22" fill="#99c8ed" font-weight="600" text-anchor="start">Internal quantile levels</text>
+<text x="76" y="1522" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">32 fixed evaluation midpoints</text>
+<text x="76" y="1550" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">64 cosine features → 192</text>
+<text x="76" y="1578" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Multiply by the state representation</text>
+<rect x="426" y="1450" width="348" height="150" rx="12" fill="#1c6552" stroke="#1c6552"/>
+<text x="460" y="1487" font-size="22" fill="white" font-weight="600" text-anchor="start">Dueling IQN</text>
+<text x="460" y="1522" font-size="17" fill="#e1eee8" font-weight="400" text-anchor="start">State value + action advantages</text>
+<text x="460" y="1550" font-size="17" fill="#e1eee8" font-weight="400" text-anchor="start">32 quantiles × 78 actions</text>
+<text x="460" y="1578" font-size="17" fill="#e1eee8" font-weight="400" text-anchor="start">Mean over quantiles → 78 scores</text>
+<path d="M372 1515H426" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="850" y="1450" width="308" height="150" rx="12" fill="#373122" stroke="#43574b"/>
+<path d="M868 1476V1574" stroke="#e6c17c" stroke-width="3" stroke-linecap="round"/>
+<text x="884" y="1487" font-size="22" fill="#e6c17c" font-weight="600" text-anchor="start">Reference-action support</text>
+<text x="884" y="1522" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Current state + fixed references</text>
+<text x="884" y="1550" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">15 nearby saved states</text>
+<text x="884" y="1578" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Map-specific, with fallback</text>
+<path d="M600 1600V1620" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="426" y="1620" width="348" height="75" rx="12" fill="#18221e" stroke="#43574b"/>
+<text x="600" y="1653" font-size="23" fill="#9ed5b9" font-weight="600" text-anchor="middle">Filter allowed actions</text>
+<text x="600" y="1680" font-size="18" fill="#adbbb2" font-weight="400" text-anchor="middle">Choose the highest remaining score</text>
+<path d="M1004 1600V1608H806V1643H774" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M774 1668H850" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="850" y="1620" width="308" height="75" rx="12" fill="#1c6552" stroke="#1c6552"/>
+<text x="1004" y="1653" font-size="24" fill="white" font-weight="600" text-anchor="middle">Steer · throttle · brake</text>
+<text x="1004" y="1680" font-size="19" fill="#e1eee8" font-weight="400" text-anchor="middle">20 decisions per second</text>
+<path d="M42 1721H94" fill="none" stroke="#9eb8a9" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="6 6"/>
+<text x="107" y="1727" font-size="17" fill="#adbbb2" font-weight="400" text-anchor="start">Dashed path: zero final Conv1D correction in all 733 recorded decisions.</text>
+</g>
+</svg>
