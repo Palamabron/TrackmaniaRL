@@ -1,0 +1,33 @@
+Create a beautiful publication-quality editorial architecture infographic for an English engineering article about TrackmaniaRL. Redesign the supplied reference diagram. Reference is authoritative for connectivity, but replace its cramped wall of boxes with a carefully composed, elegant, spacious diagram with restrained illustrations and fewer words. Portrait 2:3, high resolution, flat warm ivory paper #f8f7f2, dark charcoal lettering, forest green main flow, dusty blue car branch, muted amber context, soft lavender recovery. Large legible typography, sophisticated scientific editorial design. No neon, no gradients, no fake 3D dashboards, no decorative random networks. A small fine-line road ribbon with sampled left/center/right points can illustrate the geometry input, a tiny car with velocity arrow can illustrate car motion, a subtle bend preview can illustrate context. These are annotations, not new processing nodes. Generous whitespace. Labels must be sharp and correct.
+
+Title: "From road geometry to a driving decision"
+Subtitle: "The recorded TrackmaniaRL controller"
+
+Accurate top-to-bottom flow, visibly numbered stages:
+01 INPUTS & ENCODERS
+Three parallel columns:
+"Road geometry · 264" / "44 stations × 6 coordinates" flows to "Road GNN" / "2 message-passing steps" then "Road features · 192".
+A smaller parallel side branch from Road geometry goes through "Conv1D correction" and joins Road features at a small + circle using a dashed line. Label that dashed line "Zero in this recorded lap".
+"Car motion · 60" flows to "Car MLP" / "60 → 192".
+"Context · 29" flows to "Context MLP" / "29 → 192 → 192".
+Car MLP and Context MLP feed a + circle (addition, NOT concatenation), then "Car + context · 192".
+
+02 FUSE & REFINE
+Road features 192 and Car + context 192 both feed "Concatenate · 384".
+Then "SimbaV2 input projection" / "384 → 385 → 192" / "Append 1 · normalize · project".
+Then "4 SimbaV2 residual blocks" / "192 → 768 → 192".
+A separate lavender branch "Recovery · 8" flows into "Recovery MLP + gate" / "8 → 64 → 192", then joins the output AFTER the four blocks at a + circle.
+Then "Identity core · 192" / "No GRU".
+
+03 SCORE & SELECT
+Identity core flows into "Dueling IQN" / "32 quantiles × 78 actions" / "Mean over quantiles → 78 scores".
+A small blue side node "Internal quantile levels" / "32 fixed evaluation midpoints" enters Dueling IQN only.
+Dueling IQN flows to "Filter allowed actions" / "Select the highest remaining score".
+An amber side node "Reference-action support" / "15 nearby saved states" enters Filter allowed actions only, after network. Never connect this side node into the IQN.
+Filter flows to final bold green band "STEER · THROTTLE · BRAKE" / "20 decisions per second".
+
+Footer: "Dashed path: zero final Conv1D correction in all 733 recorded decisions."
+Keep every described connection correct with clear arrowheads, no crossing lines through boxes, no missing branch, no invented data, no new performance claims. This is a conceptual summary of the exact recorded architecture, omit the reference's extra micro-details rather than cram tiny text. Use image 1 only for factual architecture reference; substantially improve visual design and reading hierarchy.
+
+FINAL EDIT
+undefined
