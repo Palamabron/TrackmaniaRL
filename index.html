@@ -9,7 +9,7 @@
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="3 Years. Hundreds of Failed Experiments. One AI That Finished 30 Trackmania Laps in a Row."><meta name="twitter:description" content="The story of building TrackmaniaRL, a reinforcement learning library shaped by replay bugs, misleading rewards and the search for consistently fast driving."><meta name="twitter:image" content="https://trackmaniarl.github.io/TrackmaniaRL/assets/racing-poster.jpg"><meta name="twitter:image:alt" content="The TrackmaniaRL agent entering a bend on the test track.">
 <meta name="description" content="The story of building TrackmaniaRL, a reinforcement learning library shaped by replay bugs, misleading rewards and the search for consistently fast driving.">
 <title>3 Years. Hundreds of Failed Experiments. One AI That Finished 30 Trackmania Laps in a Row. - Jakub Szulc</title>
-<link rel="icon" href="assets/trackmaniarl-avatar-square.png" type="image/png"><link rel="stylesheet" href="assets/katex/katex.min.css?v=fonts-2"><script src="theme.js?v=editorial-9"></script><link rel="stylesheet" href="style.css?v=control-loop-1"><script src="article.js?v=editorial-9" defer></script>
+<link rel="icon" href="assets/trackmaniarl-avatar-square.png" type="image/png"><link rel="stylesheet" href="assets/katex/katex.min.css?v=fonts-2"><script src="theme.js?v=editorial-9"></script><link rel="stylesheet" href="style.css?v=control-loop-image-1"><script src="article.js?v=editorial-9" defer></script>
 </head>
 <body id="top">
 <a class="skip" href="#article">Skip to article</a>
@@ -25,13 +25,8 @@
 <p>The controller requests a new driving decision every 50 milliseconds, or 20 times per second. Trackmania keeps running while the network computes its choice, so the system has to collect observations, evaluate the model and apply the controls quickly enough to keep up with the car. During evaluation, model computation averaged 8.546 ms. The longest interval between observations on the game clock was 80 ms. These measure different parts of the process: computing a choice and receiving the next observation.</p>
 <figure class="control-loop" aria-labelledby="control-loop-title">
 <div class="loop-title" id="control-loop-title">Game engine and model inference</div>
-<div class="loop-flow">
-<div class="loop-node"><strong>Trackmania</strong><span>Physics and car motion<br>keep running</span></div>
-<div class="loop-exchange"><span>Live telemetry <b aria-hidden="true">→</b></span><span><b aria-hidden="true">←</b> Steering and pedals</span></div>
-<div class="loop-node"><strong>Controller + AI model</strong><span>Combine telemetry with road geometry<br>Compute and apply the next action</span></div>
-</div>
-<div class="loop-timing"><div class="loop-ticks"><span>0 ms</span><span>50 ms</span><span>100 ms</span></div><div class="loop-game">Game keeps advancing <span aria-hidden="true">→</span></div><p>One new decision requested at each tick</p></div>
-<figcaption>The controller reads the game state, asks the model for an action and sends the controls back while the game continues. The ticks show the intended 50 ms decision interval. Model computation averaged 8.5 ms. Observed intervals could be longer, reaching 80 ms in the benchmark. Timing is schematic.</figcaption>
+<a href="assets/control-loop-editorial.png" aria-label="Enlarge the illustrated game and AI control loop"><img src="assets/control-loop-editorial.png" width="1536" height="1024" loading="lazy" alt="Trackmania sends live telemetry to the controller and AI model, which also receives prepared road geometry. Steering and pedal commands return to the game. The game keeps advancing while decisions are requested at 0, 50 and 100 milliseconds. Model computation averages 8.5 milliseconds."></a>
+<figcaption>The controller reads the game state, asks the model for an action and sends the controls back while the game continues. The ticks show the intended 50 ms decision interval. Model computation averaged 8.5 ms. Observed intervals could be longer, reaching 80 ms in the benchmark. The track, network and timing are schematic. <a href="assets/control-loop-editorial.png">Enlarge illustration</a>. Artwork generated with GPT Image.</figcaption>
 </figure>
 <p>I trained and tuned on this route, then froze the controller for evaluation. The target was to finish every attempt and keep the mean below 37 seconds. Most of the work below came from cases where a better loss, higher reward or faster best lap failed to improve that result.</p>
 </section>
