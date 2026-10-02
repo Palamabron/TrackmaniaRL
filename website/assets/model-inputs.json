@@ -1,0 +1,987 @@
+{
+  "description": "Exact ordered inputs of the recorded geometry-based controller. Indices start at zero. Four environmental tensors contain 361 scalars in total.",
+  "road": {
+    "stored_shape": [
+      3,
+      88
+    ],
+    "encoder_shape": [
+      44,
+      6
+    ],
+    "stored_channel_order": [
+      "left",
+      "center",
+      "right"
+    ],
+    "pair_order": [
+      "lateral_x",
+      "forward_z"
+    ],
+    "node_order": [
+      "left_lateral_x",
+      "left_forward_z",
+      "center_lateral_x",
+      "center_forward_z",
+      "right_lateral_x",
+      "right_forward_z"
+    ],
+    "encoder_divisor_m": 50,
+    "stations": [
+      {
+        "index": 0,
+        "lookahead_m": 2.5,
+        "coordinate_pair_indices": [
+          0,
+          1
+        ]
+      },
+      {
+        "index": 1,
+        "lookahead_m": 5.0,
+        "coordinate_pair_indices": [
+          2,
+          3
+        ]
+      },
+      {
+        "index": 2,
+        "lookahead_m": 7.5,
+        "coordinate_pair_indices": [
+          4,
+          5
+        ]
+      },
+      {
+        "index": 3,
+        "lookahead_m": 10.0,
+        "coordinate_pair_indices": [
+          6,
+          7
+        ]
+      },
+      {
+        "index": 4,
+        "lookahead_m": 12.5,
+        "coordinate_pair_indices": [
+          8,
+          9
+        ]
+      },
+      {
+        "index": 5,
+        "lookahead_m": 15.0,
+        "coordinate_pair_indices": [
+          10,
+          11
+        ]
+      },
+      {
+        "index": 6,
+        "lookahead_m": 17.5,
+        "coordinate_pair_indices": [
+          12,
+          13
+        ]
+      },
+      {
+        "index": 7,
+        "lookahead_m": 20.0,
+        "coordinate_pair_indices": [
+          14,
+          15
+        ]
+      },
+      {
+        "index": 8,
+        "lookahead_m": 22.5,
+        "coordinate_pair_indices": [
+          16,
+          17
+        ]
+      },
+      {
+        "index": 9,
+        "lookahead_m": 25.0,
+        "coordinate_pair_indices": [
+          18,
+          19
+        ]
+      },
+      {
+        "index": 10,
+        "lookahead_m": 27.5,
+        "coordinate_pair_indices": [
+          20,
+          21
+        ]
+      },
+      {
+        "index": 11,
+        "lookahead_m": 30.0,
+        "coordinate_pair_indices": [
+          22,
+          23
+        ]
+      },
+      {
+        "index": 12,
+        "lookahead_m": 32.5,
+        "coordinate_pair_indices": [
+          24,
+          25
+        ]
+      },
+      {
+        "index": 13,
+        "lookahead_m": 35.0,
+        "coordinate_pair_indices": [
+          26,
+          27
+        ]
+      },
+      {
+        "index": 14,
+        "lookahead_m": 37.5,
+        "coordinate_pair_indices": [
+          28,
+          29
+        ]
+      },
+      {
+        "index": 15,
+        "lookahead_m": 40.0,
+        "coordinate_pair_indices": [
+          30,
+          31
+        ]
+      },
+      {
+        "index": 16,
+        "lookahead_m": 42.5,
+        "coordinate_pair_indices": [
+          32,
+          33
+        ]
+      },
+      {
+        "index": 17,
+        "lookahead_m": 45.0,
+        "coordinate_pair_indices": [
+          34,
+          35
+        ]
+      },
+      {
+        "index": 18,
+        "lookahead_m": 47.5,
+        "coordinate_pair_indices": [
+          36,
+          37
+        ]
+      },
+      {
+        "index": 19,
+        "lookahead_m": 50.0,
+        "coordinate_pair_indices": [
+          38,
+          39
+        ]
+      },
+      {
+        "index": 20,
+        "lookahead_m": 52.5,
+        "coordinate_pair_indices": [
+          40,
+          41
+        ]
+      },
+      {
+        "index": 21,
+        "lookahead_m": 55.0,
+        "coordinate_pair_indices": [
+          42,
+          43
+        ]
+      },
+      {
+        "index": 22,
+        "lookahead_m": 57.5,
+        "coordinate_pair_indices": [
+          44,
+          45
+        ]
+      },
+      {
+        "index": 23,
+        "lookahead_m": 60.0,
+        "coordinate_pair_indices": [
+          46,
+          47
+        ]
+      },
+      {
+        "index": 24,
+        "lookahead_m": 62.5,
+        "coordinate_pair_indices": [
+          48,
+          49
+        ]
+      },
+      {
+        "index": 25,
+        "lookahead_m": 65.0,
+        "coordinate_pair_indices": [
+          50,
+          51
+        ]
+      },
+      {
+        "index": 26,
+        "lookahead_m": 67.5,
+        "coordinate_pair_indices": [
+          52,
+          53
+        ]
+      },
+      {
+        "index": 27,
+        "lookahead_m": 70.0,
+        "coordinate_pair_indices": [
+          54,
+          55
+        ]
+      },
+      {
+        "index": 28,
+        "lookahead_m": 72.5,
+        "coordinate_pair_indices": [
+          56,
+          57
+        ]
+      },
+      {
+        "index": 29,
+        "lookahead_m": 75.0,
+        "coordinate_pair_indices": [
+          58,
+          59
+        ]
+      },
+      {
+        "index": 30,
+        "lookahead_m": 77.5,
+        "coordinate_pair_indices": [
+          60,
+          61
+        ]
+      },
+      {
+        "index": 31,
+        "lookahead_m": 80.0,
+        "coordinate_pair_indices": [
+          62,
+          63
+        ]
+      },
+      {
+        "index": 32,
+        "lookahead_m": 82.5,
+        "coordinate_pair_indices": [
+          64,
+          65
+        ]
+      },
+      {
+        "index": 33,
+        "lookahead_m": 85.0,
+        "coordinate_pair_indices": [
+          66,
+          67
+        ]
+      },
+      {
+        "index": 34,
+        "lookahead_m": 87.5,
+        "coordinate_pair_indices": [
+          68,
+          69
+        ]
+      },
+      {
+        "index": 35,
+        "lookahead_m": 90.0,
+        "coordinate_pair_indices": [
+          70,
+          71
+        ]
+      },
+      {
+        "index": 36,
+        "lookahead_m": 92.5,
+        "coordinate_pair_indices": [
+          72,
+          73
+        ]
+      },
+      {
+        "index": 37,
+        "lookahead_m": 95.0,
+        "coordinate_pair_indices": [
+          74,
+          75
+        ]
+      },
+      {
+        "index": 38,
+        "lookahead_m": 97.5,
+        "coordinate_pair_indices": [
+          76,
+          77
+        ]
+      },
+      {
+        "index": 39,
+        "lookahead_m": 100.0,
+        "coordinate_pair_indices": [
+          78,
+          79
+        ]
+      },
+      {
+        "index": 40,
+        "lookahead_m": 102.5,
+        "coordinate_pair_indices": [
+          80,
+          81
+        ]
+      },
+      {
+        "index": 41,
+        "lookahead_m": 105.0,
+        "coordinate_pair_indices": [
+          82,
+          83
+        ]
+      },
+      {
+        "index": 42,
+        "lookahead_m": 107.5,
+        "coordinate_pair_indices": [
+          84,
+          85
+        ]
+      },
+      {
+        "index": 43,
+        "lookahead_m": 110.0,
+        "coordinate_pair_indices": [
+          86,
+          87
+        ]
+      }
+    ],
+    "conv1d_added_feature": "station index / 43, one deterministic positional channel per station",
+    "lookahead_reference": "Nominal path offsets from the nearest reference station. Search selects the next geometry sample. Virtual straight extension near an open finish."
+  },
+  "physics": [
+    {
+      "index": 0,
+      "name": "speed",
+      "meaning": "Total speed",
+      "transformation": "Metres per second / 100"
+    },
+    {
+      "index": 1,
+      "name": "forward_velocity",
+      "meaning": "Forward body-frame velocity",
+      "transformation": "Metres per second / 100"
+    },
+    {
+      "index": 2,
+      "name": "lateral_velocity",
+      "meaning": "Lateral body-frame velocity",
+      "transformation": "Metres per second / 20, clipped to [-1, 1]"
+    },
+    {
+      "index": 3,
+      "name": "progress",
+      "meaning": "Route progress",
+      "transformation": "Nearest reference index / (reference point count - 1)"
+    },
+    {
+      "index": 4,
+      "name": "yaw_rate",
+      "meaning": "Yaw rate",
+      "transformation": "Wrapped heading change / elapsed seconds / 3, clipped to [-1, 1]"
+    },
+    {
+      "index": 5,
+      "name": "acceleration",
+      "meaning": "Acceleration",
+      "transformation": "Speed change / elapsed seconds / 50, clipped to [-1, 1]"
+    },
+    {
+      "index": 6,
+      "name": "heading_sin",
+      "meaning": "Relative heading, sine",
+      "transformation": "Horizontal cross product of unit car heading and road tangent"
+    },
+    {
+      "index": 7,
+      "name": "heading_cos",
+      "meaning": "Relative heading, cosine",
+      "transformation": "Dot product of unit car heading and road tangent"
+    },
+    {
+      "index": 8,
+      "name": "gear",
+      "meaning": "Gear",
+      "transformation": "Game gear / 5"
+    },
+    {
+      "index": 9,
+      "name": "pitch",
+      "meaning": "Pitch",
+      "transformation": "arcsin of the vertical component of car direction, in radians"
+    },
+    {
+      "index": 10,
+      "name": "input_gas",
+      "meaning": "Throttle input echo",
+      "transformation": "Active input before the decision, clipped to [0, 1]"
+    },
+    {
+      "index": 11,
+      "name": "input_brake",
+      "meaning": "Brake input echo",
+      "transformation": "Active input before the decision, clipped to [0, 1]"
+    },
+    {
+      "index": 12,
+      "name": "front_left_slip",
+      "meaning": "Front-left wheel slip",
+      "transformation": "Clipped to [0, 1]"
+    },
+    {
+      "index": 13,
+      "name": "front_right_slip",
+      "meaning": "Front-right wheel slip",
+      "transformation": "Clipped to [0, 1]"
+    },
+    {
+      "index": 14,
+      "name": "input_steer",
+      "meaning": "Steering input echo",
+      "transformation": "Active input before the decision, clipped to [-1, 1]"
+    },
+    {
+      "index": 15,
+      "name": "curvature_0",
+      "meaning": "Curvature at station 1, 2.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 16,
+      "name": "curvature_1",
+      "meaning": "Curvature at station 2, 5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 17,
+      "name": "curvature_2",
+      "meaning": "Curvature at station 3, 7.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 18,
+      "name": "curvature_3",
+      "meaning": "Curvature at station 4, 10 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 19,
+      "name": "curvature_4",
+      "meaning": "Curvature at station 5, 12.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 20,
+      "name": "curvature_5",
+      "meaning": "Curvature at station 6, 15 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 21,
+      "name": "curvature_6",
+      "meaning": "Curvature at station 7, 17.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 22,
+      "name": "curvature_7",
+      "meaning": "Curvature at station 8, 20 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 23,
+      "name": "curvature_8",
+      "meaning": "Curvature at station 9, 22.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 24,
+      "name": "curvature_9",
+      "meaning": "Curvature at station 10, 25 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 25,
+      "name": "curvature_10",
+      "meaning": "Curvature at station 11, 27.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 26,
+      "name": "curvature_11",
+      "meaning": "Curvature at station 12, 30 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 27,
+      "name": "curvature_12",
+      "meaning": "Curvature at station 13, 32.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 28,
+      "name": "curvature_13",
+      "meaning": "Curvature at station 14, 35 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 29,
+      "name": "curvature_14",
+      "meaning": "Curvature at station 15, 37.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 30,
+      "name": "curvature_15",
+      "meaning": "Curvature at station 16, 40 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 31,
+      "name": "curvature_16",
+      "meaning": "Curvature at station 17, 42.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 32,
+      "name": "curvature_17",
+      "meaning": "Curvature at station 18, 45 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 33,
+      "name": "curvature_18",
+      "meaning": "Curvature at station 19, 47.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 34,
+      "name": "curvature_19",
+      "meaning": "Curvature at station 20, 50 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 35,
+      "name": "curvature_20",
+      "meaning": "Curvature at station 21, 52.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 36,
+      "name": "curvature_21",
+      "meaning": "Curvature at station 22, 55 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 37,
+      "name": "curvature_22",
+      "meaning": "Curvature at station 23, 57.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 38,
+      "name": "curvature_23",
+      "meaning": "Curvature at station 24, 60 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 39,
+      "name": "curvature_24",
+      "meaning": "Curvature at station 25, 62.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 40,
+      "name": "curvature_25",
+      "meaning": "Curvature at station 26, 65 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 41,
+      "name": "curvature_26",
+      "meaning": "Curvature at station 27, 67.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 42,
+      "name": "curvature_27",
+      "meaning": "Curvature at station 28, 70 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 43,
+      "name": "curvature_28",
+      "meaning": "Curvature at station 29, 72.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 44,
+      "name": "curvature_29",
+      "meaning": "Curvature at station 30, 75 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 45,
+      "name": "curvature_30",
+      "meaning": "Curvature at station 31, 77.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 46,
+      "name": "curvature_31",
+      "meaning": "Curvature at station 32, 80 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 47,
+      "name": "curvature_32",
+      "meaning": "Curvature at station 33, 82.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 48,
+      "name": "curvature_33",
+      "meaning": "Curvature at station 34, 85 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 49,
+      "name": "curvature_34",
+      "meaning": "Curvature at station 35, 87.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 50,
+      "name": "curvature_35",
+      "meaning": "Curvature at station 36, 90 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 51,
+      "name": "curvature_36",
+      "meaning": "Curvature at station 37, 92.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 52,
+      "name": "curvature_37",
+      "meaning": "Curvature at station 38, 95 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 53,
+      "name": "curvature_38",
+      "meaning": "Curvature at station 39, 97.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 54,
+      "name": "curvature_39",
+      "meaning": "Curvature at station 40, 100 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 55,
+      "name": "curvature_40",
+      "meaning": "Curvature at station 41, 102.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 56,
+      "name": "curvature_41",
+      "meaning": "Curvature at station 42, 105 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 57,
+      "name": "curvature_42",
+      "meaning": "Curvature at station 43, 107.5 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 58,
+      "name": "curvature_43",
+      "meaning": "Curvature at station 44, 110 m ahead",
+      "transformation": "Signed turning angle / mean adjacent segment length, multiplied by 10 and clipped to [-1, 1]"
+    },
+    {
+      "index": 59,
+      "name": "skidding_wheels",
+      "meaning": "Number of skidding wheels",
+      "transformation": "Clipped to [0, 4], then divided by 4"
+    }
+  ],
+  "context": [
+    {
+      "index": 0,
+      "name": "signed_lateral_offset",
+      "meaning": "Signed lateral road offset",
+      "transformation": "2 × corridor fraction - 1. Left edge is -1 and right edge is +1"
+    },
+    {
+      "index": 1,
+      "name": "left_clearance",
+      "meaning": "Left edge clearance",
+      "transformation": "2 × corridor fraction"
+    },
+    {
+      "index": 2,
+      "name": "right_clearance",
+      "meaning": "Right edge clearance",
+      "transformation": "2 × (1 - corridor fraction)"
+    },
+    {
+      "index": 3,
+      "name": "half_width",
+      "meaning": "Road half-width",
+      "transformation": "Full horizontal corridor width in metres / 20, equivalent to half-width / 10"
+    },
+    {
+      "index": 4,
+      "name": "minimum_clearance",
+      "meaning": "Minimum edge clearance",
+      "transformation": "Minimum of the left and right normalized clearances"
+    },
+    {
+      "index": 5,
+      "name": "sideslip",
+      "meaning": "Sideslip",
+      "transformation": "atan2(lateral velocity, max(abs(forward velocity), 1)) / (π / 2)"
+    },
+    {
+      "index": 6,
+      "name": "rear_left_slip",
+      "meaning": "Rear-left wheel slip",
+      "transformation": "Clipped to [0, 1]"
+    },
+    {
+      "index": 7,
+      "name": "rear_right_slip",
+      "meaning": "Rear-right wheel slip",
+      "transformation": "Clipped to [0, 1]"
+    },
+    {
+      "index": 8,
+      "name": "rpm",
+      "meaning": "Engine RPM",
+      "transformation": "RPM / 10,000, clipped to [0, 2]"
+    },
+    {
+      "index": 9,
+      "name": "adherence",
+      "meaning": "Adherence",
+      "transformation": "Clipped to [0, 1]"
+    },
+    {
+      "index": 10,
+      "name": "flying_duration",
+      "meaning": "Flying duration",
+      "transformation": "Telemetry duration / 1,000, clipped to [0, 4]"
+    },
+    {
+      "index": 11,
+      "name": "progress_sin_1",
+      "meaning": "Route phase, sine at frequency 1",
+      "transformation": "sin(2π × 1 × nearest-index progress)"
+    },
+    {
+      "index": 12,
+      "name": "progress_sin_2",
+      "meaning": "Route phase, sine at frequency 2",
+      "transformation": "sin(2π × 2 × nearest-index progress)"
+    },
+    {
+      "index": 13,
+      "name": "progress_sin_4",
+      "meaning": "Route phase, sine at frequency 4",
+      "transformation": "sin(2π × 4 × nearest-index progress)"
+    },
+    {
+      "index": 14,
+      "name": "progress_cos_1",
+      "meaning": "Route phase, cosine at frequency 1",
+      "transformation": "cos(2π × 1 × nearest-index progress)"
+    },
+    {
+      "index": 15,
+      "name": "progress_cos_2",
+      "meaning": "Route phase, cosine at frequency 2",
+      "transformation": "cos(2π × 2 × nearest-index progress)"
+    },
+    {
+      "index": 16,
+      "name": "progress_cos_4",
+      "meaning": "Route phase, cosine at frequency 4",
+      "transformation": "cos(2π × 4 × nearest-index progress)"
+    },
+    {
+      "index": 17,
+      "name": "preview_curvature_0.25s",
+      "meaning": "Curvature preview at 0.25 s",
+      "transformation": "Sample at max(speed, 10 m/s) × horizon along the road. Curvature × 10, clipped to [-1, 1]"
+    },
+    {
+      "index": 18,
+      "name": "preview_curvature_0.5s",
+      "meaning": "Curvature preview at 0.5 s",
+      "transformation": "Sample at max(speed, 10 m/s) × horizon along the road. Curvature × 10, clipped to [-1, 1]"
+    },
+    {
+      "index": 19,
+      "name": "preview_curvature_1s",
+      "meaning": "Curvature preview at 1 s",
+      "transformation": "Sample at max(speed, 10 m/s) × horizon along the road. Curvature × 10, clipped to [-1, 1]"
+    },
+    {
+      "index": 20,
+      "name": "preview_curvature_2s",
+      "meaning": "Curvature preview at 2 s",
+      "transformation": "Sample at max(speed, 10 m/s) × horizon along the road. Curvature × 10, clipped to [-1, 1]"
+    },
+    {
+      "index": 21,
+      "name": "preview_curvature_4s",
+      "meaning": "Curvature preview at 4 s",
+      "transformation": "Sample at max(speed, 10 m/s) × horizon along the road. Curvature × 10, clipped to [-1, 1]"
+    },
+    {
+      "index": 22,
+      "name": "preview_curvature_6s",
+      "meaning": "Curvature preview at 6 s",
+      "transformation": "Sample at max(speed, 10 m/s) × horizon along the road. Curvature × 10, clipped to [-1, 1]"
+    },
+    {
+      "index": 23,
+      "name": "preview_lateral_demand_0.25s",
+      "meaning": "Lateral-demand preview at 0.25 s",
+      "transformation": "Speed squared × absolute preview curvature / 50. Uses the clipped curvature divided by 10"
+    },
+    {
+      "index": 24,
+      "name": "preview_lateral_demand_0.5s",
+      "meaning": "Lateral-demand preview at 0.5 s",
+      "transformation": "Speed squared × absolute preview curvature / 50. Uses the clipped curvature divided by 10"
+    },
+    {
+      "index": 25,
+      "name": "preview_lateral_demand_1s",
+      "meaning": "Lateral-demand preview at 1 s",
+      "transformation": "Speed squared × absolute preview curvature / 50. Uses the clipped curvature divided by 10"
+    },
+    {
+      "index": 26,
+      "name": "preview_lateral_demand_2s",
+      "meaning": "Lateral-demand preview at 2 s",
+      "transformation": "Speed squared × absolute preview curvature / 50. Uses the clipped curvature divided by 10"
+    },
+    {
+      "index": 27,
+      "name": "preview_lateral_demand_4s",
+      "meaning": "Lateral-demand preview at 4 s",
+      "transformation": "Speed squared × absolute preview curvature / 50. Uses the clipped curvature divided by 10"
+    },
+    {
+      "index": 28,
+      "name": "preview_lateral_demand_6s",
+      "meaning": "Lateral-demand preview at 6 s",
+      "transformation": "Speed squared × absolute preview curvature / 50. Uses the clipped curvature divided by 10"
+    }
+  ],
+  "recovery": [
+    {
+      "index": 0,
+      "name": "decision_interval_error",
+      "meaning": "Decision-interval error",
+      "transformation": "Elapsed seconds / 0.05 - 1"
+    },
+    {
+      "index": 1,
+      "name": "speed_loss",
+      "meaning": "Speed loss",
+      "transformation": "Positive drop from previous total speed / 20 m/s"
+    },
+    {
+      "index": 2,
+      "name": "forward_speed_loss",
+      "meaning": "Forward-speed loss",
+      "transformation": "Positive drop from previous forward velocity / 20 m/s"
+    },
+    {
+      "index": 3,
+      "name": "progress_advance",
+      "meaning": "Progress advance",
+      "transformation": "Positive change in nearest reference index / 5"
+    },
+    {
+      "index": 4,
+      "name": "clearance_loss",
+      "meaning": "Clearance loss",
+      "transformation": "Positive drop in minimum normalized edge clearance"
+    },
+    {
+      "index": 5,
+      "name": "edge_approach",
+      "meaning": "Approach to an edge",
+      "transformation": "Positive increase in absolute lateral offset / 0.5"
+    },
+    {
+      "index": 6,
+      "name": "retained_speed_deficit",
+      "meaning": "Retained speed deficit",
+      "transformation": "Positive difference between the decayed peak speed and current speed / 30 m/s. Peak time constant: 2 s"
+    },
+    {
+      "index": 7,
+      "name": "recovery_memory",
+      "meaning": "Incident memory",
+      "transformation": "Exponential average of the maximum speed loss, forward-speed loss, clearance loss and edge approach. Time constant: 0.75 s"
+    }
+  ],
+  "context_and_recovery_clip": [
+    -4,
+    4
+  ],
+  "quantile_input": {
+    "evaluation_count": 32,
+    "levels": "(j + 0.5) / 32 for j = 0..31",
+    "cosine_features": 64,
+    "source": "Internal quantile levels, not game telemetry",
+    "train_and_target_count": 64
+  },
+  "internal_constant_channel": 1
+}

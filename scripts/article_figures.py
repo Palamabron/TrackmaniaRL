@@ -26,6 +26,7 @@ plt.rcParams.update(
         "xtick.color": MUTED,
         "ytick.color": MUTED,
         "svg.fonttype": "none",
+        "mathtext.fontset": "cm",
         "svg.hashsalt": "trackmaniarl-article",
         "axes.spines.top": False,
         "axes.spines.right": False,
@@ -126,9 +127,9 @@ def finish_reward() -> None:
         value = 70 + 2 * (35 - time)
         axis.scatter(time, value, color=GREEN, s=35, zorder=3)
         axis.annotate(
-            f"{time} s -> {value} units",
+            rf"$T={time}\,\mathrm{{s}}$" + "\n" + rf"$r_{{\mathrm{{finish}}}}={value}$",
             (time, value),
-            xytext=(12, -5),
+            xytext=(12, 10),
             textcoords="offset points",
             color=GREEN,
             fontsize=12,
@@ -136,8 +137,8 @@ def finish_reward() -> None:
     axis.set(
         xlim=(33, 43),
         ylim=(53, 76),
-        xlabel="Finish time (seconds)",
-        ylabel="Extra reward at a valid finish",
+        xlabel=r"Finish time $T$ (seconds)",
+        ylabel=r"Extra reward at a valid finish, $r_{\mathrm{finish}}$",
     )
     axis.set_title("Finish bonus + signed time correction", loc="left", fontsize=15, pad=12)
     axis.grid(axis="y", color="#eef1ee")
