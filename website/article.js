@@ -1,12 +1,4 @@
-document.documentElement.classList.add('js');
-const film = document.querySelector('#neural-film');
-const toggle = document.querySelector('#film-toggle');
-toggle.addEventListener('click', () => {
-  const playing = toggle.getAttribute('aria-pressed') !== 'true';
-  film.src = playing ? 'assets/neural-flow.gif' : 'assets/neural-poster.jpg';
-  toggle.setAttribute('aria-pressed', String(playing));
-  toggle.textContent = playing ? 'Stop recorded inference' : 'Play recorded inference';
-});
+// Native video controls provide play, pause, seeking and fullscreen without JavaScript.
 if ('IntersectionObserver' in window) {
   const observer = new IntersectionObserver(entries => {
     for (const entry of entries) {

@@ -1,66 +1,66 @@
-# Article draft
+# TrackmaniaRL article — private draft
 
-An unpublished, standalone article about TrackmaniaRL, based on remote `origin/main`
-at `556adeefdb401dae5d211e836f44ea734a48aa05` (1.2.11). Source is on the local
-`codex/library-article` branch. No remote push or deployment is part of this draft.
+The article lives on `codex/library-article`, created from `origin/main` at
+`556adeefdb401dae5d211e836f44ea734a48aa05`. Work is isolated in this worktree.
+No push, Pages deployment or repository-visibility change has been made.
 
-## Read and edit
+## Preview
 
-Open `index.html` directly, or from the repository root run:
+From this worktree:
 
 ```powershell
 python -m http.server 8765 --bind 127.0.0.1 --directory website
 ```
 
-Then visit <http://127.0.0.1:8765>. All assets, typography and scripts are local;
-there is no analytics, CDN, backend, installation or build step. Edit the article
-in `index.html`, presentation in `style.css`, and optional interactions in
-`article.js`. Core text, source links, chart and trial table work without JavaScript.
-The animated recording is opt-in and has a stop control.
+Open <http://127.0.0.1:8765/>. `index.html` also works directly from disk.
+The page is static, with local assets and no analytics, remote fonts or backend.
+Native MP4 controls work without JavaScript. Charts have downloadable numeric
+sources and the evidence page includes complete development-evaluation tables.
 
-## Privacy and future GitHub Pages use
+## This revision
 
-The draft stays private by remaining local. No Pages workflow was added and no
-repository settings were changed. `noindex` and `robots.txt` discourage indexing;
-they are **not access controls**. Do not push this branch to a public repository
-while its contents need to stay private.
+The English article now follows the author's experiments from July 2023 through
+September 2026, with a gap in the surviving history after January 2024. It joins
+Git evidence to three W&B project inventories (681 logging records, not independent
+experiments) and full histories for V105A, V105B and V107H. Only selected metadata
+and numeric chart points are in the site. Raw exports and credentials are not.
 
-The `website/` directory is the complete static publishable artifact. When public
-publication is explicitly approved, it can be uploaded as a GitHub Pages artifact.
-Relative asset paths work at either a project subpath or an organization root.
-At that point, review the author/date, draft label, robots directives, accessibility,
-media permissions and scientific claims. An organization-root address such as
-`TrackmaniaRL.github.io` requires the corresponding Pages repository/configuration;
-this draft does not create it. Do not assume a private repository makes its Pages
-site private; confirm available access controls before any private online deployment.
+The best-confirmed geometry-based controller is V107I plus the V108 neighbors
+filter. Vision is motivated by limited map coverage: as the author clarified,
+only a minority of maps have complete track boundaries recordable through driving.
+Camera pilots do not yet establish superior driving performance.
 
-## Editorial and media notes
+Read `evidence.html` for exact source distinctions, recorded-versus-current Git
+hashes, benchmark selection, raw-history extraction and media provenance.
+The first-person text is a draft assembled from the author's records; personal
+motives or memories beyond those records can be added in editorial review.
 
-The author attribution follows the repository NOTICE. The narrative is a synthesis
-of implementation and release records, not an invented first-person account.
-Links are pinned to the source snapshot. Benchmark values come from the complete
-tracked V108 trial artifact. The benchmark and the five-attempt film are explicitly
-separate. The film model is not presented as the starter model.
+## Original-resolution media
 
-Current assets reuse the repository's real footage. Posters are frames from
-`docs/assets/v108-neighbors-best.gif` and `trackmaniarl-neural-flow.gif`; the latter
-GIF is copied locally so the site is self-contained. No generated gameplay,
-fabricated learning curves or borrowed reference-article graphics are used.
+- `assets/neural-flow.mp4`: complete original 1080p, 30fps, 42.1-second film,
+  H.264/yuv420p, approximately 31.2 MB.
+- `assets/benchmark-best.mp4`: complete original release excerpt of confirmation
+  attempt 29, native 720p/20fps, 38.7 seconds, approximately 23.3 MB.
+- Posters were extracted from the original videos; the cover is a native
+  1916×1054 frame at 05:00 in the Desktop recording.
+- MP4s use faststart and were stream-copied without video re-encoding. Originals
+  are untouched. The previous GIF was removed.
+- The architecture and both charts are SVG and remain sharp at any zoom level.
 
-Useful additions for the next editorial pass:
+For another visual pass, the most useful new capture would be a pair showing
+one map with complete recordable boundaries and one without them. It would
+illustrate why the vision branch is needed. No new screenshot is required to
+read the current complete draft.
 
-| Capture | What to record | Where it helps |
-| --- | --- | --- |
-| Clean hero screenshot | 1920×1080 or larger, same benchmark map, third-person view approaching a readable corner; hide ghost and unrelated overlays | Replaces the existing GIF-derived hero frame with a sharper image |
-| Paired observation view | The same timestamp as gameplay, showing the actual boundary lookahead or camera input; preserve settings and map identity | Explains exactly what the agent sees |
-| Failure and recovery clip | 10–20 seconds from an identified attempt, with visible controls; retain trial/checkpoint IDs and say whether selected | Shows the engineering problem behind recovery |
-| Training evidence | Export actual learning/evaluation data with seeds, axes, environment steps and wall time; retain failures | Enables a real learning curve, which is deliberately absent now |
+## Future GitHub Pages publication
 
-These are optional improvements; the current page has complete figures and no
-empty screenshot slots. Avoid exposing account names, chat, tokens or local paths.
-Add your own account of why the rewrite began, the first successful finish and the
-hardest debugging episode if you want a more personal article; those facts cannot
-be inferred reliably from commit history.
+`website/` is a complete static artifact with relative paths and `.nojekyll`.
+The nested `.gitignore` permits only the two intended MP4 files under the parent
+repository's broad video ignore rule. No deployment workflow is enabled.
 
-The supplied reference articles are credited in the page as inspiration and
-companion reading, not as evidence for TrackmaniaRL performance.
+Keep this branch local while the article must remain private. `noindex` and
+`robots.txt` are indexing hints, not access controls; pushing to a public repo
+would expose the source even without Pages. A private repo does not by itself
+prove a Pages site will be access-restricted. Before any publication, review the
+text, W&B metadata, media rights, author/date and draft/robots markers, then choose
+a hosting configuration with the intended access explicitly verified.
