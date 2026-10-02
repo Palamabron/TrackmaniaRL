@@ -31,3 +31,14 @@ Keep every described connection correct with clear arrowheads, no crossing lines
 
 FINAL EDIT
 undefined
+
+CORRECTION OF INPUT ILLUSTRATIONS
+Edit the attached technical architecture infographic. Preserve overall layout, colors, typography, ALL processing boxes and ALL connecting arrows and all unrelated text exactly. Correct ONLY the three misleading illustrations specified here. Scientific accuracy over decoration.
+
+1. TOP LEFT Road geometry: remove the existing perspective road sketch, including its left/center/right labels which incorrectly refer to different longitudinal stations. Replace the drawing area only with a compact readable data matrix schematic, not a perspective road. Text above stays "Road geometry · 264" and "44 stations × 6 coordinates". Draw 3 column groups headed "LEFT", "CENTER", "RIGHT". Each group contains two columns labeled "x z". Rows labeled "1", "2", "...", "44", with neutral tiny square cells for each coordinate, not invented numerical values. This represents 44 rows × 6 columns, each row contains left x,z, center x,z, right x,z for the SAME station. Use an ellipsis for omitted rows. Below the matrix in small legible type "Car-local horizontal coordinates". Keep Road GNN, Conv1D and their arrows unchanged.
+
+2. BOTTOM LEFT Internal quantile levels: remove existing row of 13 blue dots. Keep header and "32 fixed evaluation midpoints". Replace illustration with exact readable mathematical specification "τᵢ = (i + ½) / 32" then "i = 0, …, 31". No dots, no curves, no histogram. These are evenly spaced quantile fractions within (0,1), not probability mass or output values. Fit cleanly inside the existing box. Keep its arrow into IQN.
+
+3. BOTTOM RIGHT Reference-action support: remove the winding road and stones illustration entirely. Keep heading. Replace subtitle "15 nearby saved states" with "15 nearest states in feature space". Add a minimal miniature process as two lines "Current state → reference bank" and "Neighbor actions → allowed set". Use legible type, no literal road, no arbitrary scattered circles or geographic distance imagery. Keep outgoing arrow to Filter allowed actions and do not connect to IQN.
+
+No new branding, no new claims, no semicolons, no em dashes. Preserve remaining architecture and data dimensions exactly.
