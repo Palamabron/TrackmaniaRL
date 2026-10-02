@@ -62,3 +62,21 @@ feature and recovery feature in tensor order. `assets/model-inputs.json` exports
 that specification. It also documents the generated Conv1D position channel
 and internal IQN quantile inputs. `assets/model-architecture.svg` is editable
 vector source for the diagram.
+
+## Reading themes
+
+Dark mode is the default on the article and data notes. The header button switches
+between dark and light, with the choice saved locally in the browser. Storage
+restrictions do not prevent switching during the current visit. Print styles use
+the light palette and original light diagrams. Paper figures retain their source
+colors in both themes.
+
+After regenerating any original article SVG, rebuild its dark counterpart:
+
+```powershell
+node scripts/article_themes.cjs
+```
+
+The theme generator changes paint values only. Chart measurements, text and
+geometry stay the same. Both image variants use CSS visibility so the saved theme
+applies without a diagram flash or reliance on JavaScript to display the figures.
