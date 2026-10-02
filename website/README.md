@@ -57,11 +57,11 @@ local build directory and run:
 node scripts/render_article_math.cjs PATH_TO_KATEX/dist/katex.js
 ```
 
-The model input catalog enumerates every road station, car feature, context
-feature and recovery feature in tensor order. `assets/model-inputs.json` exports
-that specification. It also documents the generated Conv1D position channel
-and internal IQN quantile inputs. `assets/model-architecture.svg` is editable
-vector source for the diagram.
+The article describes the four input groups in prose, including road sampling
+every 2.5 metres. `assets/model-inputs.json` preserves every feature in tensor
+order with its scaling and clipping. The data notes link that specification and
+keep the complete benchmark rows and reward implementation details.
+`assets/model-architecture.svg` is editable vector source for the diagram.
 
 ## Reading themes
 

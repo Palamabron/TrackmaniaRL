@@ -31,24 +31,5 @@
   },
   "discount": {
     "tex": "\\gamma=0.995"
-  },
-  "car-vector": {
-    "tex": "\\mathbf{x}_{\\mathrm{car}}\\in\\mathbb{R}^{60}"
-  },
-  "context-vector": {
-    "tex": "\\mathbf{x}_{\\mathrm{context}}\\in\\mathbb{R}^{29}"
-  },
-  "recovery-vector": {
-    "tex": "\\mathbf{x}_{\\mathrm{recovery}}\\in\\mathbb{R}^{8}"
-  },
-  "road-node": {
-    "tex": "\\mathbf{x}_{\\mathrm{road},i}=\\frac{1}{50}\\,[x_i^L,z_i^L,x_i^C,z_i^C,x_i^R,z_i^R]",
-    "display": true
-  },
-  "quantile": {
-    "tex": "\\tau_j=(j+\\tfrac12)/32,\\quad j=0,\\ldots,31"
-  },
-  "quantile-embedding": {
-    "tex": "\\phi_k(\\tau)=\\cos(k\\pi\\tau),\\quad k=1,\\ldots,64"
   }
 }
