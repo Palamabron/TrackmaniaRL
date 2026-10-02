@@ -1,0 +1,355 @@
+{
+  "source": "Full W&B scan_history export, not sampled chart history",
+  "notes": [
+    "Evaluation only. Training episodes are separate in the numeric-history source files.",
+    "V105A and V105B each use 5-trial evaluation batches. V107H uses 10.",
+    "Mean/median/best are conditional on finishing; always display finished/trials alongside them.",
+    "Zero finishes is represented as null time, never as a zero-second lap.",
+    "The x axis is the W&B logged environment-transition counter, which can be ahead of the evaluated policy snapshot.",
+    "V105B is a warm start from V105A policy161118; its counter restarts at zero. Do not present it as a matched scratch comparison.",
+    "These are adaptive development evaluations, not the independent V108 30-trial confirmation."
+  ],
+  "series": [
+    {
+      "run_id": "4yq4dvlm",
+      "label": "V105A: from scratch",
+      "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/4yq4dvlm",
+      "points": [
+        {
+          "batch": 1,
+          "logged_environment_transitions": 19096,
+          "policy_version": 2236,
+          "finished": 0,
+          "trials": 5,
+          "mean_finished_seconds": null,
+          "median_finished_seconds": null,
+          "best_finished_seconds": null
+        },
+        {
+          "batch": 2,
+          "logged_environment_transitions": 47611,
+          "policy_version": 9233,
+          "finished": 0,
+          "trials": 5,
+          "mean_finished_seconds": null,
+          "median_finished_seconds": null,
+          "best_finished_seconds": null
+        },
+        {
+          "batch": 3,
+          "logged_environment_transitions": 92094,
+          "policy_version": 20316,
+          "finished": 3,
+          "trials": 5,
+          "mean_finished_seconds": 47.01333333333333,
+          "median_finished_seconds": 47.21,
+          "best_finished_seconds": 46.48
+        },
+        {
+          "batch": 4,
+          "logged_environment_transitions": 134648,
+          "policy_version": 31048,
+          "finished": 4,
+          "trials": 5,
+          "mean_finished_seconds": 45.425,
+          "median_finished_seconds": 45.150000000000006,
+          "best_finished_seconds": 44.49
+        },
+        {
+          "batch": 5,
+          "logged_environment_transitions": 178438,
+          "policy_version": 42060,
+          "finished": 0,
+          "trials": 5,
+          "mean_finished_seconds": null,
+          "median_finished_seconds": null,
+          "best_finished_seconds": null
+        },
+        {
+          "batch": 6,
+          "logged_environment_transitions": 217981,
+          "policy_version": 51762,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 43.730000000000004,
+          "median_finished_seconds": 43.71,
+          "best_finished_seconds": 42.86
+        },
+        {
+          "batch": 7,
+          "logged_environment_transitions": 261097,
+          "policy_version": 62646,
+          "finished": 2,
+          "trials": 5,
+          "mean_finished_seconds": 41.370000000000005,
+          "median_finished_seconds": 41.370000000000005,
+          "best_finished_seconds": 41.1
+        },
+        {
+          "batch": 8,
+          "logged_environment_transitions": 294694,
+          "policy_version": 70960,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 41.403999999999996,
+          "median_finished_seconds": 41.41,
+          "best_finished_seconds": 40.61
+        },
+        {
+          "batch": 9,
+          "logged_environment_transitions": 337398,
+          "policy_version": 81642,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 40.174,
+          "median_finished_seconds": 40.06,
+          "best_finished_seconds": 39.37
+        },
+        {
+          "batch": 10,
+          "logged_environment_transitions": 379726,
+          "policy_version": 92220,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 39.944,
+          "median_finished_seconds": 39.96,
+          "best_finished_seconds": 39.52
+        },
+        {
+          "batch": 11,
+          "logged_environment_transitions": 420578,
+          "policy_version": 102439,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 39.914,
+          "median_finished_seconds": 39.95,
+          "best_finished_seconds": 39.71
+        },
+        {
+          "batch": 12,
+          "logged_environment_transitions": 461572,
+          "policy_version": 112695,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 38.524,
+          "median_finished_seconds": 38.23,
+          "best_finished_seconds": 38.16
+        },
+        {
+          "batch": 13,
+          "logged_environment_transitions": 501111,
+          "policy_version": 122577,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 39.315999999999995,
+          "median_finished_seconds": 39.33,
+          "best_finished_seconds": 38.35
+        },
+        {
+          "batch": 14,
+          "logged_environment_transitions": 540168,
+          "policy_version": 132343,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 38.394,
+          "median_finished_seconds": 38.31,
+          "best_finished_seconds": 38.17
+        },
+        {
+          "batch": 15,
+          "logged_environment_transitions": 578913,
+          "policy_version": 142032,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 38.386,
+          "median_finished_seconds": 38.55,
+          "best_finished_seconds": 37.45
+        },
+        {
+          "batch": 16,
+          "logged_environment_transitions": 617667,
+          "policy_version": 151720,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 38.712,
+          "median_finished_seconds": 38.61,
+          "best_finished_seconds": 38.29
+        },
+        {
+          "batch": 17,
+          "logged_environment_transitions": 655229,
+          "policy_version": 161118,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.94,
+          "median_finished_seconds": 38.04,
+          "best_finished_seconds": 37.26
+        },
+        {
+          "batch": 18,
+          "logged_environment_transitions": 691837,
+          "policy_version": 170240,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 39.67,
+          "median_finished_seconds": 38.81,
+          "best_finished_seconds": 37.33
+        }
+      ]
+    },
+    {
+      "run_id": "x7qn7426",
+      "label": "V105B: time-aware reward, warm start",
+      "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/x7qn7426",
+      "points": [
+        {
+          "batch": 1,
+          "logged_environment_transitions": 39166,
+          "policy_version": 7058,
+          "finished": 4,
+          "trials": 5,
+          "mean_finished_seconds": 44.575,
+          "median_finished_seconds": 44.7,
+          "best_finished_seconds": 39.21
+        },
+        {
+          "batch": 2,
+          "logged_environment_transitions": 76606,
+          "policy_version": 16450,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.452,
+          "median_finished_seconds": 37.51,
+          "best_finished_seconds": 37.21
+        },
+        {
+          "batch": 3,
+          "logged_environment_transitions": 113441,
+          "policy_version": 25666,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.858000000000004,
+          "median_finished_seconds": 37.53,
+          "best_finished_seconds": 37.25
+        },
+        {
+          "batch": 4,
+          "logged_environment_transitions": 150552,
+          "policy_version": 34951,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.802,
+          "median_finished_seconds": 37.47,
+          "best_finished_seconds": 37.17
+        },
+        {
+          "batch": 5,
+          "logged_environment_transitions": 187334,
+          "policy_version": 44141,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.658,
+          "median_finished_seconds": 37.59,
+          "best_finished_seconds": 37.57
+        },
+        {
+          "batch": 6,
+          "logged_environment_transitions": 223839,
+          "policy_version": 53267,
+          "finished": 4,
+          "trials": 5,
+          "mean_finished_seconds": 37.2525,
+          "median_finished_seconds": 37.235,
+          "best_finished_seconds": 37.11
+        },
+        {
+          "batch": 7,
+          "logged_environment_transitions": 261245,
+          "policy_version": 62705,
+          "finished": 4,
+          "trials": 5,
+          "mean_finished_seconds": 37.555,
+          "median_finished_seconds": 37.58,
+          "best_finished_seconds": 37.25
+        },
+        {
+          "batch": 8,
+          "logged_environment_transitions": 296993,
+          "policy_version": 71556,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 36.962,
+          "median_finished_seconds": 36.97,
+          "best_finished_seconds": 36.67
+        },
+        {
+          "batch": 9,
+          "logged_environment_transitions": 333831,
+          "policy_version": 80768,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.068,
+          "median_finished_seconds": 37.02,
+          "best_finished_seconds": 36.99
+        },
+        {
+          "batch": 10,
+          "logged_environment_transitions": 369781,
+          "policy_version": 89754,
+          "finished": 5,
+          "trials": 5,
+          "mean_finished_seconds": 37.146,
+          "median_finished_seconds": 37.05,
+          "best_finished_seconds": 36.85
+        }
+      ]
+    },
+    {
+      "run_id": "ngsj0h5v",
+      "label": "V107H: recurrent recovery experiment",
+      "url": "https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/ngsj0h5v",
+      "points": [
+        {
+          "batch": 1,
+          "logged_environment_transitions": 20262,
+          "policy_version": 1,
+          "finished": 10,
+          "trials": 10,
+          "mean_finished_seconds": 38.902,
+          "median_finished_seconds": 36.965,
+          "best_finished_seconds": 36.63
+        },
+        {
+          "batch": 2,
+          "logged_environment_transitions": 25030,
+          "policy_version": 738,
+          "finished": 10,
+          "trials": 10,
+          "mean_finished_seconds": 37.487,
+          "median_finished_seconds": 37.03,
+          "best_finished_seconds": 36.84
+        },
+        {
+          "batch": 3,
+          "logged_environment_transitions": 35883,
+          "policy_version": 2854,
+          "finished": 9,
+          "trials": 10,
+          "mean_finished_seconds": 57.15888888888888,
+          "median_finished_seconds": 56.3,
+          "best_finished_seconds": 38.64
+        },
+        {
+          "batch": 4,
+          "logged_environment_transitions": 46158,
+          "policy_version": 5214,
+          "finished": 5,
+          "trials": 10,
+          "mean_finished_seconds": 57.878,
+          "median_finished_seconds": 58.38,
+          "best_finished_seconds": 50.28
+        }
+      ]
+    }
+  ]
+}
