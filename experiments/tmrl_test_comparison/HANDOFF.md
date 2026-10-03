@@ -3,12 +3,13 @@
 | Osoba | Algorytm | Pełne treningi |
 | --- | --- | --- |
 | Jakub | IQN i QR | każdy: seedy 17, 29, 43 |
-| Kolega 1 | discrete SAC | seedy 17, 29, 43 |
-| Kolega 2 | TQC | seedy 17, 29, 43 |
-| Kolega 3 | PPO | seedy 17, 29, 43 |
+| Borys | discrete SAC | seedy 17, 29, 43 |
+| Kamil | TQC | seedy 17, 29, 43 |
+| Kuba P. | PPO | seedy 17, 29, 43 |
 
-Najpierw lokalna kwalifikacja: aktualny IQN kończy 102 400 kroków; po nim QR,
-discrete SAC, TQC i PPO mają po 145 408 kroków (2,02 h samej jazdy przy 20 Hz).
+Aktualna decyzja przed pełnym startem: [READINESS.md](READINESS.md).
+IQN i QR zakończyły piloty. Discrete SAC wymaga dodatkowej diagnostyki;
+TQC i PPO muszą jeszcze przejść ocenę pilotów.
 Restarty, obliczenia i aktualizacje PPO wydłużą czas. Pełnych treningów nie
 uruchamiamy automatycznie po pilotach. Przed przekazaniem do długich prób
 sprawdzamy każdy algorytm: aktualizacje o skończonym lossie, zmiana polityki,
@@ -45,11 +46,11 @@ cd TrackmaniaRL
 Po pozytywnym lokalnym pilocie przypisanego algorytmu uruchom **jedno** polecenie:
 
 ```powershell
-# Kolega 1:
+# Borys:
 powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 discrete-sac
-# Kolega 2:
+# Kamil:
 powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 tqc
-# Kolega 3:
+# Kuba P.:
 powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 ppo
 ```
 

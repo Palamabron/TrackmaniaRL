@@ -6,14 +6,14 @@ Protokół pomiarów: [README.md](experiments/tmrl_test_comparison/README.md).
 | Kto | Algorytm | Seedy |
 | --- | --- | --- |
 | Jakub | IQN + QR | 17, 29, 43 dla każdego |
-| Kolega 1 | discrete SAC | 17, 29, 43 |
-| Kolega 2 | TQC | 17, 29, 43 |
-| Kolega 3 | PPO | 17, 29, 43 |
+| Borys | discrete SAC | 17, 29, 43 |
+| Kamil | TQC | 17, 29, 43 |
+| Kuba P. | PPO | 17, 29, 43 |
 
-**Przed pełnym startem czekamy na lokalne piloty u Jakuba.** IQN już wykonuje
-aktualizacje i ukończył mapę w treningu. QR, discrete SAC, TQC i PPO mają
-zaplanowane po 145 408 kroków — około 2 h jazdy każdy, więcej z narzutami.
-Nie są jeszcze zatwierdzone jako przetestowane w grze.
+**Przed startem przeczytaj [READINESS.md](experiments/tmrl_test_comparison/READINESS.md).**
+IQN i QR ukończyły piloty. Discrete SAC wymaga diagnostyki entropii
+i wydajności; TQC i PPO czekają na ocenę. Pełne treningi nie są jeszcze
+zatwierdzone dla wszystkich algorytmów.
 
 Branch zawiera snapshot lokalnej biblioteki używanej przez te eksperymenty,
 konfiguracje oraz mapę i geometrię. U wszystkich używamy tego samego commita.
