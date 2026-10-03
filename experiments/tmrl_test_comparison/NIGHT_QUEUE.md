@@ -1,5 +1,52 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Aktualizacja po audycie DSAC — 4 października, około 02:00
+
+Aktualny plan zastępuje kolejność opisaną niżej. Po zgodzie Jakuba zapisano
+i zakończono kontrolny DSAC080 z karą entropii 0,5. Końcowy checkpoint ma
+21 997 aktualizacji. Próba jest krótsza niż budżet 145 408 kroków; porównanie
+treningu trzeba ograniczyć do wspólnego budżetu kroków, podając aktualizacje.
+
+Audyt na checkpointcie 15 000 aktualizacji potwierdził poprawny kierunek
+regulacji temperatury, uczenie prostego bandyty i brak blokowania gradientów
+krytyka przez clipping w badanej próbce. Kara względem entropii wolno
+aktualizowanego aktora znosiła około 80% projekcji surowego gradientu wartości.
+To nie jest pomiar zmiany kroku optymalizatora Adam. Na dwóch osobnych kopiach
+aktora, po 200 aktualizacjach przy zamrożonych Q i alpha, entropia wynosiła
+4,126 z karą 0,5 oraz 2,798 bez kary. To diagnostyka jednej próbki replayu,
+a nie wynik jazdy ani dowód przewagi algorytmu.
+
+Dwa przejazdy deterministyczne końcowego kontrolnego checkpointu dały
+0/2 ukończeń i około 0,5% postępu, bez błędów telemetryki lub kontrolera.
+Kontrolny DSAC nie jest zakwalifikowany do pełnych treningów.
+
+Nowa kolejność:
+
+1. Ewaluacja kontrolnego DSAC080: 2 przejazdy (zakończona).
+2. DSAC080 od zera, z `entropy_penalty_coefficient: 0.0`, następnie 3 przejazdy.
+3. TQC, następnie 2 przejazdy.
+4. PPO, następnie 2 przejazdy.
+5. IQN, następnie 2 przejazdy.
+6. QR, następnie 2 przejazdy.
+
+Nowy DSAC zmienia tylko karę entropii, zachowując cel `0.8 * ln(78)`, seed 17,
+model i budżet. Próba z celem 0,98 została odroczona. Konfiguracja przenośna:
+`configs/diagnostic/discrete-sac-entropy080-beta000-s17.yaml`.
+Ustawień pełnego DSAC nie zmieniono przed uzyskaniem wyników rzeczywistego pilota.
+
+Aktualną kolejkę wskazuje `artifacts/tmrl-test-comparison/active-queue.json`
+w głównym repozytorium Jakuba. Jest to `queue-overnight-dsac-ab-20261004`;
+jej zewnętrzny `runner.py` i konfiguracje zachowują zamrożone źródła pakietów.
+Każdy pilot ma limit 2 h 15 min. Runner rozpoczyna zapis najpóźniej o 13:50
+Europe/Warsaw, pozostawiając do 10 minut na zamknięcie przed 14:00.
+Nie rozpoczyna następnego kontrolera, dopóki poprzedni i jego potomkowie nie zakończą pracy.
+
+Krótkie ewaluacje mają wyłączone progi wyniku. Komunikat „Benchmark passed”
+oznacza tu poprawne wykonanie diagnostyki, nawet przy 0 ukończeń; nie kwalifikuje
+algorytmu do pełnego treningu. Wynik oceniać z `evaluation.json`, postępu,
+ukończeń, strat, entropii i błędów. Finalny protokół nadal wymaga 30 przejazdów
+na każdy seed. Pełne treningi nie uruchomią się automatycznie.
+
 ## Zakres i podział
 
 Jakub: IQN + QR. Borys: discrete SAC. Kamil: TQC. Kuba P.: PPO.

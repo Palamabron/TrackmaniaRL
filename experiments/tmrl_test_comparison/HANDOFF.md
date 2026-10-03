@@ -8,8 +8,11 @@
 | Kuba P. | PPO | seedy 17, 29, 43 |
 
 Aktualna decyzja przed pełnym startem: [READINESS.md](READINESS.md).
-IQN i QR zakończyły piloty. Discrete SAC wymaga dodatkowej diagnostyki;
-TQC i PPO muszą jeszcze przejść ocenę pilotów.
+IQN i QR zakończyły wcześniejsze piloty; nocna kolejka v2 powtarza je z nowym
+protokołem. Discrete SAC wymaga kwalifikacji: po audycie uruchomiono próbę
+bez kary entropii, a kontrolna ewaluacja dotychczasowego checkpointu dała
+0/2 ukończeń. TQC i PPO muszą jeszcze przejść ocenę pilotów. Aktualny plan
+i ograniczenia opisuje [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
 Restarty, obliczenia i aktualizacje PPO wydłużą czas. Pełnych treningów nie
 uruchamiamy automatycznie po pilotach. Przed przekazaniem do długich prób
 sprawdzamy każdy algorytm: aktualizacje o skończonym lossie, zmiana polityki,
