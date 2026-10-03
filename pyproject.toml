@@ -126,12 +126,12 @@ dev = [
 trackmaniarl = "trackmaniarl.__main__:entrypoint"
 
 [project.urls]
-Homepage = "https://github.com/Palamabron/TrackmaniaRL"
-Repository = "https://github.com/Palamabron/TrackmaniaRL"
-Documentation = "https://github.com/Palamabron/TrackmaniaRL/tree/main/readme"
-Issues = "https://github.com/Palamabron/TrackmaniaRL/issues"
-Changelog = "https://github.com/Palamabron/TrackmaniaRL/blob/main/CHANGELOG.md"
-Security = "https://github.com/Palamabron/TrackmaniaRL/blob/main/SECURITY.md"
+Homepage = "https://github.com/TrackmaniaRL/TrackmaniaRL"
+Repository = "https://github.com/TrackmaniaRL/TrackmaniaRL"
+Documentation = "https://github.com/TrackmaniaRL/TrackmaniaRL/tree/main/readme"
+Issues = "https://github.com/TrackmaniaRL/TrackmaniaRL/issues"
+Changelog = "https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/CHANGELOG.md"
+Security = "https://github.com/TrackmaniaRL/TrackmaniaRL/blob/main/SECURITY.md"
 
 [tool.setuptools.packages.find]
 where = ["."]

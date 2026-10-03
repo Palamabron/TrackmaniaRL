@@ -20,6 +20,7 @@ from trackmaniarl.trackmania.environment_config import (
 from trackmaniarl.trackmania.geometry import BoundaryGeometry
 from trackmaniarl.trackmania.pace import PaceDemonstrationRequest, ReferencePaceProfile
 from trackmaniarl.trackmania.reward import TrajectoryReward
+from trackmaniarl.trackmania.reward_points import RewardPoints
 from trackmaniarl.trackmania.session import OpenPlanetSessionClient
 from trackmaniarl.trackmania.telemetry import (
     OpenPlanetClient,
@@ -28,7 +29,9 @@ from trackmaniarl.trackmania.telemetry import (
 )
 
 
-def _validated_live_map_uid(expected_map_uid: str | None, geometry: BoundaryGeometry) -> str:
+def _validated_live_map_uid(
+    expected_map_uid: str | None, geometry: BoundaryGeometry | RewardPoints
+) -> str:
     map_uid = (expected_map_uid or "").strip()
     if not map_uid or _is_placeholder_uid(map_uid):
         raise ValueError(
@@ -43,12 +46,12 @@ def _is_placeholder_uid(map_uid: str) -> bool:
     return map_uid.startswith("REPLACE_") or (map_uid.startswith("<") and map_uid.endswith(">"))
 
 
-def _validate_geometry_identity(map_uid: str, geometry: BoundaryGeometry) -> None:
+def _validate_geometry_identity(map_uid: str, geometry: BoundaryGeometry | RewardPoints) -> None:
     if not geometry.map_uid.strip():
         raise ValueError("geometry asset is missing its source map UID")
     if geometry.map_uid != map_uid:
         raise ValueError("geometry asset map UID does not match the configured expected_map_uid")
-    if not geometry.map_sha256.strip():
+    if not geometry.map_sha256.strip() and not isinstance(geometry, RewardPoints):
         raise ValueError(
             "geometry asset is missing its source map checksum; rebuild it with "
             "`trackmaniarl track build-geometry --map-path ...`"
@@ -57,7 +60,7 @@ def _validate_geometry_identity(map_uid: str, geometry: BoundaryGeometry) -> Non
 
 @dataclass(frozen=True, slots=True)
 class _MapContext:
-    geometry: BoundaryGeometry
+    geometry: BoundaryGeometry | RewardPoints
     expected_map_uid: str
 
 
@@ -102,13 +105,24 @@ class OpenPlanetEnvironment:
         expected_uid = (
             evaluation_map.expected_map_uid if evaluation_map else config.expected_map_uid
         )
-        geometry = BoundaryGeometry(geometry_path)
+        points_path = (
+            getattr(evaluation_map, "reward_points_path", None)
+            if evaluation_map
+            else config.reward_points_path
+        )
+        geometry = (
+            RewardPoints(points_path, expected_map_uid=expected_uid)
+            if points_path is not None
+            else BoundaryGeometry(geometry_path)
+        )
         return _MapContext(geometry, _validated_live_map_uid(expected_uid, geometry))
 
     @staticmethod
     def _create_reward(
-        config: TrackmaniaEnvironmentConfig, geometry: BoundaryGeometry
+        config: TrackmaniaEnvironmentConfig, geometry: BoundaryGeometry | RewardPoints
     ) -> TrajectoryReward:
+        if isinstance(geometry, RewardPoints):
+            return TrajectoryReward(geometry.reward_center, config.reward_config(None))
         reference = geometry.racing_line if config.use_racing_line else geometry.reward_center
         pace_profile = OpenPlanetEnvironment._pace_profile(config, geometry, reference)
         return TrajectoryReward(reference, config.reward_config(pace_profile))
@@ -242,6 +256,10 @@ class OpenPlanetEnvironmentFactory:
             demonstration_transitions,
         )
 
+        if self.config.geometry_path is None:
+            raise ValueError(
+                "telemetry demonstrations require boundary geometry; camera training needs RGB data"
+            )
         geometry = BoundaryGeometry(
             self.config.geometry_path, expected_map_uid=self.config.expected_map_uid
         )
@@ -253,7 +271,7 @@ def _resolve_environment_paths(
     config: TrackmaniaEnvironmentConfig, base_dir: Path
 ) -> TrackmaniaEnvironmentConfig:
     resolved = config
-    for name in ("geometry_path", "pace_reference_path"):
+    for name in ("geometry_path", "reward_points_path", "pace_reference_path"):
         path = getattr(resolved, name)
         if path is not None and not path.is_absolute():
             resolved = resolved.model_copy(update={name: (base_dir / path).resolve()})

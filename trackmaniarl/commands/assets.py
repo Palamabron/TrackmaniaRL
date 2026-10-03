@@ -69,6 +69,9 @@ def _trackmania_factory(config_path: Path) -> OpenPlanetEnvironmentFactory:
     kwargs = dict(component.kwargs)
     if component.class_path == vision:
         kwargs.pop("capture", None)
+        kwargs.pop("window_capture", None)
+        kwargs.pop("include_telemetry", None)
+        kwargs.pop("include_command_history", None)
     return OpenPlanetEnvironmentFactory(**kwargs, base_dir=config_path.parent)
 
 

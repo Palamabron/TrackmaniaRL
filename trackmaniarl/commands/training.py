@@ -25,6 +25,7 @@ from trackmaniarl.distributed.coordinator_types import (
     LearnerProcessRequest,
     ReplayRestoreMode,
 )
+from trackmaniarl.distributed.stop_signal import ProcessStopSignal
 from trackmaniarl.trackmania.demonstrations import resolve_demonstration_paths
 
 
@@ -34,6 +35,7 @@ class _LocalProcesses:
     actor: Any
     shutdown: Any
     endpoint: str
+    stop_file: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,8 +119,13 @@ def _materialize_run_spec(plan: _TrainingPlan) -> tuple[Path, Path | None]:
 def _spawn_local_processes(
     spec: RunSpec, config: Path, args: argparse.Namespace
 ) -> _LocalProcesses:
+    stop_file = getattr(args, "stop_file", None)
+    if stop_file is not None:
+        stop_file = stop_file.resolve()
+        if stop_file.exists():
+            raise ValueError(f"Stop file already exists; remove it before starting: {stop_file}")
     context = _spawn_context()
-    shutdown = context.Event()
+    shutdown = ProcessStopSignal(context)
     endpoint = f"127.0.0.1:{spec.distributed.port}"
     token = secrets.token_urlsafe(32)
     runtime = _LocalRuntime(config, endpoint, token, shutdown)
@@ -130,7 +137,7 @@ def _spawn_local_processes(
     actor = context.Process(
         target=_actor_process, args=(actor_request,), name="trackmaniarl-local-actor"
     )
-    return _LocalProcesses(learner, actor, shutdown, endpoint)
+    return _LocalProcesses(learner, actor, shutdown, endpoint, stop_file)
 
 
 def _local_learner_request(
@@ -182,6 +189,8 @@ def _print_process_launch(processes: _LocalProcesses) -> None:
 
 def _wait_for_processes(processes: _LocalProcesses) -> None:
     while processes.learner.is_alive() and processes.actor.is_alive():
+        if _stop_file_requested(processes):
+            return
         sleep(0.25)
     if processes.actor.is_alive() or not processes.learner.is_alive():
         return
@@ -203,7 +212,17 @@ def _wait_for_learner_drain(processes: _LocalProcesses) -> None:
         flush=True,
     )
     while processes.learner.is_alive():
+        if _stop_file_requested(processes):
+            return
         sleep(0.25)
+
+
+def _stop_file_requested(processes: _LocalProcesses) -> bool:
+    if processes.stop_file is None or not processes.stop_file.exists():
+        return False
+    print("Stop file received. Saving the final checkpoint and stopping training...", flush=True)
+    processes.shutdown.set()
+    return True
 
 
 def _stop_local_processes_with_notice(processes: _LocalProcesses) -> None:

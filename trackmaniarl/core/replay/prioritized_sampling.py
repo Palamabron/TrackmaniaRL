@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal
 
+import torch
+
 from trackmaniarl.core.data import BatchRequest, TrainingBatch, TransitionId
 from trackmaniarl.core.pytree import tree_collate
 from trackmaniarl.core.replay.batches import (
@@ -40,6 +42,7 @@ class _SequenceMaterialization:
     histories: list[list[TransitionId]]
     flattened: list[TransitionId]
     next_observations: list[object]
+    next_masks: torch.Tensor
 
 
 def _sample_incremental_snapshot(
@@ -101,7 +104,14 @@ def _sequence_materialization(sample: _IncrementalSample) -> _SequenceMaterializ
     next_histories = _sequence_target_observation_histories(history_values, horizon_values, length)
     flattened = [item for history in histories for item in history]
     next_observations = [item for history in next_histories for item in history]
-    return _SequenceMaterialization(histories, flattened, next_observations)
+    masks = _history_padding_masks(histories)
+    next_masks = torch.stack(
+        [
+            torch.cat((row, torch.ones(len(horizon), dtype=torch.bool)))[-length:]
+            for row, horizon in zip(masks, horizons, strict=True)
+        ]
+    )
+    return _SequenceMaterialization(histories, flattened, next_observations, next_masks)
 
 
 def _reshape_sequence_output(
@@ -121,7 +131,11 @@ def _reshape_sequence_output(
         request.batch_size,
         request.sequence_length,
     )
-    return replace(reshaped, next_observations=next_observations)
+    return replace(
+        reshaped,
+        next_observations=next_observations,
+        metadata={**reshaped.metadata, "next_observation_masks": materialized.next_masks},
+    )
 
 
 def _flat_batch(sample: _IncrementalSample) -> TrainingBatch:

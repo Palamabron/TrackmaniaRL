@@ -12,6 +12,7 @@ from trackmaniarl.commands.assets import (
 )
 from trackmaniarl.commands.human_recovery import _record_human_recovery
 from trackmaniarl.commands.parser_types import CommandParsers
+from trackmaniarl.commands.reward_points import record_reward_points
 
 
 def register_asset_commands(commands: CommandParsers) -> None:
@@ -23,6 +24,22 @@ def register_asset_commands(commands: CommandParsers) -> None:
     _register_boundary_recorder(track_commands)
     _register_geometry_builder(track_commands)
     _register_track_check(track_commands)
+    _register_reward_points(track_commands)
+
+
+def _register_reward_points(commands: CommandParsers) -> None:
+    parser = commands.add_parser(
+        "record-reward-points", help="record a complete reward path without lidar boundaries"
+    )
+    parser.add_argument("output", type=Path)
+    parser.add_argument(
+        "--map-path", type=Path, help="optional local map file; otherwise bind to live map UID"
+    )
+    parser.add_argument("--max-duration", type=float, default=600.0)
+    parser.add_argument("--spacing", type=float, default=2.0)
+    parser.add_argument("--session-port", type=int, default=9001)
+    _add_telemetry_connection(parser)
+    parser.set_defaults(handler=record_reward_points)
 
 
 def _add_telemetry_connection(parser: argparse.ArgumentParser) -> None:

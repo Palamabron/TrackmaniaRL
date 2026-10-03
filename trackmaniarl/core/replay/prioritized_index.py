@@ -100,8 +100,7 @@ def _rebuild_index(request: _SynchronizationRequest) -> None:
     _reset_counts(request.sampler)
     _reset_trees(request.sampler, request.store.capacity)
     for transition_id in request.store.eligible_transition_ids(request.n_step):
-        history = request.store.history_ids(transition_id, request.sequence_length)
-        if len(set(history)) == request.sequence_length:
+        if _eligible_candidate(request, transition_id):
             _activate(request.sampler, request.store, transition_id)
 
 
@@ -154,8 +153,19 @@ def _eligible_candidate(request: _SynchronizationRequest, candidate: TransitionI
     return (
         store.contains(candidate)
         and store.is_n_step_eligible(candidate, request.n_step)
-        and len(set(store.history_ids(candidate, request.sequence_length)))
-        == request.sequence_length
+        and _eligible_history(request, candidate)
+    )
+
+
+def _eligible_history(request: _SynchronizationRequest, candidate: TransitionId) -> bool:
+    history = request.store.history_ids(candidate, request.sequence_length)
+    if len(set(history)) == request.sequence_length:
+        return True
+    # Only a genuine episode start may be padded; eviction is not a reset.
+    return bool(
+        request.sampler.allow_padded_history
+        and history
+        and request.store.get([history[0]])[0].step == 0
     )
 
 

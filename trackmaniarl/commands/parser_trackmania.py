@@ -39,6 +39,11 @@ def _register_benchmark(commands: CommandParsers) -> None:
     parser.add_argument("--target-mean", type=float)
     parser.add_argument("--max-step-race-time-ms", type=float)
     parser.add_argument("--min-finish-rate", type=float)
+    parser.add_argument(
+        "--stop-file",
+        type=Path,
+        help="cancel evaluation when this file is created, preserving partial trial results",
+    )
     _add_recording_options(parser)
     parser.add_argument(
         "--reject-telemetry-skips",
@@ -259,6 +264,11 @@ def _register_bc_benchmark(commands: CommandParsers) -> None:
     parser.add_argument("config", type=Path)
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("--trials", type=int, default=30)
+    parser.add_argument(
+        "--device",
+        choices=("cpu", "cuda", "auto"),
+        help="override inference device without changing the BC training configuration",
+    )
     parser.add_argument(
         "--report-only",
         action="store_true",

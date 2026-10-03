@@ -171,10 +171,14 @@ class TrackmaniaActionSelector:
         return self._hold_steps < self.minimum_action_hold_steps or margin_blocks
 
     def _exploration_action(self, q_values: torch.Tensor, greedy: torch.Tensor) -> torch.Tensor:
-        weights = self.weights.to(q_values.device)
-        global_action = torch.multinomial(weights, greedy.numel(), replacement=True).reshape(
-            greedy.shape
-        )
+        # The policy encodes excluded actions as -inf. Respect that mask for both
+        # global and neighboring exploration, not just the greedy choice.
+        allowed = torch.isfinite(q_values)
+        weights = self.weights.to(q_values.device).expand_as(q_values).masked_fill(~allowed, 0)
+        flat_weights = weights.reshape(-1, weights.shape[-1])
+        if bool((flat_weights.sum(dim=-1) <= 0).any()):
+            raise ValueError("exploration requires at least one allowed action per row")
+        global_action = torch.multinomial(flat_weights, 1).reshape(greedy.shape)
         if self.action_ids is not None:
             return global_action.to(greedy.dtype)
         modes_per_steering = 6
@@ -185,10 +189,13 @@ class TrackmaniaActionSelector:
         mode = greedy % modes_per_steering
         delta = torch.randint(-1, 2, greedy.shape, device=greedy.device, dtype=greedy.dtype)
         neighboring = (steering + delta).clamp(0, steering_bins - 1) * 6 + mode
+        neighbor_allowed = allowed.gather(-1, neighboring.unsqueeze(-1)).squeeze(-1)
         change_mode = (
             torch.rand(greedy.shape, device=greedy.device) < self.global_exploration_probability
         )
-        return torch.where(change_mode, global_action, neighboring).to(greedy.dtype)
+        return torch.where(change_mode | ~neighbor_allowed, global_action, neighboring).to(
+            greedy.dtype
+        )
 
 
 def _validate_stabilization(minimum: int, exploration: int, margin: float) -> None:

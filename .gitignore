@@ -225,3 +225,4 @@ output/
 /experiments/*
 !/experiments/sub37/
 !/experiments/activation_film/
+!/experiments/tmrl_test_comparison/

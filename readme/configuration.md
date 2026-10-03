@@ -1,5 +1,16 @@
 # Configuration reference
 
+Torch learners accept `components.learner.kwargs.execution.torch_threads`
+(optional positive integer). It limits process-wide CPU intra-op parallelism,
+including CPU work in a CUDA learner, before model setup. Omission preserves
+the Torch default. Actor threads remain controlled separately by
+`distributed.actor_execution.torch_threads`.
+
+Local `train` and `resume` accept `--stop-file PATH`. Creating that file requests
+normal shutdown and a final checkpoint without sending a console interrupt.
+An existing stop file is rejected before starting child processes; remove it
+before resuming. Check final checkpoint completion before closing the launcher.
+
 A RunSpec YAML file is the public runtime configuration boundary in 1.2.9.
 The generated choices are `run.yaml`, `run-sac.yaml`, `run-redq.yaml`,
 `run-tqc.yaml`, `run-discrete-sac.yaml`, `run-ppo.yaml` and `run-ppo-vision.yaml`.
@@ -8,7 +19,7 @@ Pydantic as RunSpec 2.0, rejects unknown fields and NaN/Inf, then resolves each
 `module:attribute` component from the local environment. It is executable
 configuration: use only files and extension packages you trust.
 
-Start with the [generated Trackmania project](../README.md#installation)
+Start with the [generated Trackmania project](quickstart.md#installation)
 for a real run. The complete, game-free
 [`builtin-smoke.yaml`](examples/builtin-smoke.yaml) is kept under test and can
 be checked without Trackmania:
@@ -135,7 +146,7 @@ not encrypt. Bind to loopback and use an encrypted tunnel.
 ## `evaluation`
 
 `evaluation` is a versioned local asset suite, not a random-seed benchmark.
-`maps[]` contains `id`, `map_path`, `geometry_path` and `expected_map_uid`.
+`maps[]` contains `id`, `expected_map_uid` and a geometry or reward-points asset.
 Map IDs are unique and every path is bound into evaluation provenance.
 
 | Field | Default | Effect |
@@ -155,14 +166,17 @@ Each `maps[]` item has an immutable local asset identity:
 | Field | Default | Effect |
 | --- | --- | --- |
 | `id` | required | Unique safe identifier used in evaluation results and artifact names. |
-| `map_path` | required | Local `.Map.Gbx` loaded for this evaluation case. |
-| `geometry_path` | required | Matching versioned geometry used for feature/reward contracts. |
+| `map_path` | null | Local `.Map.Gbx`; required with boundary geometry or checksum-bound reward points. Official campaign reward points may use live UID identity only. |
+| `geometry_path` | null | Matching versioned boundary geometry. Configure exactly one of this and `reward_points_path`. |
+| `reward_points_path` | null | Recorded 3D reward path without road boundaries. Its UID must match the live session; a local map checksum is optional when recording official campaign maps. |
 | `expected_map_uid` | required | UID that the live session must report, a mismatch fails before driving. |
 
 ## Trackmania environment
 
 The paths below are under `components.environment.kwargs.config`.
-`geometry_path` is required because it binds map UID/hash and track boundaries.
+Configure exactly one of `geometry_path` and `reward_points_path`. The latter
+supports camera agents without recording track boundaries; it cannot supply
+LiDAR observations, racing-line optimization or a reference pace profile.
 
 ### Connection, controls and termination
 

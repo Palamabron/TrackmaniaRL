@@ -93,6 +93,7 @@ def _load_array_state(sampler: PrioritizedSampler, state: Mapping[str, Any]) -> 
 
 
 def _reset_runtime_index(sampler: PrioritizedSampler) -> None:
+    sampler._replay_store = None
     sampler._active_count = 0
     sampler._elite_active_count = 0
     sampler._expert_active_count = 0

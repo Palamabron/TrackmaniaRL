@@ -63,6 +63,7 @@ def _add_demonstrations(
 def _register_train(commands: CommandParsers) -> None:
     parser = commands.add_parser("train", help="start a local asynchronous learner and actor")
     parser.add_argument("config", type=Path)
+    _add_stop_file(parser)
     _add_demonstrations(parser, _DemonstrationRequirement.OPTIONAL)
     parser.add_argument(
         "--model-initialization-checkpoint",
@@ -143,6 +144,7 @@ def _register_resume(commands: CommandParsers) -> None:
     parser = commands.add_parser("resume", help="resume a local asynchronous training run")
     parser.add_argument("config", type=Path)
     parser.add_argument("checkpoint", type=Path)
+    _add_stop_file(parser)
     parser.add_argument(
         "--reset-replay",
         action="store_true",
@@ -150,6 +152,14 @@ def _register_resume(commands: CommandParsers) -> None:
     )
     _add_demonstrations(parser, _DemonstrationRequirement.OPTIONAL)
     parser.set_defaults(handler=_train)
+
+
+def _add_stop_file(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--stop-file",
+        type=Path,
+        help="stop local async training gracefully when this file is created (no Ctrl+C)",
+    )
 
 
 def _register_learner(commands: CommandParsers) -> None:

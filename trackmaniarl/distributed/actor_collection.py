@@ -14,6 +14,7 @@ import torch
 import trackmaniarl.distributed.actor_watchdog as actor_watchdog
 from trackmaniarl.core.contracts import PolicyMode, ReplicablePolicy
 from trackmaniarl.core.data import Transition
+from trackmaniarl.core.environment_errors import EnvironmentPausedError
 from trackmaniarl.core.pytree import tree_map
 from trackmaniarl.distributed.actor_errors import ActorEnvironmentError
 from trackmaniarl.distributed.actor_metrics import EpisodeMetrics, summarize_episode
@@ -93,7 +94,7 @@ def collect(runtime: CollectionRuntime, environment: Any, pipeline: Any) -> None
             break
         try:
             _run_training_episode(context, state)
-        except (TimeoutError, ConnectionError) as exc:
+        except (TimeoutError, ConnectionError, EnvironmentPausedError) as exc:
             _handle_training_interruption(context, exc)
             episode += 1
             continue
@@ -233,22 +234,29 @@ def _transition_info(state: TrainingEpisode, step: PolicyStep) -> dict[str, Any]
 
 
 def _handle_training_interruption(
-    context: CollectionContext, exc: TimeoutError | ConnectionError
+    context: CollectionContext, exc: TimeoutError | ConnectionError | EnvironmentPausedError
 ) -> None:
     runtime = context.runtime
     logger.warning(
-        "Actor %s telemetry stalled mid-episode (%s: %s); closing the available "
+        "Actor %s observation interrupted mid-episode (%s: %s); closing the available "
         "rollout as a bootstrappable truncation",
         runtime.actor_id,
         type(exc).__name__,
         exc,
     )
-    _truncate_interrupted_rollout(context.buffers)
+    reason = (
+        "capture_interruption"
+        if isinstance(exc, EnvironmentPausedError)
+        else "telemetry_interruption"
+    )
+    _truncate_interrupted_rollout(context.buffers, reason=reason)
     _, _, version = runtime._policy()
     context.buffers.flush(runtime, version)
 
 
-def _truncate_interrupted_rollout(buffers: CollectionBuffers) -> None:
+def _truncate_interrupted_rollout(
+    buffers: CollectionBuffers, *, reason: str = "telemetry_interruption"
+) -> None:
     if not buffers.transitions:
         return
     last = buffers.transitions[-1]
@@ -258,8 +266,8 @@ def _truncate_interrupted_rollout(buffers: CollectionBuffers) -> None:
         truncated=True,
         info={
             **dict(last.info),
-            "termination_reason": "telemetry_interruption",
-            "telemetry_health": "interrupted",
+            "termination_reason": reason,
+            **({"telemetry_health": "interrupted"} if reason == "telemetry_interruption" else {}),
         },
     )
 
@@ -282,8 +290,7 @@ def reset_environment(runtime: CollectionRuntime, request: EnvironmentReset) -> 
     delay = _TELEMETRY_RETRY_INITIAL_S
     for attempt in range(attempts):
         try:
-            observation, _ = request.environment.reset(seed=runtime._actor_seed() + request.episode)
-            return observation
+            return _reset_when_available(runtime, request)
         except (TimeoutError, ConnectionError) as exc:
             if attempt == attempts - 1:
                 return _handle_reset_exhaustion(runtime, exc, request)
@@ -292,6 +299,29 @@ def reset_environment(runtime: CollectionRuntime, request: EnvironmentReset) -> 
                 return None
             delay = min(delay * 2.0, _TELEMETRY_RETRY_MAX_S)
     raise AssertionError("unreachable")
+
+
+def _reset_when_available(runtime: CollectionRuntime, request: EnvironmentReset) -> Any:
+    paused = False
+    while not runtime.stop.is_set():
+        try:
+            observation, _ = request.environment.reset(seed=runtime._actor_seed() + request.episode)
+        except EnvironmentPausedError as exc:
+            if not paused:
+                logger.warning(
+                    "Actor %s paused: %s; waiting for game window", runtime.actor_id, exc
+                )
+                paused = True
+            # Deliberate waiting is not a blocked controller/native call.
+            actor_watchdog.touch(runtime)
+            if runtime.stop.wait(0.5):
+                return None
+        else:
+            actor_watchdog.touch(runtime)
+            if paused:
+                logger.warning("Actor %s resumed with a new episode", runtime.actor_id)
+            return observation
+    return None
 
 
 def _handle_reset_exhaustion(

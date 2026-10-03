@@ -186,9 +186,18 @@ class EvaluationMapSpec(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
     id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
-    map_path: Path
-    geometry_path: Path
+    map_path: Path | None = None
+    geometry_path: Path | None = None
+    reward_points_path: Path | None = None
     expected_map_uid: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _reward_asset_is_configured(self) -> EvaluationMapSpec:
+        if (self.geometry_path is None) == (self.reward_points_path is None):
+            raise ValueError("evaluation requires exactly one geometry or reward points asset")
+        if self.geometry_path is not None and self.map_path is None:
+            raise ValueError("boundary geometry evaluation requires map_path")
+        return self
 
 
 class EvaluationSuiteSpec(BaseModel):

@@ -77,7 +77,8 @@ _REWARD_KWARG_NAMES = (
 class TrackmaniaEnvironmentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
-    geometry_path: Path
+    geometry_path: Path | None = None
+    reward_points_path: Path | None = None
     use_racing_line: bool = False
     expected_map_uid: str | None = None
     host: str = "127.0.0.1"
@@ -131,6 +132,12 @@ class TrackmaniaEnvironmentConfig(BaseModel):
 
     @model_validator(mode="after")
     def _reward_contract_is_valid(self) -> TrackmaniaEnvironmentConfig:
+        if (self.geometry_path is None) == (self.reward_points_path is None):
+            raise ValueError("configure exactly one of geometry_path and reward_points_path")
+        if self.reward_points_path is not None and (
+            self.use_racing_line or self.pace_reference_path is not None
+        ):
+            raise ValueError("reward points do not provide a racing line or a pace profile")
         self._validate_indices()
         self._validate_reward_values()
         self._validate_time_attack()

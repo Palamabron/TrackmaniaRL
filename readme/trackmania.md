@@ -282,7 +282,7 @@ explicit `WandbTracker` under `components.additional_loggers`. Supply
 `WANDB_API_KEY` only through a private environment or ignored `.env` file.
 The generated project retains its vetted `vgamepad` source during this update.
 an existing project must retain the same direct source pin documented in the
-[installation guide](../README.md#installation).
+[installation guide](quickstart.md#installation).
 
 `trackmaniarl smoke` is the required Windows preflight. It collects a bounded number of
 real actions, completes at least one update, verifies a live policy refresh,
@@ -303,6 +303,17 @@ acceptance threshold is missed:
 ```bash
 uv run trackmaniarl benchmark run.yaml artifacts/trackmania-iqn-lidar/checkpoints/distributed-update-XXXXXXXX.pt
 ```
+
+With the first-party evaluator, add `--stop-file PATH` to cancel a benchmark
+without a console interrupt. The path must not already exist. Creating it stops
+the evaluation between control steps or during a window-availability pause, then
+closes the environment. The resulting `evaluation.json` has `status: cancelled`,
+retains completed trials and any active trial as an `operator_interruption` DNF,
+and leaves unstarted trials absent. It cannot pass as a completed benchmark.
+Native environment calls must return before cancellation can be observed.
+Successful artifacts use `status: complete`; both include the expected trial
+count and the evaluated checkpoint's SHA-256 digest. Checkpoint replacement
+during evaluation is rejected.
 
 For a diagnostic run that rejects every lap containing one or more skipped
 telemetry frames, add `--reject-telemetry-skips`. This is intentionally stricter

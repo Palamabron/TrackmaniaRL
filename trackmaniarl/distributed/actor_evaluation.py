@@ -10,6 +10,7 @@ from typing import Any, cast
 
 import trackmaniarl.distributed.actor_watchdog as actor_watchdog
 from trackmaniarl.core.contracts import ExploratoryPolicy, PolicyMode, ReplicablePolicy
+from trackmaniarl.core.environment_errors import EnvironmentPausedError
 from trackmaniarl.distributed.actor_collection import reset_pipeline, reset_policy
 from trackmaniarl.distributed.actor_metrics import EpisodeMetrics
 from trackmaniarl.distributed.actor_protocols import CollectionRuntime
@@ -181,12 +182,17 @@ def _evaluation_context(plan: EvaluationPlan, observation: Any) -> EvaluationCon
     )
 
 
-def _evaluation_summary(context: EvaluationContext) -> dict[str, Any]:
+def _evaluation_summary(
+    context: EvaluationContext, *, termination: str | None = None
+) -> dict[str, Any]:
     runtime = context.runtime
     transitions = context.metrics.controls.samples
+    info = context.metrics.summary_info(0.0, context.version, transitions)
+    if termination is not None:
+        info["termination_reason"] = termination
     summary = runtime._summary(
         context.metrics.total_reward,
-        context.metrics.summary_info(0.0, context.version, transitions),
+        info,
         transitions,
     )
     summary["deterministic"] = 1.0
@@ -210,6 +216,13 @@ def _take_evaluation_step(
     evaluated = _evaluation_action(context)
     try:
         step = _evaluation_step(context, step_index, evaluated)
+    except EnvironmentPausedError as exc:
+        logger.warning(
+            "Actor %s deterministic evaluation capture interrupted (%s); retaining DNF",
+            context.runtime.actor_id,
+            exc,
+        )
+        return _evaluation_summary(context, termination="capture_interruption"), True
     except (TimeoutError, ConnectionError) as exc:
         return _evaluation_interruption(context, exc), True
     _record_evaluation_step(context, step)

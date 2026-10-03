@@ -22,8 +22,15 @@ class TorchExecutionConfig:
     device: RequestedDevice = "auto"
     precision: RequestedPrecision = "auto"
     deterministic: bool = True
+    torch_threads: int | None = None
 
     def __post_init__(self) -> None:
+        if self.torch_threads is not None and (
+            isinstance(self.torch_threads, bool)
+            or not isinstance(self.torch_threads, int)
+            or self.torch_threads < 1
+        ):
+            raise TorchExecutionError("torch_threads must be a positive integer")
         if self.device not in {"auto", "cuda", "rocm", "mps", "cpu"}:
             raise TorchExecutionError(f"Unsupported Torch device {self.device!r}")
         if self.precision not in {"auto", "bfloat16", "float16", "float32"}:
@@ -49,6 +56,7 @@ class ResolvedTorchExecution:
             "precision": self.precision,
             "scaler_enabled": self.scaler_enabled,
             "deterministic": self.deterministic,
+            "torch_threads": torch.get_num_threads(),
         }
 
 
@@ -79,6 +87,8 @@ def _probe_command(command: tuple[str, ...]) -> bool:
 def resolve_torch_execution(config: TorchExecutionConfig) -> ResolvedTorchExecution:
     backend, device = _resolve_device(config.device)
     precision = _resolve_precision(config.precision, backend, device)
+    if config.torch_threads is not None:
+        torch.set_num_threads(config.torch_threads)
     return ResolvedTorchExecution(
         requested_device=config.device,
         requested_precision=config.precision,

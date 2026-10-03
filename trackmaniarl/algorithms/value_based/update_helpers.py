@@ -114,13 +114,20 @@ def features(
 def _encoded_features(learner: DiscreteValueLearner, view: ValueBatchView) -> _EncodedFeatures:
     assert isinstance(learner.model, CompositeValueModel)
     layout = BatchLayout.SEQUENCE if view.sequence else BatchLayout.FRAMES
-    online = learner.model.encode_sequence(view.batch.observations, layout, learner.burn_in)
-    target = learner.target_model.encode_sequence(view.batch.observations, layout, learner.burn_in)
-    final_online = learner.model.encode_sequence(
-        view.batch.next_observations, layout, learner.burn_in
+    next_masks = view.batch.metadata.get("next_observation_masks")
+    if next_masks is not None:
+        next_masks = torch.as_tensor(next_masks, device=learner.device, dtype=torch.bool)
+    online = learner.model.encode_masked_sequence(
+        view.batch.observations, layout, learner.burn_in, masks=view.masks
+    )
+    target = learner.target_model.encode_masked_sequence(
+        view.batch.observations, layout, learner.burn_in, masks=view.masks
+    )
+    final_online = learner.model.encode_masked_sequence(
+        view.batch.next_observations, layout, learner.burn_in, masks=next_masks
     )[:, -1]
-    final_target = learner.target_model.encode_sequence(
-        view.batch.next_observations, layout, learner.burn_in
+    final_target = learner.target_model.encode_masked_sequence(
+        view.batch.next_observations, layout, learner.burn_in, masks=next_masks
     )[:, -1]
     return _EncodedFeatures(online, target, final_online, final_target)
 
@@ -196,6 +203,15 @@ def demonstration_diagnostics(
         "debug/demo_sample_fraction": _mask_fraction(valid_demo, inputs.valid),
         "debug/demo_accuracy": _masked_fraction(correct, valid_demo),
     }
+    if valid_demo.any():
+        values = learner._masked(inputs.expected.detach())
+        expert = values.gather(-1, inputs.actions.unsqueeze(-1)).squeeze(-1)
+        others = values.scatter(-1, inputs.actions.unsqueeze(-1), -torch.inf).amax(dim=-1)
+        gaps = (expert - others)[valid_demo]
+        finite = gaps[torch.isfinite(gaps)]
+        if finite.numel():
+            metrics["debug/demo_q_gap_mean"] = float(finite.mean())
+            metrics["debug/demo_q_gap_negative_fraction"] = float((finite < 0).float().mean())
     switches = inputs.metadata.get("demonstration_steering_switches")
     if switches is None:
         return metrics

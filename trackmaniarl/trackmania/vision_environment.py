@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from time import perf_counter
 from typing import Any, Protocol
@@ -12,8 +13,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from trackmaniarl.core.contracts import FeaturePipeline
 from trackmaniarl.core.data import Transition
+from trackmaniarl.core.environment_errors import EnvironmentPausedError
 from trackmaniarl.trackmania.environment import OpenPlanetEnvironmentFactory
 from trackmaniarl.trackmania.environment_config import TrackmaniaEnvironmentConfig
+from trackmaniarl.trackmania.window_capture import WindowCaptureConfig, WindowsClientCapture
 
 
 class CaptureRegion(BaseModel):
@@ -53,30 +56,76 @@ class ScreenFrameSource:
 class VisionEnvironment:
     """Replace policy telemetry with RGB while retaining telemetry-based rewards."""
 
-    def __init__(
-        self, environment: Any, frames: FrameSource, *, include_telemetry: bool = False
+    def __init__(  # noqa: PLR0913 - capture resources and observation modes are independent
+        self,
+        environment: Any,
+        frames: FrameSource,
+        *,
+        include_telemetry: bool = False,
+        include_command_history: bool = False,
     ) -> None:
+        if include_command_history and not include_telemetry:
+            raise ValueError("issued command history requires include_telemetry")
         self.environment = environment
         self.frames = frames
         self.include_telemetry = include_telemetry
+        self.include_command_history = include_command_history
+        self._previous_command = np.zeros(3, dtype=np.float32)
 
     def _capture(self, info: dict[str, Any]) -> np.ndarray[Any, Any]:
         started = perf_counter()
         frame = self.frames.capture()
         info["vision/capture_ms"] = (perf_counter() - started) * 1000.0
+        if isinstance(self.frames, WindowFrameSource):
+            info.update(
+                {f"vision/client_{key}": value for key, value in self.frames.region.items()}
+            )
         return frame
 
     def _observation(self, telemetry: Any, info: dict[str, Any]) -> Any:
+        received = perf_counter()
         images = self._capture(info)
-        return {"telemetry": telemetry, "images": images} if self.include_telemetry else images
+        # A host-side lower bound, not the age of the rendered frame or telemetry packet.
+        info["vision/pairing_delay_ms"] = (perf_counter() - received) * 1000.0
+        if not self.include_telemetry:
+            return images
+        observation = {"telemetry": telemetry, "images": images}
+        if self.include_command_history:
+            observation["previous_command"] = self._previous_command.copy()
+        return observation
 
     def reset(self, *, seed: int | None = None) -> tuple[Any, dict[str, Any]]:
-        telemetry, info = self.environment.reset(seed=seed)
-        return self._observation(telemetry, info), info
+        with self._release_on_pause():
+            prepare = getattr(self.frames, "prepare_episode", None)
+            if callable(prepare):
+                prepare()
+            telemetry, info = self.environment.reset(seed=seed)
+            self._previous_command = np.zeros(3, dtype=np.float32)
+            return self._observation(telemetry, info), info
 
     def step(self, action: Any) -> tuple[Any, float, bool, bool, dict[str, Any]]:
-        telemetry, reward, terminated, truncated, info = self.environment.step(action)
-        return self._observation(telemetry, info), reward, terminated, truncated, info
+        with self._release_on_pause():
+            validate = getattr(self.frames, "validate", None)
+            if callable(validate):
+                validate()
+            telemetry, reward, terminated, truncated, info = self.environment.step(action)
+            if self.include_command_history:
+                if "control/issued_command" not in info:
+                    raise ValueError(
+                        "issued command history requires the controller boundary report"
+                    )
+                self._previous_command = np.asarray(
+                    info["control/issued_command"], dtype=np.float32
+                )
+            return self._observation(telemetry, info), reward, terminated, truncated, info
+
+    @contextmanager
+    def _release_on_pause(self) -> Iterator[None]:
+        try:
+            yield
+        except EnvironmentPausedError:
+            self.environment.controller.apply(np.zeros(3, dtype=np.float32))
+            raise
 
     def close(self) -> None:
         try:
@@ -91,22 +140,88 @@ class VisionEnvironmentFactory:
         config: TrackmaniaEnvironmentConfig | dict[str, Any],
         *,
         capture: CaptureRegion | Mapping[str, Any] | None = None,
+        window_capture: WindowCaptureConfig | Mapping[str, Any] | None = None,
         include_telemetry: bool = False,
+        include_command_history: bool = False,
         base_dir: str | Path = ".",
     ) -> None:
+        if include_command_history and not include_telemetry:
+            raise ValueError("issued command history requires include_telemetry")
+        if capture is not None and window_capture is not None:
+            raise ValueError("Choose capture or window_capture, not both")
         self._factory = OpenPlanetEnvironmentFactory(config, base_dir=base_dir)
         self.config = self._factory.config
         self.capture = CaptureRegion.model_validate({} if capture is None else capture)
+        self.window_capture = (
+            None if window_capture is None else WindowCaptureConfig.model_validate(window_capture)
+        )
         self.include_telemetry = include_telemetry
+        self.include_command_history = include_command_history
 
     def create(self, *, seed: int, evaluation_map: Any | None = None) -> VisionEnvironment:
-        frames = ScreenFrameSource(self.capture)
+        frames = (
+            ScreenFrameSource(self.capture)
+            if self.window_capture is None
+            else WindowFrameSource(self.window_capture)
+        )
         try:
             environment = self._factory.create(seed=seed, evaluation_map=evaluation_map)
         except BaseException:
             frames.close()
             raise
-        return VisionEnvironment(environment, frames, include_telemetry=self.include_telemetry)
+        return VisionEnvironment(
+            environment,
+            frames,
+            include_telemetry=self.include_telemetry,
+            include_command_history=self.include_command_history,
+        )
 
     def load_demonstration(self, path: str | Path, pipeline: FeaturePipeline) -> list[Transition]:
-        raise ValueError("Telemetry-only demonstrations have no RGB frames for vision training")
+        from trackmaniarl.trackmania.driving_replay import (
+            DrivingReplayContext,
+            driving_demonstration_transitions,
+        )
+
+        if not self.include_telemetry:
+            raise ValueError("camera/control demonstrations require include_telemetry")
+        if self.window_capture is not None:
+            raise ValueError("v1 fixed-crop demonstrations are incompatible with window_capture")
+        return driving_demonstration_transitions(
+            path, DrivingReplayContext(self.config, self.capture.model_dump(), pipeline)
+        )
+
+
+class WindowFrameSource(ScreenFrameSource):
+    """Capture the client area; reject geometry changes during an individual grab."""
+
+    def __init__(self, config: WindowCaptureConfig) -> None:
+        self._window = WindowsClientCapture(config)
+        super().__init__(CaptureRegion(width=config.client_width, height=config.client_height))
+
+    @property
+    def region(self) -> dict[str, int]:
+        return dict(self._region)
+
+    def prepare_episode(self) -> None:
+        self._region = self._window.prepare_episode()
+
+    def validate(self) -> None:
+        self._region = self._window.bounds()
+
+    def capture(self) -> np.ndarray[Any, Any]:
+        from trackmaniarl.trackmania.window_capture import (
+            CaptureWindowError,
+            CaptureWindowUnavailableError,
+        )
+
+        with self._window.physical_pixels():
+            self.validate()
+            region = self.region
+            result = super().capture()
+            if self._window.bounds() != region:
+                raise CaptureWindowUnavailableError(
+                    "Window moved during frame capture; frame discarded"
+                )
+        if result.shape[:2] != (region["height"], region["width"]):
+            raise CaptureWindowError("Captured frame dimensions differ from the game client")
+        return result

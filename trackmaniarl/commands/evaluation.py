@@ -14,7 +14,7 @@ from typing import Any, cast
 import numpy as np
 
 from trackmaniarl.commands.helpers import _training_learner_state
-from trackmaniarl.core.runtime import ResolvedRun, resolve_run
+from trackmaniarl.core.runtime import ResolvedRun, prepare_run, record_run_attempt, resolve_run
 from trackmaniarl.core.spec import EvaluationSuiteSpec, RunSpec
 from trackmaniarl.trackmania.recording import RecordingOptions, record_window
 
@@ -41,6 +41,9 @@ class _BenchmarkGate:
 
 
 def _benchmark(args: argparse.Namespace) -> None:
+    stop_file = getattr(args, "stop_file", None)
+    if stop_file is not None and stop_file.exists():
+        raise ValueError(f"Stop file already exists; remove it before starting: {stop_file}")
     spec, evaluation = _benchmark_spec(args)
     run = resolve_run(spec, base_dir=Path(args.config).parent)
     recording = (
@@ -49,6 +52,8 @@ def _benchmark(args: argparse.Namespace) -> None:
         else None
     )
     try:
+        if stop_file is not None:
+            _configure_evaluation_stop(run, stop_file.resolve())
         with record_window(recording):
             trials, metrics, checkpoint = _evaluate_checkpoint(run, args.checkpoint)
     finally:
@@ -57,6 +62,13 @@ def _benchmark(args: argparse.Namespace) -> None:
     _validate_benchmark_artifact(artifact)
     _print_benchmark_report(trials, metrics)
     _apply_benchmark_gate(trials, metrics, evaluation)
+
+
+def _configure_evaluation_stop(run: ResolvedRun, stop_file: Path) -> None:
+    set_stop_requested = getattr(run.evaluator, "set_stop_requested", None)
+    if not callable(set_stop_requested):
+        raise ValueError("This evaluator does not support --stop-file cancellation")
+    set_stop_requested(stop_file.exists)
 
 
 def _benchmark_spec(args: argparse.Namespace) -> tuple[RunSpec, EvaluationSuiteSpec]:
@@ -97,13 +109,18 @@ def _evaluate_checkpoint(
 ) -> tuple[list[dict[str, Any]], dict[str, float], str | None]:
     if run.evaluator is None:
         raise ValueError("benchmark requires components.evaluator")
+    prepare_run(run)
     _load_checkpoint(run, checkpoint_path)
+    record_run_attempt(run)
     metrics = dict(run.evaluator.evaluate(run.learner.policy()))
     artifact = _load_evaluation_artifact(run.run_dir)
     return _artifact_trials(artifact), metrics, _artifact_checkpoint(artifact)
 
 
 def _load_checkpoint(run: ResolvedRun, checkpoint_path: Path) -> None:
+    set_checkpoint = getattr(run.evaluator, "set_checkpoint", None)
+    if callable(set_checkpoint):
+        set_checkpoint(checkpoint_path)
     run.learner.setup(
         {
             "seed": run.spec.seed,
@@ -119,9 +136,6 @@ def _load_checkpoint(run: ResolvedRun, checkpoint_path: Path) -> None:
         load_policy_state(learner_state)
     else:
         run.learner.load_state_dict(learner_state)
-    set_checkpoint = getattr(run.evaluator, "set_checkpoint", None)
-    if callable(set_checkpoint):
-        set_checkpoint(checkpoint_path)
 
 
 def _load_evaluation_artifact(run_dir: Path) -> dict[str, Any]:

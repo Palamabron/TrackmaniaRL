@@ -83,6 +83,7 @@ def _sample_fallback(
 
 
 def _sample_locked(context: _FallbackContext) -> _FallbackResult:
+    context.sampler._bind_store(context.store)
     transition_ids = _eligible_n_step_ids(context.store, context.request)
     _validate_replay_size(transition_ids, context.request.batch_size)
     context.sampler._synchronize_fallback(transition_ids)
