@@ -74,6 +74,7 @@ class TrainingSpec(BaseModel):
     max_episode_steps: PositiveInt = 2_000
     batch_size: PositiveInt = 256
     sequence_length: PositiveInt = 1
+    reset_after_on_policy_rollout: bool = False
     n_step: PositiveInt = 1
     gamma: float = Field(default=0.99, ge=0.0, le=1.0)
     beta: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -164,6 +165,7 @@ class DistributedSpec(BaseModel):
     soft_policy_lag_updates: PositiveInt = 1_000
     hard_policy_lag_updates: PositiveInt = 5_000
     max_update_credit: PositiveInt = 512
+    strict_update_budget: bool = False
     epsilon_profiles: tuple[float, ...] = (1.0, 0.4, 0.1, 0.02)
     epsilon_start: float = Field(default=0.5, ge=0.0, le=1.0)
     epsilon_final: float = Field(default=0.05, ge=0.0, le=1.0)

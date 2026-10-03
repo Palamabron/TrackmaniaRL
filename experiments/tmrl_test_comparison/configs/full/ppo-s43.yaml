@@ -9,6 +9,7 @@ components:
       execution:
         device: cuda
         precision: float32
+        torch_threads: 2
       normalize_observations: false
       normalize_rewards: false
       update_epochs: 10
@@ -54,6 +55,7 @@ components:
         time_attack_linear_scale: 2
         pace_reward_scale: 0
         reward_gamma: 0.995
+        steering_curve_path: ../../../../artifacts/tmrl-test-comparison/steering-local.json
   model_factory:
     class_path: trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory
     kwargs:
@@ -114,6 +116,7 @@ training:
   save_final_checkpoint: true
   metrics_interval_updates: 100
   evaluate_every_episodes: null
+  reset_after_on_policy_rollout: true
 distributed:
   epsilon_profiles:
   - 1.0
@@ -124,6 +127,8 @@ distributed:
     device: cpu
     precision: float32
     torch_threads: 2
+  strict_update_budget: true
+  max_update_credit: 512
 evaluation:
   name: tmrl-test-comparison
   version: '1'

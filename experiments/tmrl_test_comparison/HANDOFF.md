@@ -42,6 +42,10 @@ cd TrackmaniaRL
    Wynik musi być `True` dla tych konfiguracji.
 7. Sprawdź połączenie: `uv run trackmaniarl track check` oraz test bez gry:
    `uv run python -m experiments.tmrl_test_comparison.check`.
+8. Bez działającego treningu, na załadowanej mapie zmierz lokalne sterowanie:
+   `uv run trackmaniarl track check-steering --output artifacts/tmrl-test-comparison/steering-local.json`.
+   Konfiguracje wymagają tego pliku. Nie kopiuj krzywej innej osoby; po zmianie
+   ustawień kontrolera zmierz ją ponownie. Patrz [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
 
 Po pozytywnym lokalnym pilocie przypisanego algorytmu uruchom **jedno** polecenie:
 

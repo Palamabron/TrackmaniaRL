@@ -1,5 +1,8 @@
 # Decyzja przed pełnymi treningami — 2026-10-03
 
+**Aktualizacja:** poniżej zachowano pierwotną ocenę. Poprawki i nocny plan v2 są
+w [NIGHT_QUEUE.md](NIGHT_QUEUE.md); stan wdrożenia opisany tam jest nowszy.
+
 Planowany start: 2026-10-04, po spełnieniu warunków poniżej.
 To ocena gotowości, nie zatwierdzenie wszystkich algorytmów.
 

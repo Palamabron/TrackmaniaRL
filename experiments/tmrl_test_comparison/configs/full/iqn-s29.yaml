@@ -15,6 +15,7 @@ components:
       execution:
         device: cuda
         precision: float32
+        torch_threads: 2
   environment:
     class_path: trackmaniarl.trackmania.environment:OpenPlanetEnvironmentFactory
     kwargs:
@@ -56,6 +57,7 @@ components:
         time_attack_linear_scale: 2
         pace_reward_scale: 0
         reward_gamma: 0.995
+        steering_curve_path: ../../../../artifacts/tmrl-test-comparison/steering-local.json
   model_factory:
     class_path: trackmaniarl.models.factory:CompositeValueModelFactory
     kwargs:
@@ -133,6 +135,8 @@ distributed:
     device: cpu
     precision: float32
     torch_threads: 2
+  strict_update_budget: true
+  max_update_credit: 512
 evaluation:
   name: tmrl-test-comparison
   version: '1'

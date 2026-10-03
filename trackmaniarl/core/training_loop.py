@@ -116,6 +116,7 @@ def _start_on_policy_collection(trainer: Trainer, session: _TrainingSession) -> 
             training.max_episode_steps,
             trainer.run.spec.seed,
             session.counters.next_episode_index,
+            reset_at_rollout_end=training.reset_after_on_policy_rollout,
         ),
     )
 
@@ -135,10 +136,13 @@ def _execute_session(trainer: Trainer, session: _TrainingSession) -> TrainingRes
 
 def _run_to_completion(trainer: Trainer, session: _TrainingSession) -> TrainingResult:
     total = trainer.run.spec.training.total_transitions
-    while session.counters.transitions < total:
+    while session.counters.transitions < total and not trainer.stop_requested():
         _training_cycle(trainer, session)
     _save_final_checkpoint(trainer, session)
-    _run_final_evaluation(trainer, session)
+    if trainer.stop_requested():
+        trainer._log("train/stopped", {"reason": "stop_file"}, session.counters)
+    else:
+        _run_final_evaluation(trainer, session)
     counters = session.counters
     print(
         f"Training finished: transitions={counters.transitions}, "

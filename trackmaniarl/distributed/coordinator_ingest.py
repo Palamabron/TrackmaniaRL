@@ -121,10 +121,14 @@ def _append_transitions(batch: _IngestBatch) -> None:
 def _credit_updates(coordinator: Coordinator, before: int) -> None:
     ready = coordinator.run.spec.training.warmup_transitions
     newly_trainable = max(0, coordinator.counters.transitions - ready) - max(0, before - ready)
-    coordinator.counters.update_credit = min(
-        coordinator.run.spec.distributed.max_update_credit,
-        coordinator.counters.update_credit
-        + newly_trainable * coordinator.run.spec.training.updates_per_transition,
+    credit = coordinator.counters.update_credit + (
+        newly_trainable * coordinator.run.spec.training.updates_per_transition
+    )
+    config = coordinator.run.spec.distributed
+    # Strict runs preserve every update; max_update_credit becomes the threshold
+    # for actor backpressure at episode boundaries, not a lossy accumulator cap.
+    coordinator.counters.update_credit = (
+        credit if config.strict_update_budget else min(config.max_update_credit, credit)
     )
 
 

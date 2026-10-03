@@ -9,6 +9,7 @@ components:
       execution:
         device: cuda
         precision: float32
+        torch_threads: 2
       target_entropy: 3.4853670613516736
   environment:
     class_path: trackmaniarl.trackmania.environment:OpenPlanetEnvironmentFactory
@@ -51,6 +52,7 @@ components:
         time_attack_linear_scale: 2
         pace_reward_scale: 0
         reward_gamma: 0.995
+        steering_curve_path: ../../../../artifacts/tmrl-test-comparison/steering-local.json
   model_factory:
     class_path: trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory
     kwargs:
@@ -93,9 +95,7 @@ components:
   checkpoint_codec:
     class_path: trackmaniarl.core.builtins:TorchCheckpointCodec
     kwargs: {}
-  evaluator:
-    class_path: trackmaniarl.trackmania.evaluation:TrackmaniaEvaluator
-    kwargs: {}
+  evaluator: null
 training:
   total_transitions: 145408
   max_episode_steps: 3000
@@ -121,6 +121,8 @@ distributed:
     device: cpu
     precision: float32
     torch_threads: 2
+  strict_update_budget: true
+  max_update_credit: 512
 evaluation:
   name: tmrl-test-comparison
   version: '1'
@@ -154,4 +156,4 @@ metadata:
   group: discrete-78
   encoder_source: V107I/V108 incident-gated GNN Simba V6
   protocol: experiments/tmrl_test_comparison/README.md
-  hypothesis: Lower target entropy; unvalidated candidate, not the full-run configuration.
+  hypothesis: Lower target entropy; candidate requiring real-game validation.

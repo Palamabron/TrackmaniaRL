@@ -66,6 +66,10 @@ class _MapContext:
 
 
 class OpenPlanetEnvironment:
+    def release_controls(self) -> None:
+        """Release input while the actor waits between completed episodes."""
+        self.controller.apply(np.zeros(3, dtype=np.float32))
+
     def __init__(
         self,
         config: TrackmaniaEnvironmentConfig,
@@ -275,7 +279,12 @@ def _resolve_environment_paths(
     config: TrackmaniaEnvironmentConfig, base_dir: Path
 ) -> TrackmaniaEnvironmentConfig:
     resolved = config
-    for name in ("geometry_path", "reward_points_path", "pace_reference_path", "steering_curve_path"):
+    for name in (
+        "geometry_path",
+        "reward_points_path",
+        "pace_reference_path",
+        "steering_curve_path",
+    ):
         path = getattr(resolved, name)
         if path is not None and not path.is_absolute():
             resolved = resolved.model_copy(update={name: (base_dir / path).resolve()})

@@ -217,6 +217,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "loss/critic": float(update.critic.loss.item()),
             "loss/entropy": float(update.alpha_loss.item()),
             "state/alpha": float(update.alpha.item()),
+            "policy/entropy": float(update.actor.entropy.detach().mean().item()),
         }
         td_errors = (0.5 * (update.critic.q1 + update.critic.q2) - update.critic.targets).abs()
         return metrics, PriorityUpdate(

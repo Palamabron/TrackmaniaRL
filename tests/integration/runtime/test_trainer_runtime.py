@@ -124,6 +124,29 @@ def test_local_trainer_updates_ppo_once_per_fresh_episode(tmp_path: Path) -> Non
     assert result.updates == 2
 
 
+def test_ppo_stop_file_finishes_rollout_and_saves_checkpoint(tmp_path: Path) -> None:
+    run = resolve_run(_ppo_spec(tmp_path))
+    stop = tmp_path / "STOP"
+    original_update = run.learner.update
+
+    def update(batch: Any) -> Any:
+        result = original_update(batch)
+        stop.touch()
+        return result
+
+    run.learner.update = update
+    try:
+        result = Trainer(run, stop_file=stop).train()
+        assert result.transitions == 2
+        assert result.updates == 1
+        assert result.checkpoints[-1].is_file()
+        state = run.checkpoint_codec.load(result.checkpoints[-1])
+        assert state["counters"]["transitions"] == 2
+        assert "train/stopped" in _event_names(run.run_dir)
+    finally:
+        run.logger.close()
+
+
 def test_trainer_collects_updates_and_checkpoints(tmp_path: Path) -> None:
     spec = _trainer_spec(tmp_path, _CHECKPOINT_TRAINING, _FAKE_ENVIRONMENT)
     learner = _ManifestAwareSmokeLearner()
