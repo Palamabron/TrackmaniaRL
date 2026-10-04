@@ -13,7 +13,11 @@ protokołem. Discrete SAC bez kary entropii zakończył pełny pilot, lecz ewalu
 dała 0/3 ukończeń (postęp 78,9%, 5,4%, 5,4%). **Borys: pełne treningi jeszcze
 nie są gotowe do startu.** Przygotowano osobny, nieuruchomiony test celu
 entropii 2,0; instrukcję i ograniczenia opisuje READINESS.md.
-TQC i PPO muszą jeszcze przejść ocenę pilotów. Aktualny plan
+**Kamil / TQC: pilot v2 zakończony pozytywnie**, 145 433 kroki, 71/181 met
+w treningu i 2/2 w krótkiej ewaluacji (45,24 s; 44,06 s). Hiperparametry
+pozostają bez zmian; przed pełnym startem wymagany lokalny test i kalibracja.
+PPO po błędzie startu z ekranu wyniku ma jawną nową próbę; pierwszy rollout
+i aktualizacja działają. Jego kwalifikacja jeszcze trwa. Aktualny plan
 i ograniczenia opisuje [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
 Restarty, obliczenia i aktualizacje PPO wydłużą czas. Pełnych treningów nie
 uruchamiamy automatycznie po pilotach. Przed przekazaniem do długich prób
@@ -51,6 +55,11 @@ cd TrackmaniaRL
    `uv run trackmaniarl track check-steering --output artifacts/tmrl-test-comparison/steering-local.json`.
    Konfiguracje wymagają tego pliku. Nie kopiuj krzywej innej osoby; po zmianie
    ustawień kontrolera zmierz ją ponownie. Patrz [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
+
+Launcher przed każdym seedem sprawdza UID, restartuje walidację i wymaga
+gotowego gracza oraz telemetrii. Kończy ten kontroler przed startem treningu;
+nie uruchamiaj go obok innej jazdy. Chroni to przed brakiem ramek na ekranie
+wyniku poprzedniego seeda. Błąd sprawdzenia zatrzymuje kolejkę.
 
 Po pozytywnym lokalnym pilocie przypisanego algorytmu uruchom **jedno** polecenie:
 

@@ -1,9 +1,48 @@
 # Decyzja przed pełnymi treningami
 
+## Wynik TQC i wznowienie kolejki — 2026-10-04, około 06:45
+
+**Kamil / TQC: pilot v2 przeszedł; pozostawić hiperparametry.** Trening zakończył
+145 433 kroki i 33 858 aktualizacji. W checkpointcie końcowym zachowano kredyt
+0,25 (ułamek następnej aktualizacji, nie zaległa pełna aktualizacja); wszystkie
+sprawdzone tensory są skończone. W treningu 71/181 ukończeń, ostatnie 20/20,
+najlepszy czas 43,84 s. Trening i ewaluacja mają stan `finished` w W&B.
+
+Dwa przejazdy bez eksploracji: **45,24 s i 44,06 s**, średnia 44,65 s,
+2/2 ukończeń. Brak błędów telemetryki lub kontrolera, maksymalny odstęp
+zegara wyścigu 50 ms. Liczniki pominiętych ramek: 98 i 107, maksimum 3.
+To pozytywny pilot techniczny i podstawa do pełnych prób po lokalnym teście
+oraz kalibracji Kamila; dwa przejazdy nie zastępują końcowych 30 prób na seed.
+Nie wnioskujemy o przewadze nad IQN/QR: inny rodzaj akcji i tylko jeden seed.
+Konfiguracje pełne TQC dla seedów 17/29/43 pozostają zgodne z pilotem.
+
+[Trening TQC](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/zhp8bg94),
+[ewaluacja TQC](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/y4ug6zb6).
+
+PPO po ewaluacji TQC zatrzymał się przy pierwszym resecie: ekran końca
+walidacji nie wysyłał ramek, a reset próbował je odczytać przed restartem.
+Nie wykonano aktualizacji ani nie zapisano checkpointu; nie jest to wynik
+pilota PPO. Log i nieudaną próbę `4g67pfqd` zachowano. Przywrócono gotową mapę
+i rozpoczęto jawną nową próbę `tmrl-test-v2-ppo-retry-s17` (W&B `6mmbtw48`).
+Pierwszy rollout 2048 kroków i aktualizacja mają skończone straty oraz KL.
+
+Nowy zewnętrzny runner wykonuje przed każdym procesem kontrolę UID,
+restart walidacji i potwierdzenie gotowości **przed pierwszym odczytem ramek**.
+Kontroler tego sprawdzenia jest zamykany przed uruchomieniem treningu.
+Taką samą ochronę ma launcher `run_assigned.ps1` między pełnymi seedami.
+To obejście w launcherze; źródła biblioteki i encodera pozostają zamrożone
+na `378f9c6a`. Bezpośrednie `trackmaniarl train` z ekranu wyniku nadal wymaga
+wcześniejszego powrotu do aktywnej walidacji. Poprawkę samego resetu należy
+kwalifikować osobno; nie zmieniać kodu w działającym checkoutcie.
+
+Pozostała kolejka: PPO → ewaluacja → IQN → ewaluacja → QR → ewaluacja.
+Każdy pilot ma limit 2 h 15 min i budżet 145 408; zapis graniczny o 13:50.
+DSAC pozostaje niegotowy. To nadal częściowy raport całej kampanii.
+
 ## Wynik DSAC v2 — 2026-10-04, około 04:35
 
-To częściowa aktualizacja gotowości. Nocna kolejka nadal wykonuje TQC, PPO,
-IQN i QR; ich kwalifikacja v2 nie jest jeszcze zakończona.
+To częściowa aktualizacja gotowości. W momencie tej oceny TQC, PPO,
+IQN i QR oczekiwały na zakończenie; nowszy stan jest opisany powyżej.
 
 **Borys / discrete SAC: nie uruchamiać jeszcze pełnych treningów.**
 Wariant `tmrl-test-v2-dsac080-beta000-s17` zakończył 145 412 kroków i wszystkie

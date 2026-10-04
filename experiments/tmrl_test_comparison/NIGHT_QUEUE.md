@@ -1,5 +1,22 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Aktualizacja — około 06:45
+
+TQC zakończył pełny pilot: 145 433 kroki, 33 858 aktualizacji, kredyt 0,25,
+71/181 ukończeń i ostatnie 20/20. Ewaluacja 2/2: 45,24 s oraz 44,06 s.
+Checkpoint oraz W&B sprawdzone; hiperparametry pozostają bez zmian.
+Szczegóły i ograniczenia w [READINESS.md](READINESS.md).
+
+PPO zatrzymał się przed pierwszą aktualizacją na ekranie wyniku walidacji,
+bez telemetrii. Dowody zachowano w poprzedniej kolejce. Aktualny wskaźnik
+prowadzi do `queue-overnight-ppo-recovery-20261004`; pozostało PPO, IQN i QR
+z ewaluacjami. PPO używa jawnego nowego ID `tmrl-test-v2-ppo-retry-s17`.
+Pierwsze 2048 kroków i aktualizacja przeszły poprawnie. Runner przed każdym
+procesem restartuje walidację przed odczytem ramek i zamyka swój kontroler.
+To naprawa startu kolejki; zamrożonych plików `.py` nie zmieniono.
+Limit nadal 2 h 15 min/pilot, zapis najpóźniej 13:50 Europe/Warsaw.
+Ukończonych DSAC i TQC nie powtarzamy.
+
 ## Wynik pierwszego etapu — około 04:35
 
 DSAC080 bez kary entropii zakończył 145 412 kroków i 33 853 aktualizacje,
@@ -46,7 +63,8 @@ model i budżet. Próba z celem 0,98 została odroczona. Konfiguracja przenośna
 Ustawień pełnego DSAC nie zmieniono przed uzyskaniem wyników rzeczywistego pilota.
 
 Aktualną kolejkę wskazuje `artifacts/tmrl-test-comparison/active-queue.json`
-w głównym repozytorium Jakuba. Jest to `queue-overnight-dsac-ab-20261004`;
+w głównym repozytorium Jakuba. Plan po audycie używał `queue-overnight-dsac-ab-20261004`;
+po awarii startu PPO zastąpiła go kolejka odzyskiwania opisana wyżej;
 jej zewnętrzny `runner.py` i konfiguracje zachowują zamrożone źródła pakietów.
 Każdy pilot ma limit 2 h 15 min. Runner rozpoczyna zapis najpóźniej o 13:50
 Europe/Warsaw, pozostawiając do 10 minut na zamknięcie przed 14:00.
