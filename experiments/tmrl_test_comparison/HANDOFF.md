@@ -9,9 +9,11 @@
 
 Aktualna decyzja przed pełnym startem: [READINESS.md](READINESS.md).
 IQN i QR zakończyły wcześniejsze piloty; nocna kolejka v2 powtarza je z nowym
-protokołem. Discrete SAC wymaga kwalifikacji: po audycie uruchomiono próbę
-bez kary entropii, a kontrolna ewaluacja dotychczasowego checkpointu dała
-0/2 ukończeń. TQC i PPO muszą jeszcze przejść ocenę pilotów. Aktualny plan
+protokołem. Discrete SAC bez kary entropii zakończył pełny pilot, lecz ewaluacja
+dała 0/3 ukończeń (postęp 78,9%, 5,4%, 5,4%). **Borys: pełne treningi jeszcze
+nie są gotowe do startu.** Przygotowano osobny, nieuruchomiony test celu
+entropii 2,0; instrukcję i ograniczenia opisuje READINESS.md.
+TQC i PPO muszą jeszcze przejść ocenę pilotów. Aktualny plan
 i ograniczenia opisuje [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
 Restarty, obliczenia i aktualizacje PPO wydłużą czas. Pełnych treningów nie
 uruchamiamy automatycznie po pilotach. Przed przekazaniem do długich prób

@@ -1,5 +1,16 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Wynik pierwszego etapu — około 04:35
+
+DSAC080 bez kary entropii zakończył 145 412 kroków i 33 853 aktualizacje,
+z zerowym zaległym kredytem. W treningu 0/246 ukończeń, maksymalny postęp
+62,9%. Ewaluacja końcowego checkpointu: 0/3 ukończeń, postęp 78,9%, 5,4%,
+5,4%. Entropia zbliżyła się do celu, lecz konfiguracja nie zapewniła stabilnej
+jazdy i **nie jest zakwalifikowana do pełnych treningów**. Szczegóły oraz
+następny, nieuruchomiony pilot celu entropii 2,0 są w [READINESS.md](READINESS.md).
+TQC wystartował o 04:10 Europe/Warsaw; kolejka dalej wykonuje pierwotne
+pozostałe etapy. To wynik częściowy, nie końcowy raport całej kampanii.
+
 ## Aktualizacja po audycie DSAC — 4 października, około 02:00
 
 Aktualny plan zastępuje kolejność opisaną niżej. Po zgodzie Jakuba zapisano

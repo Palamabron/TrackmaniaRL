@@ -1,4 +1,41 @@
-# Decyzja przed pełnymi treningami — 2026-10-03
+# Decyzja przed pełnymi treningami
+
+## Wynik DSAC v2 — 2026-10-04, około 04:35
+
+To częściowa aktualizacja gotowości. Nocna kolejka nadal wykonuje TQC, PPO,
+IQN i QR; ich kwalifikacja v2 nie jest jeszcze zakończona.
+
+**Borys / discrete SAC: nie uruchamiać jeszcze pełnych treningów.**
+Wariant `tmrl-test-v2-dsac080-beta000-s17` zakończył 145 412 kroków i wszystkie
+33 853 należne aktualizacje, z zerowym zaległym kredytem. Checkpoint końcowy
+`distributed-update-00033853.pt` zawiera skończone parametry. Trening i ewaluacja
+zakończyły się poprawnie i zostały zsynchronizowane z W&B.
+
+W treningu: 0/246 ukończeń, maksymalny postęp 62,9%. W trzech przejazdach
+deterministycznych: 0/3 ukończeń, postęp 78,9%, 5,4% i 5,4%. Brak błędów
+telemetryki lub kontrolera, odstępy decyzji do 50 ms. Liczniki pominiętych
+ramek telemetryki były niezerowe; nie oznacza to braku takich pominięć.
+Wynik jest niestabilny i nie kwalifikuje konfiguracji do długich prób.
+
+Wyłączenie kary entropii usuwa wykryte hamowanie wyostrzania polityki:
+przy zbliżonych 77,6 tys. kroków entropia wyniosła około 3,55 zamiast 4,14.
+Nie dowodzi to poprawy wyniku przy wspólnym budżecie. Przy limicie 100 009
+kroków obie próby miały zero ukończeń, a maksymalny treningowy postęp wyniósł
+46,3% dla kontroli i 41,1% bez kary. Końcowe ewaluacje używały różnych budżetów
+treningowych i małej liczby przejazdów; nie ogłaszać przewagi algorytmu lub wariantu.
+
+Następna hipoteza do sprawdzenia: pozostawić karę wyłączoną i obniżyć cel
+entropii do **2,0 nats**, zachowując 78 akcji, nagrodę, model, seed, lr i UTD.
+Przygotowano `configs/diagnostic/discrete-sac-entropy200-beta000-s17.yaml`.
+To osobny pilot od zera na 145 408 kroków, z limitem 2–3 godzin i późniejszą
+ewaluacją bez losowania akcji. W tej kolejce nie uruchamia się go automatycznie:
+pozostały czas należy do TQC/PPO/IQN/QR. Wartość 2,0 nie jest sprawdzonym
+ustawieniem końcowym i nie zastępuje konfiguracji trzech pełnych seedów.
+
+[Trening DSAC](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/1sukqoq3),
+[krótka ewaluacja](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/rz8xioh9).
+
+## Pierwotna ocena — 2026-10-03
 
 **Aktualizacja:** poniżej zachowano pierwotną ocenę. Poprawki i nocny plan v2 są
 w [NIGHT_QUEUE.md](NIGHT_QUEUE.md); stan wdrożenia opisany tam jest nowszy.
