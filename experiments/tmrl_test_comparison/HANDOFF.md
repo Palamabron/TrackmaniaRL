@@ -1,5 +1,14 @@
 # Podział eksperymentów
 
+## Wynik QR — 2026-10-04, około 13:30
+
+**Jakub / QR: pozytywny pilot**, 145 425 kroków, 53/174 met treningowych,
+krótka ewaluacja 2/2 (57,07 s; 56,81 s). Baseline bez zmian. Pełne próby
+po lokalnym teście nowego wspólnego kodu; docelowo 30 ewaluacji na seed.
+IQN 1/2 w krótkiej ewaluacji nadal wymaga uwagi co do stabilności.
+Continuous SAC teraz trenuje, W&B `dx93ox8g`; jego pełny start nadal
+zablokowany do oceny. Szczegóły: [READINESS.md](READINESS.md).
+
 ## Stan pilotów — około 11:25, 2026-10-04
 
 IQN v2 ukończony: 145 418 kroków, 33 854 aktualizacje, 55/200 met treningowych.

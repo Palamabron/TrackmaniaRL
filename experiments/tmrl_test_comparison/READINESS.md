@@ -1,5 +1,29 @@
 # Decyzja przed pełnymi treningami
 
+## Wynik QR i start SAC — 2026-10-04, około 13:30
+
+**QR: pozytywny pilot techniczny; pozostawić hiperparametry baseline.**
+145 425 kroków, 33 856 aktualizacji, kredyt 0,25; checkpoint
+`distributed-update-00033856.pt`, wszystkie 1140 sprawdzonych tensorów
+zmiennoprzecinkowych skończone. Trening 53/174 met, ostatnie 19/20,
+najlepszy czas 60,74 s. Ewaluacja bez eksploracji **2/2: 57,07 s i 56,81 s**,
+średnia 56,94 s. Oba pomiary odstępów ważne, maksimum i p99 50 ms,
+błędy telemetrii/kontrolera null. Pominięte ramki 170 i 115, maksimum 3 i 2.
+W&B `3gboyqdh` i `lc12mynj` mają stan `finished`.
+
+To kandydat do pełnych prób Jakuba po lokalnym teście nowego wspólnego kodu.
+Dwa przejazdy nie zastępują 30 prób na seed i nie dowodzą przewagi QR nad
+IQN. IQN miał 1/2 met, ukończony przejazd 49,90 s; szybkość i ukończenia
+trzeba raportować razem, bez rankingu algorytmów na jednym seedzie.
+
+Continuous SAC wystartował 13:30:47 Europe/Warsaw, W&B `dx93ox8g` online;
+po jego pilocie kolejka wykonuje dwa przejazdy ewaluacyjne. SAC pozostaje
+zablokowany w pełnym launcherze do oceny wyniku. DSAC nadal zablokowany.
+Dowody QR: `queue-status-recovery-20261004/qr-result.json` i wskazany tam
+`evaluation.json`. To częściowy raport: kampania oraz monitor nadal trwają
+z granicą zapisu 16:05 i zakończeniem 16:15. Test poprawionego resetu nowego
+kodu w grze czeka na zakończenie SAC i brak procesów sterujących grą.
+
 ## Aktualizacja — 2026-10-04, około 11:25
 
 IQN ukończył 145 418 kroków i 33 854 aktualizacje, zachowując kredyt 0,5.
@@ -61,7 +85,7 @@ poprawki zmieniają fingerprint. Zachowany checkout pilotów służy do ich
 dalszej ewaluacji i ewentualnego wznowienia bez obchodzenia tej kontroli.
 
 To częściowa gotowość: TQC i PPO mają pozytywne piloty, DSAC jest zablokowany,
-IQN ma wynik częściowy 1/2 w ewaluacji; QR/SAC oczekują na wyniki. Termin kampanii 16:15.
+IQN ma wynik częściowy 1/2, QR pozytywny pilot 2/2; SAC jeszcze trenuje. Termin kampanii 16:15.
 
 ## Aktualizacja — 2026-10-04, około 09:20
 

@@ -1,5 +1,15 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Przejście do SAC — około 13:30
+
+QR ukończył 145 425 kroków i 33 856 aktualizacji, kredyt 0,25. W treningu
+53/174 met, ostatnie 19/20; końcowa ewaluacja 2/2: 57,07 s i 56,81 s.
+Checkpoint oraz W&B sprawdzone. Continuous SAC ruszył 13:30:47,
+`tmrl-test-v2-sac-s17`, W&B `dx93ox8g`. Pozostał wyłącznie SAC i jego eval;
+runner tej samej `queue-status-recovery-20261004` dalej działa. Nie powtarzać
+ukończonych etapów, nie uruchamiać starego supervisora. Granice 16:05/16:15
+bez zmian; częściowy wynik QR nie wyłącza monitora całej kampanii.
+
 ## Aktualny plan — około 11:25
 
 Po awarii atomowego zapisu statusu Windows stara kolejka nie uruchomiła
