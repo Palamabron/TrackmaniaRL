@@ -1,5 +1,43 @@
 # Decyzja przed pełnymi treningami
 
+## Poprawki przed pełnymi startami — 2026-10-04
+
+Przygotowano poprawki w osobnym checkoutcie `tmrl-training-fixes`:
+
+- Timeout pierwszego odczytu telemetrii środowiska przechodzi przez istniejące
+  odzyskiwanie: zamknięcie połączenia i restart mapy, zamiast kończyć trening.
+  Zachowano kontrolę spadku zegara po restarcie. Launcher dodatkowo uruchamia
+  walidację przed pierwszym odczytem, aby uniknąć oczekiwania na timeout.
+- PPO loguje `train/rollout` oraz `rollout/finished_episodes` w W&B: wszystkie
+  mety z segmentu, rzeczywiste końce epizodów i sztuczne granice osobno.
+  Oś W&B korzysta z łącznej liczby kroków, a nie długości pojedynczego segmentu.
+  Historyczne piloty zachowują swoje stare logi; ich mety rekonstruuje audyt.
+- Launcher blokuje niegotowe pełne DSAC/SAC, drugiego kontrolera i istniejący
+  katalog runu. `-Pilot` dla DSAC wybiera istniejącą hipotezę 2,0 nats / beta 0,
+  a dla pozostałych pojedynczy seed pilota. Pełne runy nie startują automatycznie.
+
+Nagroda i hiperparametry baseline PPO/TQC/IQN/QR/SAC pozostają bez zmian.
+DSAC nadal nie ma wybranego pełnego ustawienia. Wartość 2,0 wymaga jazdy
+i ewaluacji; nie jest przenoszona do konfiguracji trzech pełnych seedów.
+
+Weryfikacja bez sterowania grą: 30 testów resetu, treningu i W&B; 8 testów
+workflowów actor-critic; testy launchera i ochrony istniejącego runu; ruff i mypy.
+Test launchera sprawdza blokadę obu niegotowych algorytmów oraz zajętej gry.
+36 konfiguracji i pliki map przeszły kontrolę schematu; wszystkie 9 algorytmów
+z manifestu przeszło syntetyczną aktualizację CPU i zapis/odczyt checkpointu.
+Po zakończeniu kolejki nadal obowiązuje lokalny test jazdy nowego kodu przed
+pełnym startem, szczególnie pomiar timingu PPO. Nie wykonujemy go równolegle.
+
+Nocne piloty i ich ewaluacje nadal używają zamrożonych źródeł `378f9c6a`.
+Ich checkout nie został zaktualizowany. Pełne treningi od zera mają używać
+nowego wspólnego commita z brancha zespołu, w osobnym katalogu; wszyscy muszą
+zapisać jego hash. Starych checkpointów nie wznawiać na nowym kodzie, ponieważ
+poprawki zmieniają fingerprint. Zachowany checkout pilotów służy do ich
+dalszej ewaluacji i ewentualnego wznowienia bez obchodzenia tej kontroli.
+
+To częściowa gotowość: TQC i PPO mają pozytywne piloty, DSAC jest zablokowany,
+IQN/QR/SAC oczekują na wyniki bieżącej kolejki. Termin kampanii 16:15.
+
 ## Aktualizacja — 2026-10-04, około 09:20
 
 PPO ukończył 145 408 kroków i 71 rolloutów / 4280 kroków Adam. Ewaluacja

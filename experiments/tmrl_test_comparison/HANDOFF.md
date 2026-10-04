@@ -8,6 +8,11 @@
 | Kuba P. | PPO | seedy 17, 29, 43 |
 
 Aktualna decyzja przed pełnym startem: [READINESS.md](READINESS.md).
+Launcher blokuje pełne DSAC do czasu pozytywnego testu niższej entropii oraz
+pełne continuous SAC do oceny jego oczekującego pilota. Dla Borysa przygotowano
+wyłącznie test: `run_assigned.ps1 discrete-sac -Pilot` (145 408 kroków, seed 17,
+cel entropii 2,0, kara 0,0). Po nim potrzebna osobna ewaluacja bez eksploracji;
+skrypt nie przechodzi automatycznie do pełnych seedów.
 IQN i QR zakończyły wcześniejsze piloty; nocna kolejka v2 powtarza je z nowym
 protokołem. Discrete SAC bez kary entropii zakończył pełny pilot, lecz ewaluacja
 dała 0/3 ukończeń (postęp 78,9%, 5,4%, 5,4%). **Borys: pełne treningi jeszcze
@@ -63,12 +68,15 @@ Launcher przed każdym seedem sprawdza UID, restartuje walidację i wymaga
 gotowego gracza oraz telemetrii. Kończy ten kontroler przed startem treningu;
 nie uruchamiaj go obok innej jazdy. Chroni to przed brakiem ramek na ekranie
 wyniku poprzedniego seeda. Błąd sprawdzenia zatrzymuje kolejkę.
+Launcher sprawdza także działające procesy treningu i ewaluacji oraz odmawia
+startu, jeśli katalog runu już istnieje. Wznowienie checkpointu wymaga osobnego
+polecenia; ponowne uruchomienie launchera nie nadpisuje istniejącej próby.
+Tryb `-Pilot` uruchamia tylko seed 17 z budżetem pilota, zwykle około 2–3 h
+plus restarty i uczenie; nie ma twardego limitu czasu ściennego.
 
 Po pozytywnym lokalnym pilocie przypisanego algorytmu uruchom **jedno** polecenie:
 
 ```powershell
-# Borys:
-powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 discrete-sac
 # Kamil:
 powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 tqc
 # Kuba P.:
@@ -78,8 +86,8 @@ powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_as
 Każde polecenie wykonuje trzy seedy kolejno, od zera. Nie uruchamiaj dwóch
 algorytmów naraz na jednej instancji gry. IQN i QR u Jakuba mają analogiczne
 polecenia. Bezpieczne zatrzymanie: utwórz plik `artifacts/STOP-NAZWA_ALGORYTMU`.
-Ponowne wykonanie skryptu rozpoczyna nowe próby, a nie wznawia checkpointów.
-Po przerwaniu ustal wznowienie konkretnego seeda zamiast ponownie odpalać całość.
+Ponowne wykonanie skryptu nie wznawia checkpointów i zatrzyma się na istniejącym
+katalogu runu. Po przerwaniu wznów konkretny seed według protokołu.
 
 ## Co zwrócić
 

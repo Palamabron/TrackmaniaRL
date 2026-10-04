@@ -15,7 +15,7 @@ from trackmaniarl.core.collector import (
 )
 from trackmaniarl.core.data import BatchRequest
 from trackmaniarl.core.runtime import prepare_run, record_run_attempt
-from trackmaniarl.core.training_support import TrainingCounters, TrainingResult
+from trackmaniarl.core.training_support import TrainingCounters, TrainingResult, rollout_metrics
 from trackmaniarl.observability.artifacts import AsyncEpisodeWriter
 
 if TYPE_CHECKING:
@@ -206,6 +206,22 @@ def _record_collection(
     session.counters.episodes += result.completed_episodes
     if result.transitions == 0:
         raise RuntimeError("Environment returned an empty episode; refusing to spin forever")
+    if result.artifact.metadata.get("termination") == "fixed_rollout":
+        metrics = rollout_metrics(result)
+        trainer._log(
+            "train/rollout",
+            {"reward": result.total_reward, "transitions": result.transitions, **metrics},
+            session.counters,
+        )
+        print(
+            f"Rollout {session.counters.updates + 1}: "
+            f"finishes={int(metrics['finished_episodes'])}, "
+            f"completed_races={int(metrics['completed_episodes'])}, "
+            f"boundaries={int(metrics['rollout_boundaries'])}; "
+            f"transitions={session.counters.transitions}",
+            flush=True,
+        )
+        return
     trainer._log("train/episode", _episode_log_payload(trainer, result), session.counters)
     if result.completed_episodes:
         _print_episode(trainer, result, session.counters)

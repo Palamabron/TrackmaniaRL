@@ -124,6 +124,17 @@ def test_local_trainer_updates_ppo_once_per_fresh_episode(tmp_path: Path) -> Non
     assert result.updates == 2
 
 
+def test_ppo_logs_segments_without_presenting_them_as_single_races(tmp_path: Path) -> None:
+    run = resolve_run(_ppo_spec(tmp_path))
+    result = _train_and_close(run)
+    events = _event_payloads(run.run_dir)
+    rollouts = [event["payload"] for event in events if event["event"] == "train/rollout"]
+    assert len(rollouts) == result.updates == 2
+    assert all(item["completed_episodes"] == 1 for item in rollouts)
+    assert all(item["rollout_boundaries"] == 0 for item in rollouts)
+    assert "train/episode" not in [event["event"] for event in events]
+
+
 def test_ppo_stop_file_finishes_rollout_and_saves_checkpoint(tmp_path: Path) -> None:
     run = resolve_run(_ppo_spec(tmp_path))
     stop = tmp_path / "STOP"

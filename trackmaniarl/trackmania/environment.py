@@ -170,10 +170,10 @@ class OpenPlanetEnvironment:
         previous_race_time_ms = self._last_race_time_ms
         for attempt in range(2):
             self._confirm_finish_if_needed()
-            if previous_race_time_ms is None:
-                previous_race_time_ms = float(self.client.read().values[3])
-            self.controller.reset()
             try:
+                if previous_race_time_ms is None:
+                    previous_race_time_ms = float(self.client.read().values[3])
+                self.controller.reset()
                 frame = self._wait_for_active_run(previous_race_time_ms)
             except TimeoutError:
                 self._finish_confirmation_pending = True
