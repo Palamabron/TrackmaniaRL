@@ -31,7 +31,7 @@ def test_preflight_refuses_existing_run_before_creating_controller(
         exec(compile(preflight, "comparison-preflight", "exec"), {})
 
 
-def test_comparison_launcher_rejects_unqualified_runs_and_busy_game(tmp_path: Path) -> None:
+def test_comparison_launcher_rejects_unqualified_dsac_and_busy_game(tmp_path: Path) -> None:
     shell = shutil.which("powershell.exe")
     if shell is None:
         pytest.skip("Windows launcher requires PowerShell")
@@ -47,7 +47,7 @@ $tokens = $null; $errors = $null
 $ast = [System.Management.Automation.Language.Parser]::ParseFile(
     $Launcher, [ref]$tokens, [ref]$errors)
 if ($errors.Count) { throw 'Launcher syntax is invalid' }
-foreach ($algorithm in @('discrete-sac', 'sac')) {
+foreach ($algorithm in @('discrete-sac')) {
     $blocked = $false
     try { & $Launcher $algorithm } catch { $blocked = $_.Exception.Message -match 'pelnych|Pelne' }
     if (-not $blocked) { throw "Unqualified algorithm was not blocked: $algorithm" }
@@ -65,6 +65,9 @@ function Get-CimInstance { param($ClassName, $Filter)
 $blocked = $false
 try { Assert-ComparisonIdle } catch { $blocked = $_.Exception.Message -match 'steruje gra' }
 if (-not $blocked) { throw 'Active controller was not blocked' }
+$blocked = $false
+try { & $Launcher sac } catch { $blocked = $_.Exception.Message -match 'steruje gra' }
+if (-not $blocked) { throw 'Qualified SAC must reach the busy-game guard before any controller' }
 Write-Output 'Launcher guards passed without game input'
 """,
         encoding="utf-8",

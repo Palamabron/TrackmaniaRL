@@ -19,7 +19,8 @@ Algorytmy dyskretne (78 akcji): Q, QR, IQN, FQF, discrete SAC.
 Algorytmy ciągłe (gaz, hamulec, skręt): SAC, TQC, REDQ, PPO.
 Wyniki tych dwóch grup pokazujemy osobno: zmienia się też przestrzeń sterowania.
 
-Lokalna kolejka obejmuje IQN, QR, discrete SAC, TQC i PPO. Podział pełnych
+Zakończona lokalna kampania obejmowała IQN, QR, discrete SAC, TQC, PPO i SAC.
+Aktualna gotowość oraz ograniczenia są w `READINESS.md`. Podział pełnych
 treningów i instrukcje dla kolegów są w `HANDOFF.md`.
 Pilot służy wykryciu problemów, sprawdzeniu szybkości i tego, czy pojawia się
 uczenie. Brak mety po 100 tys. kroków nie dowodzi, że algorytm jest słaby.

@@ -8,9 +8,6 @@ $ErrorActionPreference = 'Stop'
 if (-not $Pilot -and $Algorithm -eq 'discrete-sac') {
     throw 'DSAC nie jest gotowy do pelnych treningow. Najpierw pilot celu entropii 2.0 i ewaluacja; patrz READINESS.md. Test: run_assigned.ps1 discrete-sac -Pilot.'
 }
-if (-not $Pilot -and $Algorithm -eq 'sac') {
-    throw 'Continuous SAC czeka na wynik pilota. Pelne treningi wymagaja aktualizacji READINESS.md po ewaluacji.'
-}
 $comparisonRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Set-Location -LiteralPath $comparisonRoot
 $comparisonPython = Join-Path $comparisonRoot '.venv/Scripts/python.exe'

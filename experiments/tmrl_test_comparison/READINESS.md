@@ -1,5 +1,79 @@
 # Decyzja przed pełnymi treningami
 
+## Raport końcowy kampanii — 2026-10-04, 15:41 Europe/Warsaw
+
+**Wszystkie zaplanowane piloty i ich krótkie ewaluacje zakończone.** Nie
+uruchomiono pełnych treningów. Aktualna kolejka `queue-status-recovery-20261004`
+ma stan `queue_completed`; nie powtarzać etapów ani uruchamiać starych runnerów.
+Poniższa tabela i warunki startu zastępują historyczne decyzje dalej w pliku.
+
+| Algorytm / osoba | Trening pilota | Krótka ewaluacja bez eksploracji | Decyzja |
+| --- | --- | --- | --- |
+| TQC / Kamil | 145 433 kroków; 71/181 met; ostatnie 20/20 | 2/2: 45,24 i 44,06 s; średnia 44,65 s | Pozytywny pilot; baseline bez zmian |
+| PPO / Kuba P. | 145 408 kroków; 71 rolloutów, 4280 kroków Adam; 13 met w pełnych śladach | 2/2: 58,27 i 59,13 s; średnia 58,70 s | Działa, wolniejsza jazda; lokalny test timingu |
+| IQN / Jakub | 145 418 kroków; 55/200 met; ostatnie 17/20 | 1/2: 49,90 s; nieukończony przejazd 81,27% | Kandydat do dalszych prób; stabilność niepotwierdzona |
+| QR / Jakub | 145 425 kroków; 53/174 met; ostatnie 19/20 | 2/2: 57,07 i 56,81 s; średnia 56,94 s | Pozytywny pilot; baseline bez zmian |
+| Discrete SAC / Borys | beta 0: 145 412 kroków; 0/246 met, maks. 62,9% | 0/3: postęp 78,92%, 5,44%, 5,40% | **Pełny start zablokowany** |
+| Continuous SAC / bez przydziału | 145 416 kroków; 83/198 met; ostatnie 20/20 | 2/2: 43,78 i 44,75 s; średnia 44,265 s | Pozytywny pilot; ręczny pełny start odblokowany |
+
+Continuous SAC ukończył trening o 15:39:08, ewaluację o 15:41:03. Checkpoint
+`distributed-update-00033854.pt`: 33 854 aktualizacje, rzeczywisty kredyt 0,0;
+wszystkie 2128 sprawdzonych tensorów zmiennoprzecinkowych skończone. Najlepszy
+czas treningowy 44,06 s. Wszystkie logowane straty i alpha skończone,
+ostatnia logowana alpha 0,02080. W&B treningu `dx93ox8g` i ewaluacji `zpf9xcap`
+ma stan `finished`. Oba przejazdy ewaluacyjne mają ważne pomiary odstępów,
+max/p99 50 ms i brak błędów telemetrii/kontrolera. Pominięte ramki 94 i 97,
+maksimum 3 i 1. W treningu zdarzały się odstępy do 210 ms; ocena lokalnego
+timingu nadal jest potrzebna na każdym komputerze.
+
+SAC zachowuje sprawdzone model, nagrodę i hiperparametry. Po tym wyniku
+usunięto wyłącznie jego blokadę pełnego startu w `run_assigned.ps1`;
+ochrona zajętej gry, istniejącego runu i blokada DSAC pozostają aktywne.
+To dopuszczenie do dalszego eksperymentu po lokalnym smoke, nie zaliczenie
+końcowych progów 30 prób. Dwie próby na jednym seedzie nie dowodzą przewagi
+SAC nad TQC ani pozostałymi algorytmami. Nie zmieniono wspólnej nagrody.
+
+Po zmianie launchera przeszły oba testy: DSAC nadal blokowany, dopuszczony
+SAC zatrzymuje się przy zajętej grze, istniejący run nie otwiera kontrolera.
+Ruff i kontrola różnic przeszły. Ponownie sprawdzono 36 schematów i zasoby
+map oraz pełne SAC 17/29/43: 2 048 000 kroków, 30 prób, model i learner jak
+w pilocie. Wcześniejsze 40 testów oraz 9 syntetycznych CPU update/checkpoint
+pozostają walidacją niezmienionego kodu uczenia; nie są testem długiej jazdy.
+
+### Sprawdzenie poprawionego resetu w grze
+
+Po zakończeniu kolejki, przy braku procesów treningu/ewaluacji i STOP,
+wykonano bezpośrednie `environment.reset` z nowego checkoutu `tmrl-training-fixes`
+na kodzie `03a0f4a2`, bez launcherowego preflightu i bez learnera.
+UID `oqIJ5rQDRrNwLPTh9H2p_W4tLof` zgodny; sukces po 12,922 s,
+zegar wyścigu 10 ms, 33 pola, `telemetry_health=ok`. Kontroler i klient
+telemetrii zamknięte w `finally`. Jest to lokalny test startu/resetu, nie
+długi test jazdy ani kwalifikacja sprzętu kolegów. Dowód:
+`artifacts/tmrl-test-comparison/queue-status-recovery-20261004/source-live-reset.json`.
+
+### Warunki ręcznych pełnych startów
+
+- Jeden wspólny nowy commit zespołu z obu branchy, osobne checkouty i start
+  od zera. Zapisać hash. Nie wznawiać starych checkpointów na nowym kodzie
+  ani omijać fingerprintów; zachowany checkout pilotów pozostaje zamrożony.
+- Seedy 17/29/43, po 2 048 000 kroków; końcowo 30 greedy trials na seed.
+  Konfiguracje pełne i schematy są sprawdzone; nie przenosić wag/replayu pilota.
+- Każdy komputer: własna kalibracja sterowania, lokalny smoke nowego kodu,
+  sprawdzenie CUDA, UID, W&B, odstępów decyzji i pominiętych ramek.
+  Dla PPO szczególnie sprawdzić timing: jeden przejazd miał max 140 ms.
+- DSAC: najpierw osobny pilot hipotezy celu entropii 2,0 / beta 0 i ewaluacja;
+  ta hipoteza jest nadal **nieuruchomiona**, nie jest wybranym pełnym ustawieniem.
+  Nie przypisywać niepowodzenia wspólnej nagrodzie ani pewnemu błędowi krytyka.
+
+Dowody końca SAC: `queue-status-recovery-20261004/sac-result.json` i
+`tmrl-test-v2-sac-s17-benchmark-20261004T133913799286/evaluation.json` w
+`artifacts/tmrl-test-comparison`. Naprawiona awaria statusu Windows zachowała
+logi/checkpointy; nowy runner zakończył pozostałe etapy bez błędów. Wszystkie
+sprawdzone końcowe checkpointy mają skończone tensory. Instrukcje startu:
+[HANDOFF.md](HANDOFF.md); audyt DSAC/PPO: [ALGORITHM_AUDIT.md](ALGORITHM_AUDIT.md).
+
+## Historia kampanii — poniższe stany nie są aktualną kolejką
+
 ## Wynik QR i start SAC — 2026-10-04, około 13:30
 
 **QR: pozytywny pilot techniczny; pozostawić hiperparametry baseline.**

@@ -1,5 +1,34 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Końcowy stan — 2026-10-04, 15:41 Europe/Warsaw
+
+Kampania zakończona przed terminem 16:15. Autorytatywna kolejka
+`queue-status-recovery-20261004` ma `queue_completed`, zakończenie
+13:41:03 UTC. SAC trening zakończył 15:39:08: 145 416 kroków, 33 854
+aktualizacje, kredyt 0,0, checkpoint finite, 83/198 met i ostatnie 20/20.
+Ewaluacja 2/2: 43,78 i 44,75 s, średnia 44,265 s; ważne odstępy max/p99
+50 ms, brak błędów, pominięte ramki 94/97 (max 3/1). W&B oba `finished`.
+Dowód: `queue-status-recovery-20261004/sac-result.json`.
+
+Nie pozostały żadne etapy. Nie uruchamiać ponownie starych runnerów,
+supervisora SAC ani ukończonych pilotów. Wszystkie logi i checkpointy
+zachowane; nie usuwano STOP. Brak nowej kolejki po terminie. Pełnych
+treningów nie uruchomiono — są wyłącznie ręczne, po warunkach z
+[HANDOFF.md](HANDOFF.md) i [READINESS.md](READINESS.md). DSAC nadal zablokowany.
+
+Po zamknięciu wszystkich procesów sterujących grą przetestowano bezpośredni
+reset nowego kodu, bez preflightu launchera i bez learnera: zgodny UID,
+sukces po 12,922 s, race_time 10 ms, telemetria OK, klient i kontroler
+zamknięte. `source-live-reset.json` zachowuje dowód. To lokalny test resetu;
+smoke jazdy, kalibracja i timing każdego komputera nadal wymagane.
+
+Monitor zostaje wyłączony po publikacji raportu końcowego. Źródła pilotów
+pozostają na `378f9c6a` w zamrożonym checkoutcie; publikacja końcowa pochodzi
+wyłącznie z nowego checkoutu zespołu. Poniższe sekcje są historią kampanii,
+nie poleceniem dalszego uruchamiania.
+
+## Historia kolejki
+
 ## Przejście do SAC — około 13:30
 
 QR ukończył 145 425 kroków i 33 856 aktualizacji, kredyt 0,25. W treningu

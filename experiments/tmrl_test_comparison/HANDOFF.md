@@ -1,40 +1,28 @@
 # Podział eksperymentów
 
-## Wynik QR — 2026-10-04, około 13:30
+## Kampania zakończona — 2026-10-04, 15:41 Europe/Warsaw
 
-**Jakub / QR: pozytywny pilot**, 145 425 kroków, 53/174 met treningowych,
-krótka ewaluacja 2/2 (57,07 s; 56,81 s). Baseline bez zmian. Pełne próby
-po lokalnym teście nowego wspólnego kodu; docelowo 30 ewaluacji na seed.
-IQN 1/2 w krótkiej ewaluacji nadal wymaga uwagi co do stabilności.
-Continuous SAC teraz trenuje, W&B `dx93ox8g`; jego pełny start nadal
-zablokowany do oceny. Szczegóły: [READINESS.md](READINESS.md).
+Wszystkie zaplanowane piloty i krótkie ewaluacje zakończone. TQC, QR, PPO
+oraz continuous SAC mają pozytywne piloty; IQN ukończył 1/2 przejazdów i
+wymaga dalszej kontroli stabilności. DSAC pozostaje niegotowy. Pełnych
+treningów nie uruchomiono automatycznie. Wyniki, timing i ograniczenia:
+[READINESS.md](READINESS.md).
 
-## Stan pilotów — około 11:25, 2026-10-04
-
-IQN v2 ukończony: 145 418 kroków, 33 854 aktualizacje, 55/200 met treningowych.
-Krótka ewaluacja 1/2: 49,90 s; druga próba 81,27%. Nie jest to potwierdzenie
-stabilności ani końcowy test 30 prób. QR teraz trenuje, potem continuous SAC.
-Naprawiono blokadę zapisu statusu Windows w zewnętrznym runnerze i jawnie
-wznowiono tylko pozostałe etapy; zamrożonego kodu pilota nie zmieniono.
-Aktualna kolejka `queue-status-recovery-20261004`; koniec kampanii 16:15.
-Pełne treningi nadal nie startują automatycznie, DSAC pozostaje zablokowany.
-Najnowsze wyniki oraz warunki startu: [READINESS.md](READINESS.md).
-
-| Osoba | Algorytm | Pełne treningi |
+| Osoba | Algorytm | Warunki pełnych treningów |
 | --- | --- | --- |
-| Jakub | IQN i QR | każdy: seedy 17, 29, 43 |
-| Borys | discrete SAC | seedy 17, 29, 43 |
-| Kamil | TQC | seedy 17, 29, 43 |
-| Kuba P. | PPO | seedy 17, 29, 43 |
+| Jakub | IQN i QR | każdy: 17/29/43, lokalny smoke; IQN stabilność do sprawdzenia |
+| Borys | discrete SAC | zablokowane; najpierw pilot 2,0 / beta 0 i wybór ustawień |
+| Kamil | TQC | 17/29/43 po lokalnej kalibracji i smoke |
+| Kuba P. | PPO | 17/29/43 po lokalnym smoke i kontroli timingu |
+| Bez przydziału | continuous SAC | 17/29/43 po lokalnym smoke; ręczny start odblokowany |
 
 Aktualna decyzja przed pełnym startem: [READINESS.md](READINESS.md).
-Launcher blokuje pełne DSAC do czasu pozytywnego testu niższej entropii oraz
-pełne continuous SAC do oceny jego oczekującego pilota. Dla Borysa przygotowano
+Launcher blokuje pełne DSAC do czasu pozytywnego testu niższej entropii. Dla Borysa przygotowano
 wyłącznie test: `run_assigned.ps1 discrete-sac -Pilot` (145 408 kroków, seed 17,
 cel entropii 2,0, kara 0,0). Po nim potrzebna osobna ewaluacja bez eksploracji;
 skrypt nie przechodzi automatycznie do pełnych seedów.
-IQN i QR zakończyły wcześniejsze piloty; nocna kolejka v2 powtarza je z nowym
-protokołem. Discrete SAC bez kary entropii zakończył pełny pilot, lecz ewaluacja
+IQN i QR zakończyły kampanię v2; nie powtarzać ich automatycznie.
+Discrete SAC bez kary entropii zakończył pilot, lecz ewaluacja
 dała 0/3 ukończeń (postęp 78,9%, 5,4%, 5,4%). **Borys: pełne treningi jeszcze
 nie są gotowe do startu.** Przygotowano osobny, nieuruchomiony test celu
 entropii 2,0; instrukcję i ograniczenia opisuje READINESS.md.
@@ -45,14 +33,22 @@ pozostają bez zmian; przed pełnym startem wymagany lokalny test i kalibracja.
 treningu i 2/2 w ewaluacji (58,27 s; 59,13 s). Zachowujemy baseline; przed
 pełnym startem lokalny test oraz kontrola pojedynczego odstępu 140 ms.
 Audyt i ograniczenia: [ALGORITHM_AUDIT.md](ALGORITHM_AUDIT.md).
-Dodatkowy continuous SAC czeka po QR, bez przydzielenia osobie. Aktualny plan
-i ograniczenia opisuje [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
-Restarty, obliczenia i aktualizacje PPO wydłużą czas. Pełnych treningów nie
+**Continuous SAC: 145 416 kroków, 83/198 met, ostatnie 20/20**, ewaluacja
+2/2 (43,78 s; 44,75 s), max/p99 50 ms, bez błędów. Baseline bez zmian;
+nie ma jeszcze przydzielonej osoby. Dwa przejazdy nie zastępują 30 prób/seed.
+Końcowy stan kolejki opisuje [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
+Pełnych treningów nie
 uruchamiamy automatycznie po pilotach. Przed przekazaniem do długich prób
 sprawdzamy każdy algorytm: aktualizacje o skończonym lossie, zmiana polityki,
 ukończony budżet, poprawny zapis końcowego checkpointu, metryki w W&B,
 stabilne sterowanie i brak błędów telemetryki. Pilot nie musi ukończyć mapy,
 ale sam działający proces nie jest jeszcze pozytywnym wynikiem testu.
+
+Bezpośredni reset poprawionego nowego kodu sprawdzono lokalnie po zamknięciu
+kolejki: zgodny UID, telemetria i zegar 10 ms; klient i kontroler zamknięte.
+To nie zastępuje lokalnego smoke jazdy na komputerze każdej osoby. Wszyscy
+używają jednego nowego commita obu branchy i zapisują hash; pełny start
+od zera. Stary zamrożony checkout służy tylko starym checkpointom.
 
 ## Instalacja u kolegi
 
@@ -101,6 +97,8 @@ Po pozytywnym lokalnym pilocie przypisanego algorytmu uruchom **jedno** poleceni
 powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 tqc
 # Kuba P.:
 powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 ppo
+# Operator continuous SAC, dopiero po lokalnym smoke i kalibracji:
+powershell -ExecutionPolicy Bypass -File experiments/tmrl_test_comparison/run_assigned.ps1 sac
 ```
 
 Każde polecenie wykonuje trzy seedy kolejno, od zera. Nie uruchamiaj dwóch
