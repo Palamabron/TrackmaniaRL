@@ -1,5 +1,29 @@
 # Decyzja przed pełnymi treningami
 
+## Nowa kolejka uruchomiona — 4 października, 17:28
+
+Kod zespołu opublikowany na obu branchach: **8f440075**. Nowy pilot korzysta
+z osobnego, czystego i zamrożonego `tmrl-tuning-runtime` na tym commicie.
+Stare IQN/PPO będą oceniane na zachowanym `tmrl-algorithm-runs` (`d0dfe645`,
+źródła Python `378f9c6a`), bez przenoszenia checkpointów między wersjami.
+
+Kolejka `queue-tuning-20261004` wystartowała **17:27:56 Europe/Warsaw**.
+Termin zapisu **20:17:56**, twardy koniec **20:27:56**. To zatwierdzone nowe
+3 godziny łącznie, nie przedłużanie poprzedniej kampanii. Wskaźnik
+`artifacts/tmrl-test-comparison/active-queue.json` wskazuje tę kolejkę.
+DSAC `tmrl-tuning-dsac-entropy200-beta000-s17` działa, W&B
+[o3aknhmz](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/o3aknhmz)
+potwierdzony online/running. O 17:30 zapisano 1943 kroki w fazie warmup,
+ważny timing ostatniego epizodu (p99 50 ms, max 60 ms), brak błędu telemetrii.
+To kontrola uruchomienia, nie wynik uczenia ani kwalifikacja DSAC.
+
+Następnie planowane są 10 ocen DSAC, 10 IQN i 5 PPO w pozostałym czasie.
+Warunki promocji DSAC oraz sprawdzone ustawienia opisuje [TUNING.md](TUNING.md).
+Monitor działa co 5 minut i ma zakończyć pracę po raporcie tej kampanii.
+Pełnych treningów nie uruchomiono. Końcowy dobór DSAC pozostaje otwarty do
+wyniku jazdy; jego pełne uruchomienia są nadal zablokowane.
+
+
 ## Nowe przygotowanie i testy — 2026-10-04 po 17:00
 
 Po zakończeniu poprzedniej kampanii użytkownik zatwierdził naprawy oraz
