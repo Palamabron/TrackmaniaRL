@@ -3,7 +3,7 @@
 ## Aktualizacja — 5 października, kampania nocna
 
 Po wyraźnym wznowieniu użytkownika działa `queue-overnight-tuning-20261005`.
-Budżet 10 godzin od 00:50:18, zapis 10:40:18, twardy koniec 10:50:18 Warsaw.
+Budżet 10 godzin od początku pracy 00:34, zapis 10:24, twardy koniec 10:34 Warsaw.
 Runner 37100 sam prowadzi etapy; nie uruchamiać kolejnego kontrolera ani pełnych
 treningów. Poprzednie STOP pozostają dowodem, nowe STOP nadal zatrzymuje.
 Aktualny plan i warunki doboru parametrów: [TUNING.md](TUNING.md).

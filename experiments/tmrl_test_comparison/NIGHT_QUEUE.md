@@ -3,8 +3,10 @@
 ## Aktualna noc 4/5 października — jawne wznowienie
 
 Nowy wskaźnik `active-queue.json`: `queue-overnight-tuning-20261005`.
-Runner 37100, launcher 37184, start 00:50:18 Warsaw; zapis 10:40:18,
-twardy koniec 10:50:18 5 października, 10 godzin łącznie bez przedłużania.
+Runner 37100, launcher 37184, start 00:50:18 Warsaw; zapis 10:24,
+twardy koniec 10:34 5 października, 10 godzin od początku pracy o 00:34,
+łącznie z przygotowaniem. `effective-deadline.json` i watchdog skracają
+wewnętrzny limit runnera; nie prowadzą drugiego kontrolera.
 DSAC resume → 10 ocen → PPO baseline prefix → 10 ocen → PPO entropy0 prefix
 → 10 ocen → po 30 ocen IQN/TQC/SAC/QR w pozostałym czasie. Dokładne warunki,
 ograniczenia i zamrożone runtime opisuje [TUNING.md](TUNING.md).

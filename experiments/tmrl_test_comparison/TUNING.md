@@ -5,8 +5,11 @@
 Użytkownik odwołał pauzę i zatwierdził **10 godzin łącznie testów i nadzoru**.
 Aktualna kolejka to `queue-overnight-tuning-20261005`, wskazana przez
 `artifacts/tmrl-test-comparison/active-queue.json`. Start **00:50:18**, zapis
-do **10:40:18**, twardy koniec **10:50:18 5 października**. Tej granicy nie
+do **10:24**, twardy koniec **10:34 5 października**. Tej granicy nie
 wydłużamy. Pełne eksperymenty pozostają do ręcznego uruchomienia.
+Limit liczymy od rozpoczęcia pracy o 00:34, włącznie z przygotowaniem i testami
+CPU. `effective-deadline.json` oraz osobny watchdog terminu skracają wewnętrzny
+limit runnera liczony od uruchomienia kolejki. Watchdog nie otwiera kontrolera.
 
 Przerwana kolejka z 4 października pozostaje zatrzymana; jej STOP i dane
 zachowano. Nowa kolejka wznawia DSAC z `distributed-update-00000659.pt`:

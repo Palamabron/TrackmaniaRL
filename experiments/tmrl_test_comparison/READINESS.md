@@ -3,7 +3,7 @@
 ## Aktualizacja — 5 października, wznowienie 10 godzin
 
 Aktualna kampania `queue-overnight-tuning-20261005` działa od **00:50:18**;
-zapis do **10:40:18**, twarde zatrzymanie **10:50:18 Europe/Warsaw**.
+zapis do **10:24**, twarde zatrzymanie **10:34 Europe/Warsaw**.
 DSAC wznowiony z 12 658 kroków i pełnego zapisu. Następnie dwa świeże prefixy
 PPO (baseline entropii 0,01 / hipoteza 0,0) i pomiary powtarzalności pozostałych
 algorytmów. Plan i warunki wyboru są w [TUNING.md](TUNING.md).
