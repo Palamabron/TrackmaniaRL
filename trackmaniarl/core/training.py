@@ -111,7 +111,9 @@ class Trainer:
             counters.next_episode_index,
             counters.fractional_updates,
         )
-        stored.next_episode_index = self._next_episode_index(counters.episodes)
+        stored.next_episode_index = max(
+            stored.next_episode_index, self._next_episode_index(counters.episodes)
+        )
         return {
             "schema_version": _CHECKPOINT_SCHEMA_VERSION,
             "run_fingerprint": self.fingerprint,

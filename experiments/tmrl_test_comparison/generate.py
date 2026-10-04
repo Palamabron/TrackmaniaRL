@@ -101,6 +101,17 @@ def configuration(algorithm: str, seed: int, stage: str) -> dict:
             "class_path": "trackmaniarl.algorithms:" + names[algorithm],
             "kwargs": {"execution": execution},
         }
+        if algorithm in {"sac", "tqc", "discrete-sac"}:
+            components["learner"]["kwargs"].update(
+                learning_rate=3e-4,
+                target_tau=0.005,
+                entropy_coefficient=0.2,
+                learn_entropy_coefficient=True,
+            )
+        if algorithm in {"sac", "tqc"}:
+            components["learner"]["kwargs"]["target_entropy"] = -3.0
+        if algorithm == "tqc":
+            components["learner"]["kwargs"]["top_quantiles_to_drop_per_critic"] = 2
         components["model_factory"] = {
             "class_path": "trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory",
             "kwargs": {
@@ -135,6 +146,14 @@ def configuration(algorithm: str, seed: int, stage: str) -> dict:
     }
     if algorithm == "ppo":
         components["learner"]["kwargs"].update(
+            learning_rate=3e-4,
+            clip_epsilon=0.2,
+            value_clip_epsilon=0.2,
+            gae_lambda=0.95,
+            entropy_coefficient=0.01,
+            value_coefficient=0.5,
+            max_gradient_norm=0.5,
+            target_kl=0.02,
             normalize_observations=False,
             normalize_rewards=False,
             update_epochs=10,

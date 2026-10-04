@@ -1,5 +1,14 @@
 # Decyzja przed pełnymi treningami
 
+## Nowe przygotowanie i testy — 2026-10-04 po 17:00
+
+Po zakończeniu poprzedniej kampanii użytkownik zatwierdził naprawy oraz
+**do 3 godzin łącznie nowych testów w grze**. Aktualne decyzje o parametrach,
+kolejność prób, poprawki PPO i warunki wyboru DSAC opisuje [TUNING.md](TUNING.md).
+Pełne treningi pozostają ręczne; DSAC nadal jest zablokowany do wyniku nowego
+pilota. Stare checkpointy zachowują swój zamrożony runtime. Poniższy raport
+15:41 i starsze sekcje dokumentują zakończoną poprzednią kampanię, nie nową kolejkę.
+
 ## Raport końcowy kampanii — 2026-10-04, 15:41 Europe/Warsaw
 
 **Wszystkie zaplanowane piloty i ich krótkie ewaluacje zakończone.** Nie

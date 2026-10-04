@@ -10,6 +10,11 @@ components:
         device: cuda
         precision: float32
         torch_threads: 2
+      learning_rate: 0.0003
+      target_tau: 0.005
+      entropy_coefficient: 0.2
+      learn_entropy_coefficient: true
+      target_entropy: -3.0
   environment:
     class_path: trackmaniarl.trackmania.environment:OpenPlanetEnvironmentFactory
     kwargs:

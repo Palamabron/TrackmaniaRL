@@ -8,6 +8,14 @@ $ErrorActionPreference = 'Stop'
 if (-not $Pilot -and $Algorithm -eq 'discrete-sac') {
     throw 'DSAC nie jest gotowy do pelnych treningow. Najpierw pilot celu entropii 2.0 i ewaluacja; patrz READINESS.md. Test: run_assigned.ps1 discrete-sac -Pilot.'
 }
+$comparisonMutex = [System.Threading.Mutex]::new($false, 'Global\TrackmaniaRL.ComparisonController')
+$comparisonMutexAcquired = $false
+try {
+    try { $comparisonMutexAcquired = $comparisonMutex.WaitOne(0) }
+    catch [System.Threading.AbandonedMutexException] { $comparisonMutexAcquired = $true }
+    if (-not $comparisonMutexAcquired) {
+        throw 'Inny launcher posiada blokade sterowania gra. Kolejka nie zostala uruchomiona.'
+    }
 $comparisonRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Set-Location -LiteralPath $comparisonRoot
 $comparisonPython = Join-Path $comparisonRoot '.venv/Scripts/python.exe'
@@ -15,7 +23,12 @@ if (-not (Test-Path -LiteralPath $comparisonPython)) { throw 'Najpierw uruchom u
 $comparisonStop = Join-Path $comparisonRoot "artifacts/STOP-$Algorithm"
 function Assert-ComparisonIdle {
     $comparisonBusy = Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" |
-        Where-Object { $_.CommandLine -match 'trackmaniarl\s+(train|resume|benchmark)\b' }
+        Where-Object {
+            $_.CommandLine -match 'trackmaniarl\s+(train|resume|benchmark)\b' -or
+            $_.CommandLine -match 'tmrl_test_comparison\.launch_checks\s+benchmark\b' -or
+            $_.CommandLine -match '--comparison-map-preflight' -or
+            $_.CommandLine -match 'runtime_helper\.py.*\bpreflight\b'
+        }
     if ($comparisonBusy) { throw 'Inny trening lub ewaluacja steruje gra. Poczekaj na jego zakonczenie.' }
 }
 function Initialize-ComparisonMap([string]$ConfigPath) {
@@ -50,7 +63,7 @@ try:
     print('Comparison map ready:', uid, flush=True)
 finally:
     environment.close()
-'@ | & $comparisonPython - $ConfigPath
+'@ | & $comparisonPython - $ConfigPath --comparison-map-preflight
     if ($LASTEXITCODE -ne 0) { throw 'Mapa nie jest gotowa. Trening nie zostal uruchomiony.' }
 }
 $comparisonSeeds = if ($Pilot) { @(17) } else { @(17, 29, 43) }
@@ -62,10 +75,32 @@ foreach ($comparisonSeed in $comparisonSeeds) {
     if ($Pilot -and $Algorithm -eq 'discrete-sac') {
         $comparisonConfig = 'experiments/tmrl_test_comparison/configs/diagnostic/discrete-sac-entropy200-beta000-s17.yaml'
     }
+    if (Test-Path -LiteralPath $comparisonStop) { break }
     Initialize-ComparisonMap $comparisonConfig
     if (Test-Path -LiteralPath $comparisonStop) { break }
     Assert-ComparisonIdle
     $comparisonTrainArgs = @('-m', 'trackmaniarl', 'train', $comparisonConfig, '--stop-file', $comparisonStop)
     & $comparisonPython @comparisonTrainArgs
     if ($LASTEXITCODE -ne 0) { throw "Trening $Algorithm seed $comparisonSeed nie powiodl sie. Kolejka zatrzymana." }
+    if (Test-Path -LiteralPath $comparisonStop) { break }
+    if (-not $Pilot) {
+        $comparisonCheckpoint = & $comparisonPython -m experiments.tmrl_test_comparison.launch_checks checkpoint $comparisonConfig
+        if ($LASTEXITCODE -ne 0) { throw 'Brak potwierdzonego koncowego checkpointu. Wznow trening jawnie; kolejka zatrzymana.' }
+        $comparisonCheckpoint = ($comparisonCheckpoint | Out-String).Trim()
+        if (Test-Path -LiteralPath $comparisonStop) { break }
+        if ($Algorithm -eq 'ppo') {
+            # PPO's trainer already evaluated exactly 30 trials after the final save.
+            # Validate that measurement instead of silently collecting another 30.
+            & $comparisonPython -m experiments.tmrl_test_comparison.launch_checks evaluation $comparisonConfig $comparisonCheckpoint
+        } else {
+            Assert-ComparisonIdle
+            if (Test-Path -LiteralPath $comparisonStop) { break }
+            & $comparisonPython -m experiments.tmrl_test_comparison.launch_checks benchmark $comparisonConfig $comparisonCheckpoint --stop-file $comparisonStop
+        }
+        if ($LASTEXITCODE -ne 0) { throw 'Ewaluacja nie jest kompletnym poprawnym pomiarem 30 prob. Kolejka zatrzymana; zachowano artefakty.' }
+    }
+}
+} finally {
+    if ($comparisonMutexAcquired) { $comparisonMutex.ReleaseMutex() }
+    $comparisonMutex.Dispose()
 }

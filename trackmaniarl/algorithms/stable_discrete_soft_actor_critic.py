@@ -185,9 +185,11 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         ).detach()
         actor_loss = (probabilities * (alpha * log_probabilities - q_values)).sum(1).mean()
         entropy = -(probabilities * log_probabilities).sum(1)
-        penalty = self._entropy_penalty(batch, entropy)
-        loss = actor_loss + self.entropy_penalty_coefficient * penalty
-        return _DiscreteActorStep(loss, entropy, int(probabilities.shape[-1]))
+        if self.entropy_penalty_coefficient:
+            actor_loss = actor_loss + self.entropy_penalty_coefficient * self._entropy_penalty(
+                batch, entropy
+            )
+        return _DiscreteActorStep(actor_loss, entropy, int(probabilities.shape[-1]))
 
     def _entropy_penalty(self, batch: SACBatch, entropy: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():

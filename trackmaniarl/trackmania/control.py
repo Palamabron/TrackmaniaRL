@@ -97,7 +97,7 @@ class GamepadController:
         self._collision_lock = RLock()
         self._collision_detected = False
         self._restart_input = restart_input
-        self._vibration_callback = _VibrationCallback(self)
+        self._vibration_callback: _VibrationCallback | None = _VibrationCallback(self)
         self._gamepad.register_notification(callback_function=self._vibration_callback)
 
     def _record_vibration(self, large_motor: int) -> None:
@@ -113,17 +113,23 @@ class GamepadController:
             self._collision_detected = False
         return collision_detected
 
+    def _open_gamepad(self) -> Any:
+        if self._gamepad is None:
+            raise RuntimeError("GamepadController is closed")
+        return self._gamepad
+
     def _apply(self, action: np.ndarray) -> None:
+        gamepad = self._open_gamepad()
         gas, brake, steer = np.clip(
             np.nan_to_num(action, nan=0.0), [-0.0, 0.0, -1.0], [1.0, 1.0, 1.0]
         )
         stick = float(steer)
         if self._steering_curve is not None:
             stick = self._steering_curve.stick_for(stick)
-        self._gamepad.right_trigger_float(float(gas))
-        self._gamepad.left_trigger_float(float(brake))
-        self._gamepad.left_joystick_float(stick, 0.0)
-        self._gamepad.update()
+        gamepad.right_trigger_float(float(gas))
+        gamepad.left_trigger_float(float(brake))
+        gamepad.left_joystick_float(stick, 0.0)
+        gamepad.update()
 
     def apply(self, action: np.ndarray) -> None:
         with self._tap_lock:
@@ -147,8 +153,9 @@ class GamepadController:
         """Release controls and request a TrackMania restart before an episode."""
 
         with self._tap_lock:
-            self._gamepad.reset()
-            self._gamepad.update()
+            gamepad = self._open_gamepad()
+            gamepad.reset()
+            gamepad.update()
             match self._restart_input:
                 case "keyboard":
                     restart_trackmania_race()
@@ -162,11 +169,12 @@ class GamepadController:
         self._tap_button(self._RESTART_BUTTON)
 
     def _tap_button(self, button: int) -> None:
-        self._gamepad.press_button(button=button)
-        self._gamepad.update()
+        gamepad = self._open_gamepad()
+        gamepad.press_button(button=button)
+        gamepad.update()
         sleep(0.1)
-        self._gamepad.release_button(button=button)
-        self._gamepad.update()
+        gamepad.release_button(button=button)
+        gamepad.update()
 
     def confirm_finish(self) -> None:
         """Confirm TrackMania menus through the active virtual controller."""
@@ -176,8 +184,20 @@ class GamepadController:
 
     def close(self) -> None:
         with self._tap_lock:
-            self._gamepad.reset()
-            self._gamepad.update()
+            gamepad = self._gamepad
+            if gamepad is None:
+                return
+            try:
+                gamepad.reset()
+                gamepad.update()
+            finally:
+                try:
+                    gamepad.unregister_notification()
+                finally:
+                    # Break the pad/callback/controller cycle so the driver's
+                    # destructor detaches the device as soon as close returns.
+                    self._gamepad = None
+                    self._vibration_callback = None
 
 
 class RecordingController:

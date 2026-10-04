@@ -11,8 +11,7 @@ artykułu ani rozstrzygający ranking algorytmów RL.
 
 | Etap | Seedy na algorytm | Kroki na trening |
 | --- | --- | --- |
-| pilot IQN | 17 | 102 400 |
-| pilot pozostałych | 17 | 145 408 |
+| pilot każdego algorytmu | 17 | 145 408 |
 | full | 17, 29, 43 | 2 048 000 |
 
 Algorytmy dyskretne (78 akcji): Q, QR, IQN, FQF, discrete SAC.
@@ -27,10 +26,10 @@ uczenie. Brak mety po 100 tys. kroków nie dowodzi, że algorytm jest słaby.
 Po pilocie ustalamy konfiguracje i uruchamiamy pełne treningi od zera.
 Nie przenosimy wag ani replayu pilota do pełnych prób.
 
-Przy 20 decyzjach/s sam czas interakcji to około 1,42 h dla pilota IQN,
-2,02 h dla każdego pozostałego pilota i 28,44 h/full.
-Wybrana kolejka pięciu pilotów to około 9,5 h, a wszystkie 27 pełnych
-treningów przygotowanych w konfiguracjach to około 768 h.
+Przy 20 decyzjach/s sam czas interakcji to około 2,02 h dla każdego pilota
+i 28,44 h/full. Sześć przydzielonych algorytmów na trzech seedach daje
+18 pełnych treningów, nominalnie około 512 h. Wszystkie 27 pełnych
+treningów dostępnych w konfiguracjach to około 768 h.
 To przeliczenie nominalne: aktualizacje, restarty, opóźnienia i ewaluacja
 mogą wydłużyć rzeczywisty czas. Dlatego pełny zakres wybierzemy po pilocie.
 
@@ -46,7 +45,8 @@ mogą wydłużyć rzeczywisty czas. Dlatego pełny zakres wybierzemy po pilocie.
   warm-startu, filtra referencyjnego i zamrażania enkodera.
 - Off-policy: uniform replay 1 mln, batch 256, 1-step, warmup 10 tys.,
   0,25 aktualizacji/krok. Q/QR/IQN/FQF: LR 1e-4, hard target co 1000 aktualizacji.
-  Lokalny asynchroniczny `train` stosuje epsilon 0,3 → 0,01 przez 500 tys. kroków.
+  Q/QR/IQN/FQF w asynchronicznym `train` stosują epsilon 0,3 → 0,01 przez 500 tys. kroków.
+  Aktorzy SAC/TQC/DSAC używają własnych rozkładów; epsilon nie steruje ich eksploracją.
   Nie stosujemy historycznej heurystyki przytrzymywania eksploracyjnych akcji.
 - IQN: 64 kwantyle treningowe/target, 32 ewaluacyjne; QR/FQF: 64.
 - PPO: rollout 2048, 10 epok, minibatch 256; bez dodatkowej normalizacji
@@ -77,6 +77,9 @@ Nie trzeba ich kopiować. Uruchamiaj tylko jeden trening sterujący grą naraz.
 # Kontrola bez gry (małe syntetyczne aktualizacje na CPU, pliki tymczasowe):
 .venv/Scripts/python.exe -m experiments.tmrl_test_comparison.check
 
+# Ręczny pełny eksperyment: trzy seedy, każdy z końcową oceną 30 prób:
+./experiments/tmrl_test_comparison/run_assigned.ps1 tqc
+
 # Pierwszy pilot — uruchomi grę przez istniejące połączenie:
 .venv/Scripts/python.exe -m trackmaniarl train experiments/tmrl_test_comparison/configs/pilot/iqn-s17.yaml
 
@@ -94,7 +97,13 @@ klucz nie trafia do YAML-i, manifestu ani W&B configu.
 
 ## Ocena
 
-Po każdym zakończonym treningu oceniaj **końcowy checkpoint**, 30 przejazdów,
+Launcher `run_assigned.ps1` wykonuje dla każdego seeda trening i ocenę 30 prób.
+PPO wykorzystuje istniejącą końcową ocenę trenera, bez drugich 30 prób.
+Nieudane progi jakości są raportowane jako nieudane; nie unieważniają kompletnego,
+poprawnego pomiaru. STOP, niepełny checkpoint lub błąd wykonania zatrzymują kolejkę.
+Pełne DSAC nadal jest zablokowane do sprawdzenia hipotezy z [TUNING.md](TUNING.md).
+
+Przy ręcznym użyciu CLI po każdym zakończonym treningu oceniaj **końcowy checkpoint**, 30 przejazdów,
 bez eksploracji i bez filtra referencyjnego. Podstaw rzeczywistą ścieżkę
 zapisaną przez zakończony trening:
 
