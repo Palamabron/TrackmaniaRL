@@ -1,5 +1,30 @@
 # Decyzja przed pełnymi treningami
 
+## Aktualizacja — 2026-10-04, około 11:25
+
+IQN ukończył 145 418 kroków i 33 854 aktualizacje, zachowując kredyt 0,5.
+Końcowy `distributed-update-00033854.pt` ma skończone tensory. Trening:
+55/200 met, ostatnie 17/20, najlepszy czas 52,79 s. Krótka ewaluacja bez
+eksploracji: **1/2 met**, ukończony przejazd 49,90 s; nieukończony 81,27%.
+Oba przejazdy bez błędów kontrolera/telemetrii, maksymalny odstęp zegara 50 ms.
+Pominięte ramki nadal występują: 368 i 401, maksimum 2 i 4. Jeden ukończony
+przejazd nie potwierdza stabilności i nie zastępuje 30 prób na seed ani nie
+pozwala ogłaszać przewagi algorytmu. W&B treningu `queim8uy` i ewaluacji
+`m12bec84` potwierdzają `finished`.
+
+QR wystartował o 11:20 Europe/Warsaw, W&B `3gboyqdh` online; po nim SAC.
+Windows zablokował podmianę `status.json` starego runnera. Trening IQN
+zakończył się niezależnie i zapisano checkpoint; nie powtarzamy go. Nowa
+jawna kolejka `queue-status-recovery-20261004` zawiera tylko ewaluację IQN
+(już ukończona), QR/eval oraz SAC/eval. Runner ponawia atomowy zapis przy
+blokadzie pliku, a przy awarii zatrzymuje i zapisuje dziecko przed wyjściem.
+Cztery testy obejmują rzeczywistą blokadę Windows, błąd zapisu, STOP i zajętą
+grę. Poprawka jest w zewnętrznym helperze; źródła pilota pozostają zamrożone.
+Dowody: `iqn-completion.json`, `iqn-evaluation.json`, `test_runner.py` w kolejce.
+Granica zapisu 16:05, koniec kampanii 16:15; pełnych treningów nie uruchamiamy.
+To nadal częściowy raport. DSAC pozostaje zablokowany; lokalny test nowego
+resetu czeka na zakończenie wszystkich procesów sterujących grą.
+
 ## Poprawki przed pełnymi startami — 2026-10-04
 
 Przygotowano poprawki w osobnym checkoutcie `tmrl-training-fixes`:
@@ -36,7 +61,7 @@ poprawki zmieniają fingerprint. Zachowany checkout pilotów służy do ich
 dalszej ewaluacji i ewentualnego wznowienia bez obchodzenia tej kontroli.
 
 To częściowa gotowość: TQC i PPO mają pozytywne piloty, DSAC jest zablokowany,
-IQN/QR/SAC oczekują na wyniki bieżącej kolejki. Termin kampanii 16:15.
+IQN ma wynik częściowy 1/2 w ewaluacji; QR/SAC oczekują na wyniki. Termin kampanii 16:15.
 
 ## Aktualizacja — 2026-10-04, około 09:20
 

@@ -1,5 +1,22 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Aktualny plan — około 11:25
+
+Po awarii atomowego zapisu statusu Windows stara kolejka nie uruchomiła
+następnego etapu. IQN dokończył trening i zapis: 145 418 kroków, 33 854
+aktualizacje, kredyt 0,5. Nie powtarzamy go ani DSAC/TQC/PPO. Dowody awarii
+zachowano; nowa jawna kolejka `queue-status-recovery-20261004`, wskazywana
+przez `active-queue.json`, zastępuje stary runner oraz supervisor SAC.
+Pozostałe etapy: ewaluacja IQN (już 1/2 met, 49,90 s / 81,27%), QR, eval QR,
+continuous SAC, eval SAC. QR ruszył 11:20, W&B `3gboyqdh` online.
+Runner ma ponawianie zapisu przy blokadzie pliku oraz zapis i zatrzymanie
+procesu dziecka przy awarii; cztery testy przeszły, w tym rzeczywista blokada
+pliku w Windows. STOP w aktualnej lub poprzednich dwóch kolejkach blokuje
+start; nie uruchamia się drugi kontroler. Źródła runtime pozostają zamrożone.
+Każdy trening ma 145 408 kroków / 2 h 15 min, granica zapisu **16:05**,
+koniec **16:15 Europe/Warsaw**. Starsze plany poniżej są historyczne.
+Wyniki i ograniczenia: [READINESS.md](READINESS.md). Kampania nadal trwa.
+
 ## Rozszerzenie — około 09:20
 
 Użytkownik dodał continuous SAC i zatwierdził termin 16:15 zamiast 14:00.

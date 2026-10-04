@@ -1,5 +1,16 @@
 # Podział eksperymentów
 
+## Stan pilotów — około 11:25, 2026-10-04
+
+IQN v2 ukończony: 145 418 kroków, 33 854 aktualizacje, 55/200 met treningowych.
+Krótka ewaluacja 1/2: 49,90 s; druga próba 81,27%. Nie jest to potwierdzenie
+stabilności ani końcowy test 30 prób. QR teraz trenuje, potem continuous SAC.
+Naprawiono blokadę zapisu statusu Windows w zewnętrznym runnerze i jawnie
+wznowiono tylko pozostałe etapy; zamrożonego kodu pilota nie zmieniono.
+Aktualna kolejka `queue-status-recovery-20261004`; koniec kampanii 16:15.
+Pełne treningi nadal nie startują automatycznie, DSAC pozostaje zablokowany.
+Najnowsze wyniki oraz warunki startu: [READINESS.md](READINESS.md).
+
 | Osoba | Algorytm | Pełne treningi |
 | --- | --- | --- |
 | Jakub | IQN i QR | każdy: seedy 17, 29, 43 |
