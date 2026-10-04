@@ -16,8 +16,11 @@ entropii 2,0; instrukcję i ograniczenia opisuje READINESS.md.
 **Kamil / TQC: pilot v2 zakończony pozytywnie**, 145 433 kroki, 71/181 met
 w treningu i 2/2 w krótkiej ewaluacji (45,24 s; 44,06 s). Hiperparametry
 pozostają bez zmian; przed pełnym startem wymagany lokalny test i kalibracja.
-PPO po błędzie startu z ekranu wyniku ma jawną nową próbę; pierwszy rollout
-i aktualizacja działają. Jego kwalifikacja jeszcze trwa. Aktualny plan
+**Kuba P. / PPO: ukończony pilot**, 145 408 kroków, 13 met w pełnych śladach
+treningu i 2/2 w ewaluacji (58,27 s; 59,13 s). Zachowujemy baseline; przed
+pełnym startem lokalny test oraz kontrola pojedynczego odstępu 140 ms.
+Audyt i ograniczenia: [ALGORITHM_AUDIT.md](ALGORITHM_AUDIT.md).
+Dodatkowy continuous SAC czeka po QR, bez przydzielenia osobie. Aktualny plan
 i ograniczenia opisuje [NIGHT_QUEUE.md](NIGHT_QUEUE.md).
 Restarty, obliczenia i aktualizacje PPO wydłużą czas. Pełnych treningów nie
 uruchamiamy automatycznie po pilotach. Przed przekazaniem do długich prób

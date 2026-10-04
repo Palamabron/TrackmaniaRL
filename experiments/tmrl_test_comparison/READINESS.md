@@ -1,5 +1,23 @@
 # Decyzja przed pełnymi treningami
 
+## Aktualizacja — 2026-10-04, około 09:20
+
+PPO ukończył 145 408 kroków i 71 rolloutów / 4280 kroków Adam. Ewaluacja
+2/2 met: 58,27 s i 59,13 s; checkpoint oraz W&B sprawdzone. W pełnych
+śladach treningowych było 13 met, których skrócone logi nie pokazywały.
+To działający pilot, ale wolniejsza polityka gazu/hamulca i pojedynczy odstęp
+140 ms wymagają uwagi oraz lokalnego testu przed pełnym startem Kuby P.
+Hiperparametry baseline i wspólna nagroda pozostają bez zmian.
+
+DSAC pozostaje niegotowy: obecny cel entropii utrzymuje rozproszoną politykę;
+próbka końcowego checkpointu daje tylko 29,2% średniej masy na pełny gaz bez
+hamowania. Niższy cel 2,0 nadal jest nieuruchomionym testem, nie pełną decyzją.
+Szczegóły, dowody i ograniczenia: [ALGORITHM_AUDIT.md](ALGORITHM_AUDIT.md).
+
+Na prośbę użytkownika po IQN/QR dodano continuous SAC; termin całej kampanii
+wydłużony do 16:15 Europe/Warsaw (zapis od 16:05). Pozostałe wyniki v2 czekają
+na ukończenie. Pełne treningi nadal nie uruchamiają się automatycznie.
+
 ## Wynik TQC i wznowienie kolejki — 2026-10-04, około 06:45
 
 **Kamil / TQC: pilot v2 przeszedł; pozostawić hiperparametry.** Trening zakończył

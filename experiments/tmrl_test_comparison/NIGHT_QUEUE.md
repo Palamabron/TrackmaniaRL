@@ -1,5 +1,19 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Rozszerzenie — około 09:20
+
+Użytkownik dodał continuous SAC i zatwierdził termin 16:15 zamiast 14:00.
+Po IQN i QR ruszy nowa kolejka SAC (145 408 kroków / 2 h 15 min + 2 eval).
+Supervisor `queue-continuous-sac-20261004/after_queue.py` czeka na ukończenie
+bieżącej kolejki i brak procesów sterujących grą; STOP lub awaria blokuje start.
+Wskaźnik pending: `PENDING-SAC.json`, po starcie zmieni się `active-queue.json`.
+Nowa granica zapisu 16:05. Stary runner IQN/QR zachowuje granicę 13:50;
+eventualny krótszy QR wymaga jawnej kontynuacji, jeśli pozostaje czas.
+SAC przeszedł schema/CPU update/checkpoint round-trip, model i nagroda jak TQC.
+PPO ukończony: 2/2 eval, 58,27 s i 59,13 s. Wyniki, audyt i ograniczenia
+opisano w [ALGORITHM_AUDIT.md](ALGORITHM_AUDIT.md).
+To nadal kampania pilotów, pełne treningi nie startują automatycznie.
+
 ## Aktualizacja — około 06:45
 
 TQC zakończył pełny pilot: 145 433 kroki, 33 858 aktualizacji, kredyt 0,25,

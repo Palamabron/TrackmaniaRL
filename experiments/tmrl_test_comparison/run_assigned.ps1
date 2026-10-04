@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet('iqn', 'qr', 'discrete-sac', 'tqc', 'ppo')]
+    [ValidateSet('iqn', 'qr', 'discrete-sac', 'tqc', 'ppo', 'sac')]
     [string]$Algorithm
 )
 $ErrorActionPreference = 'Stop'
