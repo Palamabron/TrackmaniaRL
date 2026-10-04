@@ -1,6 +1,18 @@
 # Nocne piloty v2 — 3/4 października 2026
 
-## Nowa kolejka uruchomiona — 4 października, 17:28
+## Aktualna noc 4/5 października — jawne wznowienie
+
+Nowy wskaźnik `active-queue.json`: `queue-overnight-tuning-20261005`.
+Runner 37100, launcher 37184, start 00:50:18 Warsaw; zapis 10:40:18,
+twardy koniec 10:50:18 5 października, 10 godzin łącznie bez przedłużania.
+DSAC resume → 10 ocen → PPO baseline prefix → 10 ocen → PPO entropy0 prefix
+→ 10 ocen → po 30 ocen IQN/TQC/SAC/QR w pozostałym czasie. Dokładne warunki,
+ograniczenia i zamrożone runtime opisuje [TUNING.md](TUNING.md).
+Monitor co 5 minut, cisza przy zdrowym niezmienionym stanie. STOP zawsze
+zatrzymuje; po wyniku całej kampanii lub terminie raport i PAUSED monitora.
+Nie uruchamiać starego runnera, drugiego kontrolera ani pełnych eksperymentów.
+
+## Historia: kolejka z 4 października 17:28, zatrzymana na polecenie użytkownika
 
 Kod zespołu opublikowany na obu branchach: **8f440075**. Nowy pilot korzysta
 z osobnego, czystego i zamrożonego `tmrl-tuning-runtime` na tym commicie.

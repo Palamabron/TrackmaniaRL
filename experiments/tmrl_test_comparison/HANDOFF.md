@@ -1,6 +1,17 @@
 # Podział eksperymentów
 
-## Nowa kolejka uruchomiona — 4 października, 17:28
+## Aktualizacja — 5 października, kampania nocna
+
+Po wyraźnym wznowieniu użytkownika działa `queue-overnight-tuning-20261005`.
+Budżet 10 godzin od 00:50:18, zapis 10:40:18, twardy koniec 10:50:18 Warsaw.
+Runner 37100 sam prowadzi etapy; nie uruchamiać kolejnego kontrolera ani pełnych
+treningów. Poprzednie STOP pozostają dowodem, nowe STOP nadal zatrzymuje.
+Aktualny plan i warunki doboru parametrów: [TUNING.md](TUNING.md).
+Przydziały pozostają: Jakub IQN/QR, Borys DSAC, Kamil TQC, Kuba P. PPO,
+SAC bez przydziału. Pełne trzy seedy dopiero z końcowego wspólnego commita,
+od zera, po lokalnej kalibracji i smoke; nie wznawiać pilotów na nowym kodzie.
+
+## Historia: kolejka z 4 października 17:28, zatrzymana na polecenie użytkownika
 
 Kod zespołu opublikowany na obu branchach: **8f440075**. Nowy pilot korzysta
 z osobnego, czystego i zamrożonego `tmrl-tuning-runtime` na tym commicie.

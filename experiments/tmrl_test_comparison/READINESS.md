@@ -1,6 +1,18 @@
 # Decyzja przed pełnymi treningami
 
-## Nowa kolejka uruchomiona — 4 października, 17:28
+## Aktualizacja — 5 października, wznowienie 10 godzin
+
+Aktualna kampania `queue-overnight-tuning-20261005` działa od **00:50:18**;
+zapis do **10:40:18**, twarde zatrzymanie **10:50:18 Europe/Warsaw**.
+DSAC wznowiony z 12 658 kroków i pełnego zapisu. Następnie dwa świeże prefixy
+PPO (baseline entropii 0,01 / hipoteza 0,0) i pomiary powtarzalności pozostałych
+algorytmów. Plan i warunki wyboru są w [TUNING.md](TUNING.md).
+Wcześniejsza kolejka została zatrzymana i nie jest uruchamiana ponownie.
+TQC/SAC/QR zachowują pozytywne baseline; IQN wymaga sprawdzenia stabilności,
+DSAC pozostaje zablokowany, nowe PPO wymaga wyników. Pełnych treningów nie
+uruchomiono. Końcowy raport oraz wspólny commit trzech seedów powstaną po testach.
+
+## Historia: kolejka z 4 października 17:28, zatrzymana na polecenie użytkownika
 
 Kod zespołu opublikowany na obu branchach: **8f440075**. Nowy pilot korzysta
 z osobnego, czystego i zamrożonego `tmrl-tuning-runtime` na tym commicie.

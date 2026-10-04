@@ -1,6 +1,71 @@
 # Przygotowanie trzech seedów — 4 października 2026
 
-## Nowa kolejka uruchomiona — 4 października, 17:28
+## Wznowienie nocne — 5 października, 00:50 Europe/Warsaw
+
+Użytkownik odwołał pauzę i zatwierdził **10 godzin łącznie testów i nadzoru**.
+Aktualna kolejka to `queue-overnight-tuning-20261005`, wskazana przez
+`artifacts/tmrl-test-comparison/active-queue.json`. Start **00:50:18**, zapis
+do **10:40:18**, twardy koniec **10:50:18 5 października**. Tej granicy nie
+wydłużamy. Pełne eksperymenty pozostają do ręcznego uruchomienia.
+
+Przerwana kolejka z 4 października pozostaje zatrzymana; jej STOP i dane
+zachowano. Nowa kolejka wznawia DSAC z `distributed-update-00000659.pt`:
+**12 658 kroków, 659 aktualizacji, kredyt 5,5**, skończone tensory i zgodny
+fingerprint potwierdzone. Odtwarza pełny stan, bez resetowania replay.
+Nowy segment W&B: [2fslk8zh](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/2fslk8zh).
+Audytowy W&B `dwz2e073` miał wyłącznie setup i zero kroków — nie jest pilotem.
+
+Plan: dokończenie DSAC celu 2,0 / beta 0 oraz 10 ocen; świeże PPO baseline
+entropii 0,01 i osobno 0,0, każde z maksymalnie 2 h 15 min jazdy i 10 ocenami;
+następnie po 30 przejazdów starych końcowych IQN, TQC, SAC i QR, jeśli mieszczą
+się we wspólnym terminie. Globalny termin ma pierwszeństwo przed sumą etapów.
+Pominięte lub niepełne oceny muszą zostać wskazane w raporcie końcowym.
+
+Oba PPO badają **krótki prefix 145 408 kroków z horyzontem LR 2 048 000**,
+nie pełny trening. Pozostałe parametry, seed 17, nagroda i model są identyczne.
+Zatrzymanie następuje po potwierdzonym zapisie prefixu lub limicie czasu.
+Jeśli zamknięcie zapisze częściowy, nieuczony ostatni rollout, narzędzie jawnie
+odrzuca go i wybiera zachowany kompletny checkpoint z równymi licznikami
+`processed_transitions` i `transitions`. Przed startem obu PPO ustalono ocenę
+na **wspólnym zapisie 70 pełnych rolloutów = 143 360 uczonych kroków**.
+Zatrzymanie kolekcji pozostaje przy 145 408; konserwatywna ocena wcześniejszego
+zapisu chroni przed nadpisaniem ostatniego checkpointu podczas domykania.
+Nie zmieniamy liczników ani zawartości zapisu. Receipt rozróżnia kompletność
+wspólnego prefixu od pełnego eksperymentu; `full_training_complete` zawsze false.
+
+DSAC zachowuje wcześniej ustalony warunek: cały budżet 145 408, rozliczony
+kredyt, finite checkpoint, 10 kompletnych prób, minimum 8 met, ważny timing
+wszystkich, max kroku ≤100 ms i brak błędów. Bez spełnienia pozostaje zablokowany.
+PPO entropii 0 może być wybrane wyłącznie prowizorycznie, gdy oba prefixy są
+kompletne przy wspólnym uczonym budżecie, wszystkie pomiary ważne, brak błędów,
+max kroku ≤100 ms, co najmniej 8/10 met, liczba met nie niższa od baseline
+i mediana czasu co najmniej 5% lepsza. W przeciwnym razie baseline zostaje;
+jeżeli oba warianty zawodzą, nie deklarujemy gotowości i nie ukrywamy wyniku.
+Jedno ziarno i 10 prób nie dowodzą optymalności ani przewagi na trzech seedach.
+
+Zabezpieczenia nowego runnera: 19 testów CPU, mutex jednej instancji sterowania,
+STOP z zapisem, watchdog twardego terminu, atomowy JSON z ponawianiem,
+kontrola zamrożonego commita i potwierdzonego checkpointu. Dwa CPU update /
+checkpoint roundtrip PPO przeszły na syntetycznych sekwencjach 64; jazda
+używa 2048. Dalsze wyniki będą zapisywane w receiptach i raporcie końcowym.
+
+Podczas preflight wykryto i naprawiono w edytowalnym kodzie pomocnicze problemy:
+syntetyczny validator PPO dodawał chronione demonstracje poza pojemność replay
+2048; teraz używa jednej pełnej sekwencji on-policy. Fingerprint pakietów
+namespace deduplikuje korzenie importów, żeby cwd/PYTHONPATH nie zmieniały
+tożsamości tych samych plików. To zmiana nowego kodu zespołu: istniejące piloty
+pozostają na zamrożonym `8f440075`, stare checkpointy na `d0dfe645`; żadnych
+wznowień na nowym kodzie ani obchodzenia fingerprintu. Nagroda bez zmian.
+Regresje po poprawkach: **48 testów przeszło**, Ruff i mypy bez błędów.
+Dwa testy PowerShell wywołujące launcher pominięto w ponownym przebiegu,
+ponieważ prawdziwy nocny runner posiada globalny mutex; ich pierwsza próba
+została prawidłowo zablokowana przez działającą kampanię. Guardów nie osłabiano.
+
+Pełne starty od zera: jeden końcowy wspólny commit, seedy **17/29/43**, po
+**2 048 000 kroków i 30 greedy prób/seed**, kalibracja i lokalny smoke.
+Dobór DSAC i PPO oraz końcowa gotowość pozostają otwarte do wyników tej nocy.
+
+## Historia: kolejka z 4 października 17:28, zatrzymana na polecenie użytkownika
 
 Kod zespołu opublikowany na obu branchach: **8f440075**. Nowy pilot korzysta
 z osobnego, czystego i zamrożonego `tmrl-tuning-runtime` na tym commicie.
