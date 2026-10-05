@@ -1,5 +1,42 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Aktualny stan — QR-DQN dołączony po PPO, 5 października 12:05 Warsaw
+
+Użytkownik polecił poprawić QR-DQN i dodać go do kolejki, następnie zezwolił
+na późniejsze zakończenie testów, także po19:00, przed prawdziwymi treningami.
+Poprawka QR jest opublikowana: **c4ec36a0b6d2eaf948c9eb24a783e344b81c1314**.
+Nowy QR używa osobnego frozenruntime `tmrl-qr-repair-runtime`; aktualne
+SD-SAC/PPO266e2629 oraz starsze runtime pozostają bez zmian.
+
+Faktycznie dodany etap oczekujący: `queue-qr-repair-20261005`, launcher28636,
+runner61196, status `waiting_for_predecessor`, bez kontrolera i bez `launch.json`.
+`pending-queue.json` wskazuje QR; `active-queue.json` do zakończenia PPO wskazuje
+bieżącą kolejkę SD-SAC/PPO. QR przejmie wskaźnik dopiero po wszystkich czterech
+etapach, potwierdzonych wynikach, zamknięciu ich procesów/guardu i sprawdzeniu
+wspólnej blokady. Nie uruchamia drugiego kontrolera ani nie ponawia poprzednika.
+
+QR: świeży145408/seed17, max8100s, potem30greedy/max2700s. Nowa faza ma osobny
+limit3h30 od faktycznego startu QR i SAVE10min przed HARD. Konkretne godziny
+będą dopiero w QR `launch.json`/`effective-deadline.json`;16:29 pozostaje limitem
+poprzedniej fazy. Jej prawidłowe zamknięcie nie kończy jeszcze autoryzowanego QR.
+Nowy STOP, awaria lub niepełne PPO zatrzymują automatyczne przejęcie.
+
+32testy źródeł +21testów CPU nadzoru i bramki przeszły, Ruff i mypy zmienionego
+źródła przeszły. Pełna konfiguracja kompozycji QR64 przeszła standardowy validator
+na CPU: syntetyczny update i zstd checkpoint roundtrip, bez gry, kontrolera i
+nowego W&B. Bramka QR jest z góry: pełny/drained/finite/fingerprint/SHA pilot,
+30ważnychprób/max100ms/noerrors/skips, >=29/30met i mediana<=56,915s. Wynik
+jazdy nadal oczekiwany; matematyczna poprawka nie gwarantuje poprawy polityki.
+
+Monitor ACTIVEco15min obejmuje również oczekujący QR. Raport końcowy i PAUSED
+nastąpią po wszystkich autoryzowanych etapach lub ich zatrzymaniu/awarii/limicie.
+Pełnych treningów nie uruchamiamy; QR, PPO i SD-SAC nie otrzymują deklaracji
+optymalnych HP lub gotowości trzech seedów bez rzeczywistych wyników.
+Protokół, analiza ograniczeń i punkt odniesienia:
+[QR_REPAIR_20261005.md](QR_REPAIR_20261005.md).
+
+Poniższe sekcje zachowują wcześniejsze stany i dowody.
+
 Aktualna oddzielna kolejka naprawcza wystartowała 5 października10:29Warsaw: `queue-ppo-sd-sac-repair-20261005`, nowy frozenruntime266e2629. Świeży SD-SAC target0,8/beta0,5/behavior145408 +10greedy, następnie PPO.01 prefix143360uczonych (STOP145408, LRhorizon2048000) +10greedy. Nowa faza ma limit6h, SAVE16:19/HARD16:29Warsaw; te godziny są nadrzędne dla nowych testów po bezpośrednim przedłużeniu przez użytkownika. Właściwy wskaźnik: `artifacts/tmrl-test-comparison/active-queue.json`; runner61144, niezależny guard3356, W&B `wcsd62q4` online. 203testy kodu +21testów guardówCPU przeszły. Stary fixturepoczątkowegoplanu odłożono: historyczna retencja usunęła cp659; jego nowy start jest zabroniony. Pełny SD-SAC nadal zablokowany, wspólna nagroda bez zmian, bez automatycznych miesięcznych treningów. Live wynik nowych poprawek jest jeszcze w toku.
 
 
