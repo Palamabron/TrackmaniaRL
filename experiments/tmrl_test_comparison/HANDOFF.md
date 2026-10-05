@@ -1,5 +1,36 @@
 # Podział eksperymentów
 
+## Przywrócone oczekiwanie QR — 5 października 12:21 Warsaw
+
+Pomocnik oczekujący QR zakończył się o 12:09 z `PermissionError` podczas odczytu
+`status.json` poprzedniej kolejki. QR nie otworzył kontrolera, nie rozpoczął
+treningu ani oceny. Zachowano pierwotny błąd, logi, rezerwację i helpery w
+`queue-qr-repair-20261005/passive-wait-recovery-01`; zapis w
+`passive-recovery.json` potwierdza zamknięcie starego pomocnika i brak etapów QR.
+
+Poprawiono tylko odczyty zewnętrznego pomocnika QR i jego przyszłego guardu:
+ponawianie trwa najwyżej 5 s, a trwały błąd nadal przerywa pracę. Wszystkie
+26 testów CPU nadzoru przeszło, w tym 5 nowych regresji: rzeczywista wyłączna
+blokada pliku Windows, ograniczony trwały błąd uprawnień, przerwa podmiany pliku,
+odrzucenie uszkodzonego JSON i niedozwolonego długiego ponawiania. Walidacja
+planu i Ruff helperów przeszły. Poprzednie 32 testy źródeł i próba QR64 update /
+zstd roundtrip pozostają zachowanymi dowodami, nie nowym wynikiem jazdy.
+
+Oczekiwanie przywrócono: launcher **60600**, runner **60380**,
+`waiting_for_predecessor`, pusty `runner.err`, bez `launch.json` QR.
+`pending-queue.json` wskazuje nową tożsamość; aktywna kolejka pozostaje SD-SAC/PPO
+z runnerem 61144 i guardem 3356. Nie zmieniono jej źródeł, helperów ani etapów.
+Zamrożone runtime QR c4ec36a0 oraz SD-SAC/PPO 266e2629 pozostały bez zmian.
+
+Zakres i warunki przejęcia są niezmienione: wszystkie cztery etapy poprzednika,
+pełny uczony prefix PPO i 10+10 ocen, zamknięte procesy, wolna wspólna blokada,
+brak nowego STOP. Oczekiwanie kończy się najpóźniej o 16:34 Warsaw. QR nadal ma
+własne 3 godz. 30 min od rzeczywistego startu, SAVE 10 min przed HARD i wcześniej
+zapisane bramki 29/30 met / mediana ≤56,915 s. Wynik nowego QR w grze nadal
+oczekiwany. Nadzór pozostaje ACTIVE; pełnych treningów nie uruchomiono.
+
+Poniższe sekcje zachowują wcześniejsze stany i dowody.
+
 ## Aktualny stan — QR-DQN dołączony po PPO, 5 października 12:05 Warsaw
 
 Użytkownik polecił poprawić QR-DQN i dodać go do kolejki, następnie zezwolił
