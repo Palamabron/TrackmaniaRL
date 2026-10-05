@@ -1,5 +1,26 @@
 # Podział eksperymentów
 
+## PPO baseline — 5 października, 05:25 Europe/Warsaw
+
+Świeży PPO entropy coefficient 0,01 zakończył krótki prefix diagnostyczny.
+Do porównania wybrano potwierdzony, skończony cp70: **143 360 uczonych kroków,
+70 aktualizacji**, processed_transitions=transitions; prefix_complete=true,
+full_training_complete=false, wspólny harmonogram LR 2 048 000.
+SHA256: `250767107f53a5917d9cc54fb8426539c8d234fd83a8dd01d09faf9bc8660bbb`.
+Dziesięć prób greedy: **8/10 met**, średnia ukończonych 56,585 s,
+mediana **56,445 s**, najlepsza 55,520 s. Dwie porażki przy około 81,20% postępu.
+Wszystkie próby mają ważny timing; 11 068/11 068 pomiarów, max/p99 **50 ms**,
+brak błędów kontrolera i telemetrii. Pominięte ramki: **18 648**, maksimum 6.
+W treningu występowały skoki race-clock powyżej 100 ms (maksimum 530 ms);
+poprawna ocena nie usuwa tego ograniczenia lokalnego treningu.
+To wynik jednego seeda i 10 prób diagnostycznych, nie końcowe 30 prób na seed
+ani dowód globalnej optymalności. Baseline 0,01 pozostaje ustawieniem domyślnym;
+wybór 0 wymaga pełnego porównania zgodnego z ustalonym wcześniej protokołem.
+Wariant entropy0 już działa od 05:21:32 Warsaw, W&B `yei92q7a`;
+baseline `hymfpseo` potwierdzony finished. Kampania nadal trwa.
+Dowody: `queue-overnight-tuning-20261005/ppo-baseline-completion.json` i
+`tmrl-overnight-diag-ppo-baseline-s17-benchmark-20261005T031138975953/evaluation.json`.
+SAVE 10:24 / HARD 10:34 pozostają nadrzędne; pełnych treningów nie uruchomiono.
 
 ## Wynik DSAC — 5 października, 03:10 Europe/Warsaw
 
