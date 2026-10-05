@@ -1,5 +1,28 @@
 # Audyt DSAC/PPO i dodatkowy SAC — 2026-10-04
 
+## Decyzja PPO — 5 października, 07:55 Europe/Warsaw
+
+Porównanie obu wariantów zakończone na wspólnym cp70: **143 360 uczonych kroków /
+70 aktualizacji**, pełne prefixy diagnostyczne, skończone checkpointy,
+zgodność fingerprint i SHA potwierdzona. Pełnych miesięcznych treningów nie wykonano.
+
+| Współczynnik entropii | Mety | Mediana ukończonych | Średnia ukończonych | Max/p99 kroku | Pominięte ramki |
+| --- | --- | --- | --- | --- | --- |
+| 0,01 baseline | 8/10 | 56,445 s | 56,585 s | 50/50 ms | 18 648 (max 6) |
+| 0 | 7/10 | 57,880 s | 57,673 s | 50/50 ms | 18 173 (max 6) |
+
+Wszystkie 20 prób mają ważny timing i brak błędów kontrolera/telemetrii.
+Wariant 0 nie osiągnął minimum 8/10 met, miał niższy odsetek met oraz medianę
+około 2,54% wolniejszą, zamiast wymaganych przynajmniej 5% poprawy.
+**Zachowujemy baseline 0,01 w generatorze i pełnych konfiguracjach 17/29/43.**
+Nie jest to dowód globalnej optymalności ani ukończenie końcowych 30 prób na seed.
+Skoki race-clock treningu ponad 100 ms nadal stanowią ograniczenie lokalne.
+Dowód decyzji: `queue-overnight-tuning-20261005/ppo-comparison-decision.json`.
+Ocena wariantu 0: `tmrl-overnight-diag-ppo-entropy0-s17-benchmark-20261005T053439289662/evaluation.json`,
+SHA cp70 `1646e5648265e9b5af3503c40feb4f9b0eb6ea256d2efaf30c05b5d244c29b83`.
+Kampania trwa: istniejący runner rozpoczął 30 prób IQN 07:44:38 Warsaw.
+SAVE 10:24 / HARD 10:34 bez zmian; pełny DSAC nadal zablokowany.
+
 ## PPO baseline — 5 października, 05:25 Europe/Warsaw
 
 Świeży PPO entropy coefficient 0,01 zakończył krótki prefix diagnostyczny.
