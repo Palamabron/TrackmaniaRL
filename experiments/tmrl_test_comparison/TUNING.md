@@ -1,5 +1,19 @@
 # Przygotowanie trzech seedów — 4 października 2026
 
+## TQC 30 prób — 5 października, 08:40 Europe/Warsaw
+
+Zachowany stary cp33858 na runtime d0dfe645 ukończył ocenę:
+**29/30 met**, średnia **44,384 s**, mediana **44,300 s**, najlepsza **43,790 s**.
+Wszystkie 30 prób mają ważny timing: 26 222/26 222 pomiarów, max **60 ms**,
+p99 **50 ms**, brak błędów telemetrii/kontrolera. Pominięte ramki **8 080**,
+maksimum 6. Zachowujemy pozytywny baseline TQC. Ocena potwierdza tę politykę
+seeda17, nie powtarzalność treningu na trzech seedach ani osiągnięcie celu 37 s.
+Dowód: `tmrl-overnight-diag-tqc-s17-benchmark-20261005T061051859378/evaluation.json`;
+SHA cp `6dda21d2d3d5ee119919d66741517f608b2b9e12e63f8764fe4d3ce8aff29a7f`.
+W&B `4twuxhg7` finished. SAC rozpoczął 08:34:03 Warsaw, PID52608,
+W&B `wjlsmn59`; QR pozostaje w kolejce. Kampania trwa.
+SAVE 10:24 / HARD 10:34 bez zmian; pełnych treningów nie uruchomiono.
+
 ## Powtarzalność IQN — 5 października, 08:11 Europe/Warsaw
 
 Ocena zachowanego starego cp33854, na zamrożonym runtime d0dfe645, ukończona:
