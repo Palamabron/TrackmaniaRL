@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Unpack, cast
 
 import torch
@@ -80,6 +80,7 @@ class _DiscreteActorStep:
     loss: torch.Tensor
     entropy: torch.Tensor
     action_count: int
+    diagnostics: Mapping[str, torch.Tensor] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -195,18 +196,33 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
     def _actor_step(self, batch: SACBatch, alpha: torch.Tensor) -> _DiscreteActorStep:
         probabilities = self.model.actor.probabilities(batch.observations)
         log_probabilities = probabilities.clamp_min(1e-8).log()
-        q_values = (
-            0.5 * (self.model.q1(batch.observations) + self.model.q2(batch.observations))
-        ).detach()
+        # The actor improves against fixed critic values. Building a critic graph
+        # only to detach it wastes memory and compute on every actor update.
+        with torch.no_grad():
+            q_values = 0.5 * (self.model.q1(batch.observations) + self.model.q2(batch.observations))
         actor_loss = (probabilities * (alpha * log_probabilities - q_values)).sum(1).mean()
         entropy = -(probabilities * log_probabilities).sum(1)
+        diagnostics = {
+            "policy/max_probability": probabilities.detach().max(1).values.mean(),
+            "policy/q_greedy_agreement": (probabilities.detach().argmax(1) == q_values.argmax(1))
+            .float()
+            .mean(),
+            "critic/action_value_spread": (q_values.max(1).values - q_values.min(1).values).mean(),
+            "loss/entropy_penalty": torch.zeros((), device=entropy.device),
+        }
         if self.entropy_penalty_coefficient:
-            actor_loss = actor_loss + self.entropy_penalty_coefficient * self._entropy_penalty(
-                batch, entropy
-            )
-        return _DiscreteActorStep(actor_loss, entropy, int(probabilities.shape[-1]))
+            reference = self._entropy_reference(batch, entropy)
+            penalty = self.entropy_penalty_coefficient * (entropy - reference).square().mean()
+            actor_loss = actor_loss + penalty
+            diagnostics["loss/entropy_penalty"] = penalty.detach()
+            diagnostics["policy/reference_entropy"] = reference.mean()
+            diagnostics["policy/entropy_reference_gap"] = (entropy.detach() - reference).mean()
+        return _DiscreteActorStep(actor_loss, entropy, int(probabilities.shape[-1]), diagnostics)
 
     def _entropy_penalty(self, batch: SACBatch, entropy: torch.Tensor) -> torch.Tensor:
+        return (entropy - self._entropy_reference(batch, entropy)).square().mean()
+
+    def _entropy_reference(self, batch: SACBatch, entropy: torch.Tensor) -> torch.Tensor:
         if self.entropy_penalty_reference == "behavior":
             stored = batch.source.metadata.get("behavior_entropies")
             if not isinstance(stored, torch.Tensor) or stored.shape != entropy.shape:
@@ -216,13 +232,13 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             target_entropy = stored.detach().to(device=entropy.device, dtype=entropy.dtype)
             if not bool(torch.isfinite(target_entropy).all()) or bool((target_entropy < 0).any()):
                 raise ValueError("Stored behavior entropies must be finite and non-negative")
-            return (entropy - target_entropy).square().mean()
+            return target_entropy
         with torch.no_grad():
             target_probabilities = self.target_model.actor.probabilities(batch.observations)
             target_entropy = -(
                 target_probabilities * target_probabilities.clamp_min(1e-8).log()
             ).sum(1)
-        return cast(torch.Tensor, (entropy - target_entropy).square().mean())
+        return cast(torch.Tensor, target_entropy)
 
     def _entropy_loss(self, actor: _DiscreteActorStep) -> torch.Tensor:
         alpha_loss = torch.zeros((), device=self.device)
@@ -251,6 +267,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "critic/disagreement": float(
                 (update.critic.q1 - update.critic.q2).detach().abs().mean().item()
             ),
+            **{key: float(value.item()) for key, value in update.actor.diagnostics.items()},
         }
         td_errors = (0.5 * (update.critic.q1 + update.critic.q2) - update.critic.targets).abs()
         return metrics, PriorityUpdate(
