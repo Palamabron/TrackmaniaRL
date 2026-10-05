@@ -1,5 +1,45 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Nowe ograniczone QR → SD-SAC uruchomione — 5 października 17:04 Warsaw
+
+Użytkownik potwierdził: **„Tak, nowe ograniczone QR → SD-SAC”** po pytaniu
+o nowy pilot QR do 3,5 godziny i osobny SD-SAC do 4 godzin. To nowa próba,
+bez przedłużania lub restartowania kolejek zakończonych awarią.
+Poprzednie awarie i wyniki PPO 3/10 oraz SD-SAC 0/10 pozostają zachowane.
+
+Lokalny gracz i telemetria wróciły. Preflight wymaga gotowego gracza przed wejściem,
+pomija bezwarunkowe potwierdzenie finish-screen, łączy telemetrię po resecie
+i odrzuca brak powrotu na start (race_time > 2500 ms). Osobny test live potwierdził
+reset do 210 ms; właściwy QR preflight do **240 ms**, właściwy UID i 33 pola.
+Nie udowodniono, który element dawnego menu spowodował utratę gracza.
+Zmiany dotyczą wyłącznie zewnętrznych helperów; zamrożone algorytmy są niezmienione.
+Pięć testów kontraktu preflight, 31 testów nadzoru QR i 20 SD-SAC przeszło;
+oba plany przeszły validate-only.
+
+QR działa w `queue-qr-repair-retry01-20261005`: launcher 43888 / runner 51928,
+train launcher 58120, learner 53772, actor 53428; W&B **5x4ydddg online**.
+Fresh run `tmrl-repair-qr-loss-sum-s17-retry01` zbiera rollouts, bez gotowego wyniku.
+Start **17:03:16 Warsaw**, SAVE **20:23:16**, HARD **20:33:16**, cap 12600 s.
+Plan zachowuje 145408 kroków / max 8100 s i 30 greedy / max 2700 s,
+zamrożony kod `c4ec36a0`. Bramka pozostaje >=29/30 i mediana <=56,915 s,
+pełny/drained/accounted checkpoint, finite/fingerprint/SHA, ważny timing max100 ms,
+brak błędów i raport pominiętych ramek. Naprawa matematyczna nie gwarantuje jazdy.
+
+Nowy SD-SAC `queue-sd-sac-anchor005-retry01-20261005`: launcher 58956 /
+waiter 30764, created_time 1791212631.7032077; czeka **bez kontrolera i launch.json**.
+Przypina nowy QR plan/rezerwację, wymaga obu ukończonych etapów, pełnego finite/drained
+checkpointu, 30 ocen z matching SHA, normalnego zamknięcia guardu/procesów,
+braku STOP i wolnego mutexu. Pasywne oczekiwanie kończy się **20:38:16 Warsaw**.
+Po rzeczywistym przejęciu fresh beta0,005 seed17, 145408/max10800 s + 10 greedy/max2100 s,
+cap14400 s, SAVE600 s przed HARD. Źródła `4706a06b` są zamrożone i niezmienione.
+Wymagane >=8/10 i pozostałe pełne bramki; full SD-SAC nadal BLOCKED.
+
+Aktualne wskaźniki active-queue/pending-queue/sd-sac-pending-queue opisują te nowe próby;
+czytaj faktyczne statusy i launch. Nadzór pozostaje ACTIVE co15 min do zakończenia
+autoryzowanego celu SD-SAC albo jawnego STOP. Żadnych automatycznych miesięcznych
+startów, zmian nagrody, fingerprint override ani wznawiania starych checkpointów.
+
+
 ## Aktualny wynik i blokada środowiska — 5 października 15:29 Warsaw
 
 Ta aktualizacja zastępuje poniższe historyczne informacje o działającym PPO
