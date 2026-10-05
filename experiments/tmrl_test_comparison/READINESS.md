@@ -1,5 +1,25 @@
 # Decyzja przed pełnymi treningami
 
+
+## Wynik DSAC — 5 października, 03:10 Europe/Warsaw
+
+Pilot celu entropii 2,0 / beta 0 zakończył **145 487 kroków / 33 871 aktualizacji**.
+Końcowy cp33871 ma skończone tensory, zgodny fingerprint i rozliczony kredyt
+**0,75** (`earned = accounted = 33 871,75`). Ocena zakończona: **0/10 met**,
+postęp 4,24–5,17%, średnio 4,42%. Wszystkie pomiary czasu ważne, max/p99 50 ms,
+brak błędów telemetrii/kontrolera; 651 pominiętych ramek, maksimum 5.
+Warunek minimum 8/10 met NIE został spełniony: **pełny DSAC nadal zablokowany**,
+hipoteza diagnostyczna nie zostaje promowana do konfiguracji seedów 17/29/43.
+Poprawny zapis i sprawny pomiar nie oznaczają skutecznej polityki greedy.
+Dowody: `queue-overnight-tuning-20261005/dsac-completion.json` oraz
+`tmrl-overnight-diag-dsac-e200-b0-s17-benchmark-20261005T005546181914/evaluation.json`
+w `artifacts/tmrl-test-comparison`. W&B trening `2fslk8zh`, ocena `vepn4pyj`.
+
+To wynik częściowy kampanii. Świeży PPO baseline ruszył 02:58:36 Warsaw;
+pozostałe etapy prowadzi istniejący runner. Nagroda i zamrożone runtime bez zmian.
+Termin zapisu 10:24, twardy koniec 10:34 pozostają nadrzędne.
+
+
 ## Aktualizacja — 5 października, wznowienie 10 godzin
 
 Aktualna kampania `queue-overnight-tuning-20261005` działa od **00:50:18**;
