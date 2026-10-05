@@ -1,5 +1,19 @@
 # Podział eksperymentów
 
+## SAC 30 prób — 5 października, 09:10 Europe/Warsaw
+
+Zachowany stary cp33854 na runtime d0dfe645 ukończył ocenę: **30/30 met**,
+średnia **44,366 s**, mediana **44,500 s**, najlepsza **42,500 s**.
+Wszystkie 30 prób mają ważny timing: 26 627/26 627 pomiarów, max/p99 **50 ms**,
+brak błędów telemetrii/kontrolera. Pominięte ramki **8 021**, maksimum 5.
+Zachowujemy pozytywny baseline SAC. To ocena jednej polityki seed17, nie dowód
+powtarzalności treningu na trzech seedach ani osiągnięcia celu 37 s.
+Dowód: `tmrl-overnight-diag-sac-s17-benchmark-20261005T063406463907/evaluation.json`;
+SHA cp `620f9b1aaabb1afda5355b82ec7a1b71412262df6299e37de0bb3aae76f0ea3e`.
+W&B `wjlsmn59` finished. Ostatnia ocena QR rozpoczęła 08:57:38 Warsaw, PID56000;
+09:10 ukończono 13 prób, 12 met — wynik częściowy. Kampania trwa.
+SAVE 10:24 / HARD 10:34 bez zmian; pełnych treningów nie uruchomiono.
+
 ## TQC 30 prób — 5 października, 08:40 Europe/Warsaw
 
 Zachowany stary cp33858 na runtime d0dfe645 ukończył ocenę:
