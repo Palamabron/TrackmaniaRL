@@ -1,5 +1,41 @@
 # Continued SD-SAC repair — 5 October 2026
 
+## Aktualny wynik i blokada środowiska — 5 października 15:29 Warsaw
+
+Ta aktualizacja zastępuje poniższe historyczne informacje o działającym PPO
+i oczekujących procesach. PPO ukończył diagnostyczny uczony prefix cp70:
+143360 kroków / 70 aktualizacji, finite i zgodny fingerprint; to nie jest pełny trening.
+Dziesięć ocen dało **3/10 met**, medianę 55,34 s wyłącznie ukończonych prób.
+Wszystkie pomiary timingu 6681/6681 są ważne, max 60 / p99 50 ms, bez błędów;
+10778 pominiętych ramek, max 5. Timing treningu poprawił się do max 70 ms.
+Skuteczność jazdy nadal nie przechodzi progu 8/10; krótszy czas trzech finisherów
+nie dowodzi poprawy polityki względem wcześniejszego 8/10. Nie odblokowano pełnego startu.
+
+QR przejął kolejkę o 15:07:14, lecz preflight zakończył się o 15:07:31:
+po resecie nie otrzymano ramki telemetrii w 10 s. **Nie powstał learner, checkpoint
+ani katalog treningu QR.** Jego procesy i guard zamknęły się normalnie, bez forcekill.
+Oczekujący SD-SAC beta 0,005 prawidłowo przerwał przejęcie po awarii QR i również
+nie rozpoczął treningu. Poprzedni SD-SAC pozostaje 0/10 i full BLOCKED.
+
+Osobny ograniczony probe połączenia dopiero po resecie też zakończył się timeoutem.
+Pięć testów kontraktu z atrapami przeszło; nie są dowodem usunięcia rzeczywistej awarii.
+OpenPlanet potwierdza właściwy UID, ale `confirm_ready` zwraca `player_not_ready`.
+Okno gry pokazuje przejazd bez HUD-u; dostępne próby wejścia do menu nie przywróciły
+lokalnego gracza. Poproszono użytkownika o ponowne uruchomienie walidacji mapy.
+
+Dowody są w `artifacts/tmrl-test-comparison/qr-preflight-recovery-20261005/`
+(`recovery-status.json`, `session-state.json`, `probe.log`, archiwum pierwotnej awarii).
+Wskaźnik active-queue nadal opisuje zakończoną awarią QR, a nie żywy kontroler;
+zawsze czytaj status kolejki. Wszystkie obserwowane procesy zamknięto.
+Nie uruchamiaj ponownie użytych runnerów ani zakończonych etapów. Ewentualne wznowienie
+wyłącznie pozostałego QR wymaga osobnego jawnego recovery, gotowej telemetrii,
+braku nowego STOP i wolnego mutexu, z zachowaniem pierwotnego **SAVE 18:27:14 /
+HARD 18:37:14 Warsaw**. Limit nie zaczyna się ponownie od recovery.
+Nowa rezerwacja SD-SAC musi wskazywać rzeczywistego poprawnie zakończonego poprzednika.
+Cel dalszej naprawy SD-SAC i monitor ACTIVE pozostają obowiązujące; żadnych automatycznych
+miesięcznych startów, zmian wspólnej nagrody ani aktualizacji zamrożonych źródeł.
+
+
 The human explicitly instructed: “No to poprawiaj SD SAC tak długo aż będzie sensowny”. This authorizes further bounded fresh SD-SAC diagnostics, with unchanged shared reward. PPO and the already queued QR-DQN run keep their frozen sources, stages and deadlines. A new SD-SAC controller may start only after their normal closure, with no new STOP and a free shared controller mutex. No full monthly training is started automatically. Completion of PPO or QR alone no longer ends the SD-SAC repair objective.
 
 ## Evidence from the failed behavior-entropy pilot
