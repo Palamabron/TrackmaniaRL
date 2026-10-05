@@ -1,5 +1,44 @@
 # Audyt SD-SAC/PPO i dodatkowy SAC — 2026-10-04
 
+## Nowy wynik SD-SAC i przejęcie QR — 5 października 12:50 Warsaw
+
+Świeży SD-SAC target0,8 / beta0,5 / behavior nie zaliczył bramki: **0/10 met**,
+średnio **3,552% trasy**. Wszystkie 10 prób mają ważny timing, 1961/1961 pomiarów,
+max/p99 50 ms, brak błędów kontrolera i telemetrii; 2440 pominiętych ramek,
+maksimum 5. Nie ma potwierdzonej poprawy skuteczności jazdy. Pełny SD-SAC
+pozostaje zablokowany, generator i konfiguracje pełnych treningów bez promocji.
+
+Pilot zakończono przez limit czasu o 12:44:29 Warsaw: **135406/145408 kroków**,
+30775 aktualizacji, credit576,5, earned=accounted31351,5. Checkpoint jest finite
+z potwierdzonym fingerprintem/SHA, ale budżet jest niepełny i credit nie został
+wyczerpany. To ograniczenie testu, nie pełny ukończony trening. SHA checkpointu:
+`6fdab80112a7e27a5bfd65cd98e01eb20297f647b4b7258045ea726e82154175`.
+Dowody: `queue-ppo-sd-sac-repair-20261005/sd-sac-completion.json`,
+`eval-sd-sac-evaluation.json`, `sd-sac-repair-decision.json` oraz
+`tmrl-repair-diag-sd-sac-s17-benchmark-20261005T104448532426/evaluation.json`.
+
+PPO rozpoczął świeży prefix o **12:47:13 Warsaw**, PID54168, W&B `yygy62p7` online.
+Oceniamy zachowany pełny uczony cp70/143360 i 10 przejazdów zgodnie z protokołem.
+SAVE16:19/HARD16:29 poprzedniej fazy pozostają bez zmian.
+
+Przed rozpoczęciem QR wykryto dodatkowy błąd pomocnika przekazania kolejki:
+czytał `sd-sac-evaluation.json` / `ppo-evaluation.json`, choć poprzednik zapisuje
+`eval-sd-sac-evaluation.json` / `eval-ppo-evaluation.json`. Zatrzymano wyłącznie
+pasywny pomocnik, przed jakimkolwiek etapem QR, zachowano snapshot w
+`passive-wait-handoff-repair-02` i poprawiono nazwy odczytu. Nowa regresja
+odtworzyła błąd; po poprawce **31 testów nadzoru** przeszło, w tym rzeczywisty
+kontrakt nazw i odrzucanie niepełnego prefixu / brakujących prób / niefinite cp.
+Ruff helperów i validate-only planu przeszły.
+
+QR ponownie oczekuje: **launcher8384 / waiter55608**, bez kontrolera i bez
+`launch.json` QR. `passive-handoff-recovery.json` i `pending-queue.json` wskazują
+nową tożsamość. Źródła QR c4ec36a0 i SD-SAC/PPO266e2629 bez zmian; poprzednik nie
+był restartowany. Warunki przejęcia, deadline oczekiwania16:34, własny limitQR
+3h30 od rzeczywistego startu i bramki29/30 / mediana≤56,915s pozostają niezmienione.
+Matematyczna poprawka QR nadal wymaga świeżego wyniku w grze. Monitor ACTIVE.
+
+Poniższe sekcje zachowują wcześniejsze stany i dowody.
+
 ## Przywrócone oczekiwanie QR — 5 października 12:21 Warsaw
 
 Pomocnik oczekujący QR zakończył się o 12:09 z `PermissionError` podczas odczytu
