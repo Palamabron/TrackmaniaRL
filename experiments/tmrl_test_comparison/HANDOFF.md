@@ -1,5 +1,43 @@
 # Podział eksperymentów
 
+## QR bramka zaliczona, SD-SAC recovery — 6 października 01:03 Warsaw
+
+QR retry02 ukończył 145448 przejść /33862 aktualizacje, earned=accounted=33862,
+credit0, finite, fingerprint i potwierdzony SHA
+6530a914dfe24037ce967241b4eaa72ea2b8609d6be467a87744376e317af5ab.
+Kompletne 30 greedy: 29/30 met, median54.30 s, mean54.233103 s, best52.95 s,
+32288/32288 ważnych pomiarów, max60/p9950 ms, bez błędów controller/telemetry,
+skips46685/max6. qr-comparison-decision.json: gate_passed=true wobec baseline
+26/30 i median56.915 s. To wynik jednego seeda/polityki; nie dowodzi globalnej
+optymalności ani ukończenia miesięcznego treningu lub kwalifikacji trzech seedów.
+Normalne zamknięcie kolejki 22:50:35 UTC, guard closed normally/forced[].
+
+Pierwsze przejęcie SD-SAC retry02 nie rozpoczęło learnera: confirm_ready odrzucił
+player_not_ready. Odczyt okna wykazał końcowy ekran ostatniej walidacji QR.
+Po potwierdzeniu ekranu i wybraniu widocznego Improve przywrócono local player
+na starcie. Nie zmieniono mapy, nagrody ani frozen sources; stara kolejka,
+failure i normalne guard closure zachowane. Read-only/checks i bounded probe
+potwierdziły UID oqIJ5rQDRrNwLPTh9H2p_W4tLof, 33 pola i race290 ms.
+
+NOWY recovery queue-sd-sac-anchor005-recovery01-20261006 prowadzi tylko pozostałe
+SD-SAC145408/max10800 +10greedy/max2100 na4706a06b, beta.005/target.8.
+Fresh run tmrl-repair-sd-sac-anchor005-s17-retry02-recovery01, bez starego cp.
+Runner38704, launcher58684, learner43504, actor28068, guard66512.
+Start23:03:00 UTC (01:03 Warsaw), rzeczywisty preflight210 ms/33fields/UIDready.
+ZACHOWANO pierwotny SAVE2026-10-06T02:40:37.901224UTC (04:40 Warsaw) i
+HARD02:50:37.901224UTC (04:50 Warsaw), nie odnowiono czterogodzinnego cap.
+Budżet recovery13657.145471 s; helper Budget przyjmuje wcześniejszy deadline,
+odrzuca zmianę deadline oraz recovery już uruchomionego learnera/force closure.
+24 testy guardów i nowych ograniczeń przeszły; validate-only passed.
+
+SD-SAC nadal BLOCKED: bramka wymaga pełnego/drained/accounted/finite cp,
+fingerprint/SHA, 10 kompletnych ocen z prawidłowym UID/timing max100 ms,
+bez błędów, raport skips i >=8/10 met. Aktualny start nie jest wynikiem jazdy.
+PPO historyczne3/10 nadal ogranicza pełny start. Monitor ACTIVE15min;
+po SD FAIL kontynuować uzasadnioną autonomiczną diagnozę świeżym bounded pilotem,
+bez automatycznych miesięcznych startów; każdy nowy STOP nadrzędny.
+
+
 ## Autonomiczne wznowienie po pauzie — 5 października 22:12 Warsaw
 
 Użytkownik odwołał pauzę: „Ogarnij wszystko sam, ja idę spać”, następnie
