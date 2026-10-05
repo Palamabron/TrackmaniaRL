@@ -1,5 +1,46 @@
 # Audyt SD-SAC/PPO i dodatkowy SAC — 2026-10-04
 
+## Dalsza naprawa SD-SAC — 5 października 13:33 Warsaw
+
+Użytkownik polecił: „No to poprawiaj SD SAC tak długo aż będzie sensowny”.
+Nadzór pozostaje ACTIVE również po samym PPO/QR, jeśli SD-SAC nie spełni bramki.
+Ostatni SD-SAC nadal ma **0/10 met** i niepełny budżet; pełne treningi są zablokowane.
+
+Audyt CPU zgodnego checkpointu na 1024 stanach wykazał, że przy beta 0,5 kara
+utrzymująca entropię zachowania znosi niemal cały gradient preferencji wartości
+(cosinus −0,9295; udział zniesiony 1,0059). To lokalna diagnoza, nie dowód błędu
+matematycznego całego algorytmu. Nowa hipoteza zmienia tylko beta **0,5 → 0,005**;
+wspólna nagroda, model, target entropy 0,8 i budżet 145408 pozostają takie same.
+Kod dodaje diagnostykę prawdopodobieństw akcji i zgodności z krytykami oraz
+usuwa zbędny graf krytyków z kroku aktora, zachowując cel i gradient aktora.
+
+Nowy pilot faktycznie oczekuje w `queue-sd-sac-anchor005-20261005`:
+**launcher 48368 / waiter 57588**, created_time 1791199959.0079837, bez kontrolera
+i `launch.json`. `sd-sac-pending-queue.json` wskazuje rezerwację; właściwy stan
+odczytuje się z kolejki. Frozen runtime `tmrl-sd-sac-anchor-runtime` ma źródła
+`4706a06b0eea5ba3fe0d2c6aa1ad641ed29aca84`, opublikowane atomowo na obu branchach.
+
+Kolejność pozostaje **PPO → QR → nowy SD-SAC**. PPO działał o 13:33 online:
+49152 kroki / 24 pełne aktualizacje rolloutu, finite, bez awarii.
+Terminy PPO i QR oraz ich zamrożone źródła są bez zmian. SD-SAC przejmuje dopiero
+po normalnym końcu QR, pełnym rozliczonym checkpointcie QR, 30 ocenach, zamknięciu
+procesów i guardu, braku STOP i wolnym mutexie. Pasywne oczekiwanie ma limit
+**20:09 Warsaw**; nie uruchamia learnera. Po faktycznym starcie SD-SAC:
+trening maks. 10800 s, 10 greedy maks. 2100 s, całe zadanie maks. **4 h**,
+SAVE 600 s przed HARD. Właściwe daty pojawią się w jego `launch.json`.
+
+Przeszło **106 testów uczenia, 20 testów nadzoru, 42 schematy**, Ruff, mypy
+zmienionego źródła i standardowy CPU update/zstd roundtrip rzeczywistej kompozycji
+GNN / 78 akcji. To dowody poprawności technicznej, nie nowy wynik jazdy.
+Bramka pozostaje: pełny budżet, drained/accounted credit, finite/fingerprint/SHA,
+10 kompletnych ważnych prób, **co najmniej 8/10 met**, max 100 ms, brak błędów,
+raport pominiętych ramek. Nieudany wynik zachowujemy i diagnozujemy kolejną
+uzasadnioną hipotezę w osobnym ograniczonym świeżym pilocie; bez automatycznych
+pełnych treningów i bez deklaracji globalnej optymalności lub kwalifikacji 3 seedów.
+
+Szczegóły i ograniczenia: [SD_SAC_ITERATIVE_REPAIR_20261005.md](SD_SAC_ITERATIVE_REPAIR_20261005.md).
+Poniższa sekcja z 12:50 zachowuje wcześniejszy wynik i dowody.
+
 ## Nowy wynik SD-SAC i przejęcie QR — 5 października 12:50 Warsaw
 
 Świeży SD-SAC target0,8 / beta0,5 / behavior nie zaliczył bramki: **0/10 met**,
