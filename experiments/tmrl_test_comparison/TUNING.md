@@ -1,5 +1,20 @@
 # Przygotowanie trzech seedów — 4 października 2026
 
+## Zakończenie nocy i naprawy po przedłużeniu — 5 października
+
+Nocna kolejka ukończyła wszystkie etapy 09:26:36 Warsaw; ostatni QR **26/30 met**,
+mediana56,915s/średnia57,124s, max50ms, poprawny timing i brak błędów.
+Użytkownik następnie przedłużył pracę poleceniem „Możesz robić dłużej niż do 10
+ tylko spraw by PPO i DSAC poprawnie działało”. Wcześniejsze terminy są historią
+zakończonej kolejki; nowe ograniczone testy mają własny jawny limit.
+Reset nowego kodu zaliczony w grze; poprawki rozgrzewki/timingów PPO i stabilizacji
+SD-SAC są testowane przed świeżymi pilotami. Pełny SD-SAC pozostaje zablokowany,
+PPO zachowuje entropy0,01. Nagroda pozostaje wspólna; automatycznych miesięcznych
+treningów nie uruchamiamy. Pełne wyniki, dowody, ograniczenia i nowy protokół:
+[REPAIR_PPO_SD_SAC_20261005.md](REPAIR_PPO_SD_SAC_20261005.md).
+
+Starsze sekcje poniżej opisują kolejne historyczne stany; powyższy stan jest bieżący.
+
 ## SAC 30 prób — 5 października, 09:10 Europe/Warsaw
 
 Zachowany stary cp33854 na runtime d0dfe645 ukończył ocenę: **30/30 met**,
@@ -65,7 +80,7 @@ Dowód decyzji: `queue-overnight-tuning-20261005/ppo-comparison-decision.json`.
 Ocena wariantu 0: `tmrl-overnight-diag-ppo-entropy0-s17-benchmark-20261005T053439289662/evaluation.json`,
 SHA cp70 `1646e5648265e9b5af3503c40feb4f9b0eb6ea256d2efaf30c05b5d244c29b83`.
 Kampania trwa: istniejący runner rozpoczął 30 prób IQN 07:44:38 Warsaw.
-SAVE 10:24 / HARD 10:34 bez zmian; pełny DSAC nadal zablokowany.
+SAVE 10:24 / HARD 10:34 bez zmian; pełny SD-SAC nadal zablokowany.
 
 ## PPO baseline — 5 października, 05:25 Europe/Warsaw
 
@@ -89,14 +104,14 @@ Dowody: `queue-overnight-tuning-20261005/ppo-baseline-completion.json` i
 `tmrl-overnight-diag-ppo-baseline-s17-benchmark-20261005T031138975953/evaluation.json`.
 SAVE 10:24 / HARD 10:34 pozostają nadrzędne; pełnych treningów nie uruchomiono.
 
-## Wynik DSAC — 5 października, 03:10 Europe/Warsaw
+## Wynik SD-SAC — 5 października, 03:10 Europe/Warsaw
 
 Pilot celu entropii 2,0 / beta 0 zakończył **145 487 kroków / 33 871 aktualizacji**.
 Końcowy cp33871 ma skończone tensory, zgodny fingerprint i rozliczony kredyt
 **0,75** (`earned = accounted = 33 871,75`). Ocena zakończona: **0/10 met**,
 postęp 4,24–5,17%, średnio 4,42%. Wszystkie pomiary czasu ważne, max/p99 50 ms,
 brak błędów telemetrii/kontrolera; 651 pominiętych ramek, maksimum 5.
-Warunek minimum 8/10 met NIE został spełniony: **pełny DSAC nadal zablokowany**,
+Warunek minimum 8/10 met NIE został spełniony: **pełny SD-SAC nadal zablokowany**,
 hipoteza diagnostyczna nie zostaje promowana do konfiguracji seedów 17/29/43.
 Poprawny zapis i sprawny pomiar nie oznaczają skutecznej polityki greedy.
 Dowody: `queue-overnight-tuning-20261005/dsac-completion.json` oraz
@@ -120,13 +135,13 @@ CPU. `effective-deadline.json` oraz osobny watchdog terminu skracają wewnętrzn
 limit runnera liczony od uruchomienia kolejki. Watchdog nie otwiera kontrolera.
 
 Przerwana kolejka z 4 października pozostaje zatrzymana; jej STOP i dane
-zachowano. Nowa kolejka wznawia DSAC z `distributed-update-00000659.pt`:
+zachowano. Nowa kolejka wznawia SD-SAC z `distributed-update-00000659.pt`:
 **12 658 kroków, 659 aktualizacji, kredyt 5,5**, skończone tensory i zgodny
 fingerprint potwierdzone. Odtwarza pełny stan, bez resetowania replay.
 Nowy segment W&B: [2fslk8zh](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/2fslk8zh).
 Audytowy W&B `dwz2e073` miał wyłącznie setup i zero kroków — nie jest pilotem.
 
-Plan: dokończenie DSAC celu 2,0 / beta 0 oraz 10 ocen; świeże PPO baseline
+Plan: dokończenie SD-SAC celu 2,0 / beta 0 oraz 10 ocen; świeże PPO baseline
 entropii 0,01 i osobno 0,0, każde z maksymalnie 2 h 15 min jazdy i 10 ocenami;
 następnie po 30 przejazdów starych końcowych IQN, TQC, SAC i QR, jeśli mieszczą
 się we wspólnym terminie. Globalny termin ma pierwszeństwo przed sumą etapów.
@@ -144,7 +159,7 @@ zapisu chroni przed nadpisaniem ostatniego checkpointu podczas domykania.
 Nie zmieniamy liczników ani zawartości zapisu. Receipt rozróżnia kompletność
 wspólnego prefixu od pełnego eksperymentu; `full_training_complete` zawsze false.
 
-DSAC zachowuje wcześniej ustalony warunek: cały budżet 145 408, rozliczony
+SD-SAC zachowuje wcześniej ustalony warunek: cały budżet 145 408, rozliczony
 kredyt, finite checkpoint, 10 kompletnych prób, minimum 8 met, ważny timing
 wszystkich, max kroku ≤100 ms i brak błędów. Bez spełnienia pozostaje zablokowany.
 PPO entropii 0 może być wybrane wyłącznie prowizorycznie, gdy oba prefixy są
@@ -174,7 +189,7 @@ została prawidłowo zablokowana przez działającą kampanię. Guardów nie os�
 
 Pełne starty od zera: jeden końcowy wspólny commit, seedy **17/29/43**, po
 **2 048 000 kroków i 30 greedy prób/seed**, kalibracja i lokalny smoke.
-Dobór DSAC i PPO oraz końcowa gotowość pozostają otwarte do wyników tej nocy.
+Dobór SD-SAC i PPO oraz końcowa gotowość pozostają otwarte do wyników tej nocy.
 
 ## Historia: kolejka z 4 października 17:28, zatrzymana na polecenie użytkownika
 
@@ -187,16 +202,16 @@ Kolejka `queue-tuning-20261004` wystartowała **17:27:56 Europe/Warsaw**.
 Termin zapisu **20:17:56**, twardy koniec **20:27:56**. To zatwierdzone nowe
 3 godziny łącznie, nie przedłużanie poprzedniej kampanii. Wskaźnik
 `artifacts/tmrl-test-comparison/active-queue.json` wskazuje tę kolejkę.
-DSAC `tmrl-tuning-dsac-entropy200-beta000-s17` działa, W&B
+SD-SAC `tmrl-tuning-dsac-entropy200-beta000-s17` działa, W&B
 [o3aknhmz](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/o3aknhmz)
 potwierdzony online/running. O 17:30 zapisano 1943 kroki w fazie warmup,
 ważny timing ostatniego epizodu (p99 50 ms, max 60 ms), brak błędu telemetrii.
-To kontrola uruchomienia, nie wynik uczenia ani kwalifikacja DSAC.
+To kontrola uruchomienia, nie wynik uczenia ani kwalifikacja SD-SAC.
 
-Następnie planowane są 10 ocen DSAC, 10 IQN i 5 PPO w pozostałym czasie.
-Warunki promocji DSAC oraz sprawdzone ustawienia opisuje [TUNING.md](TUNING.md).
+Następnie planowane są 10 ocen SD-SAC, 10 IQN i 5 PPO w pozostałym czasie.
+Warunki promocji SD-SAC oraz sprawdzone ustawienia opisuje [TUNING.md](TUNING.md).
 Monitor działa co 5 minut i ma zakończyć pracę po raporcie tej kampanii.
-Pełnych treningów nie uruchomiono. Końcowy dobór DSAC pozostaje otwarty do
+Pełnych treningów nie uruchomiono. Końcowy dobór SD-SAC pozostaje otwarty do
 wyniku jazdy; jego pełne uruchomienia są nadal zablokowane.
 
 
@@ -219,7 +234,7 @@ algorytmów. Dokładne wartości są zapisane w generatorze oraz YAML-ach.
 | TQC | LR 3e-4, tau .005, alpha początkowe .2 uczone, cel entropii -3, 2 krytyków × 25 kwantyli, odcięcie po 2 | Zachować pozytywny baseline |
 | SAC | LR 3e-4, tau .005, alpha początkowe .2 uczone, cel entropii -3, 2 krytyków | Zachować pozytywny baseline |
 | PPO | LR 3e-4 z liniowym spadkiem do końca 2 048 000 kroków, rollout 2048, 10 epok, minibatch 256, GAE .95, entropy .01, clips .2, value .5, grad .5, KL .02 | Naprawiona inicjalizacja adapterów; hiperparametry bez niezweryfikowanych zmian |
-| DSAC | Pełne ustawienia jeszcze niewybrane; dotychczasowe pliki full nie są zakwalifikowane | Blokada pełnego startu do wyniku nowego pilota |
+| SD-SAC | Pełne ustawienia jeszcze niewybrane; dotychczasowe pliki full nie są zakwalifikowane | Blokada pełnego startu do wyniku nowego pilota |
 
 Off-policy: uniform replay 1 mln, warmup 10 tys., batch 256, n-step 1,
 UTD .25 ze ścisłym budżetem aktualizacji. Wszystkie pełne próby od zera,
@@ -228,30 +243,30 @@ Nie przenosimy wag ani replayu pilota. Każdy komputer wymaga kalibracji,
 sprawdzenia UID, CUDA, W&B i timingu. PPO zachowuje wyłączoną dodatkową
 normalizację obserwacji i nagrody.
 
-## Kontrolowany test DSAC
+## Kontrolowany test SD-SAC
 
 Główna hipoteza: cel entropii **2.0**, kara kotwicząca **beta 0.0**,
 seed 17, **145 408 kroków**, limit treningu **8100 sekund**. Model, nagroda,
 przestrzeń 78 akcji, LR, alpha, Q-clip i budżet aktualizacji bez zmian względem
 poprzedniej próby beta 0. Pomijamy obliczanie nieużywanej kary przy beta 0;
 nie zmienia to skończonej funkcji celu. Plik
-`configs/diagnostic/discrete-sac-entropy200-beta000-s17.yaml` pozostaje hipotezą,
+`configs/diagnostic/sd-sac-entropy200-beta000-s17.yaml` pozostaje hipotezą,
 nie automatycznym wyborem pełnych ustawień.
 
-Po treningu planowane jest 10 ocen DSAC, następnie 10 ocen IQN i 5 PPO ze
+Po treningu planowane jest 10 ocen SD-SAC, następnie 10 ocen IQN i 5 PPO ze
 starych końcowych checkpointów, w granicach wspólnego limitu. Częściowe oceny
 trzeba oznaczyć; nie uznawać brakujących prób za ukończone. Stare checkpointy
 oceniamy na starym zamrożonym kodzie. To test powtarzalności IQN i timingu PPO,
 nie test długiego treningu nowej inicjalizacji PPO.
 
-Porównanie DSAC obejmuje równy budżet kroków, mety, postęp, ważność timingu,
+Porównanie SD-SAC obejmuje równy budżet kroków, mety, postęp, ważność timingu,
 błędy, finite losses/checkpoint, alpha i entropię oraz kredyt aktualizacji.
 Nie wybieramy parametrów na podstawie samego spadku lossu. Nowe ustawienie
 można przenieść do trzech pełnych seedów dopiero po ocenie wyniku jazdy;
 w razie niepowodzenia blokada pozostaje. Końcowe 30 prób na seed jest osobną
 oceną po pełnym treningu, nie zbiorem używanym do wyboru tej hipotezy.
 
-Przed uruchomieniem ustalamy warunek dopuszczenia DSAC: cały budżet 145 408
+Przed uruchomieniem ustalamy warunek dopuszczenia SD-SAC: cały budżet 145 408
 kroków z rozliczonym kredytem i poprawnym checkpointem, komplet 10 ocen,
 co najmniej **8/10 met**, ważne pomiary timingu we wszystkich próbach,
 brak błędów kontrolera/telemetrii i maksymalny odstęp decyzji **100 ms**.
@@ -295,7 +310,7 @@ ograniczenia i źródła: [ALGORITHM_AUDIT.md](ALGORITHM_AUDIT.md).
   przeszło bez sterowania grą.
 - 36 YAML-i odpowiada generatorowi. Dla sześciu algorytmów konfiguracje
   pełne różnią się między seedami tylko seedem i identyfikatorem.
-- Dziewięć standardowych konfiguracji oraz osobna hipoteza DSAC przeszły
+- Dziewięć standardowych konfiguracji oraz osobna hipoteza SD-SAC przeszły
   syntetyczną aktualizację CPU i zapis/odczyt checkpointu. Ruff, mypy dla
   zmienionych modułów oraz kontrola różnic przeszły.
 - Weryfikator końcowego checkpointu sprawdzono także na rzeczywistych starych

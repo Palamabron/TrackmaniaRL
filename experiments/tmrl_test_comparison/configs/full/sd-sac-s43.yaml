@@ -1,6 +1,6 @@
 api_version: '2.0'
-run_id: tmrl-test-full-discrete-sac-s17
-seed: 17
+run_id: tmrl-test-full-sd-sac-s43
+seed: 43
 artifacts_dir: ../../../../artifacts/tmrl-test-comparison
 components:
   learner:
@@ -59,7 +59,7 @@ components:
   model_factory:
     class_path: trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory
     kwargs:
-      algorithm: discrete-sac
+      algorithm: sd-sac
       encoder:
         class_path: experiments.tmrl_test_comparison.components:BatchedIncidentEncoder
         kwargs:
@@ -82,7 +82,7 @@ components:
   sampler:
     class_path: trackmaniarl.core.replay:UniformSampler
     kwargs:
-      seed: 17
+      seed: 43
   feature_pipeline:
     class_path: trackmaniarl.experiments.graph_iqn_v5:BoundaryGraphFeaturePipelineV5
     kwargs:
@@ -155,7 +155,7 @@ evaluation:
   reject_telemetry_skips: false
   min_finish_rate: 1
 metadata:
-  algorithm: discrete-sac
+  algorithm: sd-sac
   stage: full
   initialization: random; no demos; no reference filter
   group: discrete-78

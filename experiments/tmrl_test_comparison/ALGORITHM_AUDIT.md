@@ -1,4 +1,19 @@
-# Audyt DSAC/PPO i dodatkowy SAC — 2026-10-04
+# Audyt SD-SAC/PPO i dodatkowy SAC — 2026-10-04
+
+## Zakończenie nocy i naprawy po przedłużeniu — 5 października
+
+Nocna kolejka ukończyła wszystkie etapy 09:26:36 Warsaw; ostatni QR **26/30 met**,
+mediana56,915s/średnia57,124s, max50ms, poprawny timing i brak błędów.
+Użytkownik następnie przedłużył pracę poleceniem „Możesz robić dłużej niż do 10
+ tylko spraw by PPO i DSAC poprawnie działało”. Wcześniejsze terminy są historią
+zakończonej kolejki; nowe ograniczone testy mają własny jawny limit.
+Reset nowego kodu zaliczony w grze; poprawki rozgrzewki/timingów PPO i stabilizacji
+SD-SAC są testowane przed świeżymi pilotami. Pełny SD-SAC pozostaje zablokowany,
+PPO zachowuje entropy0,01. Nagroda pozostaje wspólna; automatycznych miesięcznych
+treningów nie uruchamiamy. Pełne wyniki, dowody, ograniczenia i nowy protokół:
+[REPAIR_PPO_SD_SAC_20261005.md](REPAIR_PPO_SD_SAC_20261005.md).
+
+Starsze sekcje poniżej opisują kolejne historyczne stany; powyższy stan jest bieżący.
 
 ## SAC 30 prób — 5 października, 09:10 Europe/Warsaw
 
@@ -65,7 +80,7 @@ Dowód decyzji: `queue-overnight-tuning-20261005/ppo-comparison-decision.json`.
 Ocena wariantu 0: `tmrl-overnight-diag-ppo-entropy0-s17-benchmark-20261005T053439289662/evaluation.json`,
 SHA cp70 `1646e5648265e9b5af3503c40feb4f9b0eb6ea256d2efaf30c05b5d244c29b83`.
 Kampania trwa: istniejący runner rozpoczął 30 prób IQN 07:44:38 Warsaw.
-SAVE 10:24 / HARD 10:34 bez zmian; pełny DSAC nadal zablokowany.
+SAVE 10:24 / HARD 10:34 bez zmian; pełny SD-SAC nadal zablokowany.
 
 ## PPO baseline — 5 października, 05:25 Europe/Warsaw
 
@@ -89,14 +104,14 @@ Dowody: `queue-overnight-tuning-20261005/ppo-baseline-completion.json` i
 `tmrl-overnight-diag-ppo-baseline-s17-benchmark-20261005T031138975953/evaluation.json`.
 SAVE 10:24 / HARD 10:34 pozostają nadrzędne; pełnych treningów nie uruchomiono.
 
-## Wynik DSAC — 5 października, 03:10 Europe/Warsaw
+## Wynik SD-SAC — 5 października, 03:10 Europe/Warsaw
 
 Pilot celu entropii 2,0 / beta 0 zakończył **145 487 kroków / 33 871 aktualizacji**.
 Końcowy cp33871 ma skończone tensory, zgodny fingerprint i rozliczony kredyt
 **0,75** (`earned = accounted = 33 871,75`). Ocena zakończona: **0/10 met**,
 postęp 4,24–5,17%, średnio 4,42%. Wszystkie pomiary czasu ważne, max/p99 50 ms,
 brak błędów telemetrii/kontrolera; 651 pominiętych ramek, maksimum 5.
-Warunek minimum 8/10 met NIE został spełniony: **pełny DSAC nadal zablokowany**,
+Warunek minimum 8/10 met NIE został spełniony: **pełny SD-SAC nadal zablokowany**,
 hipoteza diagnostyczna nie zostaje promowana do konfiguracji seedów 17/29/43.
 Poprawny zapis i sprawny pomiar nie oznaczają skutecznej polityki greedy.
 Dowody: `queue-overnight-tuning-20261005/dsac-completion.json` oraz
@@ -141,7 +156,7 @@ jazdy starego PPO**. Poprawka wpływa na nowe treningi od zera; ewaluacja
 starego checkpointu nie sprawdza jakości tej nowej inicjalizacji. Aktualny
 kandydat PPO zachowuje hiperparametry baseline, w tym współczynnik entropii
 0,01 i pełny harmonogram 2 048 000 kroków. W nowym, zatwierdzonym budżecie
-3 godzin testów jazdy priorytetem jest diagnostyczny pilot DSAC; nie należy
+3 godzin testów jazdy priorytetem jest diagnostyczny pilot SD-SAC; nie należy
 opisywać nowej inicjalizacji PPO jako zweryfikowanej długim pilotem w grze.
 
 ## Discrete SAC: nadal niegotowy
@@ -195,12 +210,12 @@ To konkretna różnica definicji kotwicy, nie wierna implementacja tej części
 SD-SAC. Przy `entropy_penalty_coefficient: 0.0` różnica kotwicy nie wpływa
 na gradient celu; nie wyjaśnia sama niepowodzenia wariantu beta = 0.
 
-Eksploracja DSAC jest natywnym próbkowaniem z rozkładu kategorycznego aktora;
+Eksploracja SD-SAC jest natywnym próbkowaniem z rozkładu kategorycznego aktora;
 ewaluacja używa jego argmax. Logowana przez infrastrukturę wartość epsilon
 nie dodaje w tej ścieżce losowych akcji epsilon-greedy i pozostaje nieaktywna.
-Nie należy interpretować jej spadku jako zmniejszania eksploracji DSAC.
+Nie należy interpretować jej spadku jako zmniejszania eksploracji SD-SAC.
 
-Następny test: `configs/diagnostic/discrete-sac-entropy200-beta000-s17.yaml`:
+Następny test: `configs/diagnostic/sd-sac-entropy200-beta000-s17.yaml`:
 cel 2,0 nats, kara 0,0, wszystkie inne ustawienia, akcje, model i nagroda bez
 zmian. Na moment aktualizacji około 17:10 konfiguracja jest przygotowana
 do testu, ale **nie jest zakwalifikowana jako pełne ustawienie Borysa**.

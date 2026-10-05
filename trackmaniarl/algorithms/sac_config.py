@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, TypedDict
+from typing import Any, Literal, TypedDict
 
 from trackmaniarl.algorithms.execution import TorchExecutionConfig
 
@@ -79,15 +79,17 @@ class TQCConfig(SACConfig):
             raise ValueError("top_quantiles_to_drop_per_critic must be non-negative")
 
 
-class DiscreteSACOptions(SACOptions, total=False):
+class SDSACOptions(SACOptions, total=False):
     q_clip_epsilon: float
     entropy_penalty_coefficient: float
+    entropy_penalty_reference: Literal["target_policy", "behavior"]
 
 
 @dataclass(frozen=True, slots=True)
-class DiscreteSACConfig(SACConfig):
+class SDSACConfig(SACConfig):
     q_clip_epsilon: float = 0.5
     entropy_penalty_coefficient: float = 0.5
+    entropy_penalty_reference: Literal["target_policy", "behavior"] = "target_policy"
 
     def validate(self) -> None:
         SACConfig.validate(self)
@@ -95,3 +97,10 @@ class DiscreteSACConfig(SACConfig):
             raise ValueError(
                 "SD-SAC clipping and entropy penalty coefficients must be non-negative"
             )
+        if self.entropy_penalty_reference not in {"target_policy", "behavior"}:
+            raise ValueError("entropy_penalty_reference must be 'target_policy' or 'behavior'")
+
+
+# Existing imports remain readable; new code uses the paper's SD-SAC name.
+DiscreteSACOptions = SDSACOptions
+DiscreteSACConfig = SDSACConfig

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from time import perf_counter
 from typing import Any, Protocol
 
+from trackmaniarl.core.collection_timing import defer_rollout_gc
 from trackmaniarl.core.contracts import FeaturePipeline, Policy, ReplayStore
 from trackmaniarl.core.data import EpisodeArtifact, Transition
 
@@ -244,6 +245,23 @@ class FixedStepRolloutCollector:
         self.policy = policy
 
     def collect(self, transition_count: int, rollout_id: str) -> CollectionResult:
+        self._warm_up_policy()
+        with defer_rollout_gc(reset_at_rollout_end=self.reset_at_rollout_end):
+            return self._collect_rollout(transition_count, rollout_id)
+
+    def _warm_up_policy(self) -> None:
+        if self.prepared is not None:
+            return
+        warm_up = getattr(self.policy, "warm_up", None)
+        synthetic = getattr(self.pipeline, "synthetic_observation", None)
+        if not callable(warm_up) or not callable(synthetic):
+            return
+        # No environment reset has occurred yet. The cold forward pass and its
+        # device transfers must finish before the race clock starts.
+        warm_up(self.pipeline.transform_observation(synthetic()))
+        self._reset_episode_state()
+
+    def _collect_rollout(self, transition_count: int, rollout_id: str) -> CollectionResult:
         trace = _RolloutTrace()
         for rollout_step in range(transition_count):
             self._ending_rollout = (

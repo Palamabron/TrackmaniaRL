@@ -17,7 +17,7 @@ from trackmaniarl.algorithms._torch import (
     polyak_update,
     weighted_mean,
 )
-from trackmaniarl.algorithms.sac_config import DiscreteSACConfig, DiscreteSACOptions
+from trackmaniarl.algorithms.sac_config import SDSACConfig, SDSACOptions
 from trackmaniarl.algorithms.sac_support import (
     EntropyConfig,
     EntropyRestoreTarget,
@@ -38,13 +38,27 @@ class _DiscretePolicy:
         self.device = device
 
     def act(self, observation: Any, mode: PolicyMode = PolicyMode.ONLINE) -> Any:
+        action, _ = self.act_with_info(observation, mode)
+        return action
+
+    def act_with_info(
+        self, observation: Any, mode: PolicyMode = PolicyMode.ONLINE
+    ) -> tuple[int, Mapping[str, Any]]:
         observation = tree_to_device(tree_collate([sanitize_finite(observation)]), self.device)
         with torch.no_grad():
-            action, _ = self.actor(observation, mode=mode)
+            actor = cast(Any, self.actor)
+            probabilities: torch.Tensor = actor.probabilities(observation)
+            distribution: Any = torch.distributions.Categorical(probs=probabilities)
+            action = (
+                probabilities.argmax(dim=-1)
+                if mode is PolicyMode.EVALUATION
+                else distribution.sample()
+            )
+            entropy = distribution.entropy().detach().cpu().reshape(-1)
         values = action.detach().cpu().reshape(-1)
         if values.numel() != 1:
             raise ValueError("Discrete policy must produce exactly one action per observation")
-        return int(values.item())
+        return int(values.item()), {"_trackmaniarl_behavior_entropy": float(entropy.item())}
 
     def export_state(self) -> Mapping[str, Any]:
         return dict(self.actor.state_dict())
@@ -77,7 +91,7 @@ class _DiscreteUpdate:
 
 
 class StableDiscreteSoftActorCritic(TorchLearnerBase):
-    """SD-SAC-inspired learner using target-policy entropy anchoring."""
+    """Double-average discrete SAC with behavior or legacy target-policy entropy anchoring."""
 
     accepted_model_contracts = frozenset({ModelContract.DISCRETE_ACTOR_CRITIC})
     supports_sequence_training = False
@@ -85,9 +99,9 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
     def __init__(
         self,
         model: nn.Module | None = None,
-        **options: Unpack[DiscreteSACOptions],
+        **options: Unpack[SDSACOptions],
     ) -> None:
-        config = DiscreteSACConfig(**options)
+        config = SDSACConfig(**options)
         super().__init__(
             model,
             model_factory=config.model_factory,
@@ -97,7 +111,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         config.validate()
         self._configure(config)
 
-    def _configure(self, config: DiscreteSACConfig) -> None:
+    def _configure(self, config: SDSACConfig) -> None:
         self.learning_rate = config.learning_rate
         self.target_tau = config.target_tau
         self.initial_entropy_coefficient = config.entropy_coefficient
@@ -105,6 +119,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         self.target_entropy = config.target_entropy
         self.q_clip_epsilon = config.q_clip_epsilon
         self.entropy_penalty_coefficient = config.entropy_penalty_coefficient
+        self.entropy_penalty_reference = config.entropy_penalty_reference
 
     def _setup_model(self) -> None:
         assert self.model is not None
@@ -192,6 +207,16 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         return _DiscreteActorStep(actor_loss, entropy, int(probabilities.shape[-1]))
 
     def _entropy_penalty(self, batch: SACBatch, entropy: torch.Tensor) -> torch.Tensor:
+        if self.entropy_penalty_reference == "behavior":
+            stored = batch.source.metadata.get("behavior_entropies")
+            if not isinstance(stored, torch.Tensor) or stored.shape != entropy.shape:
+                raise ValueError(
+                    "Behavior entropy penalty requires one stored entropy per transition"
+                )
+            target_entropy = stored.detach().to(device=entropy.device, dtype=entropy.dtype)
+            if not bool(torch.isfinite(target_entropy).all()) or bool((target_entropy < 0).any()):
+                raise ValueError("Stored behavior entropies must be finite and non-negative")
+            return (entropy - target_entropy).square().mean()
         with torch.no_grad():
             target_probabilities = self.target_model.actor.probabilities(batch.observations)
             target_entropy = -(
@@ -220,6 +245,12 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "loss/entropy": float(update.alpha_loss.item()),
             "state/alpha": float(update.alpha.item()),
             "policy/entropy": float(update.actor.entropy.detach().mean().item()),
+            "critic/q1_mean": float(update.critic.q1.detach().mean().item()),
+            "critic/q2_mean": float(update.critic.q2.detach().mean().item()),
+            "critic/target_mean": float(update.critic.targets.detach().mean().item()),
+            "critic/disagreement": float(
+                (update.critic.q1 - update.critic.q2).detach().abs().mean().item()
+            ),
         }
         td_errors = (0.5 * (update.critic.q1 + update.critic.q2) - update.critic.targets).abs()
         return metrics, PriorityUpdate(

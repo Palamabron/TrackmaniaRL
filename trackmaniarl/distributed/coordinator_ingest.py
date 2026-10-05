@@ -239,6 +239,11 @@ def _ingest_payload(batch: _IngestBatch) -> dict[str, Any]:
 
 def replay_info_for_transition(info: Mapping[str, Any]) -> dict[str, Any]:
     replay_info: dict[str, Any] = {}
+    # SD-SAC's behavior entropy is part of its learning target, rather than
+    # episode diagnostics that can be discarded to keep replay compact.
+    entropy_key = "_trackmaniarl_behavior_entropy"
+    if entropy_key in info:
+        replay_info[entropy_key] = float(info[entropy_key])
     if "is_demo" in info:
         replay_info["is_demo"] = bool(info["is_demo"])
     if "sampling/projected_lap_time_s" in info:

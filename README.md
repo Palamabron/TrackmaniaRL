@@ -119,13 +119,13 @@ The starter project uses a lidar encoder, a dueling IQN policy and 78 discrete
 control actions. An actor drives while the learner trains from replay.
 
 For continuous off-policy control, use the generated `run-sac.yaml`,
-`run-redq.yaml` or `run-tqc.yaml`. `run-discrete-sac.yaml` provides a categorical
+`run-redq.yaml` or `run-tqc.yaml`. `run-sd-sac.yaml` provides a categorical
 actor-critic with the 78-action table. All four include first-party telemetry models.
 
 Every RL family supports camera observations. The template also generates
 `run-q-vision.yaml`, `run-qr-vision.yaml`, `run-iqn-vision.yaml`,
 `run-fqf-vision.yaml`, `run-sac-vision.yaml`, `run-redq-vision.yaml`,
-`run-tqc-vision.yaml` and `run-discrete-sac-vision.yaml`.
+`run-tqc-vision.yaml` and `run-sd-sac-vision.yaml`.
 For supervised learning from aligned RGB demonstrations, use `run-bc-vision.yaml`
 and the [camera BC guide](https://github.com/Palamabron/TrackmaniaRL/blob/v1.2.9/readme/vision-bc.md).
 

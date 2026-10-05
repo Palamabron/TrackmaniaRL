@@ -1,6 +1,6 @@
 api_version: '2.0'
-run_id: tmrl-test-full-discrete-sac-s29
-seed: 29
+run_id: tmrl-test-pilot-sd-sac-s17
+seed: 17
 artifacts_dir: ../../../../artifacts/tmrl-test-comparison
 components:
   learner:
@@ -59,7 +59,7 @@ components:
   model_factory:
     class_path: trackmaniarl.models.sensor_actor_critic:SensorActorCriticModelFactory
     kwargs:
-      algorithm: discrete-sac
+      algorithm: sd-sac
       encoder:
         class_path: experiments.tmrl_test_comparison.components:BatchedIncidentEncoder
         kwargs:
@@ -82,7 +82,7 @@ components:
   sampler:
     class_path: trackmaniarl.core.replay:UniformSampler
     kwargs:
-      seed: 29
+      seed: 17
   feature_pipeline:
     class_path: trackmaniarl.experiments.graph_iqn_v5:BoundaryGraphFeaturePipelineV5
     kwargs:
@@ -98,11 +98,9 @@ components:
   checkpoint_codec:
     class_path: trackmaniarl.core.builtins:TorchCheckpointCodec
     kwargs: {}
-  evaluator:
-    class_path: trackmaniarl.trackmania.evaluation:TrackmaniaEvaluator
-    kwargs: {}
+  evaluator: null
 training:
-  total_transitions: 2048000
+  total_transitions: 145408
   max_episode_steps: 3000
   batch_size: 256
   sequence_length: 1
@@ -155,8 +153,8 @@ evaluation:
   reject_telemetry_skips: false
   min_finish_rate: 1
 metadata:
-  algorithm: discrete-sac
-  stage: full
+  algorithm: sd-sac
+  stage: pilot
   initialization: random; no demos; no reference filter
   group: discrete-78
   encoder_source: V107I/V108 incident-gated GNN Simba V6

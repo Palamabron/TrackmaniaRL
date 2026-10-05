@@ -10,11 +10,12 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-ALGORITHMS = ("iqn", "q", "qr", "fqf", "discrete-sac", "sac", "tqc", "redq", "ppo")
+ALGORITHMS = ("iqn", "q", "qr", "fqf", "sd-sac", "sac", "tqc", "redq", "ppo")
 SEEDS = (17, 29, 43)
 
 
 def configuration(algorithm: str, seed: int, stage: str) -> dict:
+    algorithm = {"discrete-sac": "sd-sac", "dsac": "sd-sac"}.get(algorithm, algorithm)
     base = json.loads((ROOT / "docs/benchmarks/2026-09-08-v108-config.json").read_text())
     base["distributed"] = {
         "epsilon_profiles": [1.0],
@@ -94,14 +95,14 @@ def configuration(algorithm: str, seed: int, stage: str) -> dict:
             "sac": "SoftActorCritic",
             "redq": "RandomizedEnsembleSAC",
             "tqc": "TruncatedQuantileCritic",
-            "discrete-sac": "StableDiscreteSoftActorCritic",
+            "sd-sac": "StableDiscreteSoftActorCritic",
             "ppo": "ProximalPolicyOptimization",
         }
         components["learner"] = {
             "class_path": "trackmaniarl.algorithms:" + names[algorithm],
             "kwargs": {"execution": execution},
         }
-        if algorithm in {"sac", "tqc", "discrete-sac"}:
+        if algorithm in {"sac", "tqc", "sd-sac"}:
             components["learner"]["kwargs"].update(
                 learning_rate=3e-4,
                 target_tau=0.005,

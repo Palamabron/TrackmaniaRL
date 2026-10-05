@@ -14,8 +14,9 @@ def main() -> None:
     directory = Path(sys.argv[1]).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     stop = directory / "STOP"
-    algorithms = sys.argv[2:] or ("iqn", "qr", "discrete-sac", "tqc", "ppo")
+    algorithms = sys.argv[2:] or ("iqn", "qr", "sd-sac", "tqc", "ppo")
     for algorithm in algorithms:
+        algorithm = {"discrete-sac": "sd-sac", "dsac": "sd-sac"}.get(algorithm, algorithm)
         if stop.exists():
             break
         config = ROOT / "experiments/tmrl_test_comparison/configs/pilot" / f"{algorithm}-s17.yaml"

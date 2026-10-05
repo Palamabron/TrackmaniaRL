@@ -46,7 +46,7 @@ mogą wydłużyć rzeczywisty czas. Dlatego pełny zakres wybierzemy po pilocie.
 - Off-policy: uniform replay 1 mln, batch 256, 1-step, warmup 10 tys.,
   0,25 aktualizacji/krok. Q/QR/IQN/FQF: LR 1e-4, hard target co 1000 aktualizacji.
   Q/QR/IQN/FQF w asynchronicznym `train` stosują epsilon 0,3 → 0,01 przez 500 tys. kroków.
-  Aktorzy SAC/TQC/DSAC używają własnych rozkładów; epsilon nie steruje ich eksploracją.
+  Aktorzy SAC/TQC/SD-SAC używają własnych rozkładów; epsilon nie steruje ich eksploracją.
   Nie stosujemy historycznej heurystyki przytrzymywania eksploracyjnych akcji.
 - IQN: 64 kwantyle treningowe/target, 32 ewaluacyjne; QR/FQF: 64.
 - PPO: rollout 2048, 10 epok, minibatch 256; bez dodatkowej normalizacji
@@ -83,7 +83,7 @@ Nie trzeba ich kopiować. Uruchamiaj tylko jeden trening sterujący grą naraz.
 # Pierwszy pilot — uruchomi grę przez istniejące połączenie:
 .venv/Scripts/python.exe -m trackmaniarl train experiments/tmrl_test_comparison/configs/pilot/iqn-s17.yaml
 
-# Kolejne algorytmy: zamień iqn na qr, discrete-sac, tqc, q, fqf, sac, redq, ppo.
+# Kolejne algorytmy: zamień iqn na qr, sd-sac, tqc, q, fqf, sac, redq, ppo.
 # Pełny etap: katalog full, seedy 17 / 29 / 43, np.:
 .venv/Scripts/python.exe -m trackmaniarl train experiments/tmrl_test_comparison/configs/full/iqn-s29.yaml
 ```
@@ -101,7 +101,7 @@ Launcher `run_assigned.ps1` wykonuje dla każdego seeda trening i ocenę 30 pró
 PPO wykorzystuje istniejącą końcową ocenę trenera, bez drugich 30 prób.
 Nieudane progi jakości są raportowane jako nieudane; nie unieważniają kompletnego,
 poprawnego pomiaru. STOP, niepełny checkpoint lub błąd wykonania zatrzymują kolejkę.
-Pełne DSAC nadal jest zablokowane do sprawdzenia hipotezy z [TUNING.md](TUNING.md).
+Pełne SD-SAC nadal jest zablokowane do sprawdzenia hipotezy z [TUNING.md](TUNING.md).
 
 Przy ręcznym użyciu CLI po każdym zakończonym treningu oceniaj **końcowy checkpoint**, 30 przejazdów,
 bez eksploracji i bez filtra referencyjnego. Podstaw rzeczywistą ścieżkę

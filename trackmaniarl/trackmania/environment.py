@@ -172,7 +172,9 @@ class OpenPlanetEnvironment:
             self._confirm_finish_if_needed()
             try:
                 if previous_race_time_ms is None:
-                    previous_race_time_ms = float(self.client.read().values[3])
+                    # A finish screen may stop telemetry entirely. Restart before
+                    # reading, and discard packets from the previous controller.
+                    self.client.close()
                 self.controller.reset()
                 frame = self._wait_for_active_run(previous_race_time_ms)
             except TimeoutError:
@@ -198,16 +200,23 @@ class OpenPlanetEnvironment:
             return
         self.controller.confirm_finish()
 
-    def _wait_for_active_run(self, previous_race_time_ms: float) -> TelemetryFrame:
+    def _wait_for_active_run(self, previous_race_time_ms: float | None) -> TelemetryFrame:
         deadline = monotonic() + self.config.start_timeout_s
-        restart_observed = previous_race_time_ms <= 0.0
+        restart_observed = previous_race_time_ms is not None and previous_race_time_ms <= 0.0
         while True:
             frame = self.client.read()
             race_time_ms = float(frame.values[3])
-            restart_observed = restart_observed or race_time_ms < previous_race_time_ms
+            if previous_race_time_ms is None:
+                # With no prior clock, require a frame from the first second of
+                # the requested race rather than accepting an old running lap.
+                restart_observed = restart_observed or race_time_ms < 1_000.0
+                previous_race_time_ms = race_time_ms
+            else:
+                restart_observed = restart_observed or race_time_ms < previous_race_time_ms
             if (
                 restart_observed
                 and race_time_ms > 0.0
+                and not bool(frame.values[2])
                 and race_time_ms >= self.config.start_race_time_ms
             ):
                 return frame
@@ -228,8 +237,10 @@ class OpenPlanetEnvironment:
         return environment_step.step(self, action, perf_counter)
 
     def close(self) -> None:
-        self.controller.close()
-        self.client.close()
+        try:
+            self.controller.close()
+        finally:
+            self.client.close()
 
 
 class OpenPlanetEnvironmentFactory:

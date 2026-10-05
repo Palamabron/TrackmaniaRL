@@ -1,12 +1,13 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet('iqn', 'qr', 'discrete-sac', 'tqc', 'ppo', 'sac')]
+    [ValidateSet('iqn', 'qr', 'sd-sac', 'dsac', 'discrete-sac', 'tqc', 'ppo', 'sac')]
     [string]$Algorithm,
     [switch]$Pilot
 )
 $ErrorActionPreference = 'Stop'
-if (-not $Pilot -and $Algorithm -eq 'discrete-sac') {
-    throw 'DSAC nie jest gotowy do pelnych treningow. Najpierw pilot celu entropii 2.0 i ewaluacja; patrz READINESS.md. Test: run_assigned.ps1 discrete-sac -Pilot.'
+if ($Algorithm -in @('dsac', 'discrete-sac')) { $Algorithm = 'sd-sac' }
+if (-not $Pilot -and $Algorithm -eq 'sd-sac') {
+    throw 'SD-SAC nie jest gotowy do pelnych treningow. Pilot celu 2.0 nie zaliczyl mety. Nowy pilot wymaga stabilizacji entropii zachowania i ewaluacji; patrz READINESS.md. Test: run_assigned.ps1 sd-sac -Pilot.'
 }
 $comparisonMutex = [System.Threading.Mutex]::new($false, 'Global\TrackmaniaRL.ComparisonController')
 $comparisonMutexAcquired = $false
@@ -21,6 +22,17 @@ Set-Location -LiteralPath $comparisonRoot
 $comparisonPython = Join-Path $comparisonRoot '.venv/Scripts/python.exe'
 if (-not (Test-Path -LiteralPath $comparisonPython)) { throw 'Najpierw uruchom uv sync --group dev.' }
 $comparisonStop = Join-Path $comparisonRoot "artifacts/STOP-$Algorithm"
+$comparisonLegacyStops = if ($Algorithm -eq 'sd-sac') {
+    @((Join-Path $comparisonRoot 'artifacts/STOP-discrete-sac'),
+      (Join-Path $comparisonRoot 'artifacts/STOP-dsac'))
+} else { @() }
+function Test-ComparisonStop {
+    if (Test-Path -LiteralPath $comparisonStop) { return $true }
+    foreach ($legacyStop in $comparisonLegacyStops) {
+        if (Test-Path -LiteralPath $legacyStop) { return $true }
+    }
+    return $false
+}
 function Assert-ComparisonIdle {
     $comparisonBusy = Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" |
         Where-Object {
@@ -68,33 +80,33 @@ finally:
 }
 $comparisonSeeds = if ($Pilot) { @(17) } else { @(17, 29, 43) }
 foreach ($comparisonSeed in $comparisonSeeds) {
-    if (Test-Path -LiteralPath $comparisonStop) { break }
+    if (Test-ComparisonStop) { break }
     Assert-ComparisonIdle
     $comparisonStage = if ($Pilot) { 'pilot' } else { 'full' }
     $comparisonConfig = "experiments/tmrl_test_comparison/configs/$comparisonStage/$Algorithm-s$comparisonSeed.yaml"
-    if ($Pilot -and $Algorithm -eq 'discrete-sac') {
-        $comparisonConfig = 'experiments/tmrl_test_comparison/configs/diagnostic/discrete-sac-entropy200-beta000-s17.yaml'
+    if ($Pilot -and $Algorithm -eq 'sd-sac') {
+        $comparisonConfig = 'experiments/tmrl_test_comparison/configs/diagnostic/sd-sac-entropy080-behavior-s17.yaml'
     }
-    if (Test-Path -LiteralPath $comparisonStop) { break }
+    if (Test-ComparisonStop) { break }
     Initialize-ComparisonMap $comparisonConfig
-    if (Test-Path -LiteralPath $comparisonStop) { break }
+    if (Test-ComparisonStop) { break }
     Assert-ComparisonIdle
     $comparisonTrainArgs = @('-m', 'trackmaniarl', 'train', $comparisonConfig, '--stop-file', $comparisonStop)
     & $comparisonPython @comparisonTrainArgs
     if ($LASTEXITCODE -ne 0) { throw "Trening $Algorithm seed $comparisonSeed nie powiodl sie. Kolejka zatrzymana." }
-    if (Test-Path -LiteralPath $comparisonStop) { break }
+    if (Test-ComparisonStop) { break }
     if (-not $Pilot) {
         $comparisonCheckpoint = & $comparisonPython -m experiments.tmrl_test_comparison.launch_checks checkpoint $comparisonConfig
         if ($LASTEXITCODE -ne 0) { throw 'Brak potwierdzonego koncowego checkpointu. Wznow trening jawnie; kolejka zatrzymana.' }
         $comparisonCheckpoint = ($comparisonCheckpoint | Out-String).Trim()
-        if (Test-Path -LiteralPath $comparisonStop) { break }
+        if (Test-ComparisonStop) { break }
         if ($Algorithm -eq 'ppo') {
             # PPO's trainer already evaluated exactly 30 trials after the final save.
             # Validate that measurement instead of silently collecting another 30.
             & $comparisonPython -m experiments.tmrl_test_comparison.launch_checks evaluation $comparisonConfig $comparisonCheckpoint
         } else {
             Assert-ComparisonIdle
-            if (Test-Path -LiteralPath $comparisonStop) { break }
+            if (Test-ComparisonStop) { break }
             & $comparisonPython -m experiments.tmrl_test_comparison.launch_checks benchmark $comparisonConfig $comparisonCheckpoint --stop-file $comparisonStop
         }
         if ($LASTEXITCODE -ne 0) { throw 'Ewaluacja nie jest kompletnym poprawnym pomiarem 30 prob. Kolejka zatrzymana; zachowano artefakty.' }

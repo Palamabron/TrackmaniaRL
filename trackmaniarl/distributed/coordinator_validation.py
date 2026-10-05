@@ -125,6 +125,12 @@ def _validate_transition_values(value: Mapping[str, Any]) -> None:
     projected = value["info"].get("sampling/projected_lap_time_s")
     if projected is not None:
         _validate_finite_number(projected, "projected lap time")
+    entropy_key = "_trackmaniarl_behavior_entropy"
+    if entropy_key in value["info"]:
+        entropy = value["info"][entropy_key]
+        _validate_finite_number(entropy, "behavior entropy")
+        if entropy < 0:
+            raise ValueError("behavior entropy must be non-negative")
 
 
 def _validate_episode_summary(value: object) -> None:

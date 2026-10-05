@@ -1,5 +1,20 @@
 # Podział eksperymentów
 
+## Zakończenie nocy i naprawy po przedłużeniu — 5 października
+
+Nocna kolejka ukończyła wszystkie etapy 09:26:36 Warsaw; ostatni QR **26/30 met**,
+mediana56,915s/średnia57,124s, max50ms, poprawny timing i brak błędów.
+Użytkownik następnie przedłużył pracę poleceniem „Możesz robić dłużej niż do 10
+ tylko spraw by PPO i DSAC poprawnie działało”. Wcześniejsze terminy są historią
+zakończonej kolejki; nowe ograniczone testy mają własny jawny limit.
+Reset nowego kodu zaliczony w grze; poprawki rozgrzewki/timingów PPO i stabilizacji
+SD-SAC są testowane przed świeżymi pilotami. Pełny SD-SAC pozostaje zablokowany,
+PPO zachowuje entropy0,01. Nagroda pozostaje wspólna; automatycznych miesięcznych
+treningów nie uruchamiamy. Pełne wyniki, dowody, ograniczenia i nowy protokół:
+[REPAIR_PPO_SD_SAC_20261005.md](REPAIR_PPO_SD_SAC_20261005.md).
+
+Starsze sekcje poniżej opisują kolejne historyczne stany; powyższy stan jest bieżący.
+
 ## SAC 30 prób — 5 października, 09:10 Europe/Warsaw
 
 Zachowany stary cp33854 na runtime d0dfe645 ukończył ocenę: **30/30 met**,
@@ -65,7 +80,7 @@ Dowód decyzji: `queue-overnight-tuning-20261005/ppo-comparison-decision.json`.
 Ocena wariantu 0: `tmrl-overnight-diag-ppo-entropy0-s17-benchmark-20261005T053439289662/evaluation.json`,
 SHA cp70 `1646e5648265e9b5af3503c40feb4f9b0eb6ea256d2efaf30c05b5d244c29b83`.
 Kampania trwa: istniejący runner rozpoczął 30 prób IQN 07:44:38 Warsaw.
-SAVE 10:24 / HARD 10:34 bez zmian; pełny DSAC nadal zablokowany.
+SAVE 10:24 / HARD 10:34 bez zmian; pełny SD-SAC nadal zablokowany.
 
 ## PPO baseline — 5 października, 05:25 Europe/Warsaw
 
@@ -89,14 +104,14 @@ Dowody: `queue-overnight-tuning-20261005/ppo-baseline-completion.json` i
 `tmrl-overnight-diag-ppo-baseline-s17-benchmark-20261005T031138975953/evaluation.json`.
 SAVE 10:24 / HARD 10:34 pozostają nadrzędne; pełnych treningów nie uruchomiono.
 
-## Wynik DSAC — 5 października, 03:10 Europe/Warsaw
+## Wynik SD-SAC — 5 października, 03:10 Europe/Warsaw
 
 Pilot celu entropii 2,0 / beta 0 zakończył **145 487 kroków / 33 871 aktualizacji**.
 Końcowy cp33871 ma skończone tensory, zgodny fingerprint i rozliczony kredyt
 **0,75** (`earned = accounted = 33 871,75`). Ocena zakończona: **0/10 met**,
 postęp 4,24–5,17%, średnio 4,42%. Wszystkie pomiary czasu ważne, max/p99 50 ms,
 brak błędów telemetrii/kontrolera; 651 pominiętych ramek, maksimum 5.
-Warunek minimum 8/10 met NIE został spełniony: **pełny DSAC nadal zablokowany**,
+Warunek minimum 8/10 met NIE został spełniony: **pełny SD-SAC nadal zablokowany**,
 hipoteza diagnostyczna nie zostaje promowana do konfiguracji seedów 17/29/43.
 Poprawny zapis i sprawny pomiar nie oznaczają skutecznej polityki greedy.
 Dowody: `queue-overnight-tuning-20261005/dsac-completion.json` oraz
@@ -115,7 +130,7 @@ Budżet 10 godzin od początku pracy 00:34, zapis 10:24, twardy koniec 10:34 War
 Runner 37100 sam prowadzi etapy; nie uruchamiać kolejnego kontrolera ani pełnych
 treningów. Poprzednie STOP pozostają dowodem, nowe STOP nadal zatrzymuje.
 Aktualny plan i warunki doboru parametrów: [TUNING.md](TUNING.md).
-Przydziały pozostają: Jakub IQN/QR, Borys DSAC, Kamil TQC, Kuba P. PPO,
+Przydziały pozostają: Jakub IQN/QR, Borys SD-SAC, Kamil TQC, Kuba P. PPO,
 SAC bez przydziału. Pełne trzy seedy dopiero z końcowego wspólnego commita,
 od zera, po lokalnej kalibracji i smoke; nie wznawiać pilotów na nowym kodzie.
 
@@ -130,16 +145,16 @@ Kolejka `queue-tuning-20261004` wystartowała **17:27:56 Europe/Warsaw**.
 Termin zapisu **20:17:56**, twardy koniec **20:27:56**. To zatwierdzone nowe
 3 godziny łącznie, nie przedłużanie poprzedniej kampanii. Wskaźnik
 `artifacts/tmrl-test-comparison/active-queue.json` wskazuje tę kolejkę.
-DSAC `tmrl-tuning-dsac-entropy200-beta000-s17` działa, W&B
+SD-SAC `tmrl-tuning-dsac-entropy200-beta000-s17` działa, W&B
 [o3aknhmz](https://wandb.ai/dsc-pjatk-warsaw/my-trackmania-agent/runs/o3aknhmz)
 potwierdzony online/running. O 17:30 zapisano 1943 kroki w fazie warmup,
 ważny timing ostatniego epizodu (p99 50 ms, max 60 ms), brak błędu telemetrii.
-To kontrola uruchomienia, nie wynik uczenia ani kwalifikacja DSAC.
+To kontrola uruchomienia, nie wynik uczenia ani kwalifikacja SD-SAC.
 
-Następnie planowane są 10 ocen DSAC, 10 IQN i 5 PPO w pozostałym czasie.
-Warunki promocji DSAC oraz sprawdzone ustawienia opisuje [TUNING.md](TUNING.md).
+Następnie planowane są 10 ocen SD-SAC, 10 IQN i 5 PPO w pozostałym czasie.
+Warunki promocji SD-SAC oraz sprawdzone ustawienia opisuje [TUNING.md](TUNING.md).
 Monitor działa co 5 minut i ma zakończyć pracę po raporcie tej kampanii.
-Pełnych treningów nie uruchomiono. Końcowy dobór DSAC pozostaje otwarty do
+Pełnych treningów nie uruchomiono. Końcowy dobór SD-SAC pozostaje otwarty do
 wyniku jazdy; jego pełne uruchomienia są nadal zablokowane.
 
 
@@ -147,8 +162,8 @@ wyniku jazdy; jego pełne uruchomienia są nadal zablokowane.
 
 Po zakończeniu poprzedniej kampanii użytkownik zatwierdził naprawy oraz
 **do 3 godzin łącznie nowych testów w grze**. Aktualne decyzje o parametrach,
-kolejność prób, poprawki PPO i warunki wyboru DSAC opisuje [TUNING.md](TUNING.md).
-Pełne treningi pozostają ręczne; DSAC nadal jest zablokowany do wyniku nowego
+kolejność prób, poprawki PPO i warunki wyboru SD-SAC opisuje [TUNING.md](TUNING.md).
+Pełne treningi pozostają ręczne; SD-SAC nadal jest zablokowany do wyniku nowego
 pilota. Stare checkpointy zachowują swój zamrożony runtime. Poniższy raport
 15:41 i starsze sekcje dokumentują zakończoną poprzednią kampanię, nie nową kolejkę.
 
@@ -156,7 +171,7 @@ pilota. Stare checkpointy zachowują swój zamrożony runtime. Poniższy raport
 
 Wszystkie zaplanowane piloty i krótkie ewaluacje zakończone. TQC, QR, PPO
 oraz continuous SAC mają pozytywne piloty; IQN ukończył 1/2 przejazdów i
-wymaga dalszej kontroli stabilności. DSAC pozostaje niegotowy. Pełnych
+wymaga dalszej kontroli stabilności. SD-SAC pozostaje niegotowy. Pełnych
 treningów nie uruchomiono automatycznie. Wyniki, timing i ograniczenia:
 [READINESS.md](READINESS.md).
 
@@ -169,8 +184,8 @@ treningów nie uruchomiono automatycznie. Wyniki, timing i ograniczenia:
 | Bez przydziału | continuous SAC | 17/29/43 po lokalnym smoke; ręczny start odblokowany |
 
 Aktualna decyzja przed pełnym startem: [READINESS.md](READINESS.md).
-Launcher blokuje pełne DSAC do czasu pozytywnego testu niższej entropii. Dla Borysa przygotowano
-wyłącznie test: `run_assigned.ps1 discrete-sac -Pilot` (145 408 kroków, seed 17,
+Launcher blokuje pełne SD-SAC do czasu pozytywnego testu niższej entropii. Dla Borysa przygotowano
+wyłącznie test: `run_assigned.ps1 sd-sac -Pilot` (145 408 kroków, seed 17,
 cel entropii 2,0, kara 0,0). Po nim potrzebna osobna ewaluacja bez eksploracji;
 skrypt nie przechodzi automatycznie do pełnych seedów.
 IQN i QR zakończyły kampanię v2; nie powtarzać ich automatycznie.
