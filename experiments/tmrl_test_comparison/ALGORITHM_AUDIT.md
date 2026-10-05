@@ -1,5 +1,21 @@
 # Audyt DSAC/PPO i dodatkowy SAC — 2026-10-04
 
+## Powtarzalność IQN — 5 października, 08:11 Europe/Warsaw
+
+Ocena zachowanego starego cp33854, na zamrożonym runtime d0dfe645, ukończona:
+**29/30 met**, średnia ukończonych **49,452 s**, mediana **49,400 s**,
+najlepsza **48,370 s**. Wszystkie 30 prób mają ważny timing:
+29 587/29 587 pomiarów, max/p99 **50 ms**, brak błędów telemetrii/kontrolera.
+Pominięte ramki **15 564**, maksimum 5. Wynik wspiera powtarzalność tej polityki
+na seed17; nie dowodzi powtarzalności uczenia na trzech seedach ani celu 37 s.
+Nie zmieniamy IQN arbitralnie po dawnym wyniku 1/2: baseline pozostaje.
+Pełne nowe starty nadal wymagają wspólnego nowego commita, kalibracji lokalnej,
+smoke i 30 końcowych prób dla każdego z seedów 17/29/43.
+Dowód: `tmrl-overnight-diag-iqn-s17-benchmark-20261005T054442205511/evaluation.json`;
+SHA checkpointu `ad4fabf38558c893ed54546143a47418eb3bc589925d828a95968f5a932d4f95`.
+Istniejący runner rozpoczął TQC 08:10:48 Warsaw; SAC i QR pozostają w kolejce.
+Kampania nadal trwa, SAVE 10:24 / HARD 10:34 bez zmian.
+
 ## Decyzja PPO — 5 października, 07:55 Europe/Warsaw
 
 Porównanie obu wariantów zakończone na wspólnym cp70: **143 360 uczonych kroków /
