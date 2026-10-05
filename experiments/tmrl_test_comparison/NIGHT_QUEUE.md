@@ -1,5 +1,40 @@
 # Nocne piloty v2 — 3/4 października 2026
 
+## Autonomiczne wznowienie po pauzie — 5 października 22:12 Warsaw
+
+Użytkownik odwołał pauzę: „Ogarnij wszystko sam, ja idę spać”, następnie
+„Nawet jak będzie problem to sam to ogarnij”. Nowe ograniczone próby retry02
+zachowują checkpoint zatrzymanego QR retry01 i wszystkie stare STOP jako dowody.
+RESUME-AUTHORIZATION przypina ich hash i mtime; każdy nowy lub dotknięty STOP zatrzymuje.
+Nie wznowiono starego runnera ani checkpointu na innym kodzie.
+
+Po ponownym uruchomieniu gry przywrócono obraz i istniejącą wtyczkę telemetrii.
+Pierwsze otwarcie kopii mapy w edytorze zgłaszało brak startu; bez zapisywania
+zmian zamknięto ją i otwarto oryginalny zapis My Maps/tmrl-test.Map.Gbx.
+Gra pokazuje VALIDATED i start, session protocol potwierdza oczekiwany UID
+oqIJ5rQDRrNwLPTh9H2p_W4tLof oraz ready. Dokładnej przyczyny pierwszego otwarcia
+nie udowodniono. Nie zmieniono geometrii, nagrody ani zamrożonych źródeł.
+
+QR queue-qr-repair-retry02-20261005 rozpoczęty 20:12:16 UTC (22:12 Warsaw),
+SAVE 23:32:16 UTC (01:32 dnia 6 października), HARD 23:42:16 UTC (01:42).
+Cap 12600 s, 145408/max8100 + 30 greedy/max2700, źródła c4ec36a0.
+Bramka pozostaje >=29/30, median<=56.915 s, complete/drained/accounted/finite/
+fingerprint/SHA i valid timing max100/noerrors/skips. Nie ma jeszcze oceny jazdy.
+31 testów nadzoru QR przeszło w tym wznowieniu; plany QR i SD validate-only przeszły.
+
+SD queue-sd-sac-anchor005-retry02-20261005 czeka pasywnie, bez drugiego kontrolera,
+na normalne zamknięcie obu etapów nowego QR, kompletny checkpoint/30 ocen z matching
+SHA, normalny guard, zamknięte procesy, wolny mutex i brak nowego STOP.
+Pasywny limit 23:47:16 UTC (01:47 Warsaw). Potem fresh beta.005/target.8 seed17,
+4706a06b, 145408/max10800 +10greedy/max2100, cap14400 s od faktycznego startu,
+SAVE600 przed HARD. >=8/10 plus kompletne bramki wymagane; full SD pozostaje BLOCKED.
+PPO ostatnio 3/10 i SD beta.5 0/10 nadal są ograniczeniami, nie nowymi sukcesami.
+
+Monitor ACTIVE15min kontynuuje autonomiczne diagnozy i uzasadnione ograniczone
+nowe piloty do użytecznej jazdy SD-SAC albo nowego STOP. Żadnych automatycznych
+miesięcznych startów, zmian wspólnej nagrody lub obejścia fingerprintu.
+
+
 ## Nowe ograniczone QR → SD-SAC uruchomione — 5 października 17:04 Warsaw
 
 Użytkownik potwierdził: **„Tak, nowe ograniczone QR → SD-SAC”** po pytaniu
