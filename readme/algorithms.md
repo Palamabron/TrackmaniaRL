@@ -230,6 +230,13 @@ components:
 
 **Primary paper:** [Distributional Reinforcement Learning with Quantile Regression](https://arxiv.org/abs/1710.10044).
 
+The QR-DQN regression objective sums over learned prediction quantiles and averages
+over target samples, as in Algorithm 1. It preserves batch/sequence positions for
+the learner's mask and importance weighting. Increasing the fixed quantile count
+therefore changes the loss and gradient scale; older checkpoints using the former
+pairwise mean must retain their original frozen runtime. This correction does not
+change the regression reductions used by IQN, FQF or the SAC family.
+
 ### IQN
 
 **Status and intuition.** Supported unified composition and the generated
