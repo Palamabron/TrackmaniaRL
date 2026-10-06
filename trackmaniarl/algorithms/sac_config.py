@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Literal, TypedDict
@@ -80,6 +81,7 @@ class TQCConfig(SACConfig):
 
 
 class SDSACOptions(SACOptions, total=False):
+    actor_learning_rate: float | None
     q_clip_epsilon: float
     entropy_penalty_coefficient: float
     entropy_penalty_reference: Literal["target_policy", "behavior"]
@@ -87,12 +89,17 @@ class SDSACOptions(SACOptions, total=False):
 
 @dataclass(frozen=True, slots=True)
 class SDSACConfig(SACConfig):
+    actor_learning_rate: float | None = None
     q_clip_epsilon: float = 0.5
     entropy_penalty_coefficient: float = 0.5
     entropy_penalty_reference: Literal["target_policy", "behavior"] = "target_policy"
 
     def validate(self) -> None:
         SACConfig.validate(self)
+        if self.actor_learning_rate is not None and (
+            not math.isfinite(self.actor_learning_rate) or self.actor_learning_rate <= 0
+        ):
+            raise ValueError("SD-SAC actor_learning_rate must be finite and positive")
         if min(self.q_clip_epsilon, self.entropy_penalty_coefficient) < 0.0:
             raise ValueError(
                 "SD-SAC clipping and entropy penalty coefficients must be non-negative"

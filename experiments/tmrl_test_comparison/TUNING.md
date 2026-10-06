@@ -1,3 +1,25 @@
+## Target 1.2: rzeczywista bramka FAIL; następna hipoteza aktora — 6 października 12:16 Warsaw
+
+Ocena fresh02 zakończyła się normalnie 10:11:54.813 UTC, guard closure forced=[];
+wszystkie jej procesy zamknięte. 0/10 finishes, średni postęp 0.673439%, no_progress.
+1457/1457 pomiarów valid, max/p99 60ms, bez błędów kontrolera/telemetrii,
+skips3120/max6; checkpoint SHA niezmieniony. Wszystkie warunki techniczne bramki
+spełnione, jazda FAIL. Wynik target1.2 gorszy niż target.8 beta.0005 (48.4221%).
+
+Audyt CPU exact frozen4706, 1024 replay states, threads2/CUDA-1, bez kontrolera
+ani aktualizacji learnera: na starcie aktor wybiera akcję5 (pełny skręt z brake tap)
+z prawdopodobieństwem około .969, krytyk akcję41 (prosto z brake tap).
+1000 kroków niezależnej kopii głowy przy stałym Q podniosło zgodność aktor/Q
+z .340 do .804/.807 dla beta0/.0005. Usunięcie kotwicy daje podobny wynik;
+próba nie zapisuje polityki i nie dowodzi poprawności krytyka ani jakości jazdy.
+
+Następna hipoteza: wrócić do lepszego target.8/beta.0005 i przetestować wyłącznie
+szybsze dopasowanie aktora (actor LR9e-4 zamiast3e-4). Krytyk i temperatura
+zachowają LR3e-4. Dodano opcjonalny parametr SD-SAC z domyślnym zachowaniem
+bez zmian; nowa próba wymaga świeżego treningu i osobnego zamrożonego źródła.
+Dowody: `artifacts/tmrl-test-comparison/sd-sac-target120-audit-20261006`.
+Full SD BLOCKED; QR PASS zachowany. Poniższy ACTIVE fresh02 jest historyczny.
+
 ## Target 1.2: nowa ocena zachowanego checkpointu uruchomiona — 6 października 12:09 Warsaw
 
 Po ręcznym przywróceniu wtyczki potwierdzono protokół 2 i właściwy UID.

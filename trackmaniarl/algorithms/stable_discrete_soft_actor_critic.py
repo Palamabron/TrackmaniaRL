@@ -114,6 +114,11 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
 
     def _configure(self, config: SDSACConfig) -> None:
         self.learning_rate = config.learning_rate
+        self.actor_learning_rate = (
+            config.learning_rate
+            if config.actor_learning_rate is None
+            else config.actor_learning_rate
+        )
         self.target_tau = config.target_tau
         self.initial_entropy_coefficient = config.entropy_coefficient
         self.entropy_mode = "learned" if config.learn_entropy_coefficient else "fixed"
@@ -138,7 +143,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
     def _setup_optimizers(self) -> None:
         assert self.model is not None
         self.actor_optimizer = torch.optim.Adam(
-            self.model.actor.parameters(), lr=self.learning_rate
+            self.model.actor.parameters(), lr=self.actor_learning_rate
         )
         self.critic_optimizer = torch.optim.Adam(
             list(self.model.q1.parameters()) + list(self.model.q2.parameters()),
