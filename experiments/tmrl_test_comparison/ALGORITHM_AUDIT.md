@@ -1,3 +1,21 @@
+## 2026-10-07 — comprehensive interrupted; focus repair verified; resume not launched
+
+This supersedes older ACTIVE snapshots below. Comprehensive closed normally at
+2026-10-06 21:19 Warsaw after foreground activation was denied at an episode reset.
+Saved CP3272:23582 transitions,3272updates,credit123.5,finite/accounted; training
+incomplete and not drained. Evaluation NEVER LAUNCHED; no driving-gate result.
+All checked owned identities closed; source/checkpoint preserved; automationPAUSED.
+
+Editable focus recovery now waits at most5s per focus acquisition and rechecks
+exact game HWND before keys.84 focused CPU/fake tests and two actual idle resets
+passed (10ms,33fields,protocol2,correctUID); no policy/learner/evaluation started.
+Persistent Windows focus denial remains bounded/fail-closed. Exact-source resume
+is prepared separately using frozenab736f53 and cloned checkpoint/journal; the
+new keyboard source cannot be substituted under that checkpoint. No old queue or
+deadline is restarted/extended. See [focus recovery evidence and resume limits](SD_SAC_FOCUS_RECOVERY_20261007.md).
+FullSD remains BLOCKED; QR29/30median54.3PASS preserved. Comparable training data
+do not yet establish improved driving; the earlier train-vs-eval comparison was invalid.
+
 ## 2026-10-06 20:57 Warsaw — comprehensive repaired-source pilot ACTIVE
 
 Direct instruction “no to odpalaj, chce to dzisiaj ogarnąć najlepiej” authorizes

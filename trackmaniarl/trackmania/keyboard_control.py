@@ -9,11 +9,14 @@ from ctypes import wintypes
 from dataclasses import dataclass
 from enum import Enum
 from threading import RLock, Timer
-from time import sleep
+from time import monotonic, sleep
 
 import numpy as np
 
 from trackmaniarl.trackmania.actions import BRAKE_TAP_DURATION_S, BRAKE_TAP_SENTINEL
+
+_FOCUS_TIMEOUT_S = 5.0
+_FOCUS_POLL_S = 0.25
 
 
 class _MouseInput(ctypes.Structure):
@@ -103,11 +106,36 @@ def _windows_int_call(library: object, name: str, *args: object) -> int:
     return result
 
 
-def _focus_trackmania(*, guard: ResetGuard | None = None) -> bool:
+@dataclass(frozen=True, slots=True)
+class _FocusedWindow:
+    user32: object
+    handle: object
+
+    def verify(self) -> None:
+        """Recheck the same window immediately before sending a reset key."""
+
+        current = _windows_call(self.user32, "FindWindowW", None, "Trackmania")
+        foreground = _windows_call(self.user32, "GetForegroundWindow")
+        if current != self.handle or foreground != self.handle:
+            raise RuntimeError(
+                "Trackmania foreground changed before reset key: "
+                f"target={self.handle}, current={current}, foreground={foreground}"
+            )
+
+
+def _focus_trackmania(*, guard: ResetGuard | None = None) -> _FocusedWindow | None:
+    """Wait briefly for lawful activation, without bypassing Windows focus policy.
+
+    Windows may deny a background process's activation request, even for an open
+    game. Retry for a bounded interval so a transient denial or the user returning
+    to the game need not abort training. Persistent denial still fails before any
+    reset key, and a supplied guard can cancel every wait or attempt.
+    """
+
     if guard is not None:
         guard.check()
     if sys.platform != "win32":
-        return False
+        return None
     user32 = _windows_dll("user32")
     # HWND is pointer-sized; ctypes' default int result truncates it on Win64.
     for name, argument_types, result_type in (
@@ -120,24 +148,42 @@ def _focus_trackmania(*, guard: ResetGuard | None = None) -> bool:
         function.restype = result_type
     window = _windows_call(user32, "FindWindowW", None, "Trackmania")
     if not window:
-        return False
-    if _windows_call(user32, "GetForegroundWindow") == window:
-        return True
-    activated = _windows_int_call(user32, "SetForegroundWindow", window)
-    if activated:
-        (sleep if guard is None else guard.wait)(0.1)
+        return None
+    deadline = monotonic() + _FOCUS_TIMEOUT_S
+    activated = 0
+    attempts = 0
     foreground = _windows_call(user32, "GetForegroundWindow")
-    if foreground != window:
-        raise RuntimeError(
-            "Trackmania foreground verification failed: "
-            f"SetForegroundWindow={activated}, target={window}, foreground={foreground}"
-        )
-    return True
+    while foreground != window:
+        if guard is not None:
+            guard.check()
+        remaining = deadline - monotonic()
+        if remaining <= 0:
+            raise RuntimeError(
+                "Trackmania foreground verification failed: "
+                f"SetForegroundWindow={activated}, target={window}, foreground={foreground}, "
+                f"attempts={attempts}, timeout_s={_FOCUS_TIMEOUT_S}"
+            )
+        if _windows_call(user32, "FindWindowW", None, "Trackmania") != window:
+            raise RuntimeError("Trackmania window changed while waiting for foreground")
+        activated = _windows_int_call(user32, "SetForegroundWindow", window)
+        attempts += 1
+        if guard is not None:
+            guard.check()
+        foreground = _windows_call(user32, "GetForegroundWindow")
+        if foreground == window:
+            break
+        remaining = deadline - monotonic()
+        (sleep if guard is None else guard.wait)(max(0.0, min(_FOCUS_POLL_S, remaining)))
+        if guard is not None:
+            guard.check()
+        foreground = _windows_call(user32, "GetForegroundWindow")
+    return _FocusedWindow(user32, window)
 
 
-def _tap_reset_key(key: int, guard: ResetGuard | None) -> None:
+def _tap_reset_key(key: int, guard: ResetGuard | None, window: _FocusedWindow) -> None:
     if guard is not None:
         guard.check()
+    window.verify()
     try:
         KeyboardController._windows_key_event(KeyboardKeyEvent(key, True))
         (sleep if guard is None else guard.wait)(0.1)
@@ -147,15 +193,17 @@ def _tap_reset_key(key: int, guard: ResetGuard | None) -> None:
 
 
 def confirm_trackmania_finish(*, guard: ResetGuard | None = None) -> None:
-    if not _focus_trackmania(guard=guard):
+    window = _focus_trackmania(guard=guard)
+    if window is None:
         raise RuntimeError("Trackmania window was not found for keyboard confirmation")
-    _tap_reset_key(0x0D, guard)
+    _tap_reset_key(0x0D, guard, window)
 
 
 def restart_trackmania_race(*, guard: ResetGuard | None = None) -> None:
-    if not _focus_trackmania(guard=guard):
+    window = _focus_trackmania(guard=guard)
+    if window is None:
         raise RuntimeError("Trackmania window was not found for keyboard restart")
-    _tap_reset_key(0x2E, guard)
+    _tap_reset_key(0x2E, guard, window)
 
 
 def restart_trackmania_editor_validation(*, guard: ResetGuard | None = None) -> None:
@@ -317,11 +365,16 @@ class KeyboardController:
         with self._lock:
             self._cancel_tap_unlocked()
             self._set_pressed(set())
-            if self._requires_focus and not _focus_trackmania():
-                raise RuntimeError("Trackmania window was not found for keyboard control")
-            self._key_event(KeyboardKeyEvent(self._RESTART, True))
-            sleep(0.1)
-            self._key_event(KeyboardKeyEvent(self._RESTART, False))
+            if self._requires_focus:
+                window = _focus_trackmania()
+                if window is None:
+                    raise RuntimeError("Trackmania window was not found for keyboard control")
+                window.verify()
+            try:
+                self._key_event(KeyboardKeyEvent(self._RESTART, True))
+                sleep(0.1)
+            finally:
+                self._key_event(KeyboardKeyEvent(self._RESTART, False))
 
     def confirm_finish(self) -> None:
         confirm_trackmania_finish()
