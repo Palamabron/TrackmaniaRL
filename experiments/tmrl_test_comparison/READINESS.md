@@ -1,3 +1,21 @@
+## Target 1.2: limit recovery minął bez uruchomienia oceny — 6 października 11:58 Warsaw
+
+Pierwotny HARD 09:48:43.413685 UTC minął. Przygotowana kolejka
+`queue-sd-sac-target120-eval-recovery01-20261006` nie została uruchomiona:
+brak launch receipt, learnera, kontrolera i oceny. Kontrola po HARD nie wykazała
+procesów Python ani nasłuchu telemetrycznego 9000/9001. Nie przedłużono limitu.
+To **brak wyniku jazdy**, nie 0/10; checkpoint 33859 i kompletne dowody treningu zachowane.
+
+Pulpit i gra zostały wcześniej przywrócone, oryginalna mapa załadowana w walidacji.
+Aktualną blokadą jest odrzucenie TrackmaniaRL_Connect przez Openplanet:
+`Plugin is not suitable for the current signature mode. It requires School mode.`
+Poproszono o ręczne przywrócenie School mode i załadowanie wtyczki; ustawienia
+bezpieczeństwa nie są zmieniane automatycznie. Po tej interwencji potrzebny jest
+nowy, uzasadniony i ograniczony plan; wygasłego recovery nie uruchamiać.
+Full SD nadal BLOCKED, QR PASS zachowany, nadzór ACTIVE. Dowód:
+`artifacts/tmrl-test-comparison/queue-sd-sac-target120-eval-recovery01-20261006/deadline-expiry-receipt.json`.
+Poniższe wcześniejsze stany i możliwość uruchomienia recovery przed HARD są historyczne.
+
 ## Target 1.2: trening kompletny, ocena jeszcze nie rozpoczęta — 6 października 11:10 Warsaw
 
 Nadrzędny stan: trening `tmrl-repair-sd-sac-target120-s17` zakończył się o 08:50:54 UTC.
