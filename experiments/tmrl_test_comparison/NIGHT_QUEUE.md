@@ -1,3 +1,33 @@
+## 2026-10-06 20:57 Warsaw — comprehensive repaired-source pilot ACTIVE
+
+Direct instruction “no to odpalaj, chce to dzisiaj ogarnąć najlepiej” authorizes
+one fresh bounded training and10 greedy trials, with no automatic following/full.
+Queue `queue-sd-sac-comprehensive-20261006`, run `tmrl-repair-sd-sac-comprehensive-s17`.
+Frozen source ab736f53b3b96f517be8c72dc85bdcefb50a0606 at
+C:/Users/szulc/.codex/worktrees/tmrl-sd-sac-comprehensive-runtime/AITrackmania.
+All terminal experimental settings are retained exactly; only audited code and
+bounded preflight repairs change. No checkpoint/replay resume, reward/model/GNN/
+replay/UTD changes, or old frozen edits. This remains an experimental variant.
+
+START 2026-10-06T18:57:35.287822+00:00 = 2026-10-06 20:57:35 Warsaw.
+SAVE 2026-10-06T22:47:35.287822+00:00 = 2026-10-07 00:47:35 Warsaw.
+HARD 2026-10-06T22:57:35.287822+00:00 = 2026-10-07 00:57:35 Warsaw.
+Cap14400s, train145408/max11400 then10greedy/max2100; never extend/restart.
+Runner67324 created1791313053.5805008, guard59804,
+learner58108 ready, actor57380 registered/collecting, W&Bh9q80yog API running.
+Actual preflight20ms/33fields/correctUID, bounded countdown polling55frames.
+First preparation attempt safely rejected denied foreground activation before
+keyboard input; computer-use activated the returned game window, then a separate
+prepared check and actual preflight passed. Failed attempt evidence is retained.
+
+329 code tests and34 new queue guards plusvalidate-only passed. This is code and
+launch evidence, not driving qualification. No UI/secondcontroller during learner
+or evaluation. New/changedSTOP wins; only pinned unchanged historicalSTOP exempt.
+Gate>=8/10 plus complete/finite/fingerprint/SHA/drained/accounted training and ten
+validUID trials, timing maxima<=100ms/noerrors/skips. FullSD BLOCKED; QR29/30median
+54.3PASS preserved. MonitorACTIVE; pause and report on completion/STOP; no nextpilot
+without direct human instruction. `actual-launch-receipt.json` pins the evidence.
+
 ## 2026-10-06 20:17 Warsaw — terminal train complete; evaluation not launched; offline repairs
 
 This snapshot supersedes older ACTIVE/deadline entries below. The authorized
