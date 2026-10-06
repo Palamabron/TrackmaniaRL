@@ -37,7 +37,7 @@ def test_discrete_sac_updates_without_shape_or_target_errors() -> None:
 
 def test_discrete_sac_disabled_anchor_does_not_call_target_actor() -> None:
     learner = StableDiscreteSoftActorCritic(
-        DiscreteSacModel(), entropy_penalty_coefficient=0.0, target_entropy=2.0
+        DiscreteSacModel(), entropy_penalty_coefficient=0.0, target_entropy=0.8
     )
 
     with patch.object(

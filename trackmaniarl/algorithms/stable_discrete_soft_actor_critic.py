@@ -27,6 +27,11 @@ from trackmaniarl.algorithms.sac_support import (
     entropy_state,
     restore_entropy_state,
 )
+from trackmaniarl.algorithms.sd_sac_objectives import (
+    actor_diagnostics,
+    categorical_statistics,
+    soft_q_log_probabilities,
+)
 from trackmaniarl.core.contracts import ModelContract, PolicyMode
 from trackmaniarl.core.data import PriorityUpdate, TrainingBatch
 from trackmaniarl.core.pytree import sanitize_finite, tree_collate, tree_to_device
@@ -47,14 +52,14 @@ class _DiscretePolicy:
         observation = tree_to_device(tree_collate([sanitize_finite(observation)]), self.device)
         with torch.no_grad():
             actor = cast(Any, self.actor)
-            probabilities: torch.Tensor = actor.probabilities(observation)
+            probabilities, log_probabilities = categorical_statistics(actor, observation)
             distribution: Any = torch.distributions.Categorical(probs=probabilities)
             action = (
                 probabilities.argmax(dim=-1)
                 if mode is PolicyMode.EVALUATION
                 else distribution.sample()
             )
-            entropy = distribution.entropy().detach().cpu().reshape(-1)
+            entropy = -(probabilities * log_probabilities).sum(-1).detach().cpu().reshape(-1)
         values = action.detach().cpu().reshape(-1)
         if values.numel() != 1:
             raise ValueError("Discrete policy must produce exactly one action per observation")
@@ -73,6 +78,7 @@ class _DiscreteCriticStep:
     q1: torch.Tensor
     q2: torch.Tensor
     targets: torch.Tensor
+    diagnostics: Mapping[str, torch.Tensor] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +95,7 @@ class _DiscreteUpdate:
     actor: _DiscreteActorStep
     alpha_loss: torch.Tensor
     alpha: torch.Tensor
+    alpha_used: torch.Tensor
 
 
 class StableDiscreteSoftActorCritic(TorchLearnerBase):
@@ -96,6 +103,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
 
     accepted_model_contracts = frozenset({ModelContract.DISCRETE_ACTOR_CRITIC})
     supports_sequence_training = False
+    supports_n_step = False
 
     def __init__(
         self,
@@ -119,6 +127,14 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             if config.actor_learning_rate is None
             else config.actor_learning_rate
         )
+        self.entropy_learning_rate = (
+            config.learning_rate
+            if config.entropy_learning_rate is None
+            else config.entropy_learning_rate
+        )
+        self.entropy_coefficient_min = config.entropy_coefficient_min
+        self.entropy_coefficient_max = config.entropy_coefficient_max
+        self.actor_objective = config.actor_objective
         self.target_tau = config.target_tau
         self.initial_entropy_coefficient = config.entropy_coefficient
         self.entropy_mode = "learned" if config.learn_entropy_coefficient else "fixed"
@@ -131,12 +147,16 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         assert self.model is not None
         if not all(hasattr(self.model, name) for name in ("actor", "q1", "q2")):
             raise TypeError("SD-SAC model must expose actor, q1 and q2")
+        if self.actor_objective == "soft_q_forward_kl" and not callable(
+            getattr(self.model.actor, "log_probabilities", None)
+        ):
+            raise TypeError("soft_q_forward_kl requires actor.log_probabilities")
         self.target_model = deepcopy(self.model).to(self.device).eval()
         for parameter in self.target_model.parameters():
             parameter.requires_grad_(False)
         self._setup_optimizers()
         config = EntropyConfig(
-            self.initial_entropy_coefficient, self.learning_rate, self.entropy_mode
+            self.initial_entropy_coefficient, self.entropy_learning_rate, self.entropy_mode
         )
         self.log_alpha, self.alpha_optimizer = entropy_state(config, self.device)
 
@@ -156,6 +176,8 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
 
     def _update(self, batch: TrainingBatch) -> tuple[Mapping[str, float], PriorityUpdate]:
         assert self.model is not None
+        if batch.metadata.get("n_step", 1) != 1:
+            raise ValueError("SD-SAC requires n_step=1; generic n-step omits intermediate entropy")
         prepared = discrete_batch(self._batch(batch))
         alpha = alpha_value(self.log_alpha, self.initial_entropy_coefficient, self.device)
         critic = self._critic_step(prepared, alpha)
@@ -164,12 +186,17 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         self._optimize(actor.loss, self.actor_optimizer)
         alpha_loss = self._entropy_loss(actor)
         polyak_update(self.model, self.target_model, self.target_tau)
-        return self._update_result(prepared, _DiscreteUpdate(critic, actor, alpha_loss, alpha))
+        current_alpha = alpha_value(self.log_alpha, self.initial_entropy_coefficient, self.device)
+        return self._update_result(
+            prepared, _DiscreteUpdate(critic, actor, alpha_loss, current_alpha, alpha)
+        )
 
     def _critic_targets(self, batch: SACBatch, alpha: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
-            next_probabilities = self.model.actor.probabilities(batch.next_observations)
-            next_log_probabilities = next_probabilities.clamp_min(1e-8).log()
+            next_probabilities, next_log_probabilities = categorical_statistics(
+                self.model.actor, batch.next_observations
+            )
+            self._desired_entropy(next_probabilities.shape[-1])
             next_q = 0.5 * (
                 self.target_model.q1(batch.next_observations)
                 + self.target_model.q2(batch.next_observations)
@@ -182,12 +209,14 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         indices = batch.actions[:, None]
         q1 = self.model.q1(batch.observations).gather(1, indices).squeeze(1)
         q2 = self.model.q2(batch.observations).gather(1, indices).squeeze(1)
-        losses = self._critic_losses(batch, (q1, q2, targets))
-        return _DiscreteCriticStep(weighted_mean(losses, batch.weights), q1, q2, targets)
+        losses, diagnostics = self._critic_losses(batch, (q1, q2, targets))
+        return _DiscreteCriticStep(
+            weighted_mean(losses, batch.weights), q1, q2, targets, diagnostics
+        )
 
     def _critic_losses(
         self, batch: SACBatch, values: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, Mapping[str, torch.Tensor]]:
         q1, q2, targets = values
         indices = batch.actions[:, None]
         with torch.no_grad():
@@ -196,25 +225,57 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         clipped_q1 = target_q1 + (q1 - target_q1).clamp(-self.q_clip_epsilon, self.q_clip_epsilon)
         clipped_q2 = target_q2 + (q2 - target_q2).clamp(-self.q_clip_epsilon, self.q_clip_epsilon)
         losses = torch.maximum((q1 - targets).square(), (clipped_q1 - targets).square())
-        return losses + torch.maximum((q2 - targets).square(), (clipped_q2 - targets).square())
+        losses = losses + torch.maximum((q2 - targets).square(), (clipped_q2 - targets).square())
+        with torch.no_grad():
+            outside = torch.stack(
+                [
+                    (q1 - target_q1).abs() > self.q_clip_epsilon,
+                    (q2 - target_q2).abs() > self.q_clip_epsilon,
+                ]
+            )
+            clipped_wins = torch.stack(
+                [
+                    (clipped_q1 - targets).square() > (q1 - targets).square(),
+                    (clipped_q2 - targets).square() > (q2 - targets).square(),
+                ]
+            )
+            terminal = batch.source.terminated.bool().reshape(-1)
+            terminal_count = terminal.float().sum()
+            terminal_error = (0.5 * (q1 + q2) - targets).abs()
+            diagnostics = {
+                "critic/clipped_fraction": outside.float().mean(),
+                "critic/clip_blocked_gradient_fraction": (outside & clipped_wins).float().mean(),
+                "critic/terminal_samples": terminal_count,
+                "critic/terminal_td_mae": (terminal_error * terminal.float()).sum()
+                / terminal_count.clamp_min(1),
+            }
+        return losses, diagnostics
 
     def _actor_step(self, batch: SACBatch, alpha: torch.Tensor) -> _DiscreteActorStep:
-        probabilities = self.model.actor.probabilities(batch.observations)
-        log_probabilities = probabilities.clamp_min(1e-8).log()
+        probabilities, log_probabilities = categorical_statistics(
+            self.model.actor, batch.observations
+        )
         # The actor improves against fixed critic values. Building a critic graph
         # only to detach it wastes memory and compute on every actor update.
         with torch.no_grad():
-            q_values = 0.5 * (self.model.q1(batch.observations) + self.model.q2(batch.observations))
-        actor_loss = (probabilities * (alpha * log_probabilities - q_values)).sum(1).mean()
+            q1 = self.model.q1(batch.observations).float()
+            q2 = self.model.q2(batch.observations).float()
+            q_values = 0.5 * (q1 + q2)
+            target_log_probabilities = soft_q_log_probabilities(q_values, alpha)
+        if self.actor_objective == "soft_q_forward_kl":
+            # An explicit variant, not canonical SD-SAC. Detached cross-entropy
+            # keeps a gradient toward missed actions even for saturated logits.
+            actor_loss = -(target_log_probabilities.exp() * log_probabilities).sum(1).mean()
+        else:
+            actor_loss = (probabilities * (alpha * log_probabilities - q_values)).sum(1).mean()
         entropy = -(probabilities * log_probabilities).sum(1)
-        diagnostics = {
-            "policy/max_probability": probabilities.detach().max(1).values.mean(),
-            "policy/q_greedy_agreement": (probabilities.detach().argmax(1) == q_values.argmax(1))
-            .float()
-            .mean(),
-            "critic/action_value_spread": (q_values.max(1).values - q_values.min(1).values).mean(),
-            "loss/entropy_penalty": torch.zeros((), device=entropy.device),
-        }
+        diagnostics = actor_diagnostics(
+            (probabilities.detach(), log_probabilities.detach()), (q1, q2), target_log_probabilities
+        )
+        desired = self._desired_entropy(probabilities.shape[-1])
+        diagnostics["policy/entropy_target"] = entropy.new_tensor(desired)
+        diagnostics["policy/entropy_target_error"] = entropy.detach().mean() - desired
+        diagnostics["loss/entropy_penalty"] = torch.zeros((), device=entropy.device)
         if self.entropy_penalty_coefficient:
             reference = self._entropy_reference(batch, entropy)
             penalty = self.entropy_penalty_coefficient * (entropy - reference).square().mean()
@@ -239,21 +300,33 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
                 raise ValueError("Stored behavior entropies must be finite and non-negative")
             return target_entropy
         with torch.no_grad():
-            target_probabilities = self.target_model.actor.probabilities(batch.observations)
-            target_entropy = -(
-                target_probabilities * target_probabilities.clamp_min(1e-8).log()
-            ).sum(1)
-        return cast(torch.Tensor, target_entropy)
+            target_probabilities, target_logs = categorical_statistics(
+                self.target_model.actor, batch.observations
+            )
+            target_entropy = -(target_probabilities * target_logs).sum(1)
+        return target_entropy
+
+    def _desired_entropy(self, action_count: int) -> float:
+        maximum = math.log(action_count)
+        if self.target_entropy is None:
+            return 0.98 * maximum
+        if self.target_entropy > maximum:
+            raise ValueError("SD-SAC target_entropy cannot exceed log(action_count)")
+        return self.target_entropy
 
     def _entropy_loss(self, actor: _DiscreteActorStep) -> torch.Tensor:
         alpha_loss = torch.zeros((), device=self.device)
         if self.log_alpha is None:
             return alpha_loss
-        desired = self.target_entropy
-        desired = desired if desired is not None else 0.98 * math.log(actor.action_count)
+        desired = self._desired_entropy(actor.action_count)
         alpha_loss = (self.log_alpha * (actor.entropy.detach() - desired)).mean()
         assert self.alpha_optimizer is not None
         self._optimize(alpha_loss, self.alpha_optimizer)
+        with torch.no_grad():
+            if self.entropy_coefficient_min is not None:
+                self.log_alpha.clamp_(min=math.log(self.entropy_coefficient_min))
+            if self.entropy_coefficient_max is not None:
+                self.log_alpha.clamp_(max=math.log(self.entropy_coefficient_max))
         return alpha_loss
 
     @staticmethod
@@ -265,6 +338,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "loss/critic": float(update.critic.loss.item()),
             "loss/entropy": float(update.alpha_loss.item()),
             "state/alpha": float(update.alpha.item()),
+            "state/alpha_used": float(update.alpha_used.item()),
             "policy/entropy": float(update.actor.entropy.detach().mean().item()),
             "critic/q1_mean": float(update.critic.q1.detach().mean().item()),
             "critic/q2_mean": float(update.critic.q2.detach().mean().item()),
@@ -272,7 +346,22 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "critic/disagreement": float(
                 (update.critic.q1 - update.critic.q2).detach().abs().mean().item()
             ),
+            "critic/td_rmse": float(
+                (0.5 * (update.critic.q1 + update.critic.q2) - update.critic.targets)
+                .detach()
+                .square()
+                .mean()
+                .sqrt()
+                .item()
+            ),
+            "critic/td_bias": float(
+                (0.5 * (update.critic.q1 + update.critic.q2) - update.critic.targets)
+                .detach()
+                .mean()
+                .item()
+            ),
             **{key: float(value.item()) for key, value in update.actor.diagnostics.items()},
+            **{key: float(value.item()) for key, value in update.critic.diagnostics.items()},
         }
         td_errors = (0.5 * (update.critic.q1 + update.critic.q2) - update.critic.targets).abs()
         return metrics, PriorityUpdate(
@@ -294,18 +383,20 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "alpha_optimizer": self.alpha_optimizer.state_dict() if self.alpha_optimizer else None,
             "scaler": self._scaler_state(),
             "rng": self._rng_state(),
+            "sd_sac_options": self._checkpoint_options(),
         }
 
     def state_dict_for_policy(self, policy_state: Mapping[str, Any]) -> Mapping[str, Any]:
         assert self.model is not None
         state = evaluated_actor_state(self.state_dict(), self.model, policy_state)
         state["actor_optimizer"] = torch.optim.Adam(
-            self.model.actor.parameters(), lr=self.learning_rate
+            self.model.actor.parameters(), lr=self.actor_learning_rate
         ).state_dict()
         return state
 
     def load_state_dict(self, state: Mapping[str, Any]) -> None:
         assert self.model is not None
+        self._validate_checkpoint_options(state)
         self.model.load_state_dict(state["model"])
         self.target_model.load_state_dict(state["target_model"])
         self.actor_optimizer.load_state_dict(state["actor_optimizer"])
@@ -314,3 +405,63 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         restore_entropy_state(entropy, state)
         self._restore_scaler(state["scaler"])
         self._restore_rng(state["rng"])
+
+    def _checkpoint_options(self) -> Mapping[str, Any]:
+        return {
+            "actor_objective": self.actor_objective,
+            "learning_rate": self.learning_rate,
+            "actor_learning_rate": self.actor_learning_rate,
+            "entropy_learning_rate": self.entropy_learning_rate,
+            "entropy_coefficient_min": self.entropy_coefficient_min,
+            "entropy_coefficient_max": self.entropy_coefficient_max,
+            "entropy_mode": self.entropy_mode,
+            "initial_entropy_coefficient": self.initial_entropy_coefficient,
+            "target_entropy": self.target_entropy,
+            "target_tau": self.target_tau,
+            "q_clip_epsilon": self.q_clip_epsilon,
+            "entropy_penalty_coefficient": self.entropy_penalty_coefficient,
+            "entropy_penalty_reference": self.entropy_penalty_reference,
+        }
+
+    def _validate_checkpoint_options(self, state: Mapping[str, Any]) -> None:
+        saved = state.get("sd_sac_options")
+        if saved is not None:
+            if saved != self._checkpoint_options():
+                raise ValueError("checkpoint SD-SAC options do not match the learner")
+        elif (
+            self.actor_objective != "sac"
+            or self.entropy_learning_rate != self.learning_rate
+            or self.entropy_coefficient_min is not None
+            or self.entropy_coefficient_max is not None
+        ):
+            raise ValueError("legacy checkpoint cannot resume with new SD-SAC options")
+        for name, expected_rate in (
+            ("actor_optimizer", self.actor_learning_rate),
+            ("critic_optimizer", self.learning_rate),
+            ("alpha_optimizer", self.entropy_learning_rate),
+        ):
+            optimizer = state.get(name)
+            if name == "alpha_optimizer" and self.entropy_mode == "fixed":
+                continue
+            if not isinstance(optimizer, Mapping) or not optimizer.get("param_groups"):
+                raise ValueError(f"checkpoint is missing {name} parameter groups")
+            if any(group.get("lr") != expected_rate for group in optimizer["param_groups"]):
+                raise ValueError(f"checkpoint {name} learning rate does not match the learner")
+        if self.entropy_mode == "learned":
+            log_alpha = state.get("log_alpha")
+            if not isinstance(log_alpha, torch.Tensor) or log_alpha.numel() != 1:
+                raise ValueError("checkpoint must contain scalar learned log_alpha")
+            if not bool(torch.isfinite(log_alpha).all()):
+                raise ValueError("checkpoint log_alpha must be finite")
+            coefficient = log_alpha.float().exp()
+            if not bool(torch.isfinite(coefficient).all()) or not bool(coefficient > 0):
+                raise ValueError("checkpoint alpha must be finite and positive in float32")
+            for bound, lower in (
+                (self.entropy_coefficient_min, True),
+                (self.entropy_coefficient_max, False),
+            ):
+                if bound is not None:
+                    limit = log_alpha.new_tensor(math.log(bound))
+                    outside = bool(log_alpha < limit) if lower else bool(log_alpha > limit)
+                    if outside:
+                        raise ValueError("checkpoint log_alpha is outside configured bounds")

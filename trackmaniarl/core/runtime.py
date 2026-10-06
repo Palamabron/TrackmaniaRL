@@ -99,6 +99,8 @@ def _validate_training_contract(spec: RunSpec, components: _TrainingComponents) 
     _validate_sequence_contract(spec, components)
     _validate_burn_in(spec, components.learner)
     _validate_history_contract(spec, components.pipeline)
+    if spec.training.n_step != 1 and not getattr(components.learner, "supports_n_step", True):
+        raise ValueError("This learner requires training.n_step=1")
     if getattr(components.learner, "on_policy", False) and spec.training.n_step != 1:
         raise ValueError("on-policy training requires training.n_step=1")
     if getattr(components.learner, "on_policy", False):

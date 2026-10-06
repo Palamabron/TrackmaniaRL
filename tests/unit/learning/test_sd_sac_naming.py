@@ -10,7 +10,10 @@ from trackmaniarl.algorithms.sac_config import DiscreteSACConfig, SDSACConfig
 from trackmaniarl.core.contracts import ModelContract
 from trackmaniarl.core.spec import RunSpec
 from trackmaniarl.models.sensor_actor_critic import SensorActorCriticModelFactory
-from trackmaniarl.project.scaffold_run_templates import _trackmania_actor_critic_config
+from trackmaniarl.project.scaffold_run_templates import (
+    _trackmania_actor_critic_config,
+    _trackmania_vision_config,
+)
 from trackmaniarl.trackmania.vision_models import VisionActorCriticModelFactory
 
 
@@ -33,6 +36,9 @@ def test_new_comparison_and_scaffold_configs_use_sd_sac(name: str) -> None:
     assert spec.metadata["algorithm"] == "sd-sac"
     generated = RunSpec.model_validate(yaml.safe_load(_trackmania_actor_critic_config(name)))
     assert generated.run_id == "trackmania-sd-sac-telemetry"
+    assert generated.training.n_step == 1
+    vision = RunSpec.model_validate(yaml.safe_load(_trackmania_vision_config(name)))
+    assert vision.training.n_step == 1
 
 
 def test_sd_sac_config_preserves_the_previous_import() -> None:

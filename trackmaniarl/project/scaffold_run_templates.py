@@ -212,6 +212,8 @@ def _trackmania_actor_critic_config(algorithm: str) -> str:
     }
     config["training"]["batch_size"] = 256
     config["training"]["sequence_length"] = 1
+    if algorithm == "sd-sac":
+        config["training"]["n_step"] = 1
     return yaml.safe_dump(config, sort_keys=False)
 
 

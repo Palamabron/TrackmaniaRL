@@ -1,3 +1,22 @@
+## Poprawki kodu SD-SAC po nowym poleceniu człowieka — 6 października 2026
+
+Polecenie „to napraw to wszystko” wykonano w editable; trening, ewaluacja jazdy i nowe
+piloty nadal wymagają osobnej zgody. Automatyzacja PAUSED, STOP zachowany, Full SD BLOCKED.
+Naprawiono zapis tempa aktora, dodano stabilne log-softmax, osobną regulację temperatury
+z opcjonalnymi granicami, kontrolę opcji/optimizerów checkpointu, jawny opcjonalny
+wariant soft-Q forward-KL oraz diagnostykę błędu krytyka i zapadania polityki.
+SD-SAC wymaga n_step1; poprawiono również generatory i przykład dokumentacji.
+91 testów kodu CPU passed (2 długie pętle syntetyczne pominięte), generator7 ponownie
+passed, Ruff i mypy passed. Nie uruchomiono żadnego nowego eksperymentu jazdy/treningu.
+
+Odczyt istniejącego cp25112: 31 kompletnych epizodów, terminal Qmean1.6086 wobec
+rzeczywistej ostatniej nagrody −2.0518 (bias3.6604, RMSE4.1004). Wagi pozostają bez zmian;
+kod nie daje jeszcze dowodu naprawionej kalibracji lub jazdy. Analiza inference-only,
+bez learnera/optimizer steps/kontrolera; SHA/fingerprint i frozen runtime zachowane.
+Szczegóły: [SD_SAC_CODE_REPAIR_20261006.md](SD_SAC_CODE_REPAIR_20261006.md).
+Poniższe „nie poprawiano algorytmu” dotyczy wcześniejszego etapu analizy; starsze
+ACTIVE i zgody na autonomiczne starty pozostają odwołane.
+
 ## SD-SAC zatrzymany na żądanie człowieka — 6 października 14:08 Warsaw
 
 Nadrzędna instrukcja: zatrzymać SD-SAC, przeanalizować poprawki, **nie uruchamiać

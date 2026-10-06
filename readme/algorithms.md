@@ -593,6 +593,37 @@ bad action mapping, sequence replay, or incompatible state fails. Paper-level
 claims require a separate baseline-controlled experiment. The current tree
 provides unit/runtime support, not the paper's Atari/MOBA evidence.
 
+SD-SAC additionally separates `actor_learning_rate` and `entropy_learning_rate`
+from the critic rate; both inherit `learning_rate` when omitted. Optional
+`entropy_coefficient_min`/`entropy_coefficient_max` project learned log-alpha
+after an update. Defaults retain the unbounded canonical objective. Categorical
+log probabilities use float32 log-softmax, avoiding clipped probability logs
+for saturated logits. Custom canonical actors may still expose probabilities
+only.
+
+`actor_objective: soft_q_forward_kl` is an **explicit experimental variant**:
+it fits the actor to a detached `softmax((Q - max(Q))/alpha)` target via
+cross-entropy. Its gradient can reach actions with underflowed probability,
+but fitting incorrect Q cannot establish useful driving. The entropy anchor
+still applies when configured. The canonical `sac` objective remains the default.
+New checkpoints pin optimizer rates, entropy controls and objective; restoring
+with mismatched options fails before loading weights. Legacy checkpoints cannot
+silently opt into the new controls.
+
+Metrics distinguish alpha used for the update (`state/alpha_used`) from alpha
+after temperature optimization (`state/alpha`). They report entropy target error,
+both distances to the soft-Q target, selected-action regret, twin-critic ranking
+agreement, TD bias/RMSE, Q-clip gradient blocking and terminal TD error/sample count.
+These are diagnostics, not driving gates. An empty terminal sample has error zero
+and count zero; it is not evidence of correct terminal values.
+
+Only `training.n_step: 1` is supported: generic reward-only multi-step replay
+omits intermediate entropy terms in a soft return and is rejected by runtime
+validation. `experiments.tmrl_test_comparison.sd_sac_calibration` compares selected
+action values with complete recorded episode returns without optimizer steps.
+Its behavior soft returns are an off-policy proxy, not a ranking of unchosen actions;
+incomplete/truncated episodes are excluded rather than given invented bootstrap.
+
 **YAML fragment — first-party telemetry stable discrete SAC:**
 
 ```yaml
@@ -613,7 +644,7 @@ components:
     class_path: trackmaniarl.core.replay:PrioritizedSampler
 training:
   sequence_length: 1
-  n_step: 3
+  n_step: 1
   beta: 0.4
 ```
 
