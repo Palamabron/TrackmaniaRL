@@ -1,3 +1,24 @@
+## Świeży pilot actor LR9e-4 uruchomiony — 6 października 12:20 Warsaw
+
+`queue-sd-sac-actorlr0009-20261006`, fresh `tmrl-repair-sd-sac-actorlr0009-s17`.
+Start 10:20:15.518330 UTC, SAVE14:10:15.518330 UTC (16:10Warsaw),
+HARD14:20:15.518330 UTC (16:20Warsaw), cap14400s bez przedłużenia.
+145408 transitions/max11400s, potem 10 greedy/max2100s.
+Nowy frozen runtime `C:/Users/szulc/.codex/worktrees/tmrl-sd-sac-actorlr-runtime/AITrackmania`
+commit `c72591eda6415bd36ee18e5c4fe8eceddacd4e9c`, nie edytować podczas próby.
+Zmiana względem best target.8/beta.0005 wyłącznie actor_learning_rate9e-4;
+krytyk i temperatura3e-4, nagroda/model/replay/UTD bez zmian. Domyślny parametr
+zachowuje dotychczasowe zachowanie; starych checkpointów nie wznawiano.
+
+33 testy algorytmu, 24 guard/candidate/closure tests, Ruff i validate-only passed.
+Actual preflight240ms/33 fields/UID ready. Runner66756 created1791282014.9514704,
+launcher65000, guard69604, trainlauncher66748, learner45364, actor64172 registered.
+W&B `1rd6oj0m` running potwierdzony API; wcześniejsze `awhtibso`/`la0tyfwk` finished.
+Przypięto poprzednią normalną closure, dokładne receipts treningu/oceny i audytu;
+QR pins i stare STOP hash/mtime zachowane, nowe STOP zawsze wygrywa.
+Full SD BLOCKED do rzeczywistej bramki >=8/10 i wszystkich warunków technicznych.
+Nadzór ACTIVE, brak automatycznego pełnego treningu.
+
 ## Target 1.2: rzeczywista bramka FAIL; następna hipoteza aktora — 6 października 12:16 Warsaw
 
 Ocena fresh02 zakończyła się normalnie 10:11:54.813 UTC, guard closure forced=[];
