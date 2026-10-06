@@ -1,3 +1,36 @@
+## 2026-10-06 17:30 Warsaw — evaluation completed; driving gate FAIL
+
+This supersedes the earlier pre-evaluation failure and paused snapshot below.
+After the human instruction “no to ogarniaj”, supervision was repaired and the
+already authorized ten trials were completed on the preserved checkpoint,
+without repeating training. New queue: queue-sd-sac-stability-eval-recovery01-20261006.
+Evaluation ended 15:27:46.118406 UTC; guard normal closure 15:27:46.483867 UTC,
+forced[]. All recorded PID/creation-time identities closed; shared mutex free.
+W&B wwvg5ikp API finished. Original SAVE16:45:15/HARD16:55:15 UTC were retained.
+
+Actual driving gate FAIL: 0/10 finishes; all trials no_progress, progress0.0%.
+All ten trials used the correct map UID, 1000/1000 race-clock measurements valid,
+maximum/p99 50ms, no controller or telemetry errors. Skips162 total, maximum4.
+Complete training145466/145408,33866 updates, earned=accounted33866.5 and
+credit0.5, finite/fingerprint-valid/drained checkpoint remains unchanged:
+CP33866 SHA1428c80edfc05f5b341040aa39e6d051893b8c32d3b2648a667c048f5a94cb73.
+Recovery performed zero learner updates. Frozen e50b0b02 source and helper hashes verified.
+Evidence: the new queue's sd-sac-repair-decision.json, post-evaluation-receipt.json,
+deadline-closure.json and actual benchmark evaluation.json.
+
+Supervision repair f68cd0e2 adds bounded identity-aware polling of cached process
+objects, avoiding wait-handle reopening; descendants now persist PID plus creation
+time. Nine module tests and eleven recovery/supervision regression tests passed;
+Ruff passed; type checking passed with only missing psutil stubs ignored.
+The original AccessDenied OS cause remains unproven; no system process was modified.
+The recovery completed under the repaired supervisor, but did not repair driving.
+
+The experimental soft_q_forward_kl stability variant is NOT qualified for full
+SD-SAC or three seeds. QR PASS29/30 median54.3s remains preserved.
+Automation PAUSED after completion. No new pilot, training or evaluation without
+another direct human instruction. Offline diagnosis may inspect why a single
+unchanging action produced no progress; its cause is not yet demonstrated.
+
 ## Poprawki kodu SD-SAC po nowym poleceniu człowieka — 6 października 2026
 
 ## 2026-10-06 17:12 Warsaw — training complete; queue failed before evaluation
