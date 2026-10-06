@@ -1,3 +1,21 @@
+## Target 1.2: nowa ocena zachowanego checkpointu uruchomiona — 6 października 12:09 Warsaw
+
+Po ręcznym przywróceniu wtyczki potwierdzono protokół 2 i właściwy UID.
+Świeża, osobna kolejka `queue-sd-sac-target120-eval-fresh02-20261006` ocenia
+checkpoint 33859 SHA `a7e7aadb5d6860263c4f7c37b5bfe3f5ab19d6d8aa1d31e95242efa07dced16c`.
+Tylko 10 przejazdów/max2100s, bez learnera i bez ponownego treningu.
+Stary trening pozostaje zakończony, wygasłe recovery01 pozostaje nieuruchomione;
+przypięto jego dowody i pierwotne zamknięcie. Nie przedłużono jego limitu.
+
+Nowy plan ma osobny cap do 3000s: start 10:09:44.076605 UTC,
+SAVE 10:49:06.272848 UTC, HARD 10:59:06.272848 UTC.
+8 testów i validate-only passed; pierwszy testowy błąd dotyczył ścieżki tymczasowej
+pytest, poprawiono wyłącznie miejsce plików testowych poza frozen runtime.
+Rzeczywisty preflight 300ms/33 fields/UID ready. Runner 67284, guard 35756,
+evaluation launcher 68372; W&B `awhtibso` online. Full SD BLOCKED do wyniku bramki.
+QR PASS zachowany, źródła frozen4706 bez zmian, brak automatycznego full training.
+Poniższe stany oczekiwania na ręczne przywrócenie wtyczki są historyczne.
+
 ## Target 1.2: limit recovery minął bez uruchomienia oceny — 6 października 11:58 Warsaw
 
 Pierwotny HARD 09:48:43.413685 UTC minął. Przygotowana kolejka
