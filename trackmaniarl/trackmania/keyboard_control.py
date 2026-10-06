@@ -66,6 +66,14 @@ class KeyboardKeyEvent:
 
 
 @dataclass(frozen=True, slots=True)
+class ResetGuard:
+    """Optional cancellation/deadline checks for a supervised keyboard reset."""
+
+    check: Callable[[], object]
+    wait: Callable[[float], None]
+
+
+@dataclass(frozen=True, slots=True)
 class _KeyStroke:
     key: int
     scan_code: int
@@ -95,38 +103,65 @@ def _windows_int_call(library: object, name: str, *args: object) -> int:
     return result
 
 
-def _focus_trackmania() -> bool:
+def _focus_trackmania(*, guard: ResetGuard | None = None) -> bool:
+    if guard is not None:
+        guard.check()
     if sys.platform != "win32":
         return False
     user32 = _windows_dll("user32")
+    # HWND is pointer-sized; ctypes' default int result truncates it on Win64.
+    for name, argument_types, result_type in (
+        ("FindWindowW", [wintypes.LPCWSTR, wintypes.LPCWSTR], wintypes.HWND),
+        ("GetForegroundWindow", [], wintypes.HWND),
+        ("SetForegroundWindow", [wintypes.HWND], wintypes.BOOL),
+    ):
+        function = getattr(user32, name)
+        function.argtypes = argument_types
+        function.restype = result_type
     window = _windows_call(user32, "FindWindowW", None, "Trackmania")
     if not window:
         return False
-    _windows_call(user32, "SetForegroundWindow", window)
-    sleep(0.1)
+    if _windows_call(user32, "GetForegroundWindow") == window:
+        return True
+    activated = _windows_int_call(user32, "SetForegroundWindow", window)
+    if activated:
+        (sleep if guard is None else guard.wait)(0.1)
+    foreground = _windows_call(user32, "GetForegroundWindow")
+    if foreground != window:
+        raise RuntimeError(
+            "Trackmania foreground verification failed: "
+            f"SetForegroundWindow={activated}, target={window}, foreground={foreground}"
+        )
     return True
 
 
-def confirm_trackmania_finish() -> None:
-    if not _focus_trackmania():
-        return
-    KeyboardController._windows_key_event(KeyboardKeyEvent(0x0D, True))
-    sleep(0.1)
-    KeyboardController._windows_key_event(KeyboardKeyEvent(0x0D, False))
+def _tap_reset_key(key: int, guard: ResetGuard | None) -> None:
+    if guard is not None:
+        guard.check()
+    try:
+        KeyboardController._windows_key_event(KeyboardKeyEvent(key, True))
+        (sleep if guard is None else guard.wait)(0.1)
+    finally:
+        # Releasing a pressed key remains mandatory after cancellation or timeout.
+        KeyboardController._windows_key_event(KeyboardKeyEvent(key, False))
 
 
-def restart_trackmania_race() -> None:
-    if not _focus_trackmania():
+def confirm_trackmania_finish(*, guard: ResetGuard | None = None) -> None:
+    if not _focus_trackmania(guard=guard):
+        raise RuntimeError("Trackmania window was not found for keyboard confirmation")
+    _tap_reset_key(0x0D, guard)
+
+
+def restart_trackmania_race(*, guard: ResetGuard | None = None) -> None:
+    if not _focus_trackmania(guard=guard):
         raise RuntimeError("Trackmania window was not found for keyboard restart")
-    KeyboardController._windows_key_event(KeyboardKeyEvent(0x2E, True))
-    sleep(0.1)
-    KeyboardController._windows_key_event(KeyboardKeyEvent(0x2E, False))
+    _tap_reset_key(0x2E, guard)
 
 
-def restart_trackmania_editor_validation() -> None:
-    restart_trackmania_race()
-    sleep(0.5)
-    confirm_trackmania_finish()
+def restart_trackmania_editor_validation(*, guard: ResetGuard | None = None) -> None:
+    restart_trackmania_race(guard=guard)
+    (sleep if guard is None else guard.wait)(0.5)
+    confirm_trackmania_finish(guard=guard)
 
 
 class KeyboardController:

@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 if ($Algorithm -in @('dsac', 'discrete-sac')) { $Algorithm = 'sd-sac' }
 if (-not $Pilot -and $Algorithm -eq 'sd-sac') {
-    throw 'SD-SAC nie jest gotowy do pelnych treningow. Pilot celu 2.0 nie zaliczyl mety. Nowy pilot wymaga stabilizacji entropii zachowania i ewaluacji; patrz READINESS.md. Test: run_assigned.ps1 sd-sac -Pilot.'
+    throw 'SD-SAC nie jest gotowy do pelnych treningow: wymaga potwierdzonej ewaluacji z co najmniej 8/10 met. Nowy pilot wymaga bezposredniej zgody; patrz READINESS.md.'
 }
 $comparisonMutex = [System.Threading.Mutex]::new($false, 'Global\TrackmaniaRL.ComparisonController')
 $comparisonMutexAcquired = $false
@@ -38,44 +38,21 @@ function Assert-ComparisonIdle {
         Where-Object {
             $_.CommandLine -match 'trackmaniarl\s+(train|resume|benchmark)\b' -or
             $_.CommandLine -match 'tmrl_test_comparison\.launch_checks\s+benchmark\b' -or
+            $_.CommandLine -match 'tmrl_test_comparison\.preflight\b' -or
             $_.CommandLine -match '--comparison-map-preflight' -or
             $_.CommandLine -match 'runtime_helper\.py.*\bpreflight\b'
         }
     if ($comparisonBusy) { throw 'Inny trening lub ewaluacja steruje gra. Poczekaj na jego zakonczenie.' }
 }
 function Initialize-ComparisonMap([string]$ConfigPath) {
-    # A completed validation lap has no live telemetry until the map is restarted.
-    # This short-lived controller exits before the training process starts.
-    @'
-import sys
-import time
-from pathlib import Path
-from trackmaniarl.core.spec import RunSpec
-from trackmaniarl.trackmania.environment import OpenPlanetEnvironmentFactory
-
-path = Path(sys.argv[1]).resolve()
-spec = RunSpec.from_yaml(path)
-run_dir = (path.parent / spec.artifacts_dir / spec.run_id).resolve()
-if run_dir.exists():
-    raise RuntimeError(f'Run already exists: {run_dir}. Resume its checkpoint explicitly.')
-component = spec.components.environment
-if component.class_path != 'trackmaniarl.trackmania.environment:OpenPlanetEnvironmentFactory':
-    raise RuntimeError('Comparison preflight requires the first-party Trackmania environment')
-factory = OpenPlanetEnvironmentFactory(**component.kwargs, base_dir=path.parent)
-environment = factory.create(seed=spec.seed)
-try:
-    uid = environment.config.expected_map_uid
-    environment._session.verify_loaded_map(uid)
-    environment.controller.confirm_finish()
-    time.sleep(0.5)
-    environment.controller.reset()
-    time.sleep(1.0)
-    environment.client.read()
-    environment._session.confirm_ready(uid)
-    print('Comparison map ready:', uid, flush=True)
-finally:
-    environment.close()
-'@ | & $comparisonPython - $ConfigPath --comparison-map-preflight
+    $comparisonReceipt = Join-Path $comparisonRoot (
+        'artifacts/tmrl-test-comparison/preflight/' + [System.IO.Path]::GetFileNameWithoutExtension($ConfigPath) + '-' + [guid]::NewGuid().ToString('N') + '.json')
+    $comparisonPreflightArgs = @('-m', 'experiments.tmrl_test_comparison.preflight', $ConfigPath,
+        '--require-new-run', '--receipt', $comparisonReceipt, '--stop-file', $comparisonStop)
+    foreach ($legacyStop in $comparisonLegacyStops) {
+        $comparisonPreflightArgs += @('--stop-file', $legacyStop)
+    }
+    & $comparisonPython @comparisonPreflightArgs
     if ($LASTEXITCODE -ne 0) { throw 'Mapa nie jest gotowa. Trening nie zostal uruchomiony.' }
 }
 $comparisonSeeds = if ($Pilot) { @(17) } else { @(17, 29, 43) }

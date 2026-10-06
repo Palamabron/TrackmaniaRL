@@ -286,9 +286,17 @@ def _episode_log_fields(
         "actor_id": value["actor_id"],
         "episode_index": coordinator.counters.episodes,
         "policy_version": summary["policy_version"],
-        "q_margin/start_mean": summary.get("q_margin/start_mean", 0.0),
-        "q_margin/min": summary.get("q_margin/min", 0.0),
+        "exploration_epsilon": _measurement_label(
+            summary.get("exploration_epsilon"),
+            "unused" if summary.get("exploration_epsilon_used") is False else "unknown",
+        ),
+        "q_margin/start_mean": _measurement_label(summary.get("q_margin/start_mean")),
+        "q_margin/min": _measurement_label(summary.get("q_margin/min")),
     }
+
+
+def _measurement_label(value: Any, missing: str = "unknown") -> str:
+    return missing if value is None else f"{float(value):.3f}"
 
 
 def drain_rollouts(coordinator: Coordinator, limit: int) -> None:
@@ -377,7 +385,7 @@ _EPISODE_LOG_FORMAT = (
     "time_attack_terminal=%(reward/time_attack_terminal).3f), "
     "velocity_ratio(mean=%(velocity/ratio_mean).3f, "
     "max=%(velocity/ratio_max).3f), steps=%(steps)d, race=%(race_time_s).2fs, "
-    "epsilon=%(exploration_epsilon).3f, policy=%(policy_version)d, "
-    "q_margin(start=%(q_margin/start_mean).2f, min=%(q_margin/min).2f), "
+    "epsilon=%(exploration_epsilon)s, policy=%(policy_version)d, "
+    "q_margin(start=%(q_margin/start_mean)s, min=%(q_margin/min)s), "
     "termination=%(termination)s"
 )

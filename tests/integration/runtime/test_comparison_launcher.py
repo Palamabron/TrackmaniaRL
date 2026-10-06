@@ -8,14 +8,13 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 import torch
 
-from experiments.tmrl_test_comparison import launch_checks
+from experiments.tmrl_test_comparison import launch_checks, preflight
 from experiments.tmrl_test_comparison.generate import configuration
 from trackmaniarl.core.builtins import TorchCheckpointCodec
 from trackmaniarl.core.spec import RunSpec
@@ -25,18 +24,32 @@ def test_preflight_refuses_existing_run_before_creating_controller(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    launcher = (
-        Path(__file__).resolve().parents[3] / "experiments/tmrl_test_comparison/run_assigned.ps1"
-    )
-    text = launcher.read_text(encoding="utf-8")
-    preflight = text.split("@'", 1)[1].split("'@", 1)[0]
     existing = tmp_path / "artifacts" / "existing"
     existing.mkdir(parents=True)
     spec = SimpleNamespace(artifacts_dir=tmp_path / "artifacts", run_id="existing")
     monkeypatch.setattr(RunSpec, "from_yaml", lambda _: spec)
-    monkeypatch.setattr(sys, "argv", ["preflight", str(tmp_path / "config.yaml")])
+
+    def forbidden_controller(**kwargs: object) -> None:
+        raise AssertionError("Controller created before existing-run guard")
+
+    monkeypatch.setattr(preflight, "GamepadController", forbidden_controller)
     with pytest.raises(RuntimeError, match="Run already exists"):
-        exec(compile(preflight, "comparison-preflight", "exec"), {})
+        preflight.run_preflight(tmp_path / "config.yaml", require_new_run=True)
+
+
+def test_launcher_delegates_to_bounded_preflight_and_preserves_each_receipt() -> None:
+    launcher = (
+        Path(__file__).resolve().parents[3] / "experiments/tmrl_test_comparison/run_assigned.ps1"
+    )
+    text = launcher.read_text(encoding="utf-8")
+    assert "'experiments.tmrl_test_comparison.preflight'" in text
+    assert "'--require-new-run'" in text
+    assert "'--receipt'" in text
+    assert "[guid]::NewGuid()" in text
+    assert "'--stop-file', $comparisonStop" in text
+    assert "'--stop-file', $legacyStop" in text
+    assert "tmrl_test_comparison\\.preflight\\b" in text
+    assert "confirm_finish()" not in text
 
 
 def test_comparison_launcher_rejects_unqualified_sd_sac_and_busy_game(tmp_path: Path) -> None:

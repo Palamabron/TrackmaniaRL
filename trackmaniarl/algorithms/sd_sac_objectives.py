@@ -17,9 +17,17 @@ def categorical_statistics(actor: Any, observations: Any) -> tuple[torch.Tensor,
 
 
 def soft_q_log_probabilities(q_values: torch.Tensor, alpha: torch.Tensor) -> torch.Tensor:
-    # Center before dividing so a shared, large Q baseline cannot erase advantages.
-    advantages = q_values.float() - q_values.float().max(1, keepdim=True).values
-    return (advantages / alpha.float()).log_softmax(dim=1)
+    if q_values.ndim != 2 or not all(q_values.shape) or alpha.numel() != 1:
+        raise ValueError("soft-Q requires nonempty [batch, actions] values and scalar alpha")
+    values, temperature = q_values.float(), alpha.float().reshape(())
+    if not bool(torch.isfinite(values).all() & torch.isfinite(temperature) & (temperature > 0)):
+        raise ValueError("soft-Q requires finite float32 values and finite positive float32 alpha")
+    # Every finite float32 Q difference / positive float32 alpha fits in float64.
+    # Keep log probabilities in float64: casting them back can produce -inf and
+    # NaN in 0 * log(p) diagnostics, even when softmax probabilities are valid.
+    values = values.double()
+    advantages = values - values.max(1, keepdim=True).values
+    return (advantages / temperature.double()).log_softmax(dim=1)
 
 
 def terminal_value_loss(  # noqa: PLR0913 -- Explicit target, terminal mask and importance weights.
@@ -33,13 +41,17 @@ def terminal_value_loss(  # noqa: PLR0913 -- Explicit target, terminal mask and 
     Normalize over terminal samples so their influence does not vanish in a long
     episode batch. Truncations are excluded: their return is unknown.
     """
-    mask = terminated.reshape(-1).to(dtype=rewards.dtype)
+    mask = terminated.reshape(-1).double()
     if weights is not None:
-        mask = mask * weights.reshape(-1)
+        mask = mask * weights.reshape(-1).double()
+    mass = mask.sum()
+    # Normalize before multiplying errors: a denominator floor changes the
+    # objective for subnormal weights, and dividing the loss by that tiny mass
+    # can overflow its backward reciprocal. An empty terminal mass stays zero.
+    normalized = mask / torch.where(mass > 0, mass, torch.ones_like(mass))
     q1, q2 = critics
     errors = (q1 - rewards).square() + (q2 - rewards).square()
-    denominator = mask.sum().clamp_min(torch.finfo(mask.dtype).tiny)
-    return (mask * errors).sum() / denominator
+    return (normalized.to(errors.dtype) * errors).sum()
 
 
 @torch.no_grad()
@@ -50,7 +62,7 @@ def actor_diagnostics(
 ) -> dict[str, torch.Tensor]:
     probabilities, log_probabilities = policy
     q1, q2 = critics
-    q_values = 0.5 * (q1 + q2)
+    q_values = 0.5 * q1 + 0.5 * q2
     actor_actions = probabilities.argmax(1)
     best_values = q_values.max(1).values
     entropy = -(probabilities * log_probabilities).sum(1)

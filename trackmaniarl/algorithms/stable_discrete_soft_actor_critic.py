@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Unpack, cast
 
 import torch
@@ -36,6 +36,30 @@ from trackmaniarl.algorithms.sd_sac_objectives import (
 from trackmaniarl.core.contracts import ModelContract, PolicyMode
 from trackmaniarl.core.data import PriorityUpdate, TrainingBatch
 from trackmaniarl.core.pytree import sanitize_finite, tree_collate, tree_to_device
+
+
+def _batch_vector(value: Any, name: str, size: int) -> torch.Tensor:
+    """Accept scalar transition fields as (B,) or an explicit (B, 1) column."""
+    if not isinstance(value, torch.Tensor):
+        raise TypeError(f"SD-SAC {name} must be a tensor")
+    if value.shape not in ((size,), (size, 1)):
+        raise ValueError(f"SD-SAC {name} must have shape ({size},) or ({size}, 1)")
+    return value.reshape(size)
+
+
+def _action_values(value: Any, shape: tuple[int, int], name: str) -> torch.Tensor:
+    if not isinstance(value, torch.Tensor) or value.shape != shape:
+        raise ValueError(f"SD-SAC {name} must have shape {shape}")
+    return value
+
+
+def _policy_shape(policy: tuple[torch.Tensor, torch.Tensor], size: int) -> tuple[int, int]:
+    probabilities, logs = policy
+    if probabilities.ndim != 2 or probabilities.shape[0] != size or probabilities.shape[1] < 2:
+        raise ValueError("SD-SAC actor must produce [batch, actions] with at least two actions")
+    shape = (size, int(probabilities.shape[1]))
+    _action_values(logs, shape, "actor log probabilities")
+    return shape
 
 
 class _DiscretePolicy:
@@ -80,6 +104,7 @@ class _DiscreteCriticStep:
     q2: torch.Tensor
     targets: torch.Tensor
     diagnostics: Mapping[str, torch.Tensor] = field(default_factory=dict)
+    action_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,11 +189,18 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
 
     def _setup_optimizers(self) -> None:
         assert self.model is not None
-        self.actor_optimizer = torch.optim.Adam(
-            self.model.actor.parameters(), lr=self.actor_learning_rate
-        )
+        groups = {
+            name: list(getattr(self.model, name).parameters()) for name in ("actor", "q1", "q2")
+        }
+        owners: set[int] = set()
+        for name, parameters in groups.items():
+            identifiers = {id(parameter) for parameter in parameters}
+            if owners.intersection(identifiers) or len(identifiers) != len(parameters):
+                raise ValueError(f"SD-SAC actor, q1 and q2 parameters must be disjoint ({name})")
+            owners.update(identifiers)
+        self.actor_optimizer = torch.optim.Adam(groups["actor"], lr=self.actor_learning_rate)
         self.critic_optimizer = torch.optim.Adam(
-            list(self.model.q1.parameters()) + list(self.model.q2.parameters()),
+            groups["q1"] + groups["q2"],
             lr=self.learning_rate,
         )
 
@@ -180,11 +212,16 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         assert self.model is not None
         if batch.metadata.get("n_step", 1) != 1:
             raise ValueError("SD-SAC requires n_step=1; generic n-step omits intermediate entropy")
-        prepared = discrete_batch(self._batch(batch))
+        prepared = self._prepare_batch(batch)
         alpha = alpha_value(self.log_alpha, self.initial_entropy_coefficient, self.device)
+        if alpha.numel() != 1 or not bool(torch.isfinite(alpha) & (alpha > 0)):
+            raise ValueError("SD-SAC alpha must be finite and positive")
         critic = self._critic_step(prepared, alpha)
+        policy = self._current_policy(prepared)
+        if policy[0].shape[1] != critic.action_count:
+            raise ValueError("SD-SAC current actor and critic action counts must match")
         self._optimize(critic.loss, self.critic_optimizer)
-        actor = self._actor_step(prepared, alpha)
+        actor = self._actor_step(prepared, alpha, policy=policy)
         self._optimize(actor.loss, self.actor_optimizer)
         alpha_loss = self._entropy_loss(actor)
         polyak_update(self.model, self.target_model, self.target_tau)
@@ -193,25 +230,131 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             prepared, _DiscreteUpdate(critic, actor, alpha_loss, current_alpha, alpha)
         )
 
+    def _prepare_batch(self, batch: TrainingBatch) -> SACBatch:
+        size = len(batch.transition_ids)
+        if size == 0:
+            raise ValueError("SD-SAC batch must contain transitions")
+        values = {
+            name: _batch_vector(getattr(batch, name), name, size)
+            for name in ("actions", "rewards", "bootstrap_discounts", "terminated", "truncated")
+        }
+        if values["actions"].dtype not in (
+            torch.uint8,
+            torch.int8,
+            torch.int16,
+            torch.int32,
+            torch.int64,
+        ):
+            raise TypeError("SD-SAC actions must use an integer dtype, excluding bool")
+        for name in ("terminated", "truncated"):
+            if values[name].dtype != torch.bool:
+                raise TypeError(f"SD-SAC {name} must use bool dtype")
+        for name in ("rewards", "bootstrap_discounts"):
+            if values[name].is_complex() or values[name].dtype == torch.bool:
+                raise TypeError(f"SD-SAC {name} must contain real numeric values")
+        weights = batch.importance_weights
+        if weights is not None:
+            weights = _batch_vector(weights, "importance_weights", size)
+            if weights.is_complex() or weights.dtype == torch.bool:
+                raise TypeError("SD-SAC importance_weights must contain real numeric values")
+        # _batch waits for asynchronous transfer before any tensor-value checks.
+        normalized = self._batch(
+            replace(
+                batch,
+                actions=values["actions"],
+                rewards=values["rewards"],
+                bootstrap_discounts=values["bootstrap_discounts"],
+                terminated=values["terminated"],
+                truncated=values["truncated"],
+                importance_weights=weights,
+            )
+        )
+        prepared = replace(
+            discrete_batch(normalized),
+            actions=normalized.actions.long(),
+            weights=(
+                normalized.importance_weights.float()
+                if normalized.importance_weights is not None
+                else None
+            ),
+        )
+        valid = (
+            torch.isfinite(prepared.rewards).all()
+            & torch.isfinite(prepared.discounts).all()
+            & (prepared.discounts >= 0).all()
+            & (prepared.actions >= 0).all()
+        )
+        if prepared.weights is not None:
+            total = prepared.weights.sum()
+            valid = (
+                valid
+                & torch.isfinite(prepared.weights).all()
+                & (prepared.weights >= 0).all()
+                & torch.isfinite(total)
+                & (total > 0)
+            )
+        if not bool(valid):
+            raise ValueError(
+                "SD-SAC requires finite rewards/discounts, non-negative discounts/actions, "
+                "and finite non-negative importance_weights with positive finite sum"
+            )
+        if prepared.weights is not None:
+            # Preserve relative weights even below the shared mean's denominator floor.
+            prepared = replace(prepared, weights=prepared.weights / total)
+        return prepared
+
+    def _current_policy(self, batch: SACBatch) -> tuple[torch.Tensor, torch.Tensor]:
+        policy = categorical_statistics(self.model.actor, batch.observations)
+        shape = _policy_shape(policy, batch.rewards.numel())
+        self._desired_entropy(shape[1])
+        valid = torch.isfinite(policy[0]).all() & torch.isfinite(policy[1]).all()
+        valid = valid & (batch.actions < shape[1]).all()
+        if self.entropy_penalty_coefficient and self.entropy_penalty_reference == "behavior":
+            reference = self._entropy_reference(batch, batch.rewards)
+            valid = valid & (reference <= math.log(shape[1]) + 1e-6).all()
+        if not bool(valid):
+            raise ValueError("SD-SAC invalid actor probabilities, action index or behavior entropy")
+        return policy
+
     def _critic_targets(self, batch: SACBatch, alpha: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
             next_probabilities, next_log_probabilities = categorical_statistics(
                 self.model.actor, batch.next_observations
             )
-            self._desired_entropy(next_probabilities.shape[-1])
-            next_q = 0.5 * (
-                self.target_model.q1(batch.next_observations)
-                + self.target_model.q2(batch.next_observations)
+            next_shape = _policy_shape(
+                (next_probabilities, next_log_probabilities), batch.rewards.numel()
             )
+            self._desired_entropy(next_probabilities.shape[-1])
+            q1 = _action_values(
+                self.target_model.q1(batch.next_observations), next_shape, "target q1"
+            )
+            q2 = _action_values(
+                self.target_model.q2(batch.next_observations), next_shape, "target q2"
+            )
+            next_q = 0.5 * q1 + 0.5 * q2
             next_value = (next_probabilities * (next_q - alpha * next_log_probabilities)).sum(1)
-            return cast(torch.Tensor, batch.rewards + batch.discounts * next_value)
+            terminal = batch.source.terminated.bool().reshape(-1) & batch.discounts.eq(0)
+            continuation = torch.where(terminal, torch.zeros_like(next_value), next_value)
+            targets = batch.rewards + batch.discounts * continuation
+            if not bool(torch.isfinite(continuation).all() & torch.isfinite(targets).all()):
+                raise ValueError("SD-SAC non-finite continuation or critic target")
+            return targets
 
     def _critic_step(self, batch: SACBatch, alpha: torch.Tensor) -> _DiscreteCriticStep:
         targets = self._critic_targets(batch, alpha)
         indices = batch.actions[:, None]
-        q1 = self.model.q1(batch.observations).gather(1, indices).squeeze(1)
-        q2 = self.model.q2(batch.observations).gather(1, indices).squeeze(1)
-        losses, diagnostics = self._critic_losses(batch, (q1, q2, targets))
+        values1 = self.model.q1(batch.observations)
+        if values1.ndim != 2 or values1.shape[1] < 2:
+            raise ValueError("SD-SAC q1 must produce [batch, actions] with at least two actions")
+        shape = (batch.rewards.numel(), int(values1.shape[1]))
+        values1 = _action_values(values1, shape, "q1")
+        values2 = _action_values(self.model.q2(batch.observations), shape, "q2")
+        valid = torch.isfinite(values1).all() & torch.isfinite(values2).all()
+        if not bool(valid & (batch.actions >= 0).all() & (batch.actions < shape[1]).all()):
+            raise ValueError("SD-SAC current critics or action indices are invalid")
+        q1 = values1.gather(1, indices).squeeze(1)
+        q2 = values2.gather(1, indices).squeeze(1)
+        losses, diagnostics = self._critic_losses(batch, (q1, q2, targets), shape=shape)
         loss = weighted_mean(losses, batch.weights)
         terminal_loss = loss.new_zeros(())
         if self.terminal_value_loss_coefficient:
@@ -225,16 +368,28 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             q2,
             targets,
             {**diagnostics, "loss/terminal_value": terminal_loss.detach()},
+            action_count=shape[1],
         )
 
     def _critic_losses(
-        self, batch: SACBatch, values: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+        self,
+        batch: SACBatch,
+        values: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+        *,
+        shape: tuple[int, int] | None = None,
     ) -> tuple[torch.Tensor, Mapping[str, torch.Tensor]]:
         q1, q2, targets = values
         indices = batch.actions[:, None]
         with torch.no_grad():
-            target_q1 = self.target_model.q1(batch.observations).gather(1, indices).squeeze(1)
-            target_q2 = self.target_model.q2(batch.observations).gather(1, indices).squeeze(1)
+            values1 = self.target_model.q1(batch.observations)
+            values2 = self.target_model.q2(batch.observations)
+            if shape is not None:
+                _action_values(values1, shape, "current target q1")
+                _action_values(values2, shape, "current target q2")
+            if not bool(torch.isfinite(values1).all() & torch.isfinite(values2).all()):
+                raise ValueError("SD-SAC current target critics produced non-finite values")
+            target_q1 = values1.gather(1, indices).squeeze(1)
+            target_q2 = values2.gather(1, indices).squeeze(1)
         clipped_q1 = target_q1 + (q1 - target_q1).clamp(-self.q_clip_epsilon, self.q_clip_epsilon)
         clipped_q2 = target_q2 + (q2 - target_q2).clamp(-self.q_clip_epsilon, self.q_clip_epsilon)
         losses = torch.maximum((q1 - targets).square(), (clipped_q1 - targets).square())
@@ -265,16 +420,27 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             }
         return losses, diagnostics
 
-    def _actor_step(self, batch: SACBatch, alpha: torch.Tensor) -> _DiscreteActorStep:
-        probabilities, log_probabilities = categorical_statistics(
-            self.model.actor, batch.observations
+    def _actor_step(
+        self,
+        batch: SACBatch,
+        alpha: torch.Tensor,
+        *,
+        policy: tuple[torch.Tensor, torch.Tensor] | None = None,
+    ) -> _DiscreteActorStep:
+        # Actor parameters are disjoint from critics; reuse its graph across the
+        # critic step while evaluating the actor loss against the updated critics.
+        probabilities, log_probabilities = (
+            categorical_statistics(self.model.actor, batch.observations)
+            if policy is None
+            else policy
         )
+        shape = _policy_shape((probabilities, log_probabilities), probabilities.shape[0])
         # The actor improves against fixed critic values. Building a critic graph
         # only to detach it wastes memory and compute on every actor update.
         with torch.no_grad():
-            q1 = self.model.q1(batch.observations).float()
-            q2 = self.model.q2(batch.observations).float()
-            q_values = 0.5 * (q1 + q2)
+            q1 = _action_values(self.model.q1(batch.observations), shape, "q1").float()
+            q2 = _action_values(self.model.q2(batch.observations), shape, "q2").float()
+            q_values = 0.5 * q1 + 0.5 * q2
             target_log_probabilities = soft_q_log_probabilities(q_values, alpha)
         if self.actor_objective == "soft_q_forward_kl":
             # An explicit variant, not canonical SD-SAC. Detached cross-entropy
@@ -310,7 +476,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
                     "Behavior entropy penalty requires one stored entropy per transition"
                 )
             target_entropy = stored.detach().to(device=entropy.device, dtype=entropy.dtype)
-            if not bool(torch.isfinite(target_entropy).all()) or bool((target_entropy < 0).any()):
+            if not bool(torch.isfinite(target_entropy).all() & (target_entropy >= 0).all()):
                 raise ValueError("Stored behavior entropies must be finite and non-negative")
             return target_entropy
         with torch.no_grad():

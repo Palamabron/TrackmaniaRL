@@ -14,6 +14,7 @@ from trackmaniarl.trackmania.keyboard_control import (
     KeyboardController as KeyboardController,
 )
 from trackmaniarl.trackmania.keyboard_control import (
+    ResetGuard,
     restart_trackmania_editor_validation,
     restart_trackmania_race,
 )
@@ -149,18 +150,30 @@ class GamepadController:
             return
         self.apply(control)
 
-    def reset(self) -> None:
-        """Release controls and request a TrackMania restart before an episode."""
+    def reset(self, *, guard: ResetGuard | None = None) -> None:
+        """Release controls and request a TrackMania restart before an episode.
+
+        The optional guard supervises keyboard/editor reset keys and waits.
+        Native gamepad restart only checks the guard at entry.
+        """
 
         with self._tap_lock:
+            if guard is not None:
+                guard.check()
             gamepad = self._open_gamepad()
             gamepad.reset()
             gamepad.update()
             match self._restart_input:
                 case "keyboard":
-                    restart_trackmania_race()
+                    if guard is None:
+                        restart_trackmania_race()
+                    else:
+                        restart_trackmania_race(guard=guard)
                 case "editor_validation":
-                    restart_trackmania_editor_validation()
+                    if guard is None:
+                        restart_trackmania_editor_validation()
+                    else:
+                        restart_trackmania_editor_validation(guard=guard)
                 case "gamepad":
                     self._restart_with_gamepad()
         self.consume_collision()

@@ -151,8 +151,22 @@ def _validate_episode_fields(value: Mapping[str, Any]) -> None:
     if not isinstance(value["termination"], str):
         raise TypeError("episode termination must be a string")
     for key in _EPISODE_NUMERIC_FIELDS:
+        if key == "exploration_epsilon" and value[key] is None:
+            continue
         _validate_finite_number(value[key], f"episode {key}")
+    _validate_exploration_availability(value)
     _validate_episode_outcome(value)
+
+
+def _validate_exploration_availability(value: Mapping[str, Any]) -> None:
+    used = value.get("exploration_epsilon_used")
+    if used is not None and not isinstance(used, bool):
+        raise TypeError("exploration_epsilon_used must be a boolean or null")
+    epsilon = value["exploration_epsilon"]
+    if used is True and epsilon is None:
+        raise ValueError("epsilon-controlled policy requires a measured exploration_epsilon")
+    if used is False and epsilon is not None:
+        raise ValueError("unused exploration_epsilon must be null")
 
 
 def _validate_episode_outcome(value: Mapping[str, Any]) -> None:

@@ -179,6 +179,14 @@ disconnect, UID mismatch or readiness rejection terminates the actor with a
 failing process status. The protocol does not expose the plugin package's
 signature or version. Verify those properties in Plugin Manager.
 
+Comparison launchers use a separate bounded preflight that verifies the map and
+player before issuing one reset, then polls for an active unfinished race near
+the start. It honors stop files during socket reads, records the last clock,
+finish flag and failure phase, and closes its temporary controller and telemetry
+connection. It does not press a finish-confirmation button blindly. Keyboard
+restart/confirmation also verifies that Trackmania is the foreground window;
+failed activation raises before any key is sent.
+
 The reference baseline is a 78-action dueling IQN (`13` steering levels × `2`
 gas levels × no brake, full brake, or timed brake tap), not TQC. With default
 feature settings, each observation contains 20 normalized telemetry values, a

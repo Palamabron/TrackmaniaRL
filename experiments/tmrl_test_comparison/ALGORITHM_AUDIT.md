@@ -1,3 +1,35 @@
+## 2026-10-06 20:17 Warsaw — terminal train complete; evaluation not launched; offline repairs
+
+This snapshot supersedes older ACTIVE/deadline entries below. The authorized
+terminal pilot completed training normally at18:17:35UTC:145481/145408
+transitions,33870updates,credit0.25,earned=accounted33870.25,finite/drained/complete.
+CP33870 SHA09507b686ffb7077b4ad1483ac9154c1e6907fd1a45272d7e5144924a3850505
+and frozen7704b7f9 remain unchanged. Evaluation preflight failed18:17:50UTC:
+reset did not return to the race start. NO driving evaluation, not0/10.
+Normal closure18:17:50.898527UTC forced[];37 exactPID/ctime closed,mutexfree,
+source/helper/previous/STOP pins valid,W&Bmygl7lrw API finished.
+`final-closure-audit.json` preserves the verification. Automation PAUSED; no
+following pilot/evaluation/controller without another direct human instruction.
+QR PASS29/30median54.3s preserved; fullSD BLOCKED.
+
+Human “Dobra to teraz na serio już napraw wszystkie problemy z SD SAC” authorized
+comprehensive editable-code repairs and CPU/fake-backend checks. Contracts,
+numerics, weight normalization, terminal continuation, metric availability and
+reset/preflight defects are addressed; ordinary actor/critic math and gas/brake
+mapping were not demonstrated faulty. No shared reward/model/replay change,
+checkpoint resume or frozen edit. See
+[SD_SAC_COMPREHENSIVE_REPAIR_20261006.md](SD_SAC_COMPREHENSIVE_REPAIR_20261006.md)
+for changes, tests, unresolved partial observability and terminal reweighting.
+
+Exact-frozen CPU inference finds gas1 at all182 preserved starts, brake tap and
+steer+0.8333,actor/Qagreement0%;terminalMAE0.71417 on181 terminals. This does not
+prove useful driving or isolate causes versus older different replay states.
+Code checks and the delayed-goal Bellman oracle do not replace the real gate.
+Final integrated329CPU/fake tests passed; Ruff/format/mypy clean. Full YAML
+17/29/43 matches generator; synthetic model update/checkpoint roundtrip passed
+with environment creation forbidden. Checks/evidence:
+BASE/sd-sac-comprehensive-repair-20261006.
+
 ## 2026-10-06 17:56 Warsaw — fresh terminal-correction pilot ACTIVE
 
 Latest human instruction “to ogarniaj, badz bardziej autonomiczny” authorizes one

@@ -5,7 +5,21 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Literal, TypedDict
 
+import torch
+
 from trackmaniarl.algorithms.execution import TorchExecutionConfig
+
+
+def _validate_float32_temperature(name: str, value: float, *, learned: bool) -> None:
+    coefficient = torch.tensor(value, dtype=torch.float32)
+    if not bool(torch.isfinite(coefficient) & (coefficient > 0)):
+        raise ValueError(f"SD-SAC {name} must remain finite and positive in float32")
+    if learned:
+        # Initialization logs a float32 coefficient; bounds cast math.log(value).
+        logs = torch.stack((coefficient.log(), torch.tensor(math.log(value), dtype=torch.float32)))
+        restored = logs.exp()
+        if not bool((torch.isfinite(restored) & (restored > 0)).all()):
+            raise ValueError(f"SD-SAC {name} must remain finite and positive after float32 log/exp")
 
 
 class SACOptions(TypedDict, total=False):
@@ -118,6 +132,10 @@ class SDSACConfig(SACConfig):
         for name, value in positive.items():
             if value is not None and (not math.isfinite(value) or value <= 0):
                 raise ValueError(f"SD-SAC {name} must be finite and positive")
+        for name in ("entropy_coefficient", "entropy_coefficient_min", "entropy_coefficient_max"):
+            value = positive[name]
+            if value is not None:
+                _validate_float32_temperature(name, value, learned=self.learn_entropy_coefficient)
         if self.target_entropy is not None and (
             not math.isfinite(self.target_entropy) or self.target_entropy < 0
         ):
@@ -129,16 +147,17 @@ class SDSACConfig(SACConfig):
             raise ValueError("entropy_coefficient must not exceed entropy_coefficient_max")
         if self.actor_objective not in {"sac", "soft_q_forward_kl"}:
             raise ValueError("actor_objective must be 'sac' or 'soft_q_forward_kl'")
+        if not math.isfinite(self.q_clip_epsilon) or self.q_clip_epsilon <= 0:
+            raise ValueError("SD-SAC q_clip_epsilon must be finite and positive")
         if any(
             not math.isfinite(value) or value < 0
             for value in (
-                self.q_clip_epsilon,
                 self.entropy_penalty_coefficient,
                 self.terminal_value_loss_coefficient,
             )
         ):
             raise ValueError(
-                "SD-SAC clipping and entropy penalty coefficients must be finite and non-negative"
+                "SD-SAC entropy and terminal penalty coefficients must be finite and non-negative"
             )
         if self.entropy_penalty_reference not in {"target_policy", "behavior"}:
             raise ValueError("entropy_penalty_reference must be 'target_policy' or 'behavior'")

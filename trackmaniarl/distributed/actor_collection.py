@@ -214,7 +214,7 @@ def _record_training_step(
     metrics = state.metrics
     metrics.record_inference(step.inference_s)
     metrics.record_policy(state.policy, step.index)
-    metrics.record_diagnostics(step.action, state.policy, step.info)
+    metrics.record_diagnostics(step.action, state.policy, step.info, policy_info=step.policy_info)
     next_prepared = context.pipeline.transform_observation(step.next_observation)
     context.buffers.transitions.append(_transition(state, step, next_prepared))
     state.prepared = next_prepared

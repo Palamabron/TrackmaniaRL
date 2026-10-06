@@ -301,13 +301,14 @@ custom batch producer for `policy_anchor_q_values`.
 | REDQ: `target_subset_size` | `2` | Positive number of target critics sampled, cannot exceed ensemble size. |
 | REDQ: `policy_update_interval` | `20` | Positive critic updates between actor updates. |
 | TQC: `top_quantiles_to_drop_per_critic` | `2` | Non-negative global upper-quantile truncation per critic, cannot remove every target quantile. |
-| SD-SAC: `q_clip_epsilon` | `0.5` | Non-negative critic-target clipping width. |
+| SD-SAC: `q_clip_epsilon` | `0.5` | Finite positive critic-target clipping width. Zero freezes the clipped target branch; it does not disable clipping and is rejected. |
 | SD-SAC: `entropy_penalty_coefficient` | `0.5` | Non-negative entropy-change penalty weight. |
 | SD-SAC: `actor_learning_rate` | null | Actor optimizer rate; null inherits `learning_rate`. Preserved in evaluated-policy checkpoints. |
 | SD-SAC: `entropy_learning_rate` | null | Independent log-alpha optimizer rate; null inherits `learning_rate`. |
-| SD-SAC: `entropy_coefficient_min`, `entropy_coefficient_max` | null | Optional positive alpha bounds; initial alpha must be inside them. Learned log-alpha is projected after each update. No bounds are imposed by default. |
+| SD-SAC: `entropy_coefficient_min`, `entropy_coefficient_max` | null | Optional positive alpha bounds; initial alpha must be inside them. Temperatures must remain finite and positive in float32, including learned log/exp round trips. Learned log-alpha is projected after each update. No bounds are imposed by default. |
 | SD-SAC: `actor_objective` | `sac` | Canonical objective, or explicit experimental `soft_q_forward_kl` (detached soft-Q cross-entropy). The variant requires `actor.log_probabilities`. It does not establish critic accuracy or useful driving. |
 | SD-SAC: `entropy_penalty_reference` | `target_policy` | Entropy anchor uses target actor, or `behavior` for stored replay entropies. Historical behavior entropy may differ greatly from the current target. |
+| SD-SAC: `terminal_value_loss_coefficient` | `0` | Explicit experimental regression to known true-terminal rewards, normalized over terminal samples. This reweights sparse terminals; coefficient 1 adds about 256 times the ordinary per-row gradient when one terminal occurs in a batch of 256. It is not a proven driving correction. Truncations are excluded. |
 | all: `execution` | null | Torch device, precision and determinism policy described below. |
 
 SAC-family feature pipelines may collate observations and next observations as

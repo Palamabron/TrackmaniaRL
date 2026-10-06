@@ -57,7 +57,7 @@ class EvaluationResult:
     trial_index: int = 0
     telemetry_error: str | None = None
     controller_error: str | None = None
-    progress_bins: Mapping[str, Mapping[str, float]] | None = None
+    progress_bins: Mapping[str, Mapping[str, float | None]] | None = None
     steps: int = 0
     controller_apply_ms: float = 0.0
     telemetry_wait_ms: float = 0.0
