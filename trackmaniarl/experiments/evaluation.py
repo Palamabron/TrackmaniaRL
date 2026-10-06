@@ -62,6 +62,10 @@ class EvaluationResult:
     controller_apply_ms: float = 0.0
     telemetry_wait_ms: float = 0.0
     control_brake_tap_fraction: float = 0.0
+    issued_control_counts: Mapping[str, int] | None = None
+    issued_control_measurement_count: int = 0
+    issued_control_measurements_valid: bool = False
+    issued_gas_mean: float | None = None
     step_race_time_ms_p99: float = 0.0
     step_race_time_ms_max: float = 0.0
     step_race_time_measurement_count: int = 0

@@ -87,6 +87,7 @@ class SDSACOptions(SACOptions, total=False):
     entropy_coefficient_max: float | None
     actor_objective: Literal["sac", "soft_q_forward_kl"]
     q_clip_epsilon: float
+    terminal_value_loss_coefficient: float
     entropy_penalty_coefficient: float
     entropy_penalty_reference: Literal["target_policy", "behavior"]
 
@@ -99,6 +100,7 @@ class SDSACConfig(SACConfig):
     entropy_coefficient_max: float | None = None
     actor_objective: Literal["sac", "soft_q_forward_kl"] = "sac"
     q_clip_epsilon: float = 0.5
+    terminal_value_loss_coefficient: float = 0.0
     entropy_penalty_coefficient: float = 0.5
     entropy_penalty_reference: Literal["target_policy", "behavior"] = "target_policy"
 
@@ -129,7 +131,11 @@ class SDSACConfig(SACConfig):
             raise ValueError("actor_objective must be 'sac' or 'soft_q_forward_kl'")
         if any(
             not math.isfinite(value) or value < 0
-            for value in (self.q_clip_epsilon, self.entropy_penalty_coefficient)
+            for value in (
+                self.q_clip_epsilon,
+                self.entropy_penalty_coefficient,
+                self.terminal_value_loss_coefficient,
+            )
         ):
             raise ValueError(
                 "SD-SAC clipping and entropy penalty coefficients must be finite and non-negative"

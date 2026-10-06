@@ -22,6 +22,26 @@ def soft_q_log_probabilities(q_values: torch.Tensor, alpha: torch.Tensor) -> tor
     return (advantages / alpha.float()).log_softmax(dim=1)
 
 
+def terminal_value_loss(  # noqa: PLR0913 -- Explicit target, terminal mask and importance weights.
+    critics: tuple[torch.Tensor, torch.Tensor],
+    rewards: torch.Tensor,
+    terminated: torch.Tensor,
+    weights: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Terminal-only regression to known rewards, without bootstrap or clipping.
+
+    Normalize over terminal samples so their influence does not vanish in a long
+    episode batch. Truncations are excluded: their return is unknown.
+    """
+    mask = terminated.reshape(-1).to(dtype=rewards.dtype)
+    if weights is not None:
+        mask = mask * weights.reshape(-1)
+    q1, q2 = critics
+    errors = (q1 - rewards).square() + (q2 - rewards).square()
+    denominator = mask.sum().clamp_min(torch.finfo(mask.dtype).tiny)
+    return (mask * errors).sum() / denominator
+
+
 @torch.no_grad()
 def actor_diagnostics(
     policy: tuple[torch.Tensor, torch.Tensor],

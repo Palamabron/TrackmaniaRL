@@ -31,6 +31,7 @@ from trackmaniarl.algorithms.sd_sac_objectives import (
     actor_diagnostics,
     categorical_statistics,
     soft_q_log_probabilities,
+    terminal_value_loss,
 )
 from trackmaniarl.core.contracts import ModelContract, PolicyMode
 from trackmaniarl.core.data import PriorityUpdate, TrainingBatch
@@ -140,6 +141,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         self.entropy_mode = "learned" if config.learn_entropy_coefficient else "fixed"
         self.target_entropy = config.target_entropy
         self.q_clip_epsilon = config.q_clip_epsilon
+        self.terminal_value_loss_coefficient = config.terminal_value_loss_coefficient
         self.entropy_penalty_coefficient = config.entropy_penalty_coefficient
         self.entropy_penalty_reference = config.entropy_penalty_reference
 
@@ -210,8 +212,19 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         q1 = self.model.q1(batch.observations).gather(1, indices).squeeze(1)
         q2 = self.model.q2(batch.observations).gather(1, indices).squeeze(1)
         losses, diagnostics = self._critic_losses(batch, (q1, q2, targets))
+        loss = weighted_mean(losses, batch.weights)
+        terminal_loss = loss.new_zeros(())
+        if self.terminal_value_loss_coefficient:
+            terminal_loss = terminal_value_loss(
+                (q1, q2), batch.rewards, batch.source.terminated, batch.weights
+            )
+            loss = loss + self.terminal_value_loss_coefficient * terminal_loss
         return _DiscreteCriticStep(
-            weighted_mean(losses, batch.weights), q1, q2, targets, diagnostics
+            loss,
+            q1,
+            q2,
+            targets,
+            {**diagnostics, "loss/terminal_value": terminal_loss.detach()},
         )
 
     def _critic_losses(
@@ -246,6 +259,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
                 "critic/clipped_fraction": outside.float().mean(),
                 "critic/clip_blocked_gradient_fraction": (outside & clipped_wins).float().mean(),
                 "critic/terminal_samples": terminal_count,
+                "critic/terminal_td_abs_error_sum": (terminal_error * terminal.float()).sum(),
                 "critic/terminal_td_mae": (terminal_error * terminal.float()).sum()
                 / terminal_count.clamp_min(1),
             }
@@ -407,7 +421,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         self._restore_rng(state["rng"])
 
     def _checkpoint_options(self) -> Mapping[str, Any]:
-        return {
+        options: dict[str, Any] = {
             "actor_objective": self.actor_objective,
             "learning_rate": self.learning_rate,
             "actor_learning_rate": self.actor_learning_rate,
@@ -422,6 +436,10 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             "entropy_penalty_coefficient": self.entropy_penalty_coefficient,
             "entropy_penalty_reference": self.entropy_penalty_reference,
         }
+        # Preserve the canonical checkpoint contract at the default.
+        if self.terminal_value_loss_coefficient:
+            options["terminal_value_loss_coefficient"] = self.terminal_value_loss_coefficient
+        return options
 
     def _validate_checkpoint_options(self, state: Mapping[str, Any]) -> None:
         saved = state.get("sd_sac_options")
@@ -430,6 +448,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
                 raise ValueError("checkpoint SD-SAC options do not match the learner")
         elif (
             self.actor_objective != "sac"
+            or self.terminal_value_loss_coefficient != 0
             or self.entropy_learning_rate != self.learning_rate
             or self.entropy_coefficient_min is not None
             or self.entropy_coefficient_max is not None
