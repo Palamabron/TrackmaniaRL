@@ -1,5 +1,42 @@
 ## Poprawki kodu SD-SAC po nowym poleceniu człowieka — 6 października 2026
 
+## 2026-10-06 14:55 Warsaw — one repaired experimental pilot active
+
+Latest direct instruction: “Jak wszystko naprawisz odpal pilot SD SAC na nowo”.
+The earlier human STOP and incomplete checkpoint are preserved; this is a new run
+from zero, with no checkpoint or replay resume. Only this pilot and its ten greedy
+evaluations are authorized; no automatic following pilot or full training.
+
+Frozen source `e50b0b0216a658737209b99df6c1515e5367e625` at
+`C:/Users/szulc/.codex/worktrees/tmrl-sd-sac-stability-runtime/AITrackmania`.
+The explicit experimental variant uses soft-Q forward-KL actor fitting, actor
+LR0.0003, temperature LR0.0001 and alpha bounds[0.01,0.2]. Target entropy0.8,
+beta0.0005, critic LR0.0003, reward/map/model/GNN/replay/UTD remain unchanged.
+Multiple stability controls change together; this pilot cannot isolate their
+individual effects or establish canonical SD-SAC performance.
+
+Code regressions: 93 CPU checks including the formerly skipped synthetic loops
+passed, then the expanded behavior-entropy module (including both canonical and
+forward-KL terminal learning and checkpoint round-trip) passed16 checks. Ruff
+passed; 30 external guard/candidate/closure checks and validate-only passed.
+This is code evidence, not driving qualification.
+
+Actual queue `artifacts/tmrl-test-comparison/queue-sd-sac-stability-20261006`;
+run `tmrl-repair-sd-sac-stability-s17`, W&B `ufoxma8r` API running.
+START12:55:15.425207UTC=14:55Warsaw, SAVE16:45:15.425207UTC=18:45Warsaw,
+HARD16:55:15.425207UTC=18:55Warsaw. Runner61800(created1791291314.4029312),
+guard38544; learner66424 ready, actor51072 registered and collecting.
+Real preflight270ms/33fields/protocol2/correctUID.
+
+Train145408/max11400 followed by10greedy/max2100 within14400 seconds;
+never extend or restart. The gate still requires >=8/10 finishes plus complete,
+finite/fingerprint/SHA-valid, drained/accounted training and ten complete trials
+with correctUID, all timing maxima<=100ms, no errors and skip accounting.
+No driving result exists yet; full SD-SAC remains BLOCKED. QR PASS29/30,
+median54.3s remains preserved. Evidence includes plan/source-freeze,
+AUTHORIZATION/RESUME-AUTHORIZATION and actual-launch-receipt.json.
+
+
 Polecenie „to napraw to wszystko” wykonano w editable; trening, ewaluacja jazdy i nowe
 piloty nadal wymagają osobnej zgody. Automatyzacja PAUSED, STOP zachowany, Full SD BLOCKED.
 Naprawiono zapis tempa aktora, dodano stabilne log-softmax, osobną regulację temperatury
