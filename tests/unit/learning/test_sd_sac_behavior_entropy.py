@@ -98,7 +98,8 @@ def test_behavior_reference_supports_a_complete_finite_update() -> None:
     assert priorities.transition_ids == batch.transition_ids
 
 
-def test_discrete_sac_learns_the_known_optimal_terminal_action() -> None:
+@pytest.mark.parametrize("actor_objective", ["sac", "soft_q_forward_kl"])
+def test_discrete_sac_learns_the_known_optimal_terminal_action(actor_objective: str) -> None:
     torch.manual_seed(17)
     learner = StableDiscreteSoftActorCritic(
         DiscreteSacModel(),
@@ -106,6 +107,7 @@ def test_discrete_sac_learns_the_known_optimal_terminal_action() -> None:
         target_entropy=0.8,
         learning_rate=0.01,
         target_tau=0.2,
+        actor_objective=actor_objective,
     )
     learner.setup({"seed": 17})
     observation = torch.zeros(12, 4)
@@ -130,6 +132,17 @@ def test_discrete_sac_learns_the_known_optimal_terminal_action() -> None:
 
     assert int(probabilities[0].argmax()) == 1
     assert float(probabilities[0, 1]) > max(0.6, before)
+    restored = StableDiscreteSoftActorCritic(
+        DiscreteSacModel(),
+        entropy_penalty_reference="behavior",
+        target_entropy=0.8,
+        learning_rate=0.01,
+        target_tau=0.2,
+        actor_objective=actor_objective,
+    )
+    restored.setup({"seed": 17})
+    restored.load_state_dict(learner.state_dict_for_policy(learner.policy().export_state()))
+    assert torch.equal(restored.model.actor.probabilities(observation), probabilities)
 
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), -1.0, True, "1", None])
