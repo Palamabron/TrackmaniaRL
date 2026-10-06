@@ -1,3 +1,28 @@
+## 2026-10-06 17:56 Warsaw — fresh terminal-correction pilot ACTIVE
+
+Latest human instruction “to ogarniaj, badz bardziej autonomiczny” authorizes one
+fresh bounded pilot and ten greedy trials. This supersedes the previous paused
+snapshot; it does not resume any saved checkpoint or authorize following/full runs.
+Queue queue-sd-sac-terminal-20261006; run tmrl-repair-sd-sac-terminal-s17;
+W&B mygl7lrw API running. START15:56:52.234211UTC, SAVE19:46:52.234211UTC
+(21:46Warsaw), HARD19:56:52.234211UTC(21:56Warsaw). Total cap14400s;
+train145408/max11400 then10greedy/max2100, never extend or restart.
+Frozen runtime C:/Users/szulc/.codex/worktrees/tmrl-sd-sac-terminal-runtime/AITrackmania,
+commit7704b7f9cfb6c7cdc5f32ad672136b9f8e01437d; never edit/update it.
+Single algorithmic change vs stability: terminal_value_loss_coefficient1.
+All prior actor/temperature/reward/model/GNN/replay/UTD settings retained.
+This remains an experimental variant; no actual driving result yet; fullSD BLOCKED.
+New evaluation persists issued controls/gas completeness, without claiming game acknowledgement.
+113CPU tests/Ruff/mypy and33 guard/config/closure tests+validate-only passed.
+Actual preflight260ms,33fields,correctUID; no new STOP, old hash/mtime pins unchanged;
+previous exact owned identities closed, mutex free before launch. Source/helper,
+previous training/evaluation/closure/checkpoint and offline audit receipts pinned.
+Runner66408(created1791302211.215128),guard64200,learner54428,actor51704;
+full identities and current startup evidence in actual-launch-receipt.json.
+No UI or second controller during training/evaluation. QR PASS29/30 median54.3s retained.
+After outcome verify checkpoint/source, all owned closures, report honestly and
+pause monitoring. No automatic following pilot, changed-code resume or full start.
+
 ## 2026-10-06 — no-movement diagnosis and offline corrective variant
 
 After “no to ogarnij to”, audited the preserved CP33866 in exact frozen e50b0b02,
