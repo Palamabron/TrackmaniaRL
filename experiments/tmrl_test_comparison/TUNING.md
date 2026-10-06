@@ -1,3 +1,19 @@
+## 2026-10-07 01:48 Warsaw — exact-source FULL resume ACTIVE
+
+Human instruction “To dzialaj w sensownych pętlach aż będzie wszystko dopięte”
+authorizes bounded repair/test/diagnose loops; older one-pilot-only restrictions
+below are historical. Queue `queue-sd-sac-comprehensive-resume02-20261007`,
+run `tmrl-sd-sac-resume02-s17`, W&B5xgna8bn API running. Actual FULL restore:
+23582 transitions/3272 updates/replay23582/credit123.5, then new updates/ingest.
+Frozen ab736f53 remains exact; no changed-code resume, replay reset or reward change.
+SAVE 2026-10-07 05:36:30 Warsaw; HARD05:46:30, both retained from resume01.
+No extension/restart. Resume01 failed before controller/learner on Windows temporary
+path length and closed normally; the new shorter clone passed actual offline load,
+40 contract tests, validate-only and actual preflight10ms/33fields/correctUID.
+FullSD remains BLOCKED until actual complete/drained/accounted/finite training and
+>=8/10 valid driving trials. QR29/30median54.3PASS preserved. MonitorACTIVE;
+healthy unchanged state stays quiet. See [resume evidence and loop limits](SD_SAC_RESUME_LOOPS_20261007.md).
+
 ## 2026-10-07 — comprehensive interrupted; focus repair verified; resume not launched
 
 This supersedes older ACTIVE snapshots below. Comprehensive closed normally at

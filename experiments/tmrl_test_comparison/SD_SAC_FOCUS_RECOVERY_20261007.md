@@ -1,5 +1,10 @@
 # SD-SAC foreground recovery and preserved resume — 2026-10-07
 
+Latest state: the newly authorized exact-source resume is now ACTIVE on a shorter
+artifact path after a bounded Windows path-length failure. See
+[actual continuation, evidence and loop limits](SD_SAC_RESUME_LOOPS_20261007.md).
+The preparation-only statements below describe the earlier preparation snapshot.
+
 The comprehensive pilot stopped at 2026-10-06 19:19:55 UTC (21:19 Warsaw)
 because Windows denied foreground activation before the next episode reset.
 The actor exited, the learner saved checkpoint 3272, and the queue closed
