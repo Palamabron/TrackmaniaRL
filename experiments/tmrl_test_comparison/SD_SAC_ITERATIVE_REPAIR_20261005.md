@@ -1,3 +1,81 @@
+## SD-SAC zatrzymany na żądanie człowieka — 6 października 14:08 Warsaw
+
+Nadrzędna instrukcja: zatrzymać SD-SAC, przeanalizować poprawki, **nie uruchamiać
+nowego treningu, testu jazdy, ewaluacji ani pilota bez wyraźnego nowego pozwolenia**.
+Wcześniejsze upoważnienia do autonomicznych pilotów są odwołane. Automatyzacja PAUSED.
+
+`queue-sd-sac-actorlr0009-20261006` otrzymała nowy STOP. Trening zamknął się normalnie
+12:08:20 UTC, returncode0, guard forced[]. Wszystkie procesy należące do próby zamknięte;
+W&B `1rd6oj0m` finished (API). Zachowano cp25112,
+SHA `37188c52fc549c26f4c31b792678a10fa3308b1cd32666c76dd7d0342999577f`.
+112021/145408 transitions, 25112 updates, credit393.25,
+earned=accounted25505.25, finite i fingerprint match. Budżet NIE ukończony,
+credit NIE drained. Ewaluacja jazdy NIE rozpoczęta, brak wyniku 0/10 lub PASS dla tej próby.
+Full SD nadal BLOCKED; QR29/30, mediana54.3s pozostaje zachowanym wynikiem.
+
+Dowody: BASE/queue-sd-sac-actorlr0009-20261006/human-stop-receipt.json oraz
+BASE/sd-sac-stopped-analysis-20261006/saved-checkpoint-inspection.json.
+Odczyt istniejącego checkpointu na CPU: zero optimizer steps, zero learner updates,
+bez środowiska/kontrolera/nowych eksperymentów. Zamrożone runtime bez zmian.
+Poniższe wpisy ACTIVE i zgody na następne piloty są historyczne.
+
+### Wnioski i proponowana kolejność naprawy, bez uruchamiania prób
+
+1. **Najpierw sprawdzić wiarygodność krytyka.** W 128 zachowanych stanach startu
+   krytyk najwyżej ocenia akcję37: gaz0, pełny hamulec, prosty kierunek. Aktor wybiera59:
+   gaz1, skręt+0.5, brake tap, prawdopodobieństwo0.878. W 1024 stanach replay zgodność
+   actor/Q wynosi tylko7.62%, ale doprowadzenie jej do100% nie jest celem jazdy.
+   Poprzedni target1.2 również nie dawał dowodu poprawności Q. Dodatnie Q~7 przy starcie
+   nie dowodzi błędu samo w sobie, bo soft Q zawiera przyszłą entropię i nagrody za postęp.
+   Trzeba zestawić predykcje z rzeczywistymi zapisanymi zwrotami, osobno dla startu,
+   hamowania, powolnej jazdy i końców epizodów. Dane obserwacyjne nie rozstrzygają jakości
+   niewybranych akcji; nie wolno przedstawiać ich jako testu kontrfaktycznego.
+
+2. **Naprawić zapadanie polityki i ustalić spójną regulację entropii.** Zapisany aktor
+   ma entropy mean0.271 przy celu0.8, max_probability mean0.923, alpha0.000935.
+   W replay historyczna entropia zachowania wynosi średnio3.026; kara zakotwicza więc
+   aktora do dużo starszych, bardziej losowych polityk. Samo zwiększenie actorLR nie
+   stanowi naprawy: zatrzymana próba ma tylko3 greedy actions w badanej próbce.
+   Przed wyborem kolejnych liczb potrzebna jest analiza przebiegu alpha/H i sił składników
+   celu. Proponuję oddzielić szybkość aktualizacji temperatury od krytyka oraz kontrolować
+   odchylenie od celu i wiek odniesienia. Ewentualna zmiana sposobu kotwiczenia musi być
+   jawnie oznaczona jako wariant algorytmu; usunięcie beta nie jest uzasadnione wcześniejszym
+   porównaniem beta0/.0005. Minimum alpha lub nowy target nie są jeszcze zatwierdzoną receptą.
+
+3. **Dopiero po ocenie Q poprawić dopasowanie aktora.** Dla dyskretnych78 akcji można
+   wyliczyć dokładny rozkład softmax(Q/alpha) i mierzyć odległość polityki od niego osobno
+   na startach i w replay. Zapisana średnia KL wynosi28.01, na startach48.57: to rozjazd
+   polityki i celu krytyka, nie dowód dobrej jazdy tego celu. Należy ustalić, czy problemem
+   są nasycone logity, dryf krytyka, czy reprezentacja. Wariant z aktualizacjami aktora
+   przy zamrożonym celu lub z forward-KL distillation może być późniejszą hipotezą,
+   ale zmienia regułę uczenia i nie powinien automatycznie zastąpić kanonicznego SD-SAC.
+   Powrót do actorLR3e-4 jest punktem odniesienia, nie obietnicą naprawy.
+
+4. **Uczenie wartości musi mieć mierzalny punkt odniesienia.** Jeśli kalibracja ujawni
+   zbyt duże poleganie na samych predykcjach przyszłego Q, rozważyć poprawnie zdefiniowane
+   wielokrokowe soft targets oraz lepsze pokrycie danych. Nie kopiować bez sprawdzenia
+   zwykłego n-step, który może pomijać pośrednie składniki entropii. Nie zmieniać wspólnej
+   nagrody, nie usuwać akcji hamowania tylko dlatego, że model je nadużywa: QR na tej samej
+   przestrzeni78 akcji potrafił przejść bramkę. Każdą zmianę izolować, po nowej zgodzie.
+
+Nie wykazano błędu znaku podstawowego SAC/alpha ani głównej blokady przez Q-clip.
+W odczytanej próbce clipping przekracza limit dla0.20%/0.29% akcji, blokada gradientu0%.
+Kod no_progress/slow_progress kończy epizod jako terminated=True, a replay zeruje bootstrap
+przy terminated; nie znaleziono tu podejrzewanego błędu doliczania dalszej jazdy po porażce.
+Podstawowe double-average Q, entropy penalty i Q-clip odpowiadają konstrukcji z
+[oficjalnej implementacji autorów](https://github.com/coldsummerday/SD-SAC/blob/main/src/libs/discrete_sac.py).
+Różnica redukcji Q-clip: lokalnie max per próbka, w kodzie autorów max po mean; to różnica
+implementacji, której wpływu na tę porażkę nie wykazano.
+
+Przegląd ujawnił też drobny błąd spójności: state_dict_for_policy resetuje actor optimizer
+z learning_rate krytyka zamiast actor_learning_rate. Dotyczy ścieżki checkpointu polityki
+ocenionej i przyszłego wznowienia; nie wyjaśnia tej świeżej próby bez ewaluacji/wznowienia.
+Nie poprawiano algorytmu i nie uruchamiano testów w odpowiedzi na żądanie analizy.
+
+Wniosek: najpierw kalibracja krytyka i kontrola zapadania entropii, potem dopasowanie aktora.
+Dalsze strojenie samego beta/target/LR bez tych rozróżnień nie daje uczciwej gwarancji poprawy.
+Zmiana9e-4 nie ma końcowego wyniku jazdy, ponieważ człowiek zatrzymał próbę przed końcem.
+
 ## Świeży pilot actor LR9e-4 uruchomiony — 6 października 12:20 Warsaw
 
 `queue-sd-sac-actorlr0009-20261006`, fresh `tmrl-repair-sd-sac-actorlr0009-s17`.

@@ -1,3 +1,24 @@
+## SD-SAC zatrzymany na żądanie człowieka — 6 października 14:08 Warsaw
+
+Nadrzędna instrukcja: zatrzymać SD-SAC, przeanalizować poprawki, **nie uruchamiać
+nowego treningu, testu jazdy, ewaluacji ani pilota bez wyraźnego nowego pozwolenia**.
+Wcześniejsze upoważnienia do autonomicznych pilotów są odwołane. Automatyzacja PAUSED.
+
+`queue-sd-sac-actorlr0009-20261006` otrzymała nowy STOP. Trening zamknął się normalnie
+12:08:20 UTC, returncode0, guard forced[]. Wszystkie procesy należące do próby zamknięte;
+W&B `1rd6oj0m` finished (API). Zachowano cp25112,
+SHA `37188c52fc549c26f4c31b792678a10fa3308b1cd32666c76dd7d0342999577f`.
+112021/145408 transitions, 25112 updates, credit393.25,
+earned=accounted25505.25, finite i fingerprint match. Budżet NIE ukończony,
+credit NIE drained. Ewaluacja jazdy NIE rozpoczęta, brak wyniku 0/10 lub PASS dla tej próby.
+Full SD nadal BLOCKED; QR29/30, mediana54.3s pozostaje zachowanym wynikiem.
+
+Dowody: BASE/queue-sd-sac-actorlr0009-20261006/human-stop-receipt.json oraz
+BASE/sd-sac-stopped-analysis-20261006/saved-checkpoint-inspection.json.
+Odczyt istniejącego checkpointu na CPU: zero optimizer steps, zero learner updates,
+bez środowiska/kontrolera/nowych eksperymentów. Zamrożone runtime bez zmian.
+Poniższe wpisy ACTIVE i zgody na następne piloty są historyczne.
+
 ## Świeży pilot actor LR9e-4 uruchomiony — 6 października 12:20 Warsaw
 
 `queue-sd-sac-actorlr0009-20261006`, fresh `tmrl-repair-sd-sac-actorlr0009-s17`.
