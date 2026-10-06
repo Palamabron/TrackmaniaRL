@@ -1,3 +1,24 @@
+## Target 1.2: trening kompletny, ocena jeszcze nie rozpoczęta — 6 października 11:10 Warsaw
+
+Nadrzędny stan: trening `tmrl-repair-sd-sac-target120-s17` zakończył się o 08:50:54 UTC.
+145437/145408 transitions, 33859 updates, credit .25, earned=accounted 33859.25;
+checkpoint finite/fingerprint/accounted/drained/budget_complete. SHA
+`a7e7aadb5d6860263c4f7c37b5bfe3f5ab19d6d8aa1d31e95242efa07dced16c`.
+Ocena nie ruszyła: preflight o 08:51:09 UTC odrzucił reset, który nie wrócił do startu.
+To **brak wyniku jazdy**, nie 0/10. Normalna closure o 08:51:09.665 UTC, forced_owned_pids=[];
+runner/guard/learner/actor zamknięte. Dowody starej kolejki pozostają zachowane.
+
+Przygotowano osobną ocenę tego samego checkpointu:
+`artifacts/tmrl-test-comparison/queue-sd-sac-target120-eval-recovery01-20261006`.
+Validate-only i 8 testów zabezpieczeń passed; tylko 10 ocen/max2100s, bez learnera.
+Przypięto poprzednie receipts/source/checkpoint/QR oraz STOP i pierwotne deadlines:
+SAVE 09:38:43.413685 UTC, HARD 09:48:43.413685 UTC. Bez przedłużenia cap.
+Recovery **nie uruchomiono**. Gra została zamknięta; ponowne uruchomienie nie utworzyło procesu.
+Windows zwrócił `GetCursorPos: access denied 0x80070005`; poproszono użytkownika
+odblokowanie pulpitu/zamknięcie ewentualnego okna systemowego. Przyczyna resetu nieudowodniona.
+Full SD nadal BLOCKED; QR 29/30 median54.3 PASS zachowany. Monitor ACTIVE.
+Poniższe wcześniejsze stany ACTIVE target120 są historyczne.
+
 ## SD-SAC beta .0005 nie zdał; świeży target 1.2 — 6 października 07:48 Warsaw
 
 Poprzedni `queue-sd-sac-anchor0005-20261006` zakończył się normalnie o 05:36:38 UTC.
