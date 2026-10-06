@@ -1,3 +1,43 @@
+## SD-SAC beta .0005 nie zdał; świeży target 1.2 — 6 października 07:48 Warsaw
+
+Poprzedni `queue-sd-sac-anchor0005-20261006` zakończył się normalnie o 05:36:38 UTC.
+Wszystkie jego owned procesy zamknięto bez force-kill. Trening osiągnął 145429/145408 transitions,
+33857 updates, credit .25, earned=accounted 33857.25; kompletny/drained/accounted/finite/fingerprint checkpoint.
+SHA `f3b701086fa43071edcdf212ff7c6d4259a7c0fe8f494556e834c6c3caa383a3`.
+Dziesięć ocen greedy: **0/10 met**, mean progress48.4221%; siedem prób około41%, trzy około65%.
+12140/12140 timing valid, max60/p9950ms, no controller/telemetry errors, skips23928/max6.
+W&B train6r1s96ly/evalg3248vg6 finished. Wszystkie techniczne warunki bramki spełnione; jazda FAIL.
+Full SD pozostaje **BLOCKED**. Nie wznowiono checkpointu ani starej kolejki.
+
+CPU audit dokładnego checkpointu w frozen4706/root PYTHONPATH/threads2/CUDA hidden, zero learner updates/no controller:
+anchor gradient .001220 vs value .011101, cosine +.5765; projected cancellation -.0633.
+Poprzednia hipoteza konfliktu anchor nie opisuje już tego checkpointu. Entropymean .720/maxprob .790,
+actor/Q greedy agreement .302; te wartości nie dowodzą poprawności krytyka ani jakości jazdy.
+Niezależne actor-head copies, frozen Q/encoder,1000 kroków,beta.0005: alpha.004555 vs.01 daje
+entropy.8997 vs1.2926/maxprob.6752 vs.5841 przy expectedQ cost .00343. Bez zapisu polityki/checkpointu/jazdy.
+Wyższy target1.2 ma sprawdzić hipotezę przedwczesnego skupienia polityki i niedostatecznej eksploracji.
+Pierwszy audit z niewłaściwym PYTHONPATH nie przeszedł walidacji spec przed update; zachowano log.
+Powtórzenie z exact frozen root/fingerprint/SHA przeszło. Nie użyto wyników z main jako dowodu.
+
+NOWY `queue-sd-sac-target120-20261006`, fresh `tmrl-repair-sd-sac-target120-s17`, frozen4706a06b bez zmian.
+Jedyna zmiana learning: target entropy .8→1.2; beta.0005/reward/model/GNN/LR/replay/update ratio unchanged.
+145408/max11400s +10greedy/max2100s, całkowity cap14400s od tego świeżego startu; bez przedłużenia poprzednika.
+Start05:48:43.413685UTC=07:48Warsaw, SAVE09:38:43.413685UTC=11:38Warsaw,
+HARD09:48:43.413685UTC=11:48Warsaw. Launcher47728/runner62204created1791265722.9196036,
+guard55592,trainlauncher67920/learner29452/actor66932,W&Bla0tyfwk. Preflight280ms/33fields/właściwy UID ready.
+Learner ready, actor registered/collecting; to nie wynik bramki jazdy.
+28 guard/strict candidate/previous receipt closure tests passed, validate-only passed. Początkowy błąd temp-root
+oraz stary regex komunikatu w skopiowanym teście poprawiono w nowym external helper/test; final28passed.
+Zachowano pinned poprzednie receipts/normal closure/QR reservation i plan; QR29/30median54.3PASS nie powtarzaj.
+Nowy STOP wygrywa; stare pinned STOP hash/mtime unchanged. Nie ma drugiego kontrolera.
+
+Bramka niezmieniona: >=8/10met oraz complete/drained/accounted/finite/fingerprint/SHA,
+10complete validUID/alltimingmax100ms/noerrors/skips. Full/manual readiness nadalBLOCKED.
+Nadzór15minACTIVE; podSAVE pozostanie wturnwaitmax60s do closure/HARD, bez procesów learner/controller poHARD.
+Autonomiczna uzasadniona diagnoza poFAIL, bez full/miesięcznych autostartów/sharedreward/override/replayreset.
+Dowody: artifacts/tmrl-test-comparison/sd-sac-anchor0005-audit-20261006/ oraz obie zachowane kolejki.
+Poniższe starsze stany/deadlines są historyczne.
+
 # Nocne piloty v2 — 3/4 października 2026
 
 ## SD-SAC beta .005 nie zdał; świeży beta .0005 — 6 października 04:18 Warsaw
