@@ -1,5 +1,36 @@
 ## Poprawki kodu SD-SAC po nowym poleceniu człowieka — 6 października 2026
 
+## 2026-10-06 17:12 Warsaw — training complete; queue failed before evaluation
+
+This supersedes the earlier active-pilot snapshot. The repaired experimental
+SD-SAC stability pilot completed145466/145408 transitions and33866 updates.
+Final CP33866 SHA1428c80edfc05f5b341040aa39e6d051893b8c32d3b2648a667c048f5a94cb73
+is preserved. Read-only CPU validation in the exact frozen runtime confirmed
+fingerprint match, finite learner state, earned=accounted33866.5 and credit0.5,
+drained and complete. No learner was instantiated or updated for this validation.
+
+Queue failed2026-10-06T15:12:40.466247UTC with `psutil.AccessDenied(pid59824)`
+from `psutil.wait_procs` while checking descendant closure after training exited.
+The exact OS-level cause is unproven. Guard normal closure15:12:40.945327UTC,
+forced[], all pinned owned processes closed and shared controller mutex free.
+Current PID59824 belongs to svchost; the old descendant creation-time identity
+was not persisted. PID reuse is plausible but unproven, and that system process
+was not modified. W&B ufoxma8r API finished. Original evidence/helpers,
+checkpoint and original deadlines are unchanged. This queue is never restarted.
+
+Driving evaluation NEVER STARTED: no evaluation YAML/history/artifact or driving
+score. This is neither0/10 nor a gate PASS. Full SD-SAC remains BLOCKED, QR
+PASS29/30 median54.3s preserved. No new pilot/training/evaluation was started.
+Monitoring is being paused on completion of this report; a further test requires
+new direct human authorization. Recommended offline harness repair: bounded
+PID-and-creation-time liveness checks instead of waiting on disappeared process
+handles; unknown live identities must continue to block controller handoff.
+
+Evidence: `artifacts/tmrl-test-comparison/queue-sd-sac-stability-20261006/`
+`failure.json`, `runner-error.log`, `deadline-closure.json`,
+`offline-checkpoint-validation.json`, `post-failure-receipt.json`.
+
+
 ## 2026-10-06 14:55 Warsaw — one repaired experimental pilot active
 
 Latest direct instruction: “Jak wszystko naprawisz odpal pilot SD SAC na nowo”.
