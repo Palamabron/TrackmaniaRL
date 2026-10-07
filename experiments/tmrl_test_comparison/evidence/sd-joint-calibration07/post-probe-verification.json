@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-07T21:23:15.246035+00:00",
+  "offline_probe_owned_closed": [
+    {
+      "pid": 62764,
+      "created": 1791407784.9247057,
+      "priority": 64,
+      "os_threads": 4,
+      "thread_cpu_delta_seconds": {
+        "64476": 1.1875,
+        "67548": 0.0,
+        "77932": 0.0,
+        "75828": 0.0
+      },
+      "same_identity_alive": false
+    },
+    {
+      "pid": 74888,
+      "created": 1791407784.9114738,
+      "priority": 32,
+      "os_threads": 1,
+      "thread_cpu_delta_seconds": {
+        "15124": 0.0
+      },
+      "same_identity_alive": false
+    }
+  ],
+  "all_probe_owned_closed": true,
+  "automation": "PAUSED",
+  "independent_guard_recomputation": "PASS",
+  "script_matches_executed_sha": true,
+  "checks": {
+    "new_probe_unit_tests": 4,
+    "relevant_learning_audit_tests": 58,
+    "ruff": "PASS",
+    "mypy": "PASS"
+  },
+  "network_access_or_remote_publication": false,
+  "checkpoint_identity_note": "Requested sd-af07 label differs; exact required SHA and saved configuration identify tmrl-sd-sac-actorfit-s17 CP33866."
+}

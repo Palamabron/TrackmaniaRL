@@ -1,3 +1,13 @@
+Offline joint-calibration follow-up 2026-10-07: SHA-pinned CP33866 actorfit,
+138 starts/78 actions, both critics choose71 in138/138; actor21 ranks11/5/8
+(Q1/Q2/average).384 disposable steps, lambda0.1/1/5/10, seeds17/29,48 each.
+All held-terminal reductions have positive family-adjusted paired intervals,
+but ALL weights violate held-nonterminal MAE<=0.145 in both seeds. No viable
+joint calibration under this guard; capacity/interference conclusion conditional
+on frozen targets/split/budget. No live run/resume/networking; immutable CP/model/
+Adam unchanged, automationPAUSED/fullBLOCKED. Local offline deliverables only.
+See [SD_SAC_JOINT_CALIBRATION_20261007.md](SD_SAC_JOINT_CALIBRATION_20261007.md).
+
 Offline follow-up 2026-10-07: terminal materialization/targets/gradient sign checked;
 137 exact terminal reward targets, only1/274 clipped gradients blocked.384 disposable
 critic-copy optimizer steps, no runtime learner/controller. Corrected oversampling

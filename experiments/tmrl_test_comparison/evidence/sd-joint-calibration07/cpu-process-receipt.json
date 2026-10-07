@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-07T21:18:23.045159+00:00",
+  "processes": [
+    {
+      "pid": 62764,
+      "created": 1791407784.9247057,
+      "priority": 64,
+      "os_threads": 4,
+      "thread_cpu_delta_seconds": {
+        "64476": 1.1875,
+        "67548": 0.0,
+        "77932": 0.0,
+        "75828": 0.0
+      }
+    },
+    {
+      "pid": 74888,
+      "created": 1791407784.9114738,
+      "priority": 32,
+      "os_threads": 1,
+      "thread_cpu_delta_seconds": {
+        "15124": 0.0
+      }
+    }
+  ],
+  "note": "One numerical CPU thread is configured; idle library/launcher OS threads are separately reported."
+}

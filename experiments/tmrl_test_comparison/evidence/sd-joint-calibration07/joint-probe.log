@@ -1,0 +1,10 @@
+Stage 1: all discrete actions on 138 saved initial states, zero updates
+Stage 2: lambda=0.1, seed=17, 48 disposable steps
+Stage 2: lambda=0.1, seed=29, 48 disposable steps
+Stage 2: lambda=1.0, seed=17, 48 disposable steps
+Stage 2: lambda=1.0, seed=29, 48 disposable steps
+Stage 2: lambda=5.0, seed=17, 48 disposable steps
+Stage 2: lambda=5.0, seed=29, 48 disposable steps
+Stage 2: lambda=10.0, seed=17, 48 disposable steps
+Stage 2: lambda=10.0, seed=29, 48 disposable steps
+COMPLETE: 384 disposable steps; immutable inputs/base models/Adam unchanged
