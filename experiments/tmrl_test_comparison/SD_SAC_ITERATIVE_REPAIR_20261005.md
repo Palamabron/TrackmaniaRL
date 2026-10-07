@@ -1,3 +1,37 @@
+## 2026-10-07 12:13 Warsaw — completed slow pilot FAIL, fresh alpha-floor-only pilot ACTIVE
+
+Completed exact continuation sd-c07:145408 transitions/33852 updates/credit0,
+finite/accounted/drained, CP33852 SHA90705fda277c26536c2c7d08a7e501d2b2dc751c92e457935befcdf6e2827fa6.
+Actual evaluation3/10 finishes, median143.22s, mean progress51.365148%.
+Ten complete correct-UID trials, timing maxima60ms, no controller/telemetry errors,
+skips9278/max5. All gate checks passed except>=8 finishes. This fails readiness.
+Compared with the incomplete checkpoint's2/10 and57.836355% mean progress, extra
+training did not establish a consistent improvement. No full training has started.
+Normal closure10:09:35UTC, forced[], all41 observed exact PID/ctime identities
+closed, mutex free, source/helper/original evidence and final checkpoint unchanged.
+
+Offline temperature probe of this final checkpoint: savedalpha0.00027483, frozen-Q
+target entropy0.0152 on1024 replay states; atalpha0.01 target entropy1.805.
+No learner updates, saved-policy changes or game input. This suggests excessively
+sharp targets as a testable mechanism; it does not prove critic correctness or
+that a floor improves driving. Evidence BASE/sd-temp08/temperature-sensitivity.json.
+
+Fresh bounded queue BASE/sd-af07 is ACTIVE, run tmrl-sd-sac-alphafloor02-s17,
+W&B gdfg75cl. Same frozen70d3eb0a runtime, NEVER EDIT/PULL; fresh replay/zero initial
+updates, no checkpoint resume. The only algorithm setting changed from actorslow is
+entropy_coefficient_min0.01. ActorLR0.0001,critic/entropyLR0.0003,target0.8,beta0.0005,
+SAC objective,alpha init0.2,terminalcoef0,qclip0.5,reward/model/GNN/replay/UTD unchanged.
+Fingerprint e629a9f7d08deb923a19c14c4c53982a8e0b8ee761595cf3ac101eab42523d14.
+27 plan/predecessor tests and validate-only passed. Actual preflight30ms/33fields/
+54reads/correctUID. Runner82556,guard71832,learner76756,actor50956 exact identities
+persisted in actual-launch-receipt.json and live-owned-identity-receipt.json.
+ActualSTART10:11:53.139355UTC,SAVE14:01:53UTC/HARD14:11:53UTC (16:01/16:11Warsaw).
+Cap14400s,train145408/max11400+10greedy/max2100; never extend or restart.
+Historical STOP exceptions are inherited exactly, never automatically re-pinned.
+New/changed STOP wins. No UI or second controller while learner/evaluation is active.
+FullSD remains BLOCKED until actual gate and matching full configurations; QR PASS
+29/30 median54.3s preserved. Older ACTIVE sections below are historical snapshots.
+
 ## 2026-10-07 11:55 Warsaw — slow training COMPLETE, ten-trial evaluation ACTIVE
 
 The new human instruction reauthorizes SD-SAC repair/test loops and prioritizes SD-SAC
