@@ -67,8 +67,17 @@ def actor_diagnostics(
     best_values = q_values.max(1).values
     entropy = -(probabilities * log_probabilities).sum(1)
     target_probabilities = target_log_probabilities.exp()
+    top_probabilities = probabilities.topk(2, dim=1).values
+    top_values = q_values.topk(2, dim=1).values
+    critic_actions = q_values.argmax(1)
     return {
         "policy/max_probability": probabilities.max(1).values.mean(),
+        # Entropy alone can hide a broad policy whose greedy maximum is wrong.
+        "policy/greedy_probability_margin": (
+            top_probabilities[:, 0] - top_probabilities[:, 1]
+        ).mean(),
+        "policy/critic_greedy_probability": probabilities.gather(1, critic_actions[:, None]).mean(),
+        "policy/soft_q_cross_entropy": -(target_probabilities * log_probabilities).sum(1).mean(),
         "policy/q_greedy_agreement": (actor_actions == q_values.argmax(1)).float().mean(),
         "policy/q_greedy_regret": (
             best_values - q_values.gather(1, actor_actions[:, None]).squeeze(1)
@@ -85,6 +94,7 @@ def actor_diagnostics(
         "policy/soft_q_entropy": -(target_probabilities * target_log_probabilities).sum(1).mean(),
         "policy/entropy_min": entropy.min(),
         "critic/action_value_spread": (best_values - q_values.min(1).values).mean(),
+        "critic/greedy_value_margin": (top_values[:, 0] - top_values[:, 1]).mean(),
         "critic/q_greedy_agreement": (q1.argmax(1) == q2.argmax(1)).float().mean(),
         "critic/all_action_disagreement": (q1 - q2).abs().mean(),
     }

@@ -88,3 +88,48 @@ def test_small_scale_78_action_objective_improves_despite_stale_uniform_entropy(
     assert int(final.argmax()) == 39
     assert float(final[39]) > 3 * initial
     assert torch.isfinite(final).all()
+
+
+def test_forward_kl_corrects_a_broad_wrong_greedy_maximum_at_candidate_rate() -> None:
+    """A high-entropy actor must learn the missed action, not merely stay diverse."""
+    torch.manual_seed(17)
+    model = nn.Module()
+    model.actor = CategoricalActor(nn.Identity(), 4, 78)
+    values = [0.0] * 78
+    values[57] = 0.12
+    model.q1, model.q2 = FixedValues(values), FixedValues(values)
+    learner = StableDiscreteSoftActorCritic(
+        model,
+        actor_objective="soft_q_forward_kl",
+        actor_learning_rate=0.0001,
+        entropy_penalty_reference="behavior",
+        entropy_penalty_coefficient=0.0005,
+        entropy_coefficient_min=0.01,
+    )
+    learner.setup({"seed": 17})
+    with torch.no_grad():
+        model.actor.logits.weight.zero_()
+        model.actor.logits.bias.zero_()
+        model.actor.logits.bias[0] = 0.02
+    batch = replace(
+        _batch(BatchKind.DISCRETE),
+        observations=torch.zeros(2, 4),
+        metadata={"behavior_entropies": torch.full((2,), math.log(78))},
+    )
+    prepared = discrete_batch(learner._batch(batch))
+    before = model.actor.probabilities(prepared.observations).detach()
+    assert int(before[0].argmax()) == 0
+    initial_kl = float(
+        learner._actor_step(prepared, torch.tensor(0.01)).diagnostics["policy/soft_q_forward_kl"]
+    )
+    for _ in range(200):
+        step = learner._actor_step(prepared, torch.tensor(0.01))
+        learner._optimize(step.loss, learner.actor_optimizer)
+    final = model.actor.probabilities(prepared.observations).detach()
+    after = learner._actor_step(prepared, torch.tensor(0.01))
+    assert int(final[0].argmax()) == 57
+    assert float(after.diagnostics["policy/soft_q_forward_kl"]) < initial_kl
+    assert torch.equal(model.q1.values.detach(), torch.tensor(values))
+    assert torch.equal(model.q2.values.detach(), torch.tensor(values))
+    assert model.q1.values.grad is None
+    assert model.q2.values.grad is None
