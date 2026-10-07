@@ -1,3 +1,47 @@
+## 2026-10-07 07:32 Warsaw — fresh actorslow pilot ACTIVE
+
+Queue `queue-sd-sac-actorslow-20261007`, run `tmrl-sd-sac-actorslow-s17`, W&B olarxz70
+API running. Fresh from zero using unchanged frozen refit70d3eb0a; no resume.
+Only actorLR0.0009->0.0001; critic/entropyLR0.0003,target0.8,beta0.0005,SAC objective,
+alpha init0.2/unbounded,terminalcoef0,qclip0.5,model/GNN/reward/replay/UTD unchanged.
+Hypothesis: slower actor updates may prevent representation collapse. Offline evidence
+is mixed: fresh fixed-Q copies100steps heldout agreement0.535/0.398 for LR0.0001/0.0009,
+but forwardKL3.992/3.200 and entropy4.343/3.915. Both retain feature diversity.
+This does not prove the cause, critic correctness or driving. Collapsed full-actor
+copies remain poorly fitted after100steps; evidence BASE/sd-sac-refit-audit-20261007.
+24 guard tests+validate-only passed; preparation10ms/33fields/60reads and actual
+preflight10ms/33fields/55reads/correctUID. Runner56556,guard37024,learner63824,
+actor64872 identities in actual-launch-receipt.json. ActualSTART05:31:45.606638UTC,
+SAVE09:21:45.606638UTC/HARD09:31:45.606638UTC (11:21/11:31Warsaw),cap14400s.
+Train145408/max11400+10greedy/max2100. UnderSAVE stayturn waits<=60s toclosure/HARD;
+no owned learner/controller afterHARD. NewSTOP wins; never extend/restart/noUI.
+Refit FAIL and all previous checkpoints/receipts remain preserved and verified.
+FullSD BLOCKED until real>=8/10 plus all completion/identity/timing checks.
+QR PASS29/30 median54.3s preserved. Authorized repair loops ACTIVE; no automatic full.
+Older ACTIVE entries below are historical snapshots.
+
+## 2026-10-07 07:22 Warsaw — refit COMPLETE, driving FAIL; offline diagnosis active
+
+The fresh refit queue completed normally at05:22:14UTC; deadline closure forced[].
+All27 exact owned PID/creation-time identities are closed and the shared mutex is free.
+W&B aqsyvox9/6v7bhym0 API finished. Complete145433 transitions/33858 updates,
+credit0.25, earned=accounted33858.25, drained and finite. CP33858 SHA
+58f1c4db6bfc539988979a1d7a672b8ce4344538fc62ef4f5ebd4fb8faf993bc
+and frozen source/helper/prior receipt pins verified unchanged, including prior CP33857.
+Actual driving FAIL0/10; meanprogress4.787796%,
+10 complete correctUID trials, timing maxima<=60ms, no controller/telemetry errors,
+skips831/max6. FullSD remains BLOCKED; QR PASS29/30 median54.3s preserved.
+The audit on exact frozen70d3 source is CPU-only, no controller or saved-policy changes.
+Actor greedy action33 on1024/1024 replay states and128/128 starts, gas1/steer-1/6;
+alpha0.001243, entropy0.2525 versus target0.8. Actor feature std0.000506 versus
+critic feature std0.042807/0.041055; actor/Q agreement0.0957. This supports representation
+collapse and poor actor fitting; it does not establish critic correctness. Independent
+1000-step fixed-Q head fitting reaches only0.373 agreement at LR0.0009; full-actor
+copy probes completed with limited recovery. Evidence: BASE/sd-sac-refit-audit-20261007.
+No next game test has launched. Authorized repair/test/diagnosis loops remain ACTIVE;
+never restart refit or extend its expired-as-completed attempt. Old ACTIVE entries below
+are historical snapshots. New STOP wins. No changed-code resume or automatic full start.
+
 ## 2026-10-07 04:33 Warsaw — fresh refit pilot ACTIVE
 
 Following the authorized repair loop, clipping5 was rejected: independent100-step
