@@ -1,3 +1,13 @@
+Update 2026-10-07 19:46UTC: terminal MAE aggregation repaired in editable source;
+50 regression/contract/stability tests, Ruff and mypy passed. Frozen sd-fit07d
+continues unchanged; no new live test/full training. Read-only CP25000 audit finds
+known terminal target miscalibration: mean Q+3.0702 vs reward-2.0465, MAE5.1168 on
+all106 terminal failures. Off-policy return proxies do not establish action rankings
+or driving readiness. Full remains BLOCKED pending actual evaluation. Actual actor/
+checkpoint/frozen-runtime fingerprint1f4d2613… supersedes the differing historical
+launch-confirmation snapshot; no override. Details/evidence:
+[SD_SAC_CRITIC_AUDIT_20261007.md](SD_SAC_CRITIC_AUDIT_20261007.md).
+
 Actor-fit actual start 2026-10-07 17:22:36.869341UTC (19:22 Warsaw): NEW sd-fit07d is RUNNING, fresh tmrl-sd-sac-actorfit-s17/W&B6d20j27j, frozen281332d99fdb8bc1edb70d590260731699ab40bf. Actualpreflight ready10ms/33fields/58reads/correctUID, learner83588 and actor71412 registered/collecting, initialupdates0 and freshingest confirmed. Objective-only experimentalforwardKL; noresume, unchangedreward/model/GNN/replay/UTD. Train145408/max11400s then10greedy/max2100s, whole14400s, SAVE21:12UTC/HARD21:22UTC (23:12/23:22Warsaw). ExactPIDctime inlive-ownedreceipt. AutomationACTIVE15min, newSTOPwins, noautonexttest/full. Warmup is not driving evidence; fullBLOCKED until>=8/10 plus all integrity/timing checks. Earlier sd-fit07 failedforeground/normalclosed; sd-fit07b/c preparationonly preserved. See sd-fit07d/launch-confirmation.json and actualstatus, not older snapshots.
 
 Actor-fit launch update 2026-10-07 17:02UTC: human-authorized new sd-fit07 attempt blocked at foreground preflight BEFORE learner/eval. Normal closure/all6 exact identities closed/mutex free/pins unchanged. Await Trackmania foreground, no driving result, full BLOCKED. See SD_SAC_ACTORFIT_PREPARATION_20261007.md.

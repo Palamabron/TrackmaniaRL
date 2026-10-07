@@ -1,0 +1,19 @@
+{
+  "ruff_lint": "PASS",
+  "pytest": {
+    "process_priority": "IDLE",
+    "failed": 0,
+    "suites": [
+      "tests/integration/runtime/test_distributed_contracts.py",
+      "tests/unit/learning/test_critic_checkpoint_audit.py",
+      "tests/unit/learning/test_sd_sac_stability.py"
+    ],
+    "cuda_disabled": true,
+    "passed": 50,
+    "cpu_threads": 1
+  },
+  "mypy": "PASS (coordinator_support and audit helper)",
+  "ruff_format": "PASS",
+  "at": "2026-10-07T19:50:49.1848730Z",
+  "notes": "Initial checks from frozen cwd could not find new files; no edits; rerun from editable passed. Final audit repeats checkpoint inference after helper typing/provenance corrections; initial audit preserved."
+}

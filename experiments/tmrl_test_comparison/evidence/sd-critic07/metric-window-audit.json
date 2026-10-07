@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-07T19:33:03.898328+00:00",
+  "run": "tmrl-sd-sac-actorfit-s17",
+  "scope": "read-only current code and saved training events; no controller, learner update or runtime edit",
+  "window": [
+    24500,
+    27400
+  ],
+  "confirmed_reporting_bug": {
+    "metric": "critic/terminal_td_mae",
+    "reported_mean": 1.0743043094873428,
+    "pooled_terminal_mae": 4.872117461604333,
+    "cause": "Per-batch MAE with empty terminal batches set to zero, then unweighted averaging by _MetricAccumulator. Ratio of summed terminal absolute errors to summed terminal counts is required. This changes reporting, not loss."
+  },
+  "learning_concerns": {
+    "entropy_raw_nats_target": 0.8,
+    "entropy_latest": 3.2249020743370056,
+    "alpha_latest": 0.009999999776482582,
+    "alpha_floor": 0.01,
+    "actor_critic_greedy_agreement_window": 0.3197786458333333,
+    "critic_pair_greedy_agreement_window": 0.47855338541666664,
+    "critic_top_gap_window": 0.005193988133066645,
+    "actor_greedy_regret_latest": 0.00977276552002877,
+    "terminal_samples_per_batch256": 0.24966666666666668,
+    "clip_blocked_fraction_window": 0.00010807291666666666
+  },
+  "limitations": [
+    "Training events are not the ten-trial greedy gate",
+    "Entropy floor prevents unconstrained temperature from reaching requested entropy, but is a deliberate experimental safeguard, not proven cause",
+    "Critic disagreement and rare terminal samples do not alone establish critic incorrectness",
+    "Frozen-Q actor-copy fit does not establish fit to a changing critic",
+    "Low argmax agreement can coexist with small Q regret; not independently a driving metric"
+  ],
+  "sources": [
+    "trackmaniarl/algorithms/stable_discrete_soft_actor_critic.py",
+    "trackmaniarl/distributed/coordinator_support.py",
+    "trackmaniarl/distributed/actor_collection.py"
+  ],
+  "readiness": "BLOCKED_UNTIL_REAL_GATE"
+}

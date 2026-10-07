@@ -1,0 +1,7 @@
+{
+  "sha256": "A6F7CA1F7DE49F8233ECBA5A5D6CB000D003A66F471696E573FC8FE2456EFE85",
+  "source": "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/tmrl-sd-sac-actorfit-s17/checkpoints/distributed-update-00025000.pt",
+  "frozen_commit": "281332d99fdb8bc1edb70d590260731699ab40bf",
+  "copied_at": "2026-10-07T19:42:38.6623941Z",
+  "copy": "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-critic07/cp25000.pt"
+}

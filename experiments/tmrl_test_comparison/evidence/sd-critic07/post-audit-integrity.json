@@ -1,0 +1,77 @@
+{
+  "at": "2026-10-07T19:46:49.897112+00:00",
+  "immutable_pins_valid": true,
+  "old_checkpoints_unchanged": true,
+  "source_copy_checkpoint_equal": true,
+  "new_or_changed_STOP": false,
+  "owned_active": [
+    {
+      "pid": 38248,
+      "created_time": 1791393750.1339588
+    },
+    {
+      "pid": 78876,
+      "created_time": 1791393756.872448
+    },
+    {
+      "pid": 34152,
+      "created_time": 1791393756.8898103
+    },
+    {
+      "pid": 80772,
+      "created_time": 1791393764.3413837
+    },
+    {
+      "pid": 80428,
+      "created_time": 1791393764.3574207
+    },
+    {
+      "pid": 83588,
+      "created_time": 1791393768.0905585
+    },
+    {
+      "pid": 71412,
+      "created_time": 1791393768.1024141
+    },
+    {
+      "pid": 82472,
+      "created_time": 1791393780.6680949
+    },
+    {
+      "pid": 81264,
+      "created_time": 1791393783.294135
+    }
+  ],
+  "latest_ingest": {
+    "elapsed_s": 8637.38876,
+    "event": "distributed/ingest",
+    "payload": {
+      "actor_id": "local-actor",
+      "chunk_transitions": 41,
+      "ingest_fps": 19.4404931247337,
+      "policy_lag_updates": 97,
+      "queue_delay_s": 0.2190000000409782,
+      "replay_size": 135451,
+      "rollout_queue_depth": 0,
+      "transitions": 135451,
+      "utd": 0.24580912069254132
+    },
+    "run_id": "tmrl-sd-sac-actorfit-s17",
+    "schema_version": "1.0",
+    "segment_id": "9fa001af02924f1595bf99da4c6ed252",
+    "step": 30837,
+    "timestamp_utc": "2026-10-07T19:46:49.146239+00:00"
+  },
+  "deadline": {
+    "save_deadline": "2026-10-07T21:12:36.869341+00:00",
+    "hard_deadline": "2026-10-07T21:22:36.869341+00:00",
+    "maximum_seconds": 14400.0,
+    "guard_pid": 34152,
+    "supervised_runner_pid": 38248,
+    "reason": "User-authorized sequential four-hour SD-SAC diagnostic"
+  },
+  "actual_actor_and_checkpoint_fingerprint": "1f4d26134a9c90b701d2cc1a3a447c30ac0ef053d447833a4a8a8048b2a81989",
+  "historical_launch_confirmation_fingerprint": "241eca1b5a81c16b3725d8b1809507a5158460bc9f22527311668aa9e72cd30c",
+  "fingerprint_snapshot_discrepancy": "Historical launch-confirmation differs; actual first actor registration, saved checkpoint and fresh frozen-runtime calculation agree. No override performed.",
+  "current_run_unchanged": true
+}
