@@ -1,3 +1,14 @@
+## 8 October 2026 — pilots scheduled from 01:30 Warsaw
+
+New direct human authorization resumes justified bounded SD-SAC tests and monitoring.
+First queue sd-proj08 is PREPARED_NOT_LAUNCHED on frozen9821c23e, fresh projection
+control; live game readiness and driving remain unverified. Existing heartbeat is
+ACTIVE for01:30 and will switch to5-minute checks, then60-minute checks after three
+healthy observations spanning15 minutes. Actual guard deadlines remain binding.
+Full training remains BLOCKED; no automatic full launch. See
+[scheduled pilot handoff](SD_SAC_SCHEDULE_20261008.md). Earlier PAUSED/offline-only
+statements below describe historical scopes, superseded only by this authorization.
+
 Offline optimizer repair 2026-10-07: SD-SAC now projects hyperspherical weights after
 critic/actor Adam and before Polyak; old unprojected Adam contract cannot resume.
 Saved raw row norms reached4.20. Fixed-Q actor copies at unchangedalpha.01 improved
