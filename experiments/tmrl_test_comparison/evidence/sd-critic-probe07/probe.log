@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\szulc\.codex\worktrees\tmrl-training-fixes\AITrackmania\experiments\tmrl_test_comparison\probe_sd_sac_critic.py", line 334, in <module>
+    main()
+  File "C:\Users\szulc\.codex\worktrees\tmrl-training-fixes\AITrackmania\experiments\tmrl_test_comparison\probe_sd_sac_critic.py", line 166, in main
+    assert state["run_fingerprint"] == fingerprint
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -1,0 +1,8 @@
+Materializing saved transitions through frozen replay implementation
+Copy optimization: empirical_uniform, seed 17
+Copy optimization: empirical_uniform, seed 29
+Copy optimization: stratified_corrected, seed 17
+Copy optimization: stratified_corrected, seed 29
+Copy optimization: terminal_only_capacity, seed 17
+Copy optimization: terminal_only_capacity, seed 29
+COMPLETE: 384 disposable optimizer steps

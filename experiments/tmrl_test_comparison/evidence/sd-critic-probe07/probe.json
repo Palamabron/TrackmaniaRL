@@ -1,0 +1,22 @@
+{
+  "started": "2026-10-07T20:52:07.460977+00:00",
+  "status": "RUNNING",
+  "cap_seconds": 600,
+  "copy_optimizer_steps": 0,
+  "runtime_learner_updates": 0,
+  "controller_created": false,
+  "checkpoint_sha256": {
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07-final-audit\\cp33866.pt": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-actorfit-s17\\checkpoints\\distributed-update-00033866.pt": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7"
+  },
+  "script_sha256": "3c0d36bac28b5f01d8f72dd24fd5e70d66ef34d8115b51de47343bd4b9492da1",
+  "results": [],
+  "limitations": [
+    "Held-out episodes were used by original training, excluded only from copy fitting.",
+    "Frozen Bellman targets test regression and self-consistency, not critic truth.",
+    "Nonterminal fitting uses a fixed random subset; empirical class mass is preserved.",
+    "Sampling is with replacement; target critics, actor and alpha stay frozen.",
+    "Terminal-only unweighted MSE changes the objective as a capacity control.",
+    "No driving evaluation, new live training or saved policy change."
+  ]
+}

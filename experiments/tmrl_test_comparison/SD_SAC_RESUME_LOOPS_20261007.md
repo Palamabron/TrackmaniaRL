@@ -1,3 +1,14 @@
+Offline follow-up 2026-10-07: terminal materialization/targets/gradient sign checked;
+137 exact terminal reward targets, only1/274 clipped gradients blocked.384 disposable
+critic-copy optimizer steps, no runtime learner/controller. Corrected oversampling
+showed no consistent held-episode terminal improvement; terminal-only MSE reduced
+held terminal MAE3.3102 to0.2463/0.2500 but raised nonterminal residual0.1210 to
+11.8800/11.9412, so it is rejected as a repair. Separate scalar-tensor replay-read
+bug fixed with regression tests; ordinary saved action indices were unaffected.
+87 tests/Ruff/mypy passed; original CP and frozen pins unchanged. No live launch,
+no qualified learning-setting change; full BLOCKED/automation PAUSED/QR preserved.
+See [SD_SAC_CRITIC_PROBE_20261007.md](SD_SAC_CRITIC_PROBE_20261007.md).
+
 Final 2026-10-07 20:04UTC: sd-fit07d CLOSED / FAIL, automation PAUSED.
 Real evaluation0/10 finishes, mean progress5.770238%, median0.599639%; nine
 slow_progress failures and one51.66% time_limit. All ten correct-UID trials valid,

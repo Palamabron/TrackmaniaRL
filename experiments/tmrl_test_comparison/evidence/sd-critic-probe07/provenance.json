@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-07T21:01:24.210727+00:00",
+  "attempt01": {
+    "status": "FAILED_BEFORE_OPTIMIZATION",
+    "copy_optimizer_steps": 0,
+    "reason": "Adding both frozen and editable experiments namespace roots changed component-source fingerprint. Assertion stopped execution; no override. Log and initial JSON preserved."
+  },
+  "attempt02": {
+    "status": "COMPLETE",
+    "copy_optimizer_steps": 384,
+    "elapsed_seconds": 224.406,
+    "cap_seconds": 600,
+    "runtime_learner_updates": 0,
+    "saved_actor_updates": 0,
+    "controller_created": false
+  },
+  "executed_helper_sha256": "502e57c47e76a9f88ec5e759c1c53695a39daf565c11174f356496bf1f867b58",
+  "published_helper_changes_after_execution": "Load inference helper by explicit file to avoid namespace-source mixing; derive existing epsilon/alpha/LR/entropy from saved options and add provenance fields. No second optimization or result substitution.",
+  "saved_options_confirmed": {
+    "learning_rate": 0.0003,
+    "q_clip_epsilon": 0.5,
+    "entropy_coefficient_min": 0.01,
+    "entropy_coefficient_max": null,
+    "target_entropy": 0.8
+  },
+  "actual_saved_action_schema": [
+    "leaf",
+    0,
+    "scalar",
+    "<i8",
+    []
+  ],
+  "scalar_tensor_bug": "Initial probe unit test reproduced torch.from_numpy(numpy.int64) TypeError. Editable-only replay fix uses np.asarray before conversion; dedicated scalar tensor read/restore/no-alias/n-step tests pass. Saved live actions are Python scalars; not an explanation for this failed pilot.",
+  "replay_info_limitation": "Saved terminal info contains behavior entropy only; raw game telemetry/reward-component alignment cannot be reconstructed from it. Verified stored reward/flags/action/step/observation and actual materialization/critic targets, not physical control acceptance.",
+  "checks": {
+    "pytest_passed": 87,
+    "ruff": "PASS",
+    "mypy": "PASS (2 source files)",
+    "post_probe_all_51_owned_closed": true,
+    "mutex_free": true,
+    "immutable_pins_valid": 1260
+  },
+  "live_test_launched": false,
+  "automation": "PAUSED",
+  "full_training": "BLOCKED"
+}
