@@ -1,4 +1,4 @@
-## 2026-10-07 11:49 Warsaw — slow policy improved, exact completion ACTIVE
+## 2026-10-07 11:55 Warsaw — slow training COMPLETE, ten-trial evaluation ACTIVE
 
 The new human instruction reauthorizes SD-SAC repair/test loops and prioritizes SD-SAC
 before other algorithms. Historical STOP files remain preserved with exact SHA/mtime
@@ -11,7 +11,10 @@ closed, mutex free, immutable pins unchanged. This is improved driving versus ea
 0/10 results, but it fails the>=8/10 gate and uses incomplete training.
 Evidence: BASE/sd-e08/post-closure-verification.json and its evaluation artifact.
 
-New bounded exact completion BASE/sd-c07 is ACTIVE, run slow-complete, W&B8dj5aeh9.
+New bounded attempt BASE/sd-c07 completed training normally, run slow-complete,
+W&B8dj5aeh9. Final145408 transitions/33852 updates/credit0, finite/accounted/drained.
+CP33852 SHA90705fda277c26536c2c7d08a7e501d2b2dc751c92e457935befcdf6e2827fa6.
+Checkpoint validation passed; the new ten-trial evaluation is now ACTIVE.
 FULL restore confirmed140754 transitions/32256 updates, replay140754, credit432.5,
 same frozen70d3eb0a source and fingerprint2be95ca917238a1fd5f90760e24c2763d899b3633784b5285acc1a914372b1bc.
 Only run/artifact identity changed. Original checkpoint/journal remain byte-identical.
