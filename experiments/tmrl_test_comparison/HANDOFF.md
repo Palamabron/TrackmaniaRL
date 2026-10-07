@@ -1,3 +1,33 @@
+## 2026-10-07 11:49 Warsaw — slow policy improved, exact completion ACTIVE
+
+The new human instruction reauthorizes SD-SAC repair/test loops and prioritizes SD-SAC
+before other algorithms. Historical STOP files remain preserved with exact SHA/mtime
+exemptions; a new or changed STOP always wins.
+
+Actual saved-policy evaluation sd-e08 completed normally: **2/10 finishes**, median
+149.24s, mean progress57.836355%. Ten complete correct-UID trials; timing, SHA and
+controller/telemetry checks passed, skips reported. All observed owned identities
+closed, mutex free, immutable pins unchanged. This is improved driving versus earlier
+0/10 results, but it fails the>=8/10 gate and uses incomplete training.
+Evidence: BASE/sd-e08/post-closure-verification.json and its evaluation artifact.
+
+New bounded exact completion BASE/sd-c07 is ACTIVE, run slow-complete, W&B8dj5aeh9.
+FULL restore confirmed140754 transitions/32256 updates, replay140754, credit432.5,
+same frozen70d3eb0a source and fingerprint2be95ca917238a1fd5f90760e24c2763d899b3633784b5285acc1a914372b1bc.
+Only run/artifact identity changed. Original checkpoint/journal remain byte-identical.
+Total target remains145408 (4654 remaining); no target extension, replay reset or
+changed-code/settings resume. Trainmax900s, then10greedy/max2100s, overallcap3600s.
+ActualSTART09:47:33.022069UTC, SAVE10:42:33UTC/HARD10:47:33UTC (12:42/12:47Warsaw).
+Preflight20ms/33fields/55reads/correctUID and19 completion/STOP/accounting tests passed.
+Exact identities are persisted in sd-c07/live-owned-identity-receipt.json.
+The separate alpha-floor-only candidate is PREPARED_NOT_LAUNCHED, not the active run.
+
+Full SD-SAC remains BLOCKED pending complete/finite/accounted/drained checkpoint and
+>=8/10 real finishes plus all identity/timing/error/skips checks. Existing full YAMLs
+still use different defaults and must be aligned with the qualified candidate before
+any three-seed start. QR PASS29/30 median54.3s is preserved. No other algorithm or
+full training started. Earlier ACTIVE sections are historical snapshots.
+
 ## 2026-10-07 07:32 Warsaw — fresh actorslow pilot ACTIVE
 
 Queue `queue-sd-sac-actorslow-20261007`, run `tmrl-sd-sac-actorslow-s17`, W&B olarxz70
