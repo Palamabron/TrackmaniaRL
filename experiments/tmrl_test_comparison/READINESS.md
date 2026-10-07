@@ -1,3 +1,24 @@
+## 2026-10-07 04:20 Warsaw — resume02 COMPLETE, driving FAIL
+
+This supersedes the ACTIVE snapshot below. Queue resume02 completed normally at
+02:12:37 UTC; guard closure at 02:12:38 UTC has forced[]. Post-closure verification
+confirmed all 31 exact owned PID/creation-time identities closed, controller mutex
+free, 440 immutable pins unchanged, and training/evaluation W&B runs finished.
+Checkpoint33857 SHA c3ebe43048f24bf709fb1993da432e308fb569ddc3f319c1ebb002c5c0b73502:
+145430 transitions,33857 updates,credit0.5; finite, complete, drained and accounted.
+Actual driving gate FAIL0/10, mean progress3.72697%; ten complete correct-map trials,
+3626/3626 valid timing measurements,max60ms,p99=50ms,no controller/telemetry errors,
+1728 skipped frames,max4. FullSD remains BLOCKED. QR PASS stays preserved.
+Offline audit found greedy action28 (gas plus full brake) on128 saved start states,
+actor/Q agreement7.62% on1024 replay states, alpha0.01, entropy3.279. Fixed-Q independent
+actor-head fitting improves agreement but does not prove critic correctness or driving.
+Recorded behavior soft-return proxy bias+8.981 on21220 complete-episode states is a
+warning, not on-policy calibration. Independent critic clipping probe is diagnostic;
+no saved weights changed and no new game test launched. Evidence:
+`artifacts/tmrl-test-comparison/sd-sac-resume02-audit-20261007` and queue
+`post-closure-verification.json`. Authorized repair loops and automation remain ACTIVE.
+Never restart this completed queue or resume these weights on changed source.
+
 ## 2026-10-07 01:48 Warsaw — exact-source FULL resume ACTIVE
 
 Human instruction “To dzialaj w sensownych pętlach aż będzie wszystko dopięte”
