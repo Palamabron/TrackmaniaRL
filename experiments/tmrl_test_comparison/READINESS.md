@@ -1,3 +1,26 @@
+## 2026-10-07 04:33 Warsaw — fresh refit pilot ACTIVE
+
+Following the authorized repair loop, clipping5 was rejected: independent100-step
+critic copies gave held-out nonterminal fixed-target MAE0.52267 with epsilon0.5
+versus0.53640 with epsilon5; terminal MAE0.65203 versus0.65821. No saved policy changed.
+A fresh bounded refit pilot now uses the earlier best-driving beta0.0005/target0.8
+SAC objective with actorLR0.0009; the previous actorLR test was interrupted.
+ForwardKL, separate entropyLR, alpha bounds and terminal auxiliary loss are explicitly
+rolled back together. This does not isolate their individual effects or establish
+critic correctness. Numerical/contracts/focus repairs remain; reward/model/GNN/replay/
+UTD unchanged. No checkpoint resume. Exact new frozen source70d3eb0a, fingerprint
+b9202ac959f155a529952b74b84d01b588e098156fbd75a841beaf27f04a1c85.
+Queue `queue-sd-sac-refit-20261007`, run `tmrl-sd-sac-refit-s17`, W&Baqsyvox9 APIrunning.
+Actual start02:32:54.190437UTC; SAVE06:22:54.190437UTC/HARD06:32:54.190437UTC
+(08:22/08:32Warsaw), cap14400s,train145408/max11400+10greedy/max2100.
+Runner30620,guard68232,learner36960,actor42340 exact identities in actual-launch-receipt.
+24guard tests+18CPU learning tests+validate-only passed; actualpreflight10ms/33fields/
+correctUID/57reads. Actor registered and collecting. These checks are not a driving gate.
+Previous resume02 FAIL and all evidence preserved. New STOP wins; no UI/secondcontroller.
+UnderSAVE remain in turn with waits<=60s untilclosure/HARD; never extend/restart.
+FullSD BLOCKED,QR PASS preserved,monitorACTIVE for authorized bounded repair loops.
+
+
 ## 2026-10-07 04:20 Warsaw — resume02 COMPLETE, driving FAIL
 
 This supersedes the ACTIVE snapshot below. Queue resume02 completed normally at
