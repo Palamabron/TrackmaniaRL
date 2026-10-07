@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-10-07T23:31:56.505746+00:00",
+  "stage": "training_warmup",
+  "actual_start": "2026-10-07T23:30:24.218171+00:00",
+  "save_deadline": "2026-10-08T03:20:24.218171+00:00",
+  "hard_deadline": "2026-10-08T03:30:24.218171+00:00",
+  "identities": {
+    "runner": {
+      "pid": 69244,
+      "created_time": 1791415815.4966652
+    },
+    "guard": {
+      "pid": 23880,
+      "created_time": 1791415824.2320411
+    },
+    "learner": {
+      "pid": 64212,
+      "created_time": 1791415835.0901017
+    },
+    "actor": {
+      "pid": 52132,
+      "created_time": 1791415835.101617
+    }
+  },
+  "wandb_run": "yde8cq31",
+  "preflight": {
+    "at": "2026-10-07T23:30:27.412116+00:00",
+    "config": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-proj08\\sd-sac.yaml",
+    "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+    "status": "ready",
+    "phase": "complete",
+    "map_uid": "oqIJ5rQDRrNwLPTh9H2p_W4tLof",
+    "race_time_ms": 10.0,
+    "finished": false,
+    "read_count": 57,
+    "fields": 33,
+    "reason": null
+  },
+  "last_ingest": {
+    "timestamp_utc": "2026-10-07T23:31:56.447778+00:00",
+    "transitions": 1149,
+    "updates": 0
+  },
+  "immutable_pin_count": 1865,
+  "immutable_pins_valid": true,
+  "new_or_changed_STOP_present": false,
+  "run_failure_events": [],
+  "consecutive_healthy_checks": 0,
+  "cadence_minutes": 5,
+  "qualification": "Warmup is not driving evidence; full BLOCKED"
+}

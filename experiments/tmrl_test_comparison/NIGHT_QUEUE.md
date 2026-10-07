@@ -1,3 +1,14 @@
+## 8 October 2026 01:32 Warsaw — projection pilot running
+
+Following the direct human go, sd-proj08 started at01:30:24 Warsaw on frozen9821c23e.
+Actual preflight passed (10ms,33fields,57reads,correctUID); actor registered and
+new ingest confirmed. Start verification:1149 transitions,0 updates (warmup),
+1865 immutable pins valid, no new STOP/run failure. Monitoring ACTIVE every5min;
+hourly cadence requires sustained verified health. SAVE05:20:24/HARD05:30:24
+Warsaw; no extension/restart. Driving remains unqualified, full BLOCKED.
+See [scheduled handoff](SD_SAC_SCHEDULE_20261008.md) and sd-proj08/start-verification.json.
+Earlier PREPARED_NOT_LAUNCHED statements are historical preparation receipts.
+
 ## 8 October 2026 — pilots scheduled from 01:30 Warsaw
 
 New direct human authorization resumes justified bounded SD-SAC tests and monitoring.
