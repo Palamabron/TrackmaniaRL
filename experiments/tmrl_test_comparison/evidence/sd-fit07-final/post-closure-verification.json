@@ -1,0 +1,245 @@
+{
+  "at": "2026-10-07T20:07:49.904570+00:00",
+  "all_owned_closed": true,
+  "mutex_free": true,
+  "immutable_pins_valid": true,
+  "pin_count": 1260,
+  "owned_processes": [
+    {
+      "pid": 38248,
+      "created_time": 1791393750.1339588
+    },
+    {
+      "pid": 75284,
+      "created_time": 1791403195.25932
+    },
+    {
+      "pid": 80388,
+      "created_time": 1791403200.08755
+    },
+    {
+      "pid": 69232,
+      "created_time": 1791403200.0918677
+    },
+    {
+      "pid": 65980,
+      "created_time": 1791403200.1155007
+    },
+    {
+      "pid": 49560,
+      "created_time": 1791403200.8375275
+    },
+    {
+      "pid": 83108,
+      "created_time": 1791403203.1942768
+    },
+    {
+      "pid": 73888,
+      "created_time": 1791403211.3155603
+    },
+    {
+      "pid": 48584,
+      "created_time": 1791403211.3305278
+    },
+    {
+      "pid": 40476,
+      "created_time": 1791403213.0484006
+    },
+    {
+      "pid": 59964,
+      "created_time": 1791403188.7126372
+    },
+    {
+      "pid": 76072,
+      "created_time": 1791403191.737358
+    },
+    {
+      "pid": 78876,
+      "created_time": 1791393756.872448
+    },
+    {
+      "pid": 80428,
+      "created_time": 1791393764.3574207
+    },
+    {
+      "pid": 83588,
+      "created_time": 1791393768.0905585
+    },
+    {
+      "pid": 71412,
+      "created_time": 1791393768.1024141
+    },
+    {
+      "pid": 82472,
+      "created_time": 1791393780.6680949
+    },
+    {
+      "pid": 77444,
+      "created_time": 1791393783.2293272
+    },
+    {
+      "pid": 82832,
+      "created_time": 1791393783.2372775
+    },
+    {
+      "pid": 39924,
+      "created_time": 1791393783.263852
+    },
+    {
+      "pid": 81264,
+      "created_time": 1791393783.294135
+    },
+    {
+      "pid": 83488,
+      "created_time": 1791393790.38527
+    },
+    {
+      "pid": 83268,
+      "created_time": 1791393790.403161
+    },
+    {
+      "pid": 78968,
+      "created_time": 1791393802.9445703
+    },
+    {
+      "pid": 34152,
+      "created_time": 1791393756.8898103
+    },
+    {
+      "pid": 80772,
+      "created_time": 1791393764.3413837
+    },
+    {
+      "pid": 32916,
+      "created_time": 1791393757.1582258
+    },
+    {
+      "pid": 77544,
+      "created_time": 1791393757.1773164
+    },
+    {
+      "pid": 78236,
+      "created_time": 1791393760.3777711
+    },
+    {
+      "pid": 72188,
+      "created_time": 1791393783.0860298
+    },
+    {
+      "pid": 62276,
+      "created_time": 1791393783.094408
+    },
+    {
+      "pid": 34792,
+      "created_time": 1791393790.6903727
+    },
+    {
+      "pid": 68384,
+      "created_time": 1791393794.246094
+    },
+    {
+      "pid": 55696,
+      "created_time": 1791393794.6972103
+    },
+    {
+      "pid": 83340,
+      "created_time": 1791393794.7129846
+    },
+    {
+      "pid": 33984,
+      "created_time": 1791393794.9341063
+    },
+    {
+      "pid": 64100,
+      "created_time": 1791393794.9456117
+    },
+    {
+      "pid": 23572,
+      "created_time": 1791403180.2728045
+    },
+    {
+      "pid": 83216,
+      "created_time": 1791403180.287151
+    },
+    {
+      "pid": 81488,
+      "created_time": 1791403188.5272894
+    },
+    {
+      "pid": 33528,
+      "created_time": 1791403188.537607
+    },
+    {
+      "pid": 40700,
+      "created_time": 1791403188.6992512
+    },
+    {
+      "pid": 79684,
+      "created_time": 1791403195.2457492
+    },
+    {
+      "pid": 10348,
+      "created_time": 1791403200.0204816
+    },
+    {
+      "pid": 35140,
+      "created_time": 1791403200.030939
+    },
+    {
+      "pid": 79016,
+      "created_time": 1791403200.060518
+    },
+    {
+      "pid": 73632,
+      "created_time": 1791403210.9774868
+    },
+    {
+      "pid": 9244,
+      "created_time": 1791403212.1181452
+    },
+    {
+      "pid": 40316,
+      "created_time": 1791403212.129051
+    },
+    {
+      "pid": 72732,
+      "created_time": 1791403212.8420033
+    },
+    {
+      "pid": 65388,
+      "created_time": 1791403212.8526251
+    }
+  ],
+  "normal_closure": {
+    "at": "2026-10-07T20:04:20.815551+00:00",
+    "forced_owned_pids": [],
+    "reason": "Owned processes closed normally"
+  },
+  "new_or_changed_STOP_present": false,
+  "finishes": 0,
+  "decision": {
+    "gate_passed": false,
+    "checks": {
+      "complete_accounted_drained_finite_checkpoint": true,
+      "matching_checkpoint_sha": true,
+      "ten_complete_trials": true,
+      "all_map_uids_valid": true,
+      "all_timing_valid_max100ms": true,
+      "no_controller_or_telemetry_errors": true,
+      "telemetry_skips_reported": true,
+      "at_least_eight_finishes": false
+    },
+    "finishes": 0,
+    "trials": 10,
+    "median_finish_time_s": null,
+    "checkpoint_sha256": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+    "diagnostic_only": true,
+    "full_training_complete": false,
+    "automatic_full_training": false,
+    "three_seed_training_qualified": false,
+    "full_training_blocked": true
+  },
+  "artifact": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-actorfit-s17-eval10-benchmark-20261007T195958779111\\evaluation.json",
+  "mean_progress_pct": 5.770238363076334,
+  "previous_checkpoint_sha256": "38279862c9c56417dc9804869c66f2bb8b06c894341ccaf01aecb8b198487938"
+}

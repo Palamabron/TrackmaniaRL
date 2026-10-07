@@ -1,0 +1,18 @@
+{
+  "checkpoint": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-actorfit-s17\\checkpoints\\distributed-update-00033866.pt",
+  "checkpoint_sha256": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+  "finite": true,
+  "updates": 33866,
+  "transitions": 145464,
+  "consumed_updates": 33866,
+  "update_credit": 0.0,
+  "earned_updates": 33866.0,
+  "accounted_updates": 33866.0,
+  "update_accounting_valid": true,
+  "update_credit_drained": true,
+  "budget_complete": true,
+  "target_transitions": 145408,
+  "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-actorfit-runtime\\AITrackmania",
+  "diagnostic_only": true,
+  "qualification": "unqualified diagnostic"
+}

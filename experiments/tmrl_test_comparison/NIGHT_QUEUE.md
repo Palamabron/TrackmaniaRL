@@ -1,3 +1,15 @@
+Final 2026-10-07 20:04UTC: sd-fit07d CLOSED / FAIL, automation PAUSED.
+Real evaluation0/10 finishes, mean progress5.770238%, median0.599639%; nine
+slow_progress failures and one51.66% time_limit. All ten correct-UID trials valid,
+4477/4477 timing measurements/max50ms, no controller/telemetry errors; skips1248/max5.
+FinalCP33866:145464 transitions/33866updates/credit0, finite/accounted/drained,
+SHA a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7.
+Normal closure/forced[], all51 exact identities closed/mutexfree/1260pins unchanged.
+Final offline audit still finds terminal MAE3.3182 on137 states. No new live test or
+full training; further live work requires a new direct human instruction. FullSD
+BLOCKED; QR PASS preserved. Earlier ACTIVE sections below are historical snapshots.
+[SD_SAC_ACTORFIT_RESULT_20261007.md](SD_SAC_ACTORFIT_RESULT_20261007.md).
+
 Update 2026-10-07 19:46UTC: terminal MAE aggregation repaired in editable source;
 50 regression/contract/stability tests, Ruff and mypy passed. Frozen sd-fit07d
 continues unchanged; no new live test/full training. Read-only CP25000 audit finds
