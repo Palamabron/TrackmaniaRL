@@ -1,0 +1,21 @@
+{
+  "status": "PREPARED_NOT_LAUNCHED",
+  "candidate": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-training-fixes\\AITrackmania\\experiments\\tmrl_test_comparison\\configs\\diagnostic\\sd-sac-projected-s17.yaml",
+  "run_fingerprint": "491a986380c53f29460b52da34477ffb9a2f302ad7c5e621db984fed65b8b4a7",
+  "pins": {
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-training-fixes\\AITrackmania\\experiments\\tmrl_test_comparison\\configs\\diagnostic\\sd-sac-actorfit-s17.yaml": "024f6547b55b8674dada40390e45eb3f9271c829dc4d5cea5a9529ae90a25576",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-training-fixes\\AITrackmania\\experiments\\tmrl_test_comparison\\configs\\diagnostic\\sd-sac-projected-s17.yaml": "f790bcdec0d5311d48cea5bf89a34c81b08cdb2179944a2b54eec467ca11456b",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-training-fixes\\AITrackmania\\trackmaniarl\\algorithms\\stable_discrete_soft_actor_critic.py": "de8cc54bbff29b6c1317f6986ded1172594c6d4945371d39a0bb50d6c7be99f7",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-training-fixes\\AITrackmania\\experiments\\tmrl_test_comparison\\prepare_sd_sac_projection.py": "797c74912fbf949d71d6c3b422552d678c6c15a06b8ac6d4dc523f93cba9ffe8"
+  },
+  "new_run_directory_created": false,
+  "controller_created": false,
+  "automation": "PAUSED",
+  "checkpoint_resume_allowed": false,
+  "fresh_start_required": true,
+  "gate": "145408 complete/finite/accounted/drained, >=8/10 finishes, correctUID, max timing<=100ms, no errors, skips reported, SHA/source/STOP/process closure verified",
+  "maximum_seconds": 14400,
+  "train_maximum_seconds": 11400,
+  "evaluation_maximum_seconds": 2100,
+  "launch_requires": "New bounded queue, frozen repaired runtime, independent guard, fresh source/asset/STOP pins and live preflight. No old queue or STOP exemption reused."
+}

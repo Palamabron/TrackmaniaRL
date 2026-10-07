@@ -1,3 +1,13 @@
+Offline optimizer repair 2026-10-07: SD-SAC now projects hyperspherical weights after
+critic/actor Adam and before Polyak; old unprojected Adam contract cannot resume.
+Saved raw row norms reached4.20. Fixed-Q actor copies at unchangedalpha.01 improved
+held agreement84.59/88.58% to92.20/93.53% with projection, not proof of driving/Q truth.
+Small terminal-weight/head-only controls selected no statistically supported repair
+under the nonterminal drift guard. Fresh sd-sac-projected-s17.yaml PREPARED_NOT_LAUNCHED;
+no new run/controller/game/network publication.176 tests/Ruff/mypy passed,1260pins
+and original CP SHA unchanged, automationPAUSED, full17/29/43 BLOCKED; QR preserved.
+See [SD_SAC_PROJECTION_REPAIR_20261007.md](SD_SAC_PROJECTION_REPAIR_20261007.md).
+
 Offline joint-calibration follow-up 2026-10-07: SHA-pinned CP33866 actorfit,
 138 starts/78 actions, both critics choose71 in138/138; actor21 ranks11/5/8
 (Q1/Q2/average).384 disposable steps, lambda0.1/1/5/10, seeds17/29,48 each.

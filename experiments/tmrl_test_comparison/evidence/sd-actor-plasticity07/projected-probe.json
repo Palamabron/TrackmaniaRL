@@ -1,0 +1,167 @@
+{
+  "status": "COMPLETE",
+  "checkpoint_sha256": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+  "input_pins": {
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07-final-audit\\cp33866.pt": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-actorfit-s17\\checkpoints\\distributed-update-00033866.pt": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07d\\sd-sac.yaml": "4804f8f0f8e861eb3959d2f9f654766b7df5b9830294c67c8c9b0f30761e9b8b",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-critic-probe07\\probe02.json": "1f9800f30494e58550bdf0350499b759e19d7d363ed610ce5f4e6164f4a69a9b",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07-final-audit\\start-policy-audit.json": "c952730467670dda33e452cddc40d7cd61452ce00d3af4d9c7f14bb321397672"
+  },
+  "fingerprint": "1f4d26134a9c90b701d2cc1a3a447c30ac0ef053d447833a4a8a8048b2a81989",
+  "script_sha256": "fa77f043ef8eec9b738b254ca4c0a829d00a0b764b0d1dfdb0207ae822cb424c",
+  "cpu_threads": 1,
+  "priority": "IDLE",
+  "automation": "PAUSED",
+  "runtime_learner_updates": 0,
+  "controller_created": false,
+  "copy_optimizer_steps": 128,
+  "steps_per_copy": 64,
+  "cap_seconds": 600,
+  "design": "Fixed saved Q; copied saved actor and Adam; actor-only fit on4206 rows, 1051 held rows. Starts descriptive, not a held-out set.",
+  "results": [
+    {
+      "objective": "forward",
+      "alpha": 0.01,
+      "seed": 17,
+      "metrics": {
+        "fit": {
+          "agreement": 0.948882520198822,
+          "greedy_q_regret": 0.0012555245775729418,
+          "entropy": 3.070516347885132,
+          "critic_top1_probability": 0.22860413789749146,
+          "greedy_distribution": {
+            "4": 442,
+            "52": 360,
+            "69": 203,
+            "71": 3201
+          }
+        },
+        "held": {
+          "agreement": 0.9219790697097778,
+          "greedy_q_regret": 0.002355431206524372,
+          "entropy": 3.078914165496826,
+          "critic_top1_probability": 0.22103726863861084,
+          "greedy_distribution": {
+            "4": 83,
+            "52": 132,
+            "69": 64,
+            "71": 772
+          }
+        },
+        "starts": {
+          "agreement": 1.0,
+          "greedy_q_regret": 0.0,
+          "entropy": 3.1007659435272217,
+          "critic_top1_probability": 0.15766967833042145,
+          "greedy_distribution": {
+            "71": 138
+          }
+        }
+      }
+    },
+    {
+      "objective": "forward",
+      "alpha": 0.01,
+      "seed": 29,
+      "metrics": {
+        "fit": {
+          "agreement": 0.9581550359725952,
+          "greedy_q_regret": 0.001208599074743688,
+          "entropy": 3.0731773376464844,
+          "critic_top1_probability": 0.22857873141765594,
+          "greedy_distribution": {
+            "4": 445,
+            "52": 335,
+            "69": 187,
+            "71": 3239
+          }
+        },
+        "held": {
+          "agreement": 0.9352996945381165,
+          "greedy_q_regret": 0.002271840814501047,
+          "entropy": 3.080505847930908,
+          "critic_top1_probability": 0.22057244181632996,
+          "greedy_distribution": {
+            "4": 82,
+            "52": 121,
+            "69": 64,
+            "71": 784
+          }
+        },
+        "starts": {
+          "agreement": 1.0,
+          "greedy_q_regret": 0.0,
+          "entropy": 3.0838005542755127,
+          "critic_top1_probability": 0.1936836689710617,
+          "greedy_distribution": {
+            "71": 138
+          }
+        }
+      }
+    }
+  ],
+  "baseline": {
+    "fit": {
+      "agreement": 0.18925344944000244,
+      "greedy_q_regret": 0.032130785286426544,
+      "entropy": 3.1225204467773438,
+      "critic_top1_probability": 0.09943071007728577,
+      "greedy_distribution": {
+        "4": 437,
+        "21": 123,
+        "47": 345,
+        "52": 370,
+        "57": 849,
+        "69": 2082
+      }
+    },
+    "held": {
+      "agreement": 0.19124643504619598,
+      "greedy_q_regret": 0.03131933882832527,
+      "entropy": 3.136129140853882,
+      "critic_top1_probability": 0.09641950577497482,
+      "greedy_distribution": {
+        "4": 82,
+        "21": 25,
+        "47": 76,
+        "52": 130,
+        "57": 185,
+        "69": 553
+      }
+    },
+    "starts": {
+      "agreement": 0.0,
+      "greedy_q_regret": 0.03269709646701813,
+      "entropy": 3.1173319816589355,
+      "critic_top1_probability": 0.027206817641854286,
+      "greedy_distribution": {
+        "21": 138
+      }
+    }
+  },
+  "start_targets": {
+    "0.01": {
+      "entropy": 1.727151507241461,
+      "p71": 0.5660338216096943,
+      "p21": 0.02151920890892818,
+      "p71_over_p21": 26.303725562145804
+    },
+    "0.001": {
+      "entropy": 1.450663852661463e-06,
+      "p71": 0.9999999163934764,
+      "p21": 6.307633718878479e-15,
+      "p71_over_p21": 158563435575642.9
+    }
+  },
+  "start_gradient_norms": {
+    "sac_q": 0.008742359466850758,
+    "sac_entropy": 0.00820616539567709,
+    "forward": 1.1539788246154785,
+    "behavior_anchor": 0.0005330034764483571
+  },
+  "sac_q_entropy_gradient_cosine": -0.84755939245224,
+  "project_after_each_adam_step": true,
+  "immutable_inputs_models_saved_adam_unchanged": true,
+  "elapsed_seconds": 40.70299999997951
+}

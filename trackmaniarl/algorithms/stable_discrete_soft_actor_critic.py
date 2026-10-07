@@ -36,6 +36,7 @@ from trackmaniarl.algorithms.sd_sac_objectives import (
 from trackmaniarl.core.contracts import ModelContract, PolicyMode
 from trackmaniarl.core.data import PriorityUpdate, TrainingBatch
 from trackmaniarl.core.pytree import sanitize_finite, tree_collate, tree_to_device
+from trackmaniarl.models.backbones import HypersphericalLinear, project_hyperspherical_weights
 
 
 def _batch_vector(value: Any, name: str, size: int) -> torch.Tensor:
@@ -221,8 +222,14 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         if policy[0].shape[1] != critic.action_count:
             raise ValueError("SD-SAC current actor and critic action counts must match")
         self._optimize(critic.loss, self.critic_optimizer)
+        # Forward normalizes effective rows, but Adam updates the raw rows.
+        # Keep their radius fixed so the effective step cannot shrink as the
+        # redundant raw norm drifts. Match the value learner's Simba contract.
+        project_hyperspherical_weights(self.model.q1)
+        project_hyperspherical_weights(self.model.q2)
         actor = self._actor_step(prepared, alpha, policy=policy)
         self._optimize(actor.loss, self.actor_optimizer)
+        project_hyperspherical_weights(self.model.actor)
         alpha_loss = self._entropy_loss(actor)
         polyak_update(self.model, self.target_model, self.target_tau)
         current_alpha = alpha_value(self.log_alpha, self.initial_entropy_coefficient, self.device)
@@ -605,6 +612,12 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
         # Preserve the canonical checkpoint contract at the default.
         if self.terminal_value_loss_coefficient:
             options["terminal_value_loss_coefficient"] = self.terminal_value_loss_coefficient
+        if self.model is not None and any(
+            isinstance(module, HypersphericalLinear) for module in self.model.modules()
+        ):
+            # A saved Adam trajectory without projection is a different optimizer
+            # contract. Do not silently resume it under the repaired behavior.
+            options["hyperspherical_projection"] = True
         return options
 
     def _validate_checkpoint_options(self, state: Mapping[str, Any]) -> None:
@@ -618,6 +631,7 @@ class StableDiscreteSoftActorCritic(TorchLearnerBase):
             or self.entropy_learning_rate != self.learning_rate
             or self.entropy_coefficient_min is not None
             or self.entropy_coefficient_max is not None
+            or "hyperspherical_projection" in self._checkpoint_options()
         ):
             raise ValueError("legacy checkpoint cannot resume with new SD-SAC options")
         for name, expected_rate in (

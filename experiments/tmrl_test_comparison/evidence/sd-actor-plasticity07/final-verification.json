@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-07T21:46:21.753933+00:00",
+  "checkpoint_sha256": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+  "original_and_copy_sha_unchanged": true,
+  "source_freeze_checked": 1260,
+  "immutable_pin_failures": [],
+  "previous_owned_identities_still_live": [],
+  "automation": "PAUSED",
+  "new_training_runs_created": false
+}

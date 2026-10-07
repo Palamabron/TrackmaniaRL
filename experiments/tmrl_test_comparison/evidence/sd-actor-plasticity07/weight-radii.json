@@ -1,0 +1,150 @@
+{
+  "checkpoint_sha256": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7",
+  "layers": {
+    "actor.encoder.backbone.input_projection": {
+      "mean": 1.2706481218338013,
+      "min": 1.1239981651306152,
+      "max": 1.3816523551940918
+    },
+    "actor.encoder.backbone.blocks.0.expand": {
+      "mean": 1.1936674118041992,
+      "min": 1.0475058555603027,
+      "max": 1.4534194469451904
+    },
+    "actor.encoder.backbone.blocks.0.project": {
+      "mean": 1.5965089797973633,
+      "min": 1.2560975551605225,
+      "max": 2.214008092880249
+    },
+    "actor.encoder.backbone.blocks.1.expand": {
+      "mean": 1.1988118886947632,
+      "min": 1.016984462738037,
+      "max": 1.4015240669250488
+    },
+    "actor.encoder.backbone.blocks.1.project": {
+      "mean": 1.550728440284729,
+      "min": 1.2744104862213135,
+      "max": 2.0672919750213623
+    },
+    "actor.encoder.backbone.blocks.2.expand": {
+      "mean": 1.2200161218643188,
+      "min": 1.0263653993606567,
+      "max": 1.3870736360549927
+    },
+    "actor.encoder.backbone.blocks.2.project": {
+      "mean": 1.6319273710250854,
+      "min": 1.2207739353179932,
+      "max": 2.1361613273620605
+    },
+    "actor.encoder.backbone.blocks.3.expand": {
+      "mean": 1.2552231550216675,
+      "min": 1.0705487728118896,
+      "max": 1.4102023839950562
+    },
+    "actor.encoder.backbone.blocks.3.project": {
+      "mean": 1.8111400604248047,
+      "min": 1.4603558778762817,
+      "max": 2.273216724395752
+    },
+    "q1.0.backbone.input_projection": {
+      "mean": 1.377764344215393,
+      "min": 1.2634292840957642,
+      "max": 1.5219500064849854
+    },
+    "q1.0.backbone.blocks.0.expand": {
+      "mean": 1.1910721063613892,
+      "min": 1.0233813524246216,
+      "max": 1.4073147773742676
+    },
+    "q1.0.backbone.blocks.0.project": {
+      "mean": 1.6533937454223633,
+      "min": 1.168940782546997,
+      "max": 2.766713857650757
+    },
+    "q1.0.backbone.blocks.1.expand": {
+      "mean": 1.2377771139144897,
+      "min": 1.0036267042160034,
+      "max": 1.7323734760284424
+    },
+    "q1.0.backbone.blocks.1.project": {
+      "mean": 2.134279489517212,
+      "min": 1.1845942735671997,
+      "max": 3.881466865539551
+    },
+    "q1.0.backbone.blocks.2.expand": {
+      "mean": 1.185407042503357,
+      "min": 1.00205659866333,
+      "max": 1.6384236812591553
+    },
+    "q1.0.backbone.blocks.2.project": {
+      "mean": 2.0135648250579834,
+      "min": 0.9326801300048828,
+      "max": 3.667468547821045
+    },
+    "q1.0.backbone.blocks.3.expand": {
+      "mean": 1.1988526582717896,
+      "min": 0.9966909289360046,
+      "max": 1.4556565284729004
+    },
+    "q1.0.backbone.blocks.3.project": {
+      "mean": 1.58967924118042,
+      "min": 1.0382400751113892,
+      "max": 2.1047797203063965
+    },
+    "q2.0.backbone.input_projection": {
+      "mean": 1.3615103960037231,
+      "min": 1.2737314701080322,
+      "max": 1.4541387557983398
+    },
+    "q2.0.backbone.blocks.0.expand": {
+      "mean": 1.1904932260513306,
+      "min": 1.010587453842163,
+      "max": 1.5872043371200562
+    },
+    "q2.0.backbone.blocks.0.project": {
+      "mean": 1.7350858449935913,
+      "min": 1.1130363941192627,
+      "max": 4.196914196014404
+    },
+    "q2.0.backbone.blocks.1.expand": {
+      "mean": 1.2699440717697144,
+      "min": 1.0089751482009888,
+      "max": 1.7613869905471802
+    },
+    "q2.0.backbone.blocks.1.project": {
+      "mean": 2.013359546661377,
+      "min": 1.0485146045684814,
+      "max": 3.401526927947998
+    },
+    "q2.0.backbone.blocks.2.expand": {
+      "mean": 1.223225474357605,
+      "min": 1.0056648254394531,
+      "max": 1.506996512413025
+    },
+    "q2.0.backbone.blocks.2.project": {
+      "mean": 1.8467363119125366,
+      "min": 1.235640525817871,
+      "max": 3.1914615631103516
+    },
+    "q2.0.backbone.blocks.3.expand": {
+      "mean": 1.223150610923767,
+      "min": 1.0038676261901855,
+      "max": 1.6939058303833008
+    },
+    "q2.0.backbone.blocks.3.project": {
+      "mean": 1.6155518293380737,
+      "min": 1.1664249897003174,
+      "max": 2.1056301593780518
+    }
+  },
+  "copy_projection_inference_max_abs_difference": {
+    "actor_logits": 1.9073486328125e-06,
+    "q1": 3.814697265625e-06,
+    "q2": 2.86102294921875e-06
+  },
+  "optimizer_steps": 0,
+  "automation": "PAUSED",
+  "cpu_threads": 1,
+  "priority": "IDLE",
+  "scope": "Weight radius audit; projection invariance does not establish learning or driving improvement."
+}
