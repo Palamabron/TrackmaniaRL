@@ -1,0 +1,27 @@
+{
+  "status": "COMPLETE",
+  "verified_at": "2026-10-08T07:14:22.604355+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "pins_valid": true,
+  "no_new_stop": true,
+  "all_observed_exact_identities_closed": true,
+  "observed_identities": [
+    {
+      "pid": 53756,
+      "create_time": 1791443585.2152529,
+      "priority": 32
+    },
+    {
+      "pid": 74860,
+      "create_time": 1791443585.228284,
+      "priority": 64
+    }
+  ],
+  "original_model_target_all_optimizers_unchanged": true,
+  "optimizer_steps": 0,
+  "controller_created": false,
+  "scalar_adam_controls_passed": 8,
+  "reason_decomposition_invariant_passed": true,
+  "all_held_loss_derivatives_negative": true,
+  "conclusion": "All15 initial analytic Adam directions locally improve all measured held losses. No initial momentum reversal or optimizer reset justified; finite-step trajectory needed to locate later drift."
+}
