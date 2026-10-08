@@ -1,0 +1,26 @@
+{
+  "status": "COMPLETE",
+  "verified_at": "2026-10-08T07:21:38.264754+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "pins_valid": true,
+  "no_new_stop": true,
+  "all_observed_exact_identities_closed": true,
+  "observed_identities": [
+    {
+      "pid": 71028,
+      "create_time": 1791443816.5183413,
+      "priority": 64
+    },
+    {
+      "pid": 72716,
+      "create_time": 1791443816.505306,
+      "priority": 32
+    }
+  ],
+  "original_model_target_all_optimizers_unchanged": true,
+  "total_copy_optimizer_steps": 192,
+  "runtime_learner_updates": 0,
+  "controller_created": false,
+  "all_reference_endpoints_exact_match": true,
+  "decision": "Both terminal0.01 seeds first sampled guard failure at8; train/held nonterminal MSE and held clipped loss worsen with MAE. Close this weighting/initial-optimizer branch; no early promotion or additional grid. Prepare causal clock proposal requiring scope decision."
+}

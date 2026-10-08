@@ -1,0 +1,15 @@
+{
+  "updated_at": "2026-10-08T07:21:38.264754+00:00",
+  "stage": "OFFLINE_DIAGNOSIS",
+  "active_hypothesis": null,
+  "active_output": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08-audit\\calibration-trajectory.json",
+  "process_receipt": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08-audit\\calibration-trajectory-processes.json",
+  "status": "COMPLETE",
+  "compute_cap_seconds": 300,
+  "total_copy_steps": 192,
+  "next_decision": "Human scope decision on prepared SD-SAC-only causal-clock observation/model adapter proposal; no dependent experiment before authorization",
+  "full": "BLOCKED",
+  "offline_processes": [],
+  "optimization_branch": "CLOSED_NO_SUPPORTED_REPAIR",
+  "first_sampled_weighted_guard_failure_both_seeds": 8
+}

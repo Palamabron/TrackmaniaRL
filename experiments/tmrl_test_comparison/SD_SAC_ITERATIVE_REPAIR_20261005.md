@@ -1,3 +1,13 @@
+> Update 2026-10-08 07:22 UTC — repair search reorganized around decisions; calibration trajectory COMPLETE.
+>
+> Central entry point: [SD_SAC_REPAIR_DECISIONS.md](SD_SAC_REPAIR_DECISIONS.md), with closed hypotheses, fixed budgets and decision/stop rules. Existing scheduler instructions shortened to current state and durable constraints; no more unrelated audits or grids at each wakeup. One checkpoint load now collects complementary trajectory metrics and reason groups.
+>
+> Fixed weight0/.01, seeds17/29,48steps each:192 copied steps,212.36s; all four endpoints EXACTLY reproduce prior calibration. Both weight0.01 seeds first fail held nonterminal MAE guard at sampled step8. Final held MAE0.113856/0.115229, MSE0.095405/0.090436 versus initial0.071385/0.033756; fit nonterminal MSE also worsens. Held clipped loss worsens alongside MAE. Terminal MAE improves to4.550828/4.597501. This supports a finite calibration tradeoff, not merely metric disagreement or ordinary train-only overfit; no optimizer/clipping bug is established. Close further generic weighting/initial-optimizer tweaks; no early promotion.
+>
+> Original actual CP SHA/model/target/all optimizers unchanged; pins/STOP valid, both captured exact processes closed. Ruff/mypy PASS. Evidence calibration-trajectory.json plus receipts/verification and repair-state.json under evidence/sd-projlr08-final. No runtime learner/controller/pilot; full SD BLOCKED.
+>
+> Concrete next hypothesis and causal/control/scope contract prepared in [SD_SAC_OBSERVABILITY_PROPOSAL.md](SD_SAC_OBSERVABILITY_PROPOSAL.md). SD-SAC-only remaining-clock adapter requires explicit widening of the current no-observation/model/architecture-change scope. No dependent experiment before that decision; keep heartbeat ACTIVE5min and quiet on unchanged pending state.
+
 > Update 2026-10-08 07:14 UTC — critic Adam-direction audit COMPLETE; zero optimizer/model/runtime steps.
 >
 > Same calibration episode split/frozen targets as the prior gradient audit. Non-mutating saved/fresh/zero-first-moment Adam algebra for empirical-frequency baseline and baseline plus previously tested normalized terminal weight0.01. Reason-specific additions weighted by their fit-terminal prevalence sum to the total terminal addition (invariant PASS). Eight independent float64 scalar Adam algebra controls PASS, including bias correction, weight decay and AMSGrad; no synthetic optimizer step was executed. Frozen SD-SAC _optimize has no gradient clipping to reproduce here.
