@@ -1,0 +1,18 @@
+{
+  "checkpoint": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-projected-fastactor-s17\\checkpoints\\distributed-update-00033856.pt",
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "finite": true,
+  "updates": 33856,
+  "transitions": 145424,
+  "consumed_updates": 33856,
+  "update_credit": 0.0,
+  "earned_updates": 33856.0,
+  "accounted_updates": 33856.0,
+  "update_accounting_valid": true,
+  "update_credit_drained": true,
+  "budget_complete": true,
+  "target_transitions": 145408,
+  "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+  "diagnostic_only": true,
+  "qualification": "unqualified diagnostic"
+}

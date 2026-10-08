@@ -1,3 +1,15 @@
+## 8 October 2026 04:55 UTC - fast actor pilot failed; offline diagnosis
+
+sd-projlr08 completed normally at04:50:06 UTC. Real evaluation: **0/10 finishes, mean progress1.060849%**, versus predecessor2/10 and51.558708%. All other gate checks passed: ten complete correct-UID trials,1446 valid timing measurements,max50ms,no controller/telemetry errors; skipped frames2906,max6. Full training remains BLOCKED. No next pilot launched.
+
+Normal guard closure at04:50:07 UTC,forced[]; external post-closure verification confirms all43 observed exactPID/ctime closed,mutex free,1883 immutable pins valid,no new/changed STOP. Final CP33856 SHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53:145424 transitions,33856 updates,credit0,finite/accounted/drained/complete. Frozen9821c23e and prior checkpoints preserved.
+
+Completed offline CPU idle/single-thread audits,zero runtime learner/controller updates:130 terminals MAE5.52922 (predecessor2.08577);944 analyzed nonterminals Bellman MAE0.06185 (predecessor0.08369). These are different saved replay samples,not a paired causal comparison. Critic pair greedy agreement on the sampled replay falls to5.20% from70.79%. On131 saved starts actor selects8,critic1 selects56,critic2/min selects62; all three are no-throttle timed-brake actions. Actor entropy4.25073; minQ margin0.06533; actor/minQ agreement0%. This is evidence against faster actor tracking as a sufficient repair,not proof of a capacity/architecture bottleneck.
+
+Completed disposable saved-Adam actor probe64 steps per LR/seed,384 total,86.77s,checkpoint/model/Adam unchanged. Fixed averageQ held agreement23.24% initially; LR0.0001 gives25.00/25.00%,0.0003 gives25.20/24.61%,0.0009 gives76.95/77.15%. For0.0009 held KL0.37559->0.08744/0.08687 and regret0.00861->0.000536/0.000518,while saved-start top1 agreement remains0% for every variant. Frozen-Q fitting improvements did not establish useful driving. Next step: offline inspect critic target/value calibration and mean-versus-min actor target before selecting a justified fresh plan. No terminal-weighting promotion,shared reward/model/GNN changes,resume,or reused-queue restart.
+
+Evidence: [closure](evidence/sd-projlr08-final/post-closure-verification.json),[critic](evidence/sd-projlr08-final/critic-audit.json),[starts](evidence/sd-projlr08-final/initial-landscape.json),[actor copies](evidence/sd-projlr08-final/actor-lr-probe.json). Automation ACTIVE every5min during offline diagnosis; earlier active-training states below are historical.
+
 ## Aktualizacja 2026-10-08 02:20UTC: nowy projected actor-LR pilot działa
 
 sd-projlr08 wystartował02:18:45.468189UTC=04:18Warsaw, run tmrl-sd-sac-projected-fastactor-s17,W&Bryzo37yc. Aktor registered i świeży ingest205/0updates02:19:23UTC; warmup nie ocenia jazdy. SAVE06:08:45UTC/HARD06:18:45UTC,cap14400s,targetCAŁKOWITY145408/max11400+10greedy/max2100. Runner74772/guard8472/learner7632/actor66896 exactctimes w receipts. Preflight10ms/33fields/57reads/correctUID. Frozen projection runtime9821c23e unchanged;1883pins,fingerprintc022d63558596fe1a341d616f4d83681b2d9435ad90d966ea645cd6fe2cc0fb7.

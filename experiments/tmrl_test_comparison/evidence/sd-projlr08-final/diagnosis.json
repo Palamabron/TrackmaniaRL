@@ -1,0 +1,25 @@
+{
+  "stage": "offline_diagnosis",
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "actions": {
+    "8": {
+      "gas": 0,
+      "brake_mode": "timed_brake",
+      "steer": -0.8333333134651184
+    },
+    "56": {
+      "gas": 0,
+      "brake_mode": "timed_brake",
+      "steer": 0.5
+    },
+    "62": {
+      "gas": 0,
+      "brake_mode": "timed_brake",
+      "steer": 0.6666666865348816
+    }
+  },
+  "inference": "Actor and both critics prefer no-throttle timed-brake actions on saved starts; faster actor fitting alone is not a sufficient repair. This does not establish architecture/capacity as the cause.",
+  "next_diagnostic": "Inspect critic target/value calibration and mean-vs-min actor target on disposable offline copies before selecting any fresh pilot.",
+  "new_pilot_launched": false,
+  "full_training_blocked": true
+}
