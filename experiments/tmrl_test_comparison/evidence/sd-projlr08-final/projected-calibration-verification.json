@@ -1,0 +1,47 @@
+{
+  "checked_at": "2026-10-08T05:12:29.582308+00:00",
+  "status": "COMPLETE",
+  "all_probe_owned_closed": true,
+  "live_exact_identities": [],
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "immutable_pins_valid": true,
+  "new_or_changed_STOP_present": false,
+  "comparisons": [
+    {
+      "lambda": 0.01,
+      "mean_held_terminal_reduction_vs_zero": 0.42945581912994385,
+      "family_adjusted_interval": [
+        0.34560964969793956,
+        0.5212569097677867
+      ],
+      "both_seed_drift_guards_pass": false,
+      "positive_lower_bound": true,
+      "baseline_terminal_improved_both_seeds": true
+    },
+    {
+      "lambda": 0.1,
+      "mean_held_terminal_reduction_vs_zero": 1.9498093831539154,
+      "family_adjusted_interval": [
+        1.6122836426595846,
+        2.292790539075931
+      ],
+      "both_seed_drift_guards_pass": false,
+      "positive_lower_bound": true,
+      "baseline_terminal_improved_both_seeds": true
+    },
+    {
+      "lambda": 1,
+      "mean_held_terminal_reduction_vs_zero": 3.774867278337479,
+      "family_adjusted_interval": [
+        2.924176071782907,
+        4.770178491850694
+      ],
+      "both_seed_drift_guards_pass": false,
+      "positive_lower_bound": true,
+      "baseline_terminal_improved_both_seeds": true
+    }
+  ],
+  "eligible_weights": [],
+  "decision": "Reject tested extra terminal weights: both seed nonterminal drift guards fail for every nonzero weight. No new pilot justified.",
+  "next_diagnostic": "Offline actor objective audit: compare projected forward-KL and canonical SAC copies against identical frozen mean-Q targets, episode-held rows and saved Adam; establish actionable difference before any runtime change."
+}

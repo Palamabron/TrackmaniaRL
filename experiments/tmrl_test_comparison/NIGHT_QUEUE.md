@@ -1,3 +1,11 @@
+## 8 October 2026 05:12 UTC - projected terminal calibration rejected
+
+Offline projected critic/saved-Adam copy probe completed all 384 steps in336.33s within600s cap. Both lambda0 baselines pass the held nonterminal drift guard. Every tested extra terminal weight(.01,.1,1) fails that guard in both seeds. At lambda.01,held terminal MAE improves from lambda0 4.994/5.013 to4.551/4.598,while held nonterminal MAE worsens to.113856/.115229 against the fixed limit.085662. Higher weights worsen nonterminal error further(.429/.434 and.913/1.159).
+
+Whole-episode paired bootstrap with three-candidate family adjustment gives positive terminal-error reductions versus lambda0: .01 interval[.3456,.5213],.1[1.6123,2.2928],1[2.9242,4.7702]. Both-seed terminal gains also beat the initial baseline,but none qualifies because all nonzero weights fail the predeclared drift guard. This frozen-target reused-replay diagnostic does not establish driving quality; no terminal weighting promoted and no new pilot launched.
+
+Final assertions confirm original checkpoint,models and saved Adam unchanged. Independent actual checkpoint SHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53,all probe exactPID/ctime closed,immutable pins valid,no new/changed STOP. Evidence: evidence/sd-projlr08-final/projected-calibration.json and projected-calibration-verification.json. Full BLOCKED;automationACTIVE5min. Next scoped offline hypothesis: inspect actor objective gradients and compare projected forward-KL/canonical SAC copies against identical frozen mean-Q targets with episode-held rows and saved Adam. No runtime setting change justified yet.
+
 ## 8 October 2026 05:08 UTC - projected critic copy probe running
 
 New standalone probe_sd_sac_projected_calibration.py is executing offline on CPU idle/single-thread against immutable CP33856 f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53. Only independent q1/q2 and saved critic Adam copies receive updates; saved actor,target critics,alpha and Bellman targets remain frozen. Projection after each copied Adam step; no Polyak update. No game controller/runtime learner/new training run.
