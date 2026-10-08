@@ -1,0 +1,12 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:11:48.045553+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "execution_exit_code": 0,
+  "exact_process_identity_capture": false,
+  "closure_evidence": "Foreground exec returned exit0; this short read-only audit had no captured live identities.",
+  "decision": "Worsened rows are nonterminal/nontruncated, mostly56->35 at positive forward speed, spanning many steps/episodes. Global gas bias rather than reset-only damage. Test value-aware margin across competing actions, fixed coefficients, not larger start weighting."
+}

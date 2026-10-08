@@ -1,0 +1,24 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:15:29.203307+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 80456,
+      "created_time": 1791439924.9014602
+    },
+    {
+      "pid": 28248,
+      "created_time": 1791439924.9160085
+    },
+    {
+      "pid": 75084,
+      "created_time": 1791439924.956594
+    }
+  ],
+  "decision": "Value-gap margin FAIL: start agreement1/0 across seeds, general greedy regret .00141125/.00072544 above matched guards. Reject/no runtime promotion. Historical alpha.001/greedy tests were on older unprojected actorfit checkpoint with already-correct starts; current projected flat target failed mixed fits. A single actor-only .1 temperature-scale control on current checkpoint is a distinct scoped hypothesis, no critic-alpha or replay changes."
+}

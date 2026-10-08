@@ -1,3 +1,13 @@
+> Update 2026-10-08 06:22 UTC — SD-SAC remains BLOCKED. No new driving pilot.
+>
+> Zero-update paired metadata audit found all 62/71 worsened held rows are moving, nonterminal states; 41/51 changes are action56 to gas action35. This identifies an observed tradeoff, not true action values. Value-gap margin control failed (held starts100%/0%, regret .001411/.000725).
+>
+> Actor-only target temperature .001 (saved alpha/critics .01 unchanged) on ordinary fit rows gave both seeds100% held starts and lower greedy regret .000389/.000340, but forward/reverse KL failed. Fixed inverse-logit scaling .1 preserves that ranking but still fails KL: forward .583804/.580610, reverse1.631637/1.620626. Both rejected; no temperature grid or waived guards. Uncompensated endpoints reproduce the sharpening control within1e-6.
+>
+> All probes are CPU idle/single-thread disposable copies. Original checkpoint actual SHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53, saved model/Adam, immutable pins and STOP checks pass; all captured exact processes closed. Evidence: evidence/sd-projlr08-final/{tradeoff-metadata,value-gap-margin,actor-target-sharpening,temperature-compensation}.json and corresponding verifications. No runtime/controller/replay changes. These are fitting results, not driving or critic-truth evidence.
+>
+> Next: zero-update held-distribution error/target-margin audit before any further optimizer experiment. Existing probes COMPLETE; never restart/extend. Monitor ACTIVE5min.
+
 ## 2026-10-08 — fixed combination fits starts but fails greedy-regret protection
 
 The standalone all-state margin probe completed 384 steps in87.47s: coefficient0.1 improves general held reverse-KL to0.09108/0.09931, but both seeds still miss all starts. The subsequent fixed0.25-start-loss plus0.1-margin combination fits all27 held-episode starts in both seeds. General held forward-KL0.06339/0.06397 and reverse-KL0.09081/0.09135 pass the matched-control limits, but greedy regret0.00082685/0.00091310 exceeds both ordinary and margin-only 20% drift guards. The combination is rejected for runtime promotion; start success alone is insufficient. This is frozen-Q diagnostic evidence, not driving or a validated critic.

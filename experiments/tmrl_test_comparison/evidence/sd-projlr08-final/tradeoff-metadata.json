@@ -1,0 +1,839 @@
+{
+  "status": "COMPLETE",
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_checkpoint_unchanged": true,
+  "optimizer_steps": 0,
+  "controller_created": false,
+  "runtime_learner_updates": 0,
+  "cpu_threads": 1,
+  "priority": "IDLE",
+  "results": [
+    {
+      "seed": 17,
+      "groups": {
+        "worsened": {
+          "metadata": {
+            "step": {
+              "count": 62,
+              "min": 29.0,
+              "median": 719.5,
+              "mean": 999.0967741935484,
+              "max": 2690.0
+            },
+            "speed_mps": {
+              "count": 62,
+              "min": 0.9886001944541931,
+              "median": 7.515113115310669,
+              "mean": 7.931850632352214,
+              "max": 13.216489791870117
+            },
+            "forward_speed_mps": {
+              "count": 62,
+              "min": 0.9677942991256714,
+              "median": 7.473191261291504,
+              "mean": 7.912064304274898,
+              "max": 13.200667381286621
+            },
+            "progress_fraction": {
+              "count": 62,
+              "min": 0.0023062729742377996,
+              "median": 0.12569188326597214,
+              "mean": 0.1809085220241198,
+              "max": 0.5599631071090698
+            },
+            "terminated": {
+              "count": 62,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            },
+            "truncated": {
+              "count": 62,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            }
+          },
+          "action_transitions": {
+            "56->35": 41,
+            "76->75": 6,
+            "3->35": 6,
+            "35->56": 8,
+            "3->56": 1
+          },
+          "distinct_episodes": 17
+        },
+        "improved": {
+          "metadata": {
+            "step": {
+              "count": 37,
+              "min": 0.0,
+              "median": 572.0,
+              "mean": 913.6216216216217,
+              "max": 2780.0
+            },
+            "speed_mps": {
+              "count": 37,
+              "min": 0.2246370017528534,
+              "median": 7.990826606750488,
+              "mean": 7.9418921132345455,
+              "max": 15.16258430480957
+            },
+            "forward_speed_mps": {
+              "count": 37,
+              "min": -8.632918380158117e-09,
+              "median": 7.990056991577148,
+              "mean": 7.929102896605253,
+              "max": 15.162494659423828
+            },
+            "progress_fraction": {
+              "count": 37,
+              "min": 0.0,
+              "median": 0.08302582800388336,
+              "mean": 0.1676473506990619,
+              "max": 0.5152214169502258
+            },
+            "terminated": {
+              "count": 37,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            },
+            "truncated": {
+              "count": 37,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            }
+          },
+          "action_transitions": {
+            "76->75": 2,
+            "56->35": 10,
+            "3->35": 12,
+            "75->76": 2,
+            "35->56": 10,
+            "76->56": 1
+          },
+          "distinct_episodes": 16
+        },
+        "unchanged": {
+          "metadata": {
+            "step": {
+              "count": 413,
+              "min": 4.0,
+              "median": 724.0,
+              "mean": 1010.2590799031477,
+              "max": 2966.0
+            },
+            "speed_mps": {
+              "count": 413,
+              "min": 0.0017545262817293406,
+              "median": 8.059938430786133,
+              "mean": 7.662641324218448,
+              "max": 15.75007152557373
+            },
+            "forward_speed_mps": {
+              "count": 413,
+              "min": -2.090245485305786,
+              "median": 8.033302307128906,
+              "mean": 7.6155718615571475,
+              "max": 15.738147735595703
+            },
+            "progress_fraction": {
+              "count": 413,
+              "min": 0.0,
+              "median": 0.10285978019237518,
+              "mean": 0.18115691143566107,
+              "max": 0.6559040546417236
+            },
+            "terminated": {
+              "count": 413,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.002421307506053269,
+              "max": 1.0
+            },
+            "truncated": {
+              "count": 413,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            }
+          },
+          "action_transitions": {
+            "56->56": 263,
+            "75->75": 10,
+            "23->23": 11,
+            "76->76": 9,
+            "0->0": 17,
+            "3->3": 77,
+            "62->62": 19,
+            "35->35": 7
+          },
+          "distinct_episodes": 26
+        }
+      },
+      "worst20": [
+        {
+          "row": 122666,
+          "regret_increase": 0.012440681457519531,
+          "step": 1559.0,
+          "speed_mps": 12.954209327697754,
+          "forward_speed_mps": 12.954055786132812,
+          "progress_fraction": 0.3316420614719391,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108276,
+          "regret_increase": 0.008580207824707031,
+          "step": 1343.0,
+          "speed_mps": 9.879971504211426,
+          "forward_speed_mps": 9.87499713897705,
+          "progress_fraction": 0.236623615026474,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121966,
+          "regret_increase": 0.008260726928710938,
+          "step": 859.0,
+          "speed_mps": 10.99488639831543,
+          "forward_speed_mps": 10.994194030761719,
+          "progress_fraction": 0.17619925737380981,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 12515,
+          "regret_increase": 0.007533073425292969,
+          "step": 468.0,
+          "speed_mps": 5.611727714538574,
+          "forward_speed_mps": 5.593147277832031,
+          "progress_fraction": 0.049815498292446136,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 35,
+          "combination_action": 56
+        },
+        {
+          "row": 110339,
+          "regret_increase": 0.0074596405029296875,
+          "step": 1097.0,
+          "speed_mps": 9.475985527038574,
+          "forward_speed_mps": 9.39404010772705,
+          "progress_fraction": 0.22970479726791382,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120724,
+          "regret_increase": 0.0074310302734375,
+          "step": 2583.0,
+          "speed_mps": 12.032578468322754,
+          "forward_speed_mps": 12.028841972351074,
+          "progress_fraction": 0.5369003415107727,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110959,
+          "regret_increase": 0.007143974304199219,
+          "step": 1717.0,
+          "speed_mps": 11.103936195373535,
+          "forward_speed_mps": 11.098104476928711,
+          "progress_fraction": 0.3814575672149658,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 75337,
+          "regret_increase": 0.00684356689453125,
+          "step": 280.0,
+          "speed_mps": 6.200192928314209,
+          "forward_speed_mps": 6.1986613273620605,
+          "progress_fraction": 0.026291513815522194,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108857,
+          "regret_increase": 0.006839752197265625,
+          "step": 1924.0,
+          "speed_mps": 7.342173099517822,
+          "forward_speed_mps": 7.341329097747803,
+          "progress_fraction": 0.3380996286869049,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121799,
+          "regret_increase": 0.006831169128417969,
+          "step": 692.0,
+          "speed_mps": 10.895256042480469,
+          "forward_speed_mps": 10.89493179321289,
+          "progress_fraction": 0.13929888606071472,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90648,
+          "regret_increase": 0.006630897521972656,
+          "step": 1530.0,
+          "speed_mps": 11.415609359741211,
+          "forward_speed_mps": 11.41443157196045,
+          "progress_fraction": 0.28090405464172363,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 111217,
+          "regret_increase": 0.006237030029296875,
+          "step": 1975.0,
+          "speed_mps": 10.559737205505371,
+          "forward_speed_mps": 10.354681015014648,
+          "progress_fraction": 0.4261992573738098,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120831,
+          "regret_increase": 0.0061054229736328125,
+          "step": 2690.0,
+          "speed_mps": 9.956666946411133,
+          "forward_speed_mps": 9.956367492675781,
+          "progress_fraction": 0.5599631071090698,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 119247,
+          "regret_increase": 0.005991935729980469,
+          "step": 1106.0,
+          "speed_mps": 5.157516956329346,
+          "forward_speed_mps": 5.157201290130615,
+          "progress_fraction": 0.2177121788263321,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90621,
+          "regret_increase": 0.0057220458984375,
+          "step": 1503.0,
+          "speed_mps": 10.340076446533203,
+          "forward_speed_mps": 10.321992874145508,
+          "progress_fraction": 0.2749077379703522,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110141,
+          "regret_increase": 0.005016326904296875,
+          "step": 899.0,
+          "speed_mps": 6.06933069229126,
+          "forward_speed_mps": 6.069314956665039,
+          "progress_fraction": 0.18680812418460846,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 107345,
+          "regret_increase": 0.0049610137939453125,
+          "step": 412.0,
+          "speed_mps": 13.216489791870117,
+          "forward_speed_mps": 13.200667381286621,
+          "progress_fraction": 0.05811808258295059,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110143,
+          "regret_increase": 0.004918098449707031,
+          "step": 901.0,
+          "speed_mps": 5.804920673370361,
+          "forward_speed_mps": 5.795365333557129,
+          "progress_fraction": 0.18726937472820282,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 107918,
+          "regret_increase": 0.0048046112060546875,
+          "step": 985.0,
+          "speed_mps": 5.599246025085449,
+          "forward_speed_mps": 5.598721504211426,
+          "progress_fraction": 0.16928043961524963,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90585,
+          "regret_increase": 0.0046253204345703125,
+          "step": 1467.0,
+          "speed_mps": 7.613657474517822,
+          "forward_speed_mps": 7.537222862243652,
+          "progress_fraction": 0.26752766966819763,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        }
+      ]
+    },
+    {
+      "seed": 29,
+      "groups": {
+        "worsened": {
+          "metadata": {
+            "step": {
+              "count": 71,
+              "min": 29.0,
+              "median": 901.0,
+              "mean": 1083.9577464788733,
+              "max": 2690.0
+            },
+            "speed_mps": {
+              "count": 71,
+              "min": 0.6161423325538635,
+              "median": 7.85905122756958,
+              "mean": 8.028184907537112,
+              "max": 15.75007152557373
+            },
+            "forward_speed_mps": {
+              "count": 71,
+              "min": 0.5792754292488098,
+              "median": 7.842217445373535,
+              "mean": 8.01050606747748,
+              "max": 15.738147735595703
+            },
+            "progress_fraction": {
+              "count": 71,
+              "min": 0.0023062729742377996,
+              "median": 0.16928043961524963,
+              "mean": 0.20186060888391041,
+              "max": 0.5885608792304993
+            },
+            "terminated": {
+              "count": 71,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            },
+            "truncated": {
+              "count": 71,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            }
+          },
+          "action_transitions": {
+            "56->35": 51,
+            "76->75": 10,
+            "35->56": 5,
+            "3->35": 5
+          },
+          "distinct_episodes": 18
+        },
+        "improved": {
+          "metadata": {
+            "step": {
+              "count": 30,
+              "min": 0.0,
+              "median": 480.0,
+              "mean": 790.2666666666667,
+              "max": 2780.0
+            },
+            "speed_mps": {
+              "count": 30,
+              "min": 0.2246370017528534,
+              "median": 7.375571250915527,
+              "mean": 7.2589429199695585,
+              "max": 14.1248197555542
+            },
+            "forward_speed_mps": {
+              "count": 30,
+              "min": -8.632918380158117e-09,
+              "median": 7.35469388961792,
+              "mean": 7.24433241557114,
+              "max": 14.1248140335083
+            },
+            "progress_fraction": {
+              "count": 30,
+              "min": 0.0,
+              "median": 0.06226937286555767,
+              "mean": 0.14200491909869015,
+              "max": 0.49492618441581726
+            },
+            "terminated": {
+              "count": 30,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            },
+            "truncated": {
+              "count": 30,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            }
+          },
+          "action_transitions": {
+            "76->75": 2,
+            "56->35": 13,
+            "3->35": 9,
+            "75->76": 2,
+            "75->56": 2,
+            "35->56": 2
+          },
+          "distinct_episodes": 13
+        },
+        "unchanged": {
+          "metadata": {
+            "step": {
+              "count": 411,
+              "min": 4.0,
+              "median": 705.0,
+              "mean": 1003.2019464720195,
+              "max": 2966.0
+            },
+            "speed_mps": {
+              "count": 411,
+              "min": 0.0017545262817293406,
+              "median": 8.076459884643555,
+              "mean": 7.6947109446800805,
+              "max": 15.20875072479248
+            },
+            "forward_speed_mps": {
+              "count": 411,
+              "min": -2.090245485305786,
+              "median": 8.065385818481445,
+              "mean": 7.6473967630279915,
+              "max": 15.199546813964844
+            },
+            "progress_fraction": {
+              "count": 411,
+              "min": 0.0,
+              "median": 0.09963099658489227,
+              "mean": 0.17918451085296933,
+              "max": 0.6559040546417236
+            },
+            "terminated": {
+              "count": 411,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0024330900243309003,
+              "max": 1.0
+            },
+            "truncated": {
+              "count": 411,
+              "min": 0.0,
+              "median": 0.0,
+              "mean": 0.0,
+              "max": 0.0
+            }
+          },
+          "action_transitions": {
+            "56->56": 246,
+            "75->75": 12,
+            "77->77": 1,
+            "23->23": 10,
+            "0->0": 18,
+            "3->3": 76,
+            "62->62": 19,
+            "35->35": 26,
+            "76->76": 3
+          },
+          "distinct_episodes": 26
+        }
+      },
+      "worst20": [
+        {
+          "row": 122666,
+          "regret_increase": 0.012440681457519531,
+          "step": 1559.0,
+          "speed_mps": 12.954209327697754,
+          "forward_speed_mps": 12.954055786132812,
+          "progress_fraction": 0.3316420614719391,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 83696,
+          "regret_increase": 0.0108795166015625,
+          "step": 1330.0,
+          "speed_mps": 13.711089134216309,
+          "forward_speed_mps": 13.629213333129883,
+          "progress_fraction": 0.2287822812795639,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108276,
+          "regret_increase": 0.008580207824707031,
+          "step": 1343.0,
+          "speed_mps": 9.879971504211426,
+          "forward_speed_mps": 9.87499713897705,
+          "progress_fraction": 0.236623615026474,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121966,
+          "regret_increase": 0.008260726928710938,
+          "step": 859.0,
+          "speed_mps": 10.99488639831543,
+          "forward_speed_mps": 10.994194030761719,
+          "progress_fraction": 0.17619925737380981,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108301,
+          "regret_increase": 0.007785797119140625,
+          "step": 1368.0,
+          "speed_mps": 9.261275291442871,
+          "forward_speed_mps": 9.254185676574707,
+          "progress_fraction": 0.24123616516590118,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110339,
+          "regret_increase": 0.0074596405029296875,
+          "step": 1097.0,
+          "speed_mps": 9.475985527038574,
+          "forward_speed_mps": 9.39404010772705,
+          "progress_fraction": 0.22970479726791382,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120724,
+          "regret_increase": 0.0074310302734375,
+          "step": 2583.0,
+          "speed_mps": 12.032578468322754,
+          "forward_speed_mps": 12.028841972351074,
+          "progress_fraction": 0.5369003415107727,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110959,
+          "regret_increase": 0.007143974304199219,
+          "step": 1717.0,
+          "speed_mps": 11.103936195373535,
+          "forward_speed_mps": 11.098104476928711,
+          "progress_fraction": 0.3814575672149658,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 75337,
+          "regret_increase": 0.00684356689453125,
+          "step": 280.0,
+          "speed_mps": 6.200192928314209,
+          "forward_speed_mps": 6.1986613273620605,
+          "progress_fraction": 0.026291513815522194,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108857,
+          "regret_increase": 0.006839752197265625,
+          "step": 1924.0,
+          "speed_mps": 7.342173099517822,
+          "forward_speed_mps": 7.341329097747803,
+          "progress_fraction": 0.3380996286869049,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121799,
+          "regret_increase": 0.006831169128417969,
+          "step": 692.0,
+          "speed_mps": 10.895256042480469,
+          "forward_speed_mps": 10.89493179321289,
+          "progress_fraction": 0.13929888606071472,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90648,
+          "regret_increase": 0.006630897521972656,
+          "step": 1530.0,
+          "speed_mps": 11.415609359741211,
+          "forward_speed_mps": 11.41443157196045,
+          "progress_fraction": 0.28090405464172363,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 111217,
+          "regret_increase": 0.006237030029296875,
+          "step": 1975.0,
+          "speed_mps": 10.559737205505371,
+          "forward_speed_mps": 10.354681015014648,
+          "progress_fraction": 0.4261992573738098,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 119278,
+          "regret_increase": 0.00617218017578125,
+          "step": 1137.0,
+          "speed_mps": 7.671204090118408,
+          "forward_speed_mps": 7.670190334320068,
+          "progress_fraction": 0.22140221297740936,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120831,
+          "regret_increase": 0.0061054229736328125,
+          "step": 2690.0,
+          "speed_mps": 9.956666946411133,
+          "forward_speed_mps": 9.956367492675781,
+          "progress_fraction": 0.5599631071090698,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 119247,
+          "regret_increase": 0.005991935729980469,
+          "step": 1106.0,
+          "speed_mps": 5.157516956329346,
+          "forward_speed_mps": 5.157201290130615,
+          "progress_fraction": 0.2177121788263321,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 111254,
+          "regret_increase": 0.0059108734130859375,
+          "step": 2012.0,
+          "speed_mps": 11.351604461669922,
+          "forward_speed_mps": 11.344887733459473,
+          "progress_fraction": 0.4363468587398529,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90621,
+          "regret_increase": 0.0057220458984375,
+          "step": 1503.0,
+          "speed_mps": 10.340076446533203,
+          "forward_speed_mps": 10.321992874145508,
+          "progress_fraction": 0.2749077379703522,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 122848,
+          "regret_increase": 0.005542755126953125,
+          "step": 1741.0,
+          "speed_mps": 15.542375564575195,
+          "forward_speed_mps": 15.537144660949707,
+          "progress_fraction": 0.38238006830215454,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121153,
+          "regret_increase": 0.005290031433105469,
+          "step": 46.0,
+          "speed_mps": 7.416568756103516,
+          "forward_speed_mps": 7.4091596603393555,
+          "progress_fraction": 0.0036900369450449944,
+          "terminated": 0.0,
+          "truncated": 0.0,
+          "ordinary_action": 35,
+          "combination_action": 56
+        }
+      ]
+    }
+  ],
+  "limitation": "Replay metadata and frozen-Q regret; no driving or true action-value claim."
+}

@@ -1,0 +1,26 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:22:22.059519+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 79724,
+      "created_time": 1791440458.1002004
+    },
+    {
+      "pid": 39924,
+      "created_time": 1791440458.1106913
+    },
+    {
+      "pid": 45656,
+      "created_time": 1791440458.1507852
+    }
+  ],
+  "uncompensated_control_matches": true,
+  "argmax_agreement_unchanged": true,
+  "decision": "Both seeds start agreement100% and lower greedy regret, but fixed inverse-logit scaling fails both KL guards. Reject runtime promotion. No scale search or guard waiver."
+}

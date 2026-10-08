@@ -1,0 +1,24 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:20:42.723393+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 65796,
+      "created_time": 1791440152.2917702
+    },
+    {
+      "pid": 70492,
+      "created_time": 1791440152.3023467
+    },
+    {
+      "pid": 62164,
+      "created_time": 1791440152.3427067
+    }
+  ],
+  "decision": "Sharpened actor target passes starts and greedy regret but fails both KL guards; reject runtime promotion. Fixed inverse-logit scaling control is mathematically paired, no parameter search."
+}
