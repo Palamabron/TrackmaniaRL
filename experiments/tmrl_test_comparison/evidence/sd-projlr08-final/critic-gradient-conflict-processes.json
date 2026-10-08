@@ -1,0 +1,47 @@
+{
+  "observed": [
+    {
+      "pid": 11800,
+      "create_time": 1791443285.6800466,
+      "priority": 32,
+      "cmdline": [
+        "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\.venv\\Scripts\\python.exe",
+        "C:/Users/szulc/.codex/worktrees/tmrl-training-fixes/AITrackmania/experiments/tmrl_test_comparison/audit_sd_sac_critic_gradients.py",
+        "--checkpoint",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/tmrl-sd-sac-projected-fastactor-s17/checkpoints/distributed-update-00033856.pt",
+        "--config",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08/sd-sac.yaml",
+        "--output",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08-audit/critic-gradient-conflict.json",
+        "--expected-sha",
+        "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+        "--calibration",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08-audit/projected-calibration.json",
+        "--history",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08-audit/terminal-history-events.json"
+      ]
+    },
+    {
+      "pid": 74208,
+      "create_time": 1791443285.6940143,
+      "priority": 64,
+      "cmdline": [
+        "C:\\Users\\szulc\\AppData\\Roaming\\uv\\python\\cpython-3.12-windows-x86_64-none\\python.exe",
+        "C:/Users/szulc/.codex/worktrees/tmrl-training-fixes/AITrackmania/experiments/tmrl_test_comparison/audit_sd_sac_critic_gradients.py",
+        "--checkpoint",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/tmrl-sd-sac-projected-fastactor-s17/checkpoints/distributed-update-00033856.pt",
+        "--config",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08/sd-sac.yaml",
+        "--output",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08-audit/critic-gradient-conflict.json",
+        "--expected-sha",
+        "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+        "--calibration",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08-audit/projected-calibration.json",
+        "--history",
+        "H:/Studia/inzynierskie/inzynierkav2/AITrackmania/artifacts/tmrl-test-comparison/sd-projlr08-audit/terminal-history-events.json"
+      ]
+    }
+  ],
+  "capture": "Live exact identities if present; empty means foreground ended before capture."
+}

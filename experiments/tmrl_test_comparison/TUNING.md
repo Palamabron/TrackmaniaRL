@@ -1,3 +1,13 @@
+> Update 2026-10-08 07:09 UTC — critic parameter-gradient audit COMPLETE; zero optimizer/runtime updates.
+>
+> Exact calibration episode split:105/25 fit/held terminals,1024/1024 nonterminals; reasons56/13 no_progress,30/7 slow_progress,19/5 time_limit. Frozen actor/target critics/alpha/discounts; endpoint reasons label groups only, never model inputs. Raw MSE and clipped Bellman gradients, spherical tangent projection and per-parameter comparisons are recorded.
+>
+> Terminal-MSE tangent cosine with fit/held nonterminal clipped loss is +0.39168/+0.66611. Held alignment by reason: +0.49030 no_progress, +0.71055 slow_progress, +0.17171 time_limit; globally positive despite72/20/62 negative individual parameter dots. Terminal-MSE tangent norm22.71267 versus nonterminal-MSE0.21923, so normalized terminal weighting can materially alter gradient scale. Terminal fit/held agreement0.72189 overall,0.26055 for time_limit (only5 held episodes). Initial global conflict does not explain the later finite-step drift; these are not Adam steps, critic truth or driving evidence.
+>
+> Evidence critic-gradient-conflict.json plus process receipt/verification under evidence/sd-projlr08-final. CPU IDLE/single-thread computation19.22s; both captured exact identities closed. Actual CP SHA, model/target/all optimizer digests unchanged; frozen pins/STOP valid. Ruff/mypy PASS. No runtime pilot; full SD BLOCKED.
+>
+> Next zero-update audit: saved critic-Adam momentum/preconditioning directions for the empirical baseline and previously tested terminal weight0.01, with reason-specific decomposition and held nonterminal derivatives. Numerical Adam controls, no optimizer/model steps; no blind grid, architecture/shared model/reward/GNN/replay changes, automatic timeout relabeling or guard waiver. ACTIVE5min.
+
 > Update 2026-10-08 07:02 UTC — clock/timeout semantics control COMPLETE; zero optimizer/runtime updates.
 >
 > Frozen reward and environment intentionally implement maximum_race_time_s as a penalized terminal; collection/telemetry interruptions are separate truncations. Three existing focused tests PASS: penalized race deadline, terminal zero bootstrap, truncation preserving bootstrap. SD-SAC target construction respects the replay discount. Automatic time-limit-to-truncation relabeling would change the tested task objective and is rejected.

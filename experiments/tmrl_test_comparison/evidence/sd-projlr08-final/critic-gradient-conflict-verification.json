@@ -1,0 +1,25 @@
+{
+  "status": "COMPLETE",
+  "verified_at": "2026-10-08T07:09:06.196203+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "pins_valid": true,
+  "no_new_stop": true,
+  "all_observed_exact_identities_closed": true,
+  "observed_identities": [
+    {
+      "pid": 11800,
+      "create_time": 1791443285.6800466,
+      "priority": 32
+    },
+    {
+      "pid": 74208,
+      "create_time": 1791443285.6940143,
+      "priority": 64
+    }
+  ],
+  "original_model_target_all_optimizers_unchanged": true,
+  "optimizer_steps": 0,
+  "controller_created": false,
+  "matched_calibration_split": true,
+  "conclusion": "Positive initial total and per-reason tangent alignment with fit/held nonterminal gradients; not evidence of finite Adam-step compatibility or driving improvement."
+}
