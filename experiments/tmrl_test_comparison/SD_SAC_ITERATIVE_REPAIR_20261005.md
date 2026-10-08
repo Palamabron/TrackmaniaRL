@@ -1,3 +1,13 @@
+> Update 2026-10-08 06:37 UTC — centered-score hypothesis rejected; SD-SAC remains BLOCKED.
+>
+> Zero-update gradient audit COMPLETE13.69s; five shift/scale/optimum/gradient invariants PASS. Fit-only score normalizer10.41447. Score-fit tangent cosine with score-held .91281, with forwardKL-held .01883, with forwardKL-held-starts .11963. Both forward/score local descent worsen35-vs56 start margin; this was not claimed as a start fix or Adam-step evidence.
+>
+> Matched FRESH-Adam projected copies COMPLETE256steps/58.08s, forwardKL versus normalized centered-score regression, LR.0009, seeds17/29,64steps, frozen meanQ/alpha.01/anchor/episodes/ordinary sampling unchanged. Score held error improves .258 to .178/.177, but forwardKL .137607/.146395, reverseKL .205478/.212842, greedy regret .004639/.005727 and both held-start agreements0 FAIL all guards. Forward controls reproduce earlier fresh-Adam probe within1e-6. Reject objective; no runtime promotion or new pilot.
+>
+> OriginalCP/model/Adam actual SHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53 unchanged, immutable pins/STOP valid, all three finite-probe exact identities closed. Gradient audit completed before identity capture and explicitly makes no exactID claim. Evidence: evidence/sd-projlr08-final/centered-score-gradients.json and centered-score.json plus verifications. Ruff/mypy PASS. CPU copies are not driving/critic-truth evidence.
+>
+> Existing recorded-return audit already covers behavior soft-return proxies: current nonterminal Bellman MAE .06185 versus proxy MAE3.869, terminal MAE5.529. Do not repeat it or call off-policy returns current-policy truth. Next zero-update diagnostic: critic feature/head geometry, normalized-feature variation/effective rank and head reachable intervals on current/predecessor checkpoints; inspect harness first. No architecture/shared-model/replay edits or further actor-loss probe without evidence. ACTIVE5min; no offline process remains.
+
 > Update 2026-10-08 06:31 UTC — SD-SAC remains BLOCKED; no new driving pilot.
 >
 > Zero-update distribution-geometry audit: held target entropy3.60254 versus sharp fitted actor .885/.872 and inverse-scaled actor4.33995/4.33980. Compensation loses expectedQ .02369/.02358 versus target. The ideal inverse-temperature identity holds in float64 (max error7.1e-15); the fitted actor is not that ideal target. Initial float32 assertion failure is preserved in verification; no optimizer updates occurred. FrozenQ is not ground truth.

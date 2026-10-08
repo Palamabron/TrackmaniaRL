@@ -1,0 +1,12 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:34:47.915321+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "optimizer_steps": 0,
+  "identity_capture": "Foreground audit completed before capture, empty script-process inventory receipt; no exactID claim.",
+  "numerical_controls_passed": 5,
+  "decision": "Normalized centered-score tangent aligns with held score .91281, held forwardKL .01883, held start forwardKL .11963. Both score/forward descent locally worsen35-vs56 margin, so no local start-fix claim. Justifies one bounded finite-step score-vs-forward control with FRESH Adam in both arms to remove forward-moment confound; no runtime promotion from gradients."
+}
