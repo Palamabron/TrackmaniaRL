@@ -1,0 +1,25 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:30:38.416012+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 47084,
+      "created_time": 1791440866.9340708
+    },
+    {
+      "pid": 33176,
+      "created_time": 1791440866.9433846
+    },
+    {
+      "pid": 61276,
+      "created_time": 1791440866.9838395
+    }
+  ],
+  "midpoint_controls_match_1e6": true,
+  "decision": "Both seeds starts100% and prior64guardsPASS, but equal128step ordinary forward/reverse KL guardsFAIL. Reject runtime promotion; no cap extension. Next inspect centered-logit regression history and zero-update objective geometry before any new finite-step test."
+}

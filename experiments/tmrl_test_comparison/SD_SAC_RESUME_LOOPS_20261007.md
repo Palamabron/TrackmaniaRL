@@ -1,3 +1,13 @@
+> Update 2026-10-08 06:31 UTC — SD-SAC remains BLOCKED; no new driving pilot.
+>
+> Zero-update distribution-geometry audit: held target entropy3.60254 versus sharp fitted actor .885/.872 and inverse-scaled actor4.33995/4.33980. Compensation loses expectedQ .02369/.02358 versus target. The ideal inverse-temperature identity holds in float64 (max error7.1e-15); the fitted actor is not that ideal target. Initial float32 assertion failure is preserved in verification; no optimizer updates occurred. FrozenQ is not ground truth.
+>
+> Fixed two-stage control COMPLETE512copy steps/115.17s: sharp64 then original64 versus ordinary128, savedAdam/projection/LR.0009, identical episodes/ordinary sampling/anchor/frozenQ. Both seeds retain100% held-start agreement. Final general forwardKL .083571/.073379, reverseKL .120566/.113120, greedy regret .00056664/.00045306. Prior64 guards all PASS, but equal128 ordinary KL guards FAIL (ordinary forward .037866/.032359, reverse .056223/.046170). Reject runtime promotion; do not extend or select a favorable partial endpoint.64step controls reproduce prior results within1e-6.
+>
+> OriginalCP actual SHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53, saved model/Adam, immutable pins and STOP unchanged. All three captured exact probe identities closed. Evidence: evidence/sd-projlr08-final/distribution-geometry.json and two-stage-distillation.json plus verifications. No controller/runtime/replay changes; no driving claim.
+>
+> Next: inspect centered-logit regression history and zero-update objective geometry before another finite-step experiment. This may address relative-score calibration rather than another scalar-temperature search; no implementation selected yet. ACTIVE5min; all previous probes COMPLETE, never restart.
+
 > Update 2026-10-08 06:22 UTC — SD-SAC remains BLOCKED. No new driving pilot.
 >
 > Zero-update paired metadata audit found all 62/71 worsened held rows are moving, nonterminal states; 41/51 changes are action56 to gas action35. This identifies an observed tradeoff, not true action values. Value-gap margin control failed (held starts100%/0%, regret .001411/.000725).

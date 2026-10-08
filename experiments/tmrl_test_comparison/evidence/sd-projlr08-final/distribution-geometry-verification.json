@@ -1,0 +1,13 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:26:44.411784+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "optimizer_steps": 0,
+  "process_inventory": [],
+  "identity_capture": "Foreground zero-update audit completed before identity capture; no exact-PID receipt claimed.",
+  "first_invocation": "Aborted on overly strict float32 ideal-compensation identity before output. Corrected audit uses float64 for target geometry; ideal identity max error7.1e-15. No optimizer steps in either invocation.",
+  "decision": "Sharp actor entropy .885/.872 vs target3.603; compensated4.340 is near-uniform and expectedQ .02369/.02358 below target. Reject fixed scaling; no scalar search. Next bounded sharp-then-original distillation versus equal128step ordinary copies, fixed schedule, guards unchanged."
+}
