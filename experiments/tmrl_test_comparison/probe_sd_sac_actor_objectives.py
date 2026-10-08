@@ -31,6 +31,7 @@ def main() -> None:
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--expected-sha", required=True)
     parser.add_argument("--adam-state", choices=("saved", "fresh"), default="saved")
+    parser.add_argument("--fit-scope", choices=("mixed", "starts"), default="mixed")
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
@@ -69,6 +70,18 @@ def main() -> None:
         "held": rng.choice(held_pool, min(512, len(held_pool)), replace=False),
         "starts": np.flatnonzero(replay["steps"][:size] == 0),
     }
+    if args.fit_scope == "starts":
+        rows["fit"] = np.intersect1d(fit_pool, rows["starts"])
+        rows["held_starts"] = np.intersect1d(held_pool, rows["starts"])
+        assert len(rows["fit"])
+        assert len(rows["held_starts"])
+        assert not np.intersect1d(rows["fit"], rows["held_starts"]).size
+    variants = (
+        (("forward", 0.0009),)
+        if args.fit_scope == "starts"
+        else (("forward", 0.0001), ("forward", 0.0009), ("sac", 0.0001), ("sac", 0.0009))
+    )
+    cap_seconds = 180 if args.fit_scope == "starts" else 300
     groups = {}
     for name, selected in rows.items():
         obs = helper.decode_tree(replay["observations"], selected)
@@ -151,13 +164,14 @@ def main() -> None:
         "checkpoint_sha256": args.expected_sha,
         "alpha": alpha,
         "adam_state": args.adam_state,
+        "fit_scope": args.fit_scope,
         "initial_logit_gradients": gradients,
         "design": {
-            "objectives": ["forward", "sac"],
-            "learning_rates": [0.0001, 0.0009],
+            "objectives": sorted({objective for objective, _ in variants}),
+            "learning_rates": sorted({lr for _, lr in variants}),
             "seeds": [17, 29],
             "steps_per_copy": 64,
-            "cap_seconds": 300,
+            "cap_seconds": cap_seconds,
             "targets": "identical saved frozen mean Q and alpha; unchanged behavior entropy anchor",
             "projection": "after each disposable saved-Adam actor step",
         },
@@ -174,12 +188,7 @@ def main() -> None:
     }
     begun = time.monotonic()
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    for objective, lr in (
-        ("forward", 0.0001),
-        ("forward", 0.0009),
-        ("sac", 0.0001),
-        ("sac", 0.0009),
-    ):
+    for objective, lr in variants:
         for seed in (17, 29):
             actor = copy.deepcopy(model.actor).requires_grad_(True)
             optimizer = torch.optim.Adam(actor.parameters(), lr=lr)
@@ -190,8 +199,8 @@ def main() -> None:
             sample = np.random.default_rng(seed)
             obs, q, behavior = groups["fit"]
             for _ in range(64):
-                if time.monotonic() - begun > 300:
-                    raise TimeoutError("300s offline cap")
+                if time.monotonic() - begun > cap_seconds:
+                    raise TimeoutError(f"{cap_seconds}s offline cap")
                 index = sample.integers(0, len(q), 128)
                 logs = actor.log_probabilities(h.indexed(obs, index))
                 entropy = -(logs.exp() * logs).sum(1)
@@ -224,7 +233,7 @@ def main() -> None:
     report.update(
         status="COMPLETE",
         saved_model_adam_checkpoint_unchanged=True,
-        total_copy_optimizer_steps=512,
+        total_copy_optimizer_steps=len(variants) * 2 * 64,
         elapsed_seconds=time.monotonic() - begun,
     )
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")

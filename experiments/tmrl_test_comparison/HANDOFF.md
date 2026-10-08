@@ -1,3 +1,13 @@
+## 8 October 2026 05:36 UTC - start-fit capacity/exposure control complete
+
+Dedicated fit to104 fit-episode starts completed128 projected saved-Adam actor steps in27.30s,seeds17/29,LR.0009,forward-KL,unchanged alpha.01 and behavior entropy anchor. Both copies reach100% mean-Q greedy agreement(action35,gas1) on all27 held-episode starts,zero greedy regret,forwardKL.010035/reverseKL.016348. The actor can fit this saved initial-state preference;short mixed-probe failure does not establish an architecture/capacity bottleneck. Held starts are similar observations already encountered during original training,not unseen real driving.
+
+General held replay reverseKL increases from original.471377 to.716892/.716887 despite forwardKL declining.375595 to.329989/.329986 and greedy regret declining.008611 to.005998. Start-only fitting therefore loses general distribution calibration and is not a runtime candidate. No proof that frozen Q values are correct,no driving claim,no model/reward/GNN/replay change.
+
+Original checkpoint/model/Adam unchanged,actualSHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53,all exact owned probe processes closed,immutable pins valid,no changed STOP. Evidence: evidence/sd-projlr08-final/actor-start-fit.json and actor-start-fit-verification.json. Explicit --fit-scope starts mode is bounded180s and128steps;default mixed behavior unchanged. Ruff and boundary-scoped mypy pass;real split disjointness and immutable-input assertions pass. No offline process remains,fullBLOCKED,automationACTIVE5min.
+
+Next offline diagnostic may test a fixed mixed/start loss-mixture grid .01/.1/.25 on disposable projected actor/savedAdam copies,paired seeds64steps,against the completed ordinary mixed fit. Require held-start agreement and both-seed general-held forwardKL/reverseKL/greedy-regret no more than20% worse than the matched ordinary-mixed result. This tests a fitting tradeoff only;no automatic runtime replay reweighting or fresh pilot until scoped evidence is reviewed.
+
 ## 8 October 2026 05:32 UTC - zero-update start coverage audit
 
 The diagnostic fit sample contains3 episode-first observations out of2048(.1465%),held sample1/512. With128 draws per step and64 steps,the fit distribution yields12 expected start draws per copy. This quantifies limited exposure in the short offline probe;it does not reconstruct or establish insufficient start sampling in actual training. Saved replay has131 starts among145424 transitions. All131 starts form9 exact decoded observation hashes with small context/physics differences;none of the sampled nonstart rows exactly aliases any start. This is a sampled exact-identity check,not proof of a fully Markov representation or absence of near-aliases.

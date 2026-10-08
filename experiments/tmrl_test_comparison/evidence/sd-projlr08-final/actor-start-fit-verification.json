@@ -1,0 +1,9 @@
+{
+  "checked_at": "2026-10-08T05:36:08.077054+00:00",
+  "all_probe_owned_closed": true,
+  "immutable_pins_valid": true,
+  "new_or_changed_STOP_present": false,
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "decision": "Both seeds fit all 27 held-episode starts to action35,while general held reverseKL increases to .71689 from .47138. Actor can fit these saved starts; start-only fitting does not preserve overall soft-target calibration and is not a runtime candidate.",
+  "next_diagnostic": "Bounded offline mixed/start loss tradeoff on disposable projected actor+savedAdam copies. Fixed nonzero start-mixture grid .01/.1/.25 versus completed ordinary-mixed baseline,paired seeds17/29,64steps,held-start agreement and general held forward/reverseKL/regret guards. No replay or runtime change."
+}
