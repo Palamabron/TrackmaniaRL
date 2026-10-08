@@ -1,0 +1,14 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:42:03.508819+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_all_optimizers_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "optimizer_steps": 0,
+  "process_inventory": [],
+  "identity_capture": "Short foreground inference completed before capture; no exactID receipt claimed.",
+  "first_invocation": "Current first invocation aborted before output because replay actions are encoded trees. Corrected using existing decode_tree API. No optimizer steps in either invocation.",
+  "invariants": "Linear-head reconstruction and Cauchy bounds PASS for all sampled rows/actions.",
+  "decision": "No terminal reward outside observed feature-norm head envelope. Current nonterminal head alignment .937/.933 vs predecessor .779/.779; low centered feature rank occurs in BOTH snapshots. Descriptive different-replay comparison, no causal collapse/capacity proof; no architecture fix justified. Next zero-update terminal/nonterminal neighbor and decoded-observation alias audit to assess separability before another critic optimization probe."
+}

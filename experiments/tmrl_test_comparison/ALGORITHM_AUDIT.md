@@ -1,3 +1,13 @@
+> Update 2026-10-08 06:43 UTC — critic feature/head geometry audit COMPLETE; no optimizer/runtime updates.
+>
+> Current and predecessor actual checkpoint SHA/fingerprint/model/all-optimizer invariants PASS; immutable pins/STOP valid. Linear-head reconstruction and Cauchy output bounds PASS on all sampled rows/actions. All terminal rewards lie inside the observed feature-norm head envelopes. No output-range impossibility or architecture fix is established. Short foreground audits completed before identity capture; no exactID receipt claimed. First current attempt aborted on encoded replay actions and was corrected with the existing decode_tree helper, with zero updates throughout.
+>
+> Current nonterminal feature pair-cosine .88951/.89923, centered effective rank2.3634/1.4392, taken-action head alignment .93672/.93273. Predecessor: cosine .73066/.72783, rank1.3973/1.3959, alignment .77923/.77946. Low rank also exists in the predecessor, so do not claim new representation collapse. Replay populations differ; this is descriptive, not paired causal evidence. Head mean norms current8.4611/8.4927, predecessor8.5781/8.6004; terminal targets remain representable within observed norm envelopes.
+>
+> Evidence: evidence/sd-projlr08-final/critic-geometry-current.json and critic-geometry-predecessor.json plus verifications; source audit_sd_sac_critic_geometry.py, Ruff/mypy PASS. Original models and replay unchanged; no controller or pilot. Full SD remains BLOCKED.
+>
+> Next: zero-update terminal/nonterminal nearest-neighbor and exact decoded-observation alias audit, including episode/step/action/termination metadata, to assess separability before another critic optimization probe. Reuse existing return audit; no architecture/shared-model/GNN/replay changes. ACTIVE5min, no offline process remains.
+
 > Update 2026-10-08 06:37 UTC — centered-score hypothesis rejected; SD-SAC remains BLOCKED.
 >
 > Zero-update gradient audit COMPLETE13.69s; five shift/scale/optimum/gradient invariants PASS. Fit-only score normalizer10.41447. Score-fit tangent cosine with score-held .91281, with forwardKL-held .01883, with forwardKL-held-starts .11963. Both forward/score local descent worsen35-vs56 start margin; this was not claimed as a start fix or Adam-step evidence.
