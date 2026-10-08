@@ -1,3 +1,11 @@
+## 8 October 2026 05:41 UTC - bounded start/general fitting tradeoff running
+
+New explicit --fit-scope mixture compares fixed start-loss fractions.01/.1/.25,seeds17/29,64 projected disposable saved-Adam actor steps each,LR.0009,384 total,300s copy-compute cap. Loss=(1-fraction)*ordinary mixed forward-KL+behavior-anchor loss + fraction*fit-start forward-KL+behavior-anchor loss. Each component draws128 rows with replacement;ordinary mixed RNG is paired with the completed baseline,start RNG is separate. Frozen original mean-Q,alpha.01 and behavior references stay fixed;no critic/target update or persistent policy.
+
+Same episode split and2048 mixed fit/512 general held rows,104 fit starts/27 held starts. Predeclared fit eligibility requires100% held-start agreement and every general-held forwardKL/reverseKL/greedy-regret metric<=1.2 times the matched seed ordinary-mixed result from actor-objectives.json,in both seeds. Report all outcomes;no promotion from only favorable start fit. These reused-replay/frozen-Q criteria do not establish driving quality or critic truth. No runtime replay sampling or model/reward/GNN changes.
+
+Probe executes on CPUidle1thread:child65620ctime1791438024.3426428,wrapper74432ctime1791438024.3286068;exec94880,receipt BASE/sd-projlr08-audit/actor-start-mixture-processes.json,output actor-start-mixture.json. Ruff and boundary-scoped mypy pass;immutable pins/no changed STOP checked before execution. Results pending,original CP/models/Adam must remain unchanged. AutomationACTIVE5min/fullBLOCKED,no new pilot. Wait existing process,never duplicate or extend.
+
 ## 8 October 2026 05:36 UTC - start-fit capacity/exposure control complete
 
 Dedicated fit to104 fit-episode starts completed128 projected saved-Adam actor steps in27.30s,seeds17/29,LR.0009,forward-KL,unchanged alpha.01 and behavior entropy anchor. Both copies reach100% mean-Q greedy agreement(action35,gas1) on all27 held-episode starts,zero greedy regret,forwardKL.010035/reverseKL.016348. The actor can fit this saved initial-state preference;short mixed-probe failure does not establish an architecture/capacity bottleneck. Held starts are similar observations already encountered during original training,not unseen real driving.

@@ -31,8 +31,11 @@ def main() -> None:
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--expected-sha", required=True)
     parser.add_argument("--adam-state", choices=("saved", "fresh"), default="saved")
-    parser.add_argument("--fit-scope", choices=("mixed", "starts"), default="mixed")
+    parser.add_argument("--fit-scope", choices=("mixed", "starts", "mixture"), default="mixed")
+    parser.add_argument("--baseline", type=Path)
     args = parser.parse_args()
+    if args.fit_scope == "mixture" and args.baseline is None:
+        parser.error("mixture requires completed ordinary-mixed baseline")
     if args.output.exists():
         raise FileExistsError(args.output)
     psutil.Process().nice(psutil.IDLE_PRIORITY_CLASS if os.name == "nt" else 19)
@@ -70,17 +73,23 @@ def main() -> None:
         "held": rng.choice(held_pool, min(512, len(held_pool)), replace=False),
         "starts": np.flatnonzero(replay["steps"][:size] == 0),
     }
-    if args.fit_scope == "starts":
-        rows["fit"] = np.intersect1d(fit_pool, rows["starts"])
+    if args.fit_scope in ("starts", "mixture"):
+        rows["fit_starts"] = np.intersect1d(fit_pool, rows["starts"])
         rows["held_starts"] = np.intersect1d(held_pool, rows["starts"])
-        assert len(rows["fit"])
+        assert len(rows["fit_starts"])
         assert len(rows["held_starts"])
-        assert not np.intersect1d(rows["fit"], rows["held_starts"]).size
-    variants = (
-        (("forward", 0.0009),)
-        if args.fit_scope == "starts"
-        else (("forward", 0.0001), ("forward", 0.0009), ("sac", 0.0001), ("sac", 0.0009))
-    )
+        assert not np.intersect1d(rows["fit_starts"], rows["held_starts"]).size
+    if args.fit_scope == "starts":
+        rows["fit"] = rows.pop("fit_starts")
+    if args.fit_scope == "mixture":
+        variants = [("forward", 0.0009, weight) for weight in (0.01, 0.1, 0.25)]
+        assert args.adam_state == "saved"
+    elif args.fit_scope == "starts":
+        variants = [("forward", 0.0009, 0.0)]
+    else:
+        variants = [
+            (objective, lr, 0.0) for objective in ("forward", "sac") for lr in (0.0001, 0.0009)
+        ]
     cap_seconds = 180 if args.fit_scope == "starts" else 300
     groups = {}
     for name, selected in rows.items():
@@ -165,10 +174,11 @@ def main() -> None:
         "alpha": alpha,
         "adam_state": args.adam_state,
         "fit_scope": args.fit_scope,
+        "start_loss_fractions": sorted({weight for _, _, weight in variants}),
         "initial_logit_gradients": gradients,
         "design": {
-            "objectives": sorted({objective for objective, _ in variants}),
-            "learning_rates": sorted({lr for _, lr in variants}),
+            "objectives": sorted({objective for objective, _, _ in variants}),
+            "learning_rates": sorted({lr for _, lr, _ in variants}),
             "seeds": [17, 29],
             "steps_per_copy": 64,
             "cap_seconds": cap_seconds,
@@ -188,7 +198,7 @@ def main() -> None:
     }
     begun = time.monotonic()
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    for objective, lr in variants:
+    for objective, lr, fraction in variants:
         for seed in (17, 29):
             actor = copy.deepcopy(model.actor).requires_grad_(True)
             optimizer = torch.optim.Adam(actor.parameters(), lr=lr)
@@ -197,6 +207,7 @@ def main() -> None:
             for group in optimizer.param_groups:
                 group["lr"] = lr
             sample = np.random.default_rng(seed)
+            start_sample = np.random.default_rng(seed + 100000)
             obs, q, behavior = groups["fit"]
             for _ in range(64):
                 if time.monotonic() - begun > cap_seconds:
@@ -209,6 +220,17 @@ def main() -> None:
                     options["entropy_penalty_coefficient"]
                     * (entropy - behavior[index]).square().mean()
                 )
+                if fraction:
+                    start_obs, start_q, start_behavior = groups["fit_starts"]
+                    selected = start_sample.integers(0, len(start_q), 128)
+                    start_logs = actor.log_probabilities(h.indexed(start_obs, selected))
+                    start_entropy = -(start_logs.exp() * start_logs).sum(1)
+                    start_loss = h.policy_loss(start_logs, start_q[selected], alpha, objective)
+                    start_loss += (
+                        options["entropy_penalty_coefficient"]
+                        * (start_entropy - start_behavior[selected]).square().mean()
+                    )
+                    loss = (1 - fraction) * loss + fraction * start_loss
                 assert torch.isfinite(loss)
                 optimizer.zero_grad(set_to_none=True)
                 loss.backward()
@@ -217,6 +239,7 @@ def main() -> None:
             report["results"].append(
                 {
                     "objective": objective,
+                    "start_loss_fraction": fraction,
                     "lr": lr,
                     "seed": seed,
                     "copy_steps": 64,
@@ -227,6 +250,45 @@ def main() -> None:
             print(
                 f"Completed disposable actor objective={objective} lr={lr} seed={seed}", flush=True
             )
+    if args.fit_scope == "mixture":
+        baseline = json.loads(args.baseline.read_text())
+        assert baseline["status"] == "COMPLETE"
+        assert baseline["checkpoint_sha256"] == args.expected_sha
+        assert baseline["rows"]["fit"] == rows["fit"].tolist()
+        assert baseline["rows"]["held"] == rows["held"].tolist()
+        assert baseline.get("adam_state", "saved") == "saved"
+        comparison = []
+        for result in report["results"]:
+            reference = next(
+                item
+                for item in baseline["results"]
+                if item["seed"] == result["seed"]
+                and item["lr"] == 0.0009
+                and item["objective"] == "forward"
+            )
+            checks = {
+                name: result["metrics"]["held"][name] <= 1.2 * reference["metrics"]["held"][name]
+                for name in ("forward_kl", "reverse_kl", "regret")
+            }
+            comparison.append(
+                {
+                    "fraction": result["start_loss_fraction"],
+                    "seed": result["seed"],
+                    "held_start_agreement": result["metrics"]["held_starts"]["agreement"],
+                    "guards": checks,
+                    "all_guards_pass": all(checks.values()),
+                }
+            )
+        report["comparison"] = comparison
+        report["eligible_fractions"] = [
+            weight
+            for weight in (0.01, 0.1, 0.25)
+            if all(
+                item["all_guards_pass"] and item["held_start_agreement"] == 1
+                for item in comparison
+                if item["fraction"] == weight
+            )
+        ]
     assert helper.sha(args.checkpoint) == args.expected_sha
     assert helper.model_digest(model) == model_pin
     assert helper.tree_digest(state["learner"]["actor_optimizer"]) == adam_pin
