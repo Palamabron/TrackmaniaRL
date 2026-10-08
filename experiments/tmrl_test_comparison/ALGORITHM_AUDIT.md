@@ -1,3 +1,11 @@
+## 8 October 2026 05:16 UTC - actor objective copy comparison running
+
+New diagnostic probe_sd_sac_actor_objectives.py compares forward-KL versus canonical SAC on identical frozen mean-Q,alpha,behavior entropy references and whole-episode fit/held rows. Each objective uses actorLR.0001/.0009 and seeds17/29,64 projected saved-Adam actor-copy steps per cell,512 total,300s copy-compute cap. Saved checkpoint/model/optimizer remain originals; no controller/runtime learner/new pilot. Fixed-Q fitting cannot establish critic correctness or driving.
+
+Initial held logit gradients differ in magnitude and direction: forward norm.006390,SAC.00009552,cosine.76136. Unchanged entropy-anchor gradient relative norm is.00213 versus.14257. These are local logit gradients,not full parameter gradients or Adam step sizes; no conclusion about learning rate follows directly. Metrics include both KL directions,SAC objective,expected Q,greedy agreement/regret,entropy and per-row actions. Compare matched-seed/LR results only after completion; no objective promotion from partial results.
+
+Ruff and boundary-scoped mypy pass. Existing objective helpers match runtime forward cross-entropy and canonical SAC up to a state-only Q baseline. Active CPU child80212 created1791436551.8764615 IDLE64,wrapper39824 created1791436551.862483. Exec66735,BASE/sd-projlr08-audit/actor-objectives.json and actor-objectives-processes.json. No duplicate execution or cap extension. Immutable source pins valid/no changed STOP. AutomationACTIVE5min; fullBLOCKED.
+
 ## 8 October 2026 05:12 UTC - projected terminal calibration rejected
 
 Offline projected critic/saved-Adam copy probe completed all 384 steps in336.33s within600s cap. Both lambda0 baselines pass the held nonterminal drift guard. Every tested extra terminal weight(.01,.1,1) fails that guard in both seeds. At lambda.01,held terminal MAE improves from lambda0 4.994/5.013 to4.551/4.598,while held nonterminal MAE worsens to.113856/.115229 against the fixed limit.085662. Higher weights worsen nonterminal error further(.429/.434 and.913/1.159).
