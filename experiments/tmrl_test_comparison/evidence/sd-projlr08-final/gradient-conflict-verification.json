@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-10-08T05:51:25.521138+00:00",
+  "status": "COMPLETE",
+  "exec_session": 22309,
+  "exec_exit_code": 0,
+  "process_inventory_empty_after_exit": true,
+  "exact_identities_captured": false,
+  "process_receipt_limitation": "The short audit exited before process inventory; no live identity was captured. Session exit 0 plus no matching script process verified.",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "original_model_adam_unchanged": true,
+  "matched_episode_rows": true,
+  "negative_parameter_tangent_dots": [
+    "encoder.backbone.input_projection.scale",
+    "encoder.backbone.blocks.0.mix_logit",
+    "encoder.backbone.blocks.0.expand.weight",
+    "encoder.backbone.blocks.0.expand.scale",
+    "encoder.backbone.blocks.0.project.scale",
+    "encoder.backbone.blocks.1.mix_logit",
+    "encoder.backbone.blocks.1.expand.scale",
+    "encoder.backbone.blocks.1.project.scale",
+    "encoder.backbone.blocks.2.expand.scale"
+  ],
+  "decision": "No global initial gradient conflict: tangent cosine .44116 fit versus starts, .42375 starts versus general held; start fit/held cosine ~1. Local evidence does not establish Adam-step or finite-step compatibility. No pilot justified."
+}

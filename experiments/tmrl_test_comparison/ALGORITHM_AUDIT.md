@@ -1,3 +1,9 @@
+## 2026-10-08 — zero-update actor gradient audit
+
+The CPU single-thread audit completed in 7.05 seconds with zero optimizer steps. At the original saved actor, tangent gradient cosine is +0.44116 for ordinary fit versus fit starts, +0.42375 for fit starts versus general held rows, and approximately 1 for fit versus held starts. Nine parameter tensors nevertheless have negative tangent dot products (listed in verification); the aggregate result does not support a global initial gradient-conflict explanation. These local gradients are not saved-Adam steps and do not establish compatibility after finite updates or driving quality.
+
+Episode rows match the completed mixture probe. Actual checkpoint SHA, original model and Adam are unchanged; immutable pins and STOP checks pass. The audit exited normally before identity capture; verification records session exit 0 and an empty matching-process inventory, without claiming captured exact identities. Evidence: `evidence/sd-projlr08-final/gradient-conflict.json` and its verification. No new pilot is justified; Full SD remains BLOCKED. Next inspect saved-Adam preconditioning and action-margin directional derivatives without optimizer steps before choosing further fitting experiments.
+
 ## 2026-10-08 — completed start-loss mixture diagnostic
 
 The bounded offline probe completed all 384 disposable actor steps in 160.48 seconds. Fractions 0.01, 0.1 and 0.25 passed all general held forward-KL, reverse-KL and greedy-regret limits against their matched ordinary-fit baseline, but every fraction and both seeds retained 0% held-start agreement. No tested fraction qualifies. Lower start fitting error alone does not justify a runtime change or a new pilot.
