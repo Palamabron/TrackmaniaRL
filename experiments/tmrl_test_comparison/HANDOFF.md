@@ -1,3 +1,11 @@
+## 8 October 2026 05:20 UTC - saved-Adam actor objective result and fresh control
+
+All512 projected actor-copy steps completed in113.14s; original checkpoint/model/saved Adam unchanged,all exact probe identities closed,actual CP SHA and immutable pins valid,no changed STOP. On held episodes,forward-KL atLR.0009 gives agreement76.95/77.15%,regret.000536/.000518,reverseKL.124906/.124686. Canonical SAC at the same LR and inherited Adam gives agreement21.68/22.27%,regret.007336/.007167,reverseKL.653937/.608725 versus baseline.471377. AtLR.0001,SAC reverseKL.469171/.468223 barely improves baseline. All variants still have zero mean-Q greedy agreement on saved starts; no objective promoted and no new runtime pilot.
+
+This is not a clean comparison of objectives trained from scratch: inherited Adam moments were accumulated under forward-KL,whose current local logit gradients are much larger. A paired fresh-Adam control is therefore now running with identical original actor,Q,alpha,entropy anchor,episode split,seeds,LR grid,64 steps per cell and projection. Explicit --adam-state fresh changes only disposable optimizer initialization; saved mode remains default. Output actor-objectives-fresh-adam.json is new,never overwrites saved-Adam evidence. Fixed300s cap/512steps,no runtime learner/controller. Exec3005,CPUchild77448ctime1791436820.5188873 IDLE64,wrapper77376ctime1791436820.5062568. Wait this existing probe;never duplicate or extend.
+
+Evidence saved-Adam: evidence/sd-projlr08-final/actor-objectives.json and actor-objectives-verification.json. Fresh-Adam results pending. Ruff and boundary-scoped mypy pass. No claim about critic truth,architecture bottleneck or driving from this reused-replay frozen-Q diagnostic. FullBLOCKED;automationACTIVE5min.
+
 ## 8 October 2026 05:16 UTC - actor objective copy comparison running
 
 New diagnostic probe_sd_sac_actor_objectives.py compares forward-KL versus canonical SAC on identical frozen mean-Q,alpha,behavior entropy references and whole-episode fit/held rows. Each objective uses actorLR.0001/.0009 and seeds17/29,64 projected saved-Adam actor-copy steps per cell,512 total,300s copy-compute cap. Saved checkpoint/model/optimizer remain originals; no controller/runtime learner/new pilot. Fixed-Q fitting cannot establish critic correctness or driving.

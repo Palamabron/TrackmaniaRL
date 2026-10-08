@@ -1,0 +1,9 @@
+{
+  "checked_at": "2026-10-08T05:20:05.275092+00:00",
+  "status": "COMPLETE",
+  "all_probe_owned_closed": true,
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "immutable_pins_valid": true,
+  "new_or_changed_STOP_present": false,
+  "decision": "No objective promotion: SAC with inherited forward-KL Adam does not improve saved starts; optimizer history is a confound. Fresh-Adam paired control needed."
+}

@@ -30,6 +30,7 @@ def main() -> None:
     for name in ("checkpoint", "config", "output"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--expected-sha", required=True)
+    parser.add_argument("--adam-state", choices=("saved", "fresh"), default="saved")
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
@@ -149,6 +150,7 @@ def main() -> None:
     report = {
         "checkpoint_sha256": args.expected_sha,
         "alpha": alpha,
+        "adam_state": args.adam_state,
         "initial_logit_gradients": gradients,
         "design": {
             "objectives": ["forward", "sac"],
@@ -181,7 +183,8 @@ def main() -> None:
         for seed in (17, 29):
             actor = copy.deepcopy(model.actor).requires_grad_(True)
             optimizer = torch.optim.Adam(actor.parameters(), lr=lr)
-            optimizer.load_state_dict(copy.deepcopy(state["learner"]["actor_optimizer"]))
+            if args.adam_state == "saved":
+                optimizer.load_state_dict(copy.deepcopy(state["learner"]["actor_optimizer"]))
             for group in optimizer.param_groups:
                 group["lr"] = lr
             sample = np.random.default_rng(seed)
