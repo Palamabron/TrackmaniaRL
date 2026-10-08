@@ -159,3 +159,5 @@ metadata:
   group: discrete-78
   encoder_source: V107I/V108 incident-gated GNN Simba V6
   protocol: experiments/tmrl_test_comparison/README.md
+  support_tier: experimental
+  included_in_campaign: false

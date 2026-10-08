@@ -1,3 +1,9 @@
+> **RETIRED / EXPERIMENTAL — 2026-10-08.** Human decision supersedes the active
+> repair loop below. Scheduler PAUSED; no pending automatic experiment. This
+> document preserves the diagnosis/proposal, not launch authorization. See
+> [the Fable 5.1 report](SD_SAC_FABLE_5_1_REPORT.md) and
+> [the current campaign](MULTI_COMPUTER_TRAINING.md), which excludes SD-SAC.
+
 # SD-SAC repair decisions
 
 Updated 2026-10-08 07:22 UTC. Human instruction: make the complete repair search more efficient. This ledger is the entry point; READINESS/HANDOFF retain full evidence history. Latest actual files/process identities override historical snapshots.

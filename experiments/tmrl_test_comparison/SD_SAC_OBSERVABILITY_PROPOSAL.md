@@ -1,3 +1,9 @@
+> **RETIRED / EXPERIMENTAL — 2026-10-08.** Human decision supersedes the active
+> repair loop below. Scheduler PAUSED; no pending automatic experiment. This
+> document preserves the diagnosis/proposal, not launch authorization. See
+> [the Fable 5.1 report](SD_SAC_FABLE_5_1_REPORT.md) and
+> [the current campaign](MULTI_COMPUTER_TRAINING.md), which excludes SD-SAC.
+
 # Scoped SD-SAC observability proposal
 
 Prepared 2026-10-08 from clock-semantics and terminal-history evidence. Proposal only; no shared observation/model/reward/GNN/replay code changed. This is a candidate next hypothesis if the calibration trajectory closes generic optimizer tuning, not an established cause of failed driving.

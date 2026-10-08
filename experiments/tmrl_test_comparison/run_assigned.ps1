@@ -2,13 +2,17 @@ param(
     [Parameter(Mandatory=$true)]
     [ValidateSet('iqn', 'qr', 'sd-sac', 'dsac', 'discrete-sac', 'tqc', 'ppo', 'sac')]
     [string]$Algorithm,
-    [switch]$Pilot
+    [switch]$Pilot,
+    [ValidateSet(17, 29, 43)][int[]]$Seeds = @(17, 29, 43),
+    [string]$ConfigDirectory
 )
 $ErrorActionPreference = 'Stop'
 if ($Algorithm -in @('dsac', 'discrete-sac')) { $Algorithm = 'sd-sac' }
-if (-not $Pilot -and $Algorithm -eq 'sd-sac') {
-    throw 'SD-SAC nie jest gotowy do pelnych treningow: wymaga potwierdzonej ewaluacji z co najmniej 8/10 met. Nowy pilot wymaga bezposredniej zgody; patrz READINESS.md.'
+if ($Algorithm -eq 'sd-sac') {
+    throw 'SD-SAC jest EXPERIMENTAL: wykluczony z pelnych treningow i standardowych pilotow. Patrz SD_SAC_FABLE_5_1_REPORT.md; osobny projekt naprawczy wymaga jawnej zgody.'
 }
+if ($Pilot -and $ConfigDirectory) { throw 'Pilot nie moze uzywac katalogu dlugiej kampanii.' }
+if (@($Seeds | Select-Object -Unique).Count -ne $Seeds.Count) { throw 'Seedy nie moga sie powtarzac.' }
 $comparisonMutex = [System.Threading.Mutex]::new($false, 'Global\TrackmaniaRL.ComparisonController')
 $comparisonMutexAcquired = $false
 try {
@@ -27,6 +31,8 @@ $comparisonLegacyStops = if ($Algorithm -eq 'sd-sac') {
       (Join-Path $comparisonRoot 'artifacts/STOP-dsac'))
 } else { @() }
 function Test-ComparisonStop {
+    if (Test-Path -LiteralPath (Join-Path $comparisonRoot 'artifacts/STOP')) { return $true }
+    if (Test-Path -LiteralPath (Join-Path $comparisonRoot 'artifacts/tmrl-test-comparison/STOP')) { return $true }
     if (Test-Path -LiteralPath $comparisonStop) { return $true }
     foreach ($legacyStop in $comparisonLegacyStops) {
         if (Test-Path -LiteralPath $legacyStop) { return $true }
@@ -55,14 +61,18 @@ function Initialize-ComparisonMap([string]$ConfigPath) {
     & $comparisonPython @comparisonPreflightArgs
     if ($LASTEXITCODE -ne 0) { throw 'Mapa nie jest gotowa. Trening nie zostal uruchomiony.' }
 }
-$comparisonSeeds = if ($Pilot) { @(17) } else { @(17, 29, 43) }
+$comparisonSeeds = if ($Pilot) { @(17) } else { $Seeds }
 foreach ($comparisonSeed in $comparisonSeeds) {
-    if (Test-ComparisonStop) { break }
+    if (Test-ComparisonStop) { throw 'STOP jest aktywny. Kolejka nie uruchomi kolejnego etapu.' }
     Assert-ComparisonIdle
     $comparisonStage = if ($Pilot) { 'pilot' } else { 'full' }
     $comparisonConfig = "experiments/tmrl_test_comparison/configs/$comparisonStage/$Algorithm-s$comparisonSeed.yaml"
-    if ($Pilot -and $Algorithm -eq 'sd-sac') {
-        $comparisonConfig = 'experiments/tmrl_test_comparison/configs/diagnostic/sd-sac-entropy080-behavior-s17.yaml'
+    if ($ConfigDirectory) {
+        $comparisonConfig = Join-Path $ConfigDirectory "$Algorithm-s$comparisonSeed.yaml"
+    }
+    if ($ConfigDirectory) {
+        & $comparisonPython -m experiments.tmrl_test_comparison.campaign config-check $comparisonConfig
+        if ($LASTEXITCODE -ne 0) { throw 'Konfiguracja kampanii jest niezgodna. Nie uruchomiono gry.' }
     }
     if (Test-ComparisonStop) { break }
     Initialize-ComparisonMap $comparisonConfig

@@ -119,8 +119,10 @@ The starter project uses a lidar encoder, a dueling IQN policy and 78 discrete
 control actions. An actor drives while the learner trains from replay.
 
 For continuous off-policy control, use the generated `run-sac.yaml`,
-`run-redq.yaml` or `run-tqc.yaml`. `run-sd-sac.yaml` provides a categorical
-actor-critic with the 78-action table. All four include first-party telemetry models.
+`run-redq.yaml` or `run-tqc.yaml`. The **experimental** `run-sd-sac.yaml` provides a categorical
+actor-critic with the 78-action table. SD-SAC is retained for isolated research and
+excluded from the [multi-computer training campaign](experiments/tmrl_test_comparison/MULTI_COMPUTER_TRAINING.md).
+All four include first-party telemetry models.
 
 Every RL family supports camera observations. The template also generates
 `run-q-vision.yaml`, `run-qr-vision.yaml`, `run-iqn-vision.yaml`,

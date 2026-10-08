@@ -1,0 +1,75 @@
+{
+  "checked_at": "2026-10-08T12:12:26.384209+00:00",
+  "status": "RETIRED_EXPERIMENTAL",
+  "automatic_repair": false,
+  "included_in_campaign": false,
+  "checkpoints": [
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-projected-fastactor-s17\\checkpoints\\distributed-update-00033856.pt",
+      "sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+      "actual_bytes_hashed": 256877715
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-projected-s17\\checkpoints\\distributed-update-00033866.pt",
+      "sha256": "333522bce19b998118da2ca3acde864c17e092f2d821f82d54d861d16256e8dc",
+      "actual_bytes_hashed": 255445381
+    }
+  ],
+  "immutable_pins_valid": true,
+  "prior_stop_pins_valid": true,
+  "all_previously_owned_exact_identities_closed": true,
+  "mutex_free": true,
+  "related_live_python_processes": [],
+  "model_loaded": false,
+  "optimizer_steps": 0,
+  "runtime_launched": false,
+  "retired_at": "2026-10-08T12:13:58.438245+00:00",
+  "automation": {
+    "id": "trackmania-nocne-piloty-i-gotowo-trening-w",
+    "status": "PAUSED",
+    "cadence_minutes": 15,
+    "target_thread_id": "01a100f4-b923-7e73-9401-4aaeaa1360f5"
+  },
+  "archived_mutable_states": [
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\active-queue.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\active-queue.json",
+      "sha256": "c65c58836b9fd0d9f3562223860a510e5e64601fa7f01da817b7a11bb1224ce0"
+    },
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\pending-queue.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\pending-queue.json",
+      "sha256": "52094d120a3e057593e7381e4752a2ebc002efbdaf5fb2d9c416e2499cab0fc7"
+    },
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\pending-sd-projected-actor-lr.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\pending-sd-projected-actor-lr.json",
+      "sha256": "ef0bf58e876ba27f52207a70483eccaf626db1e527310c076db76d074b2b9a82"
+    },
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\pending-sd-projection.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\pending-sd-projection.json",
+      "sha256": "481749b89cb7ae13e5f99b4afb3100b0fa86db66fb53afa64f0c5eb04e30d567"
+    },
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-pending-queue.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\sd-sac-pending-queue.json",
+      "sha256": "328520620659f88a4f8a87cc2b4111ef1c5f23b5a678900a351ba27ff27e9437"
+    },
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08-audit\\repair-state.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\sd-projlr08-audit\\repair-state.json",
+      "sha256": "b2f141b47d85119b6587e20689eaff95c1867f37ef6fade7ad39a37734f00c46"
+    },
+    {
+      "source": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\monitor-state.json",
+      "backup": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-sac-retired-20261008\\original-state\\sd-projlr08\\monitor-state.json",
+      "sha256": "0b41d224515f1ce56ce29f375d4f9b4426c1efc3be72d0c542e7fbd1509b80a1"
+    }
+  ],
+  "immutable_recheck_after_retirement": true,
+  "preserved_frozen_runtime_commit": "9821c23eabfacc989869a71e7b97e99ce006deca",
+  "preserved_stop_files": true,
+  "preserved_checkpoint_replay_and_raw_evidence": true,
+  "code_changes": "No model equations/reward/GNN/replay changes; SD-SAC documentation/status only"
+}

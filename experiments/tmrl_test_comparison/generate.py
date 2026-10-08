@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import argparse
 import copy
 import json
 from pathlib import Path
 
 import yaml
 
+from experiments.tmrl_test_comparison.policy import EXPERIMENTAL_ALGORITHMS, STANDARD_ALGORITHMS
+
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-ALGORITHMS = ("iqn", "q", "qr", "fqf", "sd-sac", "sac", "tqc", "redq", "ppo")
+ALGORITHMS = STANDARD_ALGORITHMS
+DISCRETE_ALGORITHMS = frozenset({"iqn", "q", "qr", "fqf", "sd-sac"})
 SEEDS = (17, 29, 43)
 
 
@@ -178,29 +182,44 @@ def configuration(algorithm: str, seed: int, stage: str) -> dict:
         "algorithm": algorithm,
         "stage": stage,
         "initialization": "random; no demos; no reference filter",
-        "group": "discrete-78" if algorithm in ALGORITHMS[:5] else "continuous-3",
+        "group": "discrete-78" if algorithm in DISCRETE_ALGORITHMS else "continuous-3",
         "encoder_source": "V107I/V108 incident-gated GNN Simba V6",
         "protocol": "experiments/tmrl_test_comparison/README.md",
     }
+    if algorithm in EXPERIMENTAL_ALGORITHMS:
+        base["metadata"].update(support_tier="experimental", included_in_campaign=False)
     return base
 
 
 def main() -> None:
     from trackmaniarl import RunSpec
 
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--include-experimental", action="store_true")
+    args = parser.parse_args()
     paths = []
+    experimental = []
     for stage, seeds in (("pilot", SEEDS[:1]), ("full", SEEDS)):
         directory = HERE / "configs" / stage
         directory.mkdir(parents=True, exist_ok=True)
-        for algorithm in ALGORITHMS:
+        algorithms = ALGORITHMS + (EXPERIMENTAL_ALGORITHMS if args.include_experimental else ())
+        for algorithm in algorithms:
             for seed in seeds:
                 config = configuration(algorithm, seed, stage)
                 RunSpec.model_validate(config)
                 path = directory / f"{algorithm}-s{seed}.yaml"
                 path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
-                paths.append(path.relative_to(ROOT).as_posix())
+                destination = experimental if algorithm in EXPERIMENTAL_ALGORITHMS else paths
+                destination.append(path.relative_to(ROOT).as_posix())
     (HERE / "manifest.json").write_text(json.dumps(paths, indent=2) + "\n", encoding="utf-8")
-    print(f"Generated {len(paths)} configs; no training started.")
+    if args.include_experimental:
+        (HERE / "experimental-manifest.json").write_text(
+            json.dumps(experimental, indent=2) + "\n", encoding="utf-8"
+        )
+    print(
+        f"Generated {len(paths)} standard and {len(experimental)} experimental configs; "
+        "no training started."
+    )
 
 
 if __name__ == "__main__":

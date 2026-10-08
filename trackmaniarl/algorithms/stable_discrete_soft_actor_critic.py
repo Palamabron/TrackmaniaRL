@@ -1,4 +1,4 @@
-"""SD-SAC-inspired discrete SAC with conservative double-Q targets."""
+"""Experimental SD-SAC-inspired learner; excluded from the standard training campaign."""
 
 from __future__ import annotations
 
@@ -126,7 +126,11 @@ class _DiscreteUpdate:
 
 
 class StableDiscreteSoftActorCritic(TorchLearnerBase):
-    """Double-average discrete SAC with behavior or legacy target-policy entropy anchoring."""
+    """Experimental double-average SAC with behavior or legacy entropy anchoring.
+
+    Retained for isolated research and checkpoint compatibility. Trackmania pilots
+    have not qualified this implementation for the multi-computer campaign.
+    """
 
     accepted_model_contracts = frozenset({ModelContract.DISCRETE_ACTOR_CRITIC})
     supports_sequence_training = False

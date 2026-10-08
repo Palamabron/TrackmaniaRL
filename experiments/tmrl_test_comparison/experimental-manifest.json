@@ -1,0 +1,6 @@
+[
+  "experiments/tmrl_test_comparison/configs/pilot/sd-sac-s17.yaml",
+  "experiments/tmrl_test_comparison/configs/full/sd-sac-s17.yaml",
+  "experiments/tmrl_test_comparison/configs/full/sd-sac-s29.yaml",
+  "experiments/tmrl_test_comparison/configs/full/sd-sac-s43.yaml"
+]

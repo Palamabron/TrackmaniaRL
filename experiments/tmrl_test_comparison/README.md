@@ -7,14 +7,24 @@ artykułu ani rozstrzygający ranking algorytmów RL.
 
 ## Zakres
 
-36 samodzielnych YAML-i w `configs/`, lista w `manifest.json`:
+Aktualna kampania na czterech komputerach: pięć algorytmów, trzy seedy,
+8 192 000 kroków/seed, **przygotowana i nieuruchomiona**.
+[Plan, instalacja i nadzór](MULTI_COMPUTER_TRAINING.md).
+SD-SAC jest **experimental**, wyłączony ze standardowych kolejek i przydziałów;
+scheduler napraw jest PAUSED. [Raport i prompt dla Fable 5.1](SD_SAC_FABLE_5_1_REPORT.md).
+
+Generator standardowy zapisuje 32 samodzielne YAML-e dla ośmiu algorytmów;
+lista w `manifest.json`. Cztery zachowane konfiguracje SD-SAC mają oddzielny
+`experimental-manifest.json` i wymagają osobnego zakresu badawczego.
+Historyczny protokół pozostaje dostępny:
 
 | Etap | Seedy na algorytm | Kroki na trening |
 | --- | --- | --- |
 | pilot każdego algorytmu | 17 | 145 408 |
 | full | 17, 29, 43 | 2 048 000 |
+| nowa kampania `weeks` — 5 przydzielonych algorytmów | 17, 29, 43 | 8 192 000 |
 
-Algorytmy dyskretne (78 akcji): Q, QR, IQN, FQF, discrete SAC.
+Algorytmy dyskretne (78 akcji): Q, QR, IQN, FQF. SD-SAC pozostaje eksperymentalny.
 Algorytmy ciągłe (gaz, hamulec, skręt): SAC, TQC, REDQ, PPO.
 Wyniki tych dwóch grup pokazujemy osobno: zmienia się też przestrzeń sterowania.
 
@@ -26,12 +36,11 @@ uczenie. Brak mety po 100 tys. kroków nie dowodzi, że algorytm jest słaby.
 Po pilocie ustalamy konfiguracje i uruchamiamy pełne treningi od zera.
 Nie przenosimy wag ani replayu pilota do pełnych prób.
 
-Przy 20 decyzjach/s sam czas interakcji to około 2,02 h dla każdego pilota
-i 28,44 h/full. Sześć przydzielonych algorytmów na trzech seedach daje
-18 pełnych treningów, nominalnie około 512 h. Wszystkie 27 pełnych
-treningów dostępnych w konfiguracjach to około 768 h.
+Przy 20 decyzjach/s sam czas interakcji to około 2,02 h dla każdego pilota,
+28,44 h/historyczny full i 113,78 h/nowy weeks. Pięć przydzielonych algorytmów
+na trzech seedach daje 15 długich treningów, nominalnie 1706,67 godzin hostów.
 To przeliczenie nominalne: aktualizacje, restarty, opóźnienia i ewaluacja
-mogą wydłużyć rzeczywisty czas. Dlatego pełny zakres wybierzemy po pilocie.
+mogą wydłużyć rzeczywisty czas. Nie łączymy wyników różnych budżetów w jeden ranking.
 
 ## Co jest wspólne
 
@@ -46,7 +55,7 @@ mogą wydłużyć rzeczywisty czas. Dlatego pełny zakres wybierzemy po pilocie.
 - Off-policy: uniform replay 1 mln, batch 256, 1-step, warmup 10 tys.,
   0,25 aktualizacji/krok. Q/QR/IQN/FQF: LR 1e-4, hard target co 1000 aktualizacji.
   Q/QR/IQN/FQF w asynchronicznym `train` stosują epsilon 0,3 → 0,01 przez 500 tys. kroków.
-  Aktorzy SAC/TQC/SD-SAC używają własnych rozkładów; epsilon nie steruje ich eksploracją.
+  Aktorzy SAC/TQC używają własnych rozkładów; epsilon nie steruje ich eksploracją.
   Nie stosujemy historycznej heurystyki przytrzymywania eksploracyjnych akcji.
 - IQN: 64 kwantyle treningowe/target, 32 ewaluacyjne; QR/FQF: 64.
 - PPO: rollout 2048, 10 epok, minibatch 256; bez dodatkowej normalizacji
@@ -77,21 +86,21 @@ Nie trzeba ich kopiować. Uruchamiaj tylko jeden trening sterujący grą naraz.
 # Kontrola bez gry (małe syntetyczne aktualizacje na CPU, pliki tymczasowe):
 .venv/Scripts/python.exe -m experiments.tmrl_test_comparison.check
 
-# Ręczny pełny eksperyment: trzy seedy, każdy z końcową oceną 30 prób:
-./experiments/tmrl_test_comparison/run_assigned.ps1 tqc
+# Nowa kampania: pokazanie przydziału bez jazdy (późniejszy start opisuje plan):
+./experiments/tmrl_test_comparison/run_campaign.ps1 -Worker kamil
 
 # Pierwszy pilot — uruchomi grę przez istniejące połączenie:
 .venv/Scripts/python.exe -m trackmaniarl train experiments/tmrl_test_comparison/configs/pilot/iqn-s17.yaml
 
-# Kolejne algorytmy: zamień iqn na qr, sd-sac, tqc, q, fqf, sac, redq, ppo.
-# Pełny etap: katalog full, seedy 17 / 29 / 43, np.:
+# Kolejne standardowe algorytmy: qr, tqc, q, fqf, sac, redq, ppo.
+# Historyczny pełny etap: katalog full, seedy 17 / 29 / 43, np.:
 .venv/Scripts/python.exe -m trackmaniarl train experiments/tmrl_test_comparison/configs/full/iqn-s29.yaml
 ```
 
 Artefakty trafiają do `artifacts/tmrl-test-comparison/`; CLI nadaje próbom
 identyfikatory. Do powtarzalności zachowaj manifest, resolved config, snapshot
-źródeł, sprzęt, logi i czas trwania każdej próby. Aktualny checkout zawiera
-inne lokalne zmiany, więc sam hash commita nie opisuje całego środowiska.
+źródeł, sprzęt, logi i czas trwania każdej próby. Nowa kampania wymaga czystego
+checkoutu, wspólnego commita i zgodnych przypięć źródeł/konfiguracji/mapy.
 `WandbTracker` odczytuje `WANDB_API_KEY` z prywatnego `.env` w katalogu głównym;
 klucz nie trafia do YAML-i, manifestu ani W&B configu.
 
@@ -101,7 +110,7 @@ Launcher `run_assigned.ps1` wykonuje dla każdego seeda trening i ocenę 30 pró
 PPO wykorzystuje istniejącą końcową ocenę trenera, bez drugich 30 prób.
 Nieudane progi jakości są raportowane jako nieudane; nie unieważniają kompletnego,
 poprawnego pomiaru. STOP, niepełny checkpoint lub błąd wykonania zatrzymują kolejkę.
-Pełne SD-SAC nadal jest zablokowane do sprawdzenia hipotezy z [TUNING.md](TUNING.md).
+SD-SAC jest wyłączony zarówno ze standardowych pilotów, jak i pełnych treningów.
 
 Przy ręcznym użyciu CLI po każdym zakończonym treningu oceniaj **końcowy checkpoint**, 30 przejazdów,
 bez eksploracji i bez filtra referencyjnego. Podstaw rzeczywistą ścieżkę

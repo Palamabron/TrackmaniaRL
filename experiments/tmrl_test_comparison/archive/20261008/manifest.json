@@ -1,0 +1,106 @@
+{
+  "source_commit": "be6a161e",
+  "status": "SUPERSEDED_HISTORY_NOT_LAUNCH_INSTRUCTIONS",
+  "files": [
+    {
+      "original": "READINESS.md",
+      "sha256": "2c536534741f517da7eef171f43b4b04f8252995ef0f70ddbb1b03b9bf70f007",
+      "bytes": 157859
+    },
+    {
+      "original": "HANDOFF.md",
+      "sha256": "01c6b193899789acf02f0c310374158897721127fd444c13067564c8f3e9fc7d",
+      "bytes": 140697
+    },
+    {
+      "original": "TUNING.md",
+      "sha256": "dce0371d45b706c3d617f27aa22429bbe7fca4d530dc3f0a653b9ab5229fab06",
+      "bytes": 143565
+    },
+    {
+      "original": "NIGHT_QUEUE.md",
+      "sha256": "0da8c2214566dc4fb1517f7f2ee85343582774393d8a20e673979dd17b1bb2b3",
+      "bytes": 147548
+    },
+    {
+      "original": "ALGORITHM_AUDIT.md",
+      "sha256": "3630939b65b7d3c8708c03b4dc2134786c83c97f087e46a420668954c0219690",
+      "bytes": 141638
+    },
+    {
+      "original": "SD_SAC_ITERATIVE_REPAIR_20261005.md",
+      "sha256": "65cc3d5af69b849b28aeb54771cc4fe428dcc404b2cdb89feadcd822da1d4179",
+      "bytes": 123916
+    },
+    {
+      "original": "SD_SAC_RESUME_LOOPS_20261007.md",
+      "sha256": "7a6b050d01d99d73290e91d458035209e6b57d2ac6e92c0a51d6b0c99ea16c4a",
+      "bytes": 73454
+    },
+    {
+      "original": "SD_SAC_ACTORFIT_PREPARATION_20261007.md",
+      "sha256": "73ebc21c6fa6b3c8e5318e36e0e06cdb1f2bf01f60bb409990bf99677d205c5f",
+      "bytes": 7028
+    },
+    {
+      "original": "SD_SAC_ACTORFIT_RESULT_20261007.md",
+      "sha256": "7003c4f61640264dcc8f6ccbe41e5eecf49c3f260dde44d4fd2bd21537f72026",
+      "bytes": 5207
+    },
+    {
+      "original": "SD_SAC_CODE_REPAIR_20261006.md",
+      "sha256": "22f7ee7220d7aad0a72babb80ee379088cbd81f24cdca54a544fba822039c1f3",
+      "bytes": 6062
+    },
+    {
+      "original": "SD_SAC_COMPREHENSIVE_REPAIR_20261006.md",
+      "sha256": "24f35d9deaec830544568de56ab577722e7a7884121fe449d11e862009d96e03",
+      "bytes": 13959
+    },
+    {
+      "original": "SD_SAC_CRITIC_AUDIT_20261007.md",
+      "sha256": "8cbb5b85041caa9b1a326ad69c28fcfe100d0597e81c7382e9302ac4e7128d7f",
+      "bytes": 7186
+    },
+    {
+      "original": "SD_SAC_CRITIC_PROBE_20261007.md",
+      "sha256": "7d12f4739c00a98994aee4d04e796d531961b960ff30ffa763583af716fb7345",
+      "bytes": 7844
+    },
+    {
+      "original": "SD_SAC_FOCUS_RECOVERY_20261007.md",
+      "sha256": "809d5fca900da4107431579c57670e64ddf13fa02514dc55cd22bb4bd01400ae",
+      "bytes": 5207
+    },
+    {
+      "original": "SD_SAC_JOINT_CALIBRATION_20261007.md",
+      "sha256": "0f3acec8b858c2c0358ca971c3bf137f1aa294a58db2ce34c69595cf138f161f",
+      "bytes": 9559
+    },
+    {
+      "original": "SD_SAC_NO_MOVEMENT_REPAIR_20261006.md",
+      "sha256": "949f866eb0172d162a7a7d928ee736f277974250ab0f01ecf9fa060e8b65b88f",
+      "bytes": 3259
+    },
+    {
+      "original": "SD_SAC_PROJECTION_REPAIR_20261007.md",
+      "sha256": "554c5770baf45daac81d7c9a01aaace7f264172cb92daa23bc5fd06d19c2ba89",
+      "bytes": 9984
+    },
+    {
+      "original": "SD_SAC_SCHEDULE_20261008.md",
+      "sha256": "d0f49b363fad1f505190c88c1e2df24362622812a7ab417f9644e4708a9c9163",
+      "bytes": 6656
+    },
+    {
+      "original": "REPAIR_PPO_SD_SAC_20261005.md",
+      "sha256": "472a304e5c50f5b94e541aba11ee12e3e38ec258fe55b748d36ae27826ba8b7d",
+      "bytes": 9251
+    },
+    {
+      "original": "QR_REPAIR_20261005.md",
+      "sha256": "e44d63bcd5737504f133baf309e70f0c6787f3b8cd91c3c3775431d7f60c8c32",
+      "bytes": 9038
+    }
+  ]
+}

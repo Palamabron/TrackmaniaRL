@@ -1,0 +1,94 @@
+{
+  "checked_at": "2026-10-08T12:25:43.059468+00:00",
+  "status": "PREPARED_NOT_LAUNCHED_HOST_READINESS_REQUIRED",
+  "tests": {
+    "passed": 73,
+    "failed": 0,
+    "scope": [
+      "tests/integration/runtime/test_training_campaign.py",
+      "tests/integration/runtime/test_comparison_launcher.py",
+      "tests/unit/trackmania/test_comparison_preflight.py"
+    ],
+    "basetemp": ".pytest-cache/r08z"
+  },
+  "ruff": "PASS: 7 changed Python files",
+  "mypy": "PASS: campaign.py and policy.py; follow-imports=skip boundary for existing modules",
+  "standard_configs": 32,
+  "standard_config_semantic_comparison_to_be6a161e": "ALL_EXACT_MATCH",
+  "experimental_configs": 4,
+  "experimental_algorithms": [
+    "sd-sac"
+  ],
+  "synthetic_cpu_updates_and_checkpoint_roundtrips": {
+    "passed": 8,
+    "algorithms": [
+      "iqn",
+      "q",
+      "qr",
+      "fqf",
+      "sac",
+      "tqc",
+      "redq",
+      "ppo"
+    ],
+    "game_connected": false,
+    "original_SD_CP_loaded": false
+  },
+  "long_campaign": {
+    "jobs": 15,
+    "algorithms": 5,
+    "source_dependency_asset_pins": 343,
+    "total_transitions_per_seed": 8192000,
+    "budget_is_planning_assumption": true,
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "final_trials_per_seed": 30,
+    "run_ids_unique": true,
+    "actual_map_files_and_schema": "15 PASS",
+    "verify": "PASS",
+    "worker_job_counts": {
+      "jakub": 6,
+      "borys": 3,
+      "kamil": 3,
+      "kuba-p": 3
+    },
+    "runtime_launched": false,
+    "remote_hosts_validated": false
+  },
+  "powershell": {
+    "syntax_parse": "PASS: 3 scripts, no execution",
+    "actual_script_preview": "BLOCKED by local Windows script setup for all 4 workers",
+    "host_check": {
+      "status": "BLOCKED_BEFORE_LAUNCH",
+      "reason": "Cannot inspect PowerShell policy/modules on this host; launch blocked. Have the operator resolve the Windows setup; no policy was changed.",
+      "policy_changed": false,
+      "script_bypass_used": false
+    }
+  },
+  "archived_original_documents": 20,
+  "archive_hashes": "ALL_PASS",
+  "automation": "PAUSED, original interval 15 minutes preserved, no duplicate",
+  "known_limitations": [
+    "Local PowerShell script execution/module inspection is blocked; resolve through operator-approved Windows setup, no bypass",
+    "Every remote host still needs CUDA, private W&B access, local steering calibration and game readiness/timing checks",
+    "PPO needs a fresh bounded pilot before multi-day commitment; historical 8/10 is not qualification of later 3/10 variant",
+    "Supervisor requires its session to remain alive; it is not an independent system service"
+  ],
+  "verification_repairs": [
+    {
+      "issue": "Initial lint/type findings in new helpers",
+      "resolution": "Corrected before final PASS"
+    },
+    {
+      "issue": "One test run used a long Windows basetemp: 67 passed, 5 checkpoint temporary-path failures",
+      "resolution": "Same code/tests with a shorter workspace-owned basetemp; final 73 passed; no security setting changed"
+    },
+    {
+      "issue": "Get-ExecutionPolicy module unavailable in this host environment",
+      "resolution": "Host readiness now fails closed with an actionable message; tested and actual rejection verified"
+    }
+  ]
+}

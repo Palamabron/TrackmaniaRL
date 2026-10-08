@@ -13,6 +13,7 @@ from pathlib import Path
 
 import psutil
 
+from experiments.tmrl_test_comparison.policy import require_standard_config
 from trackmaniarl.observability.wandb_metrics import _load_wandb_key_from_dotenv
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,6 +26,7 @@ def write_status(directory: Path, state: dict) -> None:
 
 
 def run_one(directory: Path, entry: dict, seconds: float) -> dict:
+    require_standard_config(Path(entry["config"]))
     name = entry["name"]
     stop = directory / f"STOP-{name}"
     if stop.exists():
@@ -111,12 +113,14 @@ def main() -> None:
     if not 0 < args.hours <= 3:
         raise ValueError("Pilot duration must be in (0, 3] hours")
     directory = args.directory.resolve()
+    schedule = json.loads((directory / "schedule.json").read_text(encoding="utf-8"))
+    for entry in schedule:
+        require_standard_config(Path(entry["config"]))
     _load_wandb_key_from_dotenv(str(args.key_source_root.resolve()))
     if not os.environ.get("WANDB_API_KEY"):
         raise RuntimeError("W&B API key is unavailable; refusing an untracked pilot.")
     os.environ["WANDB_MODE"] = "online"
     os.environ.setdefault("WANDB_ENTITY", "dsc-pjatk-warsaw")
-    schedule = json.loads((directory / "schedule.json").read_text(encoding="utf-8"))
     # An interrupted schedule is resumed deliberately using a new directory.
     if (directory / "history.jsonl").exists():
         raise RuntimeError("Schedule already has history; refusing duplicate training.")
