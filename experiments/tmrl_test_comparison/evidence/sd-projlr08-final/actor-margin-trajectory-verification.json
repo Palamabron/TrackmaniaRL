@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-10-08T06:01:23.362056+00:00",
+  "status": "COMPLETE",
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 33500,
+      "created_time": 1791439025.8069744
+    },
+    {
+      "pid": 63128,
+      "created_time": 1791439025.8162208
+    },
+    {
+      "pid": 66628,
+      "created_time": 1791439025.8625708
+    }
+  ],
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "matched_rows_and_baseline_endpoints": true,
+  "decision": "Both ordinary seeds have held-start agreement100% at48 and0 at64 while general reverseKL falls .20 to .125; .25 mixture no agreement at sampled trace times; start-only both100% at48/64 but general calibration guard fails. No qualifying runtime candidate.",
+  "next_hypothesis": "All-state greedy-mode hinge auxiliary on ordinary rows: objective aligns target action ranking while retaining soft-distribution fit. Offline diagnostic only; no extra start sampling or runtime change."
+}
