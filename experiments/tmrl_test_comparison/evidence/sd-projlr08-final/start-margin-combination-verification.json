@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-08T06:07:14.966695+00:00",
+  "status": "COMPLETE",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 82856,
+      "created_time": 1791439504.653939
+    },
+    {
+      "pid": 73208,
+      "created_time": 1791439504.6642325
+    },
+    {
+      "pid": 71384,
+      "created_time": 1791439504.7044165
+    }
+  ],
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "decision": "Both seeds100% held-start agreement but general greedy regret .00082685/.00091310 fails 1.2xordinary (.00064274/.00062213) and margin-only controls. Forward/reverseKL guards pass. Reject runtime promotion; locate per-row greedy-regret tradeoff before another candidate."
+}

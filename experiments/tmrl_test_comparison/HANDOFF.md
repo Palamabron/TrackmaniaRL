@@ -1,3 +1,9 @@
+## 2026-10-08 — fixed combination fits starts but fails greedy-regret protection
+
+The standalone all-state margin probe completed 384 steps in87.47s: coefficient0.1 improves general held reverse-KL to0.09108/0.09931, but both seeds still miss all starts. The subsequent fixed0.25-start-loss plus0.1-margin combination fits all27 held-episode starts in both seeds. General held forward-KL0.06339/0.06397 and reverse-KL0.09081/0.09135 pass the matched-control limits, but greedy regret0.00082685/0.00091310 exceeds both ordinary and margin-only 20% drift guards. The combination is rejected for runtime promotion; start success alone is insufficient. This is frozen-Q diagnostic evidence, not driving or a validated critic.
+
+All original checkpoint/model/Adam pins, actual SHA, STOP and exact owned-process closure checks pass. Evidence includes `greedy-margin.json`, `start-margin-combination.json`, their verification files, and `greedy-tradeoff-rows.json` in `evidence/sd-projlr08-final`. The paired row analysis identifies where greedy regret worsens without rereading or updating any model. Next inspect replay metadata for those rows and recurring action/context tradeoffs before another candidate. Full SD remains BLOCKED; no new pilot is launched.
+
 ## 2026-10-08 — repeated greedy-margin reversal; auxiliary probe pending
 
 The matched trajectory audit completed 384 disposable actor steps in 202.56 seconds. Both ordinary-fit seeds reach 100% held-start agreement at step48 and lose it by step64, while general held reverse-KL improves from about0.20 to0.125. The 0.25 mixture has no correct start mode at the sampled trace points; start-only fits starts but fails general calibration. Ordinary endpoints reproduce prior metrics within1e-6. Original checkpoint/model/Adam, exact process closure, pins and STOP verified. This supports a soft-distribution-versus-greedy-mode fitting tradeoff on these saved data, not critic correctness or a driving fix.

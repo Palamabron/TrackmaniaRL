@@ -1,0 +1,313 @@
+{
+  "status": "COMPLETE",
+  "checked_at": "2026-10-08T06:07:14.966695+00:00",
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "optimizer_steps": 0,
+  "model_reads": 0,
+  "source_reports": [
+    "actor-objectives.json",
+    "greedy-margin.json",
+    "start-margin-combination.json"
+  ],
+  "paired_tradeoff": [
+    {
+      "seed": 17,
+      "worsened_rows": 62,
+      "improved_rows": 37,
+      "mean_regret_increase": 0.0002912338823080063,
+      "top20_positive_share": 0.6048887705952555,
+      "worst_rows": [
+        {
+          "row": 122666,
+          "increase": 0.012440681457519531,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108276,
+          "increase": 0.008580207824707031,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121966,
+          "increase": 0.008260726928710938,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 12515,
+          "increase": 0.007533073425292969,
+          "ordinary_action": 35,
+          "margin_action": 35,
+          "combination_action": 56
+        },
+        {
+          "row": 110339,
+          "increase": 0.0074596405029296875,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120724,
+          "increase": 0.0074310302734375,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110959,
+          "increase": 0.007143974304199219,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 75337,
+          "increase": 0.00684356689453125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108857,
+          "increase": 0.006839752197265625,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121799,
+          "increase": 0.006831169128417969,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90648,
+          "increase": 0.006630897521972656,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 111217,
+          "increase": 0.006237030029296875,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120831,
+          "increase": 0.0061054229736328125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 119247,
+          "increase": 0.005991935729980469,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90621,
+          "increase": 0.0057220458984375,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110141,
+          "increase": 0.005016326904296875,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 107345,
+          "increase": 0.0049610137939453125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110143,
+          "increase": 0.004918098449707031,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 107918,
+          "increase": 0.0048046112060546875,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90585,
+          "increase": 0.0046253204345703125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        }
+      ]
+    },
+    {
+      "seed": 29,
+      "worsened_rows": 71,
+      "improved_rows": 30,
+      "mean_regret_increase": 0.00039465539157390594,
+      "top20_positive_share": 0.5653548551245211,
+      "worst_rows": [
+        {
+          "row": 122666,
+          "increase": 0.012440681457519531,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 83696,
+          "increase": 0.0108795166015625,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108276,
+          "increase": 0.008580207824707031,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121966,
+          "increase": 0.008260726928710938,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108301,
+          "increase": 0.007785797119140625,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110339,
+          "increase": 0.0074596405029296875,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120724,
+          "increase": 0.0074310302734375,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 110959,
+          "increase": 0.007143974304199219,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 75337,
+          "increase": 0.00684356689453125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 108857,
+          "increase": 0.006839752197265625,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121799,
+          "increase": 0.006831169128417969,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90648,
+          "increase": 0.006630897521972656,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 111217,
+          "increase": 0.006237030029296875,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 119278,
+          "increase": 0.00617218017578125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 120831,
+          "increase": 0.0061054229736328125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 119247,
+          "increase": 0.005991935729980469,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 111254,
+          "increase": 0.0059108734130859375,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 90621,
+          "increase": 0.0057220458984375,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 122848,
+          "increase": 0.005542755126953125,
+          "ordinary_action": 56,
+          "margin_action": 56,
+          "combination_action": 35
+        },
+        {
+          "row": 121153,
+          "increase": 0.005290031433105469,
+          "ordinary_action": 35,
+          "margin_action": 35,
+          "combination_action": 56
+        }
+      ]
+    }
+  ],
+  "limitation": "Saved frozen-Q greedy regret, not ground truth or driving; repeatedly inspected diagnostic holdout."
+}

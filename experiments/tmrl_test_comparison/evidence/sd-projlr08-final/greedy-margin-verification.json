@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-10-08T06:04:11.048124+00:00",
+  "status": "COMPLETE",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "all_owned_exact_closed": true,
+  "processes": [
+    {
+      "pid": 4448,
+      "created_time": 1791439309.4047017
+    },
+    {
+      "pid": 44904,
+      "created_time": 1791439309.4184692
+    },
+    {
+      "pid": 51828,
+      "created_time": 1791439309.4664552
+    }
+  ],
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "numerical_hinge_invariants_passed": 5,
+  "decision": "All-state margin coefficients .01/.1 improve general held metrics but both seeds still have0 held-start agreement. Reject standalone auxiliary as runtime fix; next only a fixed .25-start/.1-margin combination diagnostic with existing controls, no grid expansion."
+}
