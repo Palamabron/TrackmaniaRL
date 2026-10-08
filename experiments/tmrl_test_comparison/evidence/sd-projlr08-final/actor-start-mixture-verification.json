@@ -1,0 +1,23 @@
+{
+  "checked_at": "2026-10-08T05:46:49.690152+00:00",
+  "status": "COMPLETE",
+  "all_owned_closed": true,
+  "owned_processes": [
+    {
+      "pid": 65620,
+      "created_time": 1791438024.3426428,
+      "priority": 64
+    },
+    {
+      "pid": 74432,
+      "created_time": 1791438024.3286068,
+      "priority": 32
+    }
+  ],
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_adam_unchanged": true,
+  "decision": "Reject all tested mixture fractions: held-start agreement 0 for both seeds at every fraction; general held guards pass. No runtime candidate.",
+  "next_diagnostic": "Zero-update parameter-gradient conflict audit of start versus ordinary fitting losses; inspect harness first, no duplicate optimizer grid."
+}

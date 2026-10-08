@@ -1,3 +1,9 @@
+## 2026-10-08 — completed start-loss mixture diagnostic
+
+The bounded offline probe completed all 384 disposable actor steps in 160.48 seconds. Fractions 0.01, 0.1 and 0.25 passed all general held forward-KL, reverse-KL and greedy-regret limits against their matched ordinary-fit baseline, but every fraction and both seeds retained 0% held-start agreement. No tested fraction qualifies. Lower start fitting error alone does not justify a runtime change or a new pilot.
+
+Original checkpoint SHA, models and saved Adam remain unchanged; both exact owned processes are closed, all immutable pins are valid, and no new STOP is present. Evidence: `evidence/sd-projlr08-final/actor-start-mixture.json` and its verification. Full SD training remains BLOCKED. Next: inspect parameter-gradient conflict between start and ordinary fitting losses with a zero-update CPU diagnostic before selecting any further fitting experiment. Do not repeat or extend the completed grid.
+
 ## 8 October 2026 05:41 UTC - bounded start/general fitting tradeoff running
 
 New explicit --fit-scope mixture compares fixed start-loss fractions.01/.1/.25,seeds17/29,64 projected disposable saved-Adam actor steps each,LR.0009,384 total,300s copy-compute cap. Loss=(1-fraction)*ordinary mixed forward-KL+behavior-anchor loss + fraction*fit-start forward-KL+behavior-anchor loss. Each component draws128 rows with replacement;ordinary mixed RNG is paired with the completed baseline,start RNG is separate. Frozen original mean-Q,alpha.01 and behavior references stay fixed;no critic/target update or persistent policy.
