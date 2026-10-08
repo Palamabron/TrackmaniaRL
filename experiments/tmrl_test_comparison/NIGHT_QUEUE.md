@@ -1,3 +1,15 @@
+> Update 2026-10-08 06:57 UTC — terminal-history observability audit COMPLETE; zero optimizer/runtime updates.
+>
+> Frozen coordinator intentionally retains only behavior entropy in online replay info. First diagnostic found all terminal-reason/history metadata absent; its output is preserved. Extended diagnostic joins all130 terminal rows to train/episode events by exact episode name and asserts episode steps=row step+1. Previous transition links/episode/step continuity also PASS, but causal pre-action progress counters are absent from replay, so no counter-conditioned fit is claimed.
+>
+> Matched endpoint reasons:69 no_progress,37 slow_progress,24 time_limit. Both-critic terminal-reward MAE: no_progress4.2454/4.2379, slow_progress4.6690/4.6947, time_limit10.5076/10.5670. Time-limit rows contribute35.18% of total absolute meanQ terminal error despite18.46% of terminal rows. No-progress endpoints all have steps_since=100; slow-progress window predicates PASS. Endpoint metadata is post-action and cannot be used as current-observation input.
+>
+> Frozen V5 observation shapes/context/recovery layouts and V2 motion construction omit explicit reward no-progress age, reward progress-window aggregate and absolute race time. They include frame advance and decaying incident memory, which are different signals. This omission does not establish non-identifiability from other features, a causal explanation of failed driving, or permission to alter shared model/reward/GNN/replay.
+>
+> Evidence terminal-history.json, terminal-history-events.json and terminal-history-verification.json preserved in evidence/sd-projlr08-final. Actual CP SHA/fingerprint/model/all-optimizer invariants PASS, immutable pins/STOP valid, no offline process remains. Short foreground runs ended before capture; no exact PID/ctime claim. Source audit_sd_sac_terminal_history.py, Ruff/mypy PASS. No new pilot; full SD BLOCKED.
+>
+> Next: inspect time-limit termination versus truncation semantics and clock observability in the intended SD-SAC objective before any finite-step or runtime change. Do not automatically relabel time limits or add shared features. ACTIVE5min.
+
 > Update 2026-10-08 06:50 UTC — terminal observation alias / neighbor audit COMPLETE; zero updates.
 >
 > Exact decoded current-observation hashes cover all145424 current and145466 predecessor replay rows. No terminal/nonterminal exact aliases in either snapshot (130/181 terminal rows). Nearest-neighbor audit uses fixed4096 random nonterminals plus all immediate terminal predecessors, giving4224/4269 candidates. Episode/step/action/reward/termination metadata and per-branch raw RMS differences are preserved. Current median branch-scaled distance .20932 for any neighbor, .25456 across episodes, .65917 for the same action across episodes; predecessor .17414/.21311/.50606. These are different populations with separately scaled distances, not paired causal evidence or a classifier.

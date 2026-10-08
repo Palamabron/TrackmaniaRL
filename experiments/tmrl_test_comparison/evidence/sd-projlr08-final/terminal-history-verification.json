@@ -1,0 +1,20 @@
+{
+  "status": "COMPLETE",
+  "verified_at": "2026-10-08T06:56:55.909130+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "original_model_all_optimizers_unchanged": true,
+  "pins_valid": true,
+  "no_new_stop": true,
+  "offline_process_inventory": [],
+  "identity_capture": "Short foreground runs completed before capture; no exact PID/ctime claim.",
+  "all130_terminal_episode_endpoints_matched": true,
+  "all_previous_links_validated": true,
+  "no_progress_and_slow_progress_endpoint_predicates_pass": true,
+  "time_limit_absolute_error_share": 0.3518315483947526,
+  "initial_execution": "terminal-history.json identified absent replay metadata; extended diagnostic joins episode logs in new terminal-history-events.json, without optimizer updates.",
+  "limitations": [
+    "Missing counters do not prove non-identifiability or failure causality.",
+    "Post-action metadata must not be used as current-observation training input.",
+    "Terminal errors describe these rows, not policy value truth for other states."
+  ]
+}
