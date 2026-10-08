@@ -1,0 +1,32 @@
+{
+  "status": "COMPLETE",
+  "verified_at": "2026-10-08T07:00:54.655038+00:00",
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "pins_valid": true,
+  "no_new_stop": true,
+  "checkpoint_models_optimizers_not_loaded_or_updated": true,
+  "optimizer_steps": 0,
+  "controller_created": false,
+  "offline_process_inventory": [],
+  "identity_capture": "Short foreground control ended before capture; no exact PID/ctime claim.",
+  "frozen_source_sha256": {
+    "trackmaniarl/trackmania/environment_step.py": "af14e76e77ec419b40321fcbac09e12d77c7cea5ad0b59f0cd74c3ff72fb3b5c",
+    "trackmaniarl/trackmania/reward_step.py": "1f3a0a7bb834ddf44d5623e2eb9d637055c584152a3d478b6e11478d9c4c27ea",
+    "trackmaniarl/trackmania/reward_components.py": "f085939973f5de0d503fb6449b566f0048ed38237f47afdace2a63fbc92b9a72",
+    "trackmaniarl/algorithms/stable_discrete_soft_actor_critic.py": "de8cc54bbff29b6c1317f6986ded1172594c6d4945371d39a0bb50d6c7be99f7",
+    "trackmaniarl/core/replay/n_step.py": "41c00e89c539d2b111cadf7ab1042fce1bac7b7cb2da400f28388a7170e276bb",
+    "tests/integration/trackmania/test_time_attack_reward.py": "7ad0e5d601ab2f1582020b5e0c3b4e33d588b61e1eb8f04f96d4acb63c363855",
+    "tests/unit/core/test_n_step_replay.py": "fcaf32b93a044b4eeaf792032a0a211a1242c4a9f583e70473e9d92cb95c2ba6"
+  },
+  "tests": {
+    "passed": 3,
+    "names": [
+      "test_race_time_limit_is_a_penalized_terminal_transition",
+      "test_n_step_return_stops_on_termination_and_does_not_bootstrap",
+      "test_truncation_keeps_the_bootstrap_discount"
+    ],
+    "elapsed_seconds": 0.67,
+    "warning": "Unknown pytest cache_dir option with cacheprovider disabled; all tests passed."
+  },
+  "conclusion": "Configured time limit is intentional penalized terminal; automatic truncation relabeling rejected. Clock-shift alias is synthetic, not observed replay alias or driving-causality proof."
+}

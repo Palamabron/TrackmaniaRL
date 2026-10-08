@@ -1,0 +1,41 @@
+{
+  "status": "COMPLETE",
+  "optimizer_steps": 0,
+  "controller_created": false,
+  "cpu_threads": 1,
+  "priority": "IDLE",
+  "frames": [
+    {
+      "race_time_ms": [
+        0.0,
+        149900.0
+      ],
+      "max_branch_error": {
+        "context": 0.0,
+        "physics": 0.0,
+        "recovery": 0.0,
+        "track": 0.0
+      }
+    },
+    {
+      "race_time_ms": [
+        50.0,
+        149950.0
+      ],
+      "max_branch_error": {
+        "context": 0.0,
+        "physics": 0.0,
+        "recovery": 0.0,
+        "track": 0.0
+      }
+    }
+  ],
+  "maximum_race_time_s": 150,
+  "finding": "The actual V5 transform maps these clock-shifted equal-motion histories to identical prepared observations.",
+  "semantics": "The configured race deadline is a penalized terminal; collection interruptions are truncations.",
+  "limitations": [
+    "Synthetic representation control, not an alias found in saved replay.",
+    "No proof that clock omission causes failed starts or driving failure.",
+    "Changing terminal to truncated would change the tested task objective."
+  ]
+}

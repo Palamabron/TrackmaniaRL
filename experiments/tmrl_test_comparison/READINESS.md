@@ -1,3 +1,13 @@
+> Update 2026-10-08 07:02 UTC — clock/timeout semantics control COMPLETE; zero optimizer/runtime updates.
+>
+> Frozen reward and environment intentionally implement maximum_race_time_s as a penalized terminal; collection/telemetry interruptions are separate truncations. Three existing focused tests PASS: penalized race deadline, terminal zero bootstrap, truncation preserving bootstrap. SD-SAC target construction respects the replay discount. Automatic time-limit-to-truncation relabeling would change the tested task objective and is rejected.
+>
+> Actual frozen V5 feature transform on two synthetic identical-motion histories with clock pairs0/149900ms then50/149950ms produces exactly identical context/physics/recovery/track tensors (all max errors0). This establishes clock-shift information loss for this control, not an exact alias observed in replay and not failure causality. Absolute race time is used by termination but is not represented explicitly by this pipeline. No shared feature/model/reward/GNN/replay changes are authorized by this finding alone.
+>
+> Evidence clock-semantics.json and clock-semantics-verification.json under evidence/sd-projlr08-final; source audit_sd_sac_clock_semantics.py, Ruff/mypy PASS. Actual CP SHA unchanged, immutable pins/STOP valid, no remaining process. Checkpoint models/optimizers were not loaded or updated. Short foreground control ended before capture; no exact PID/ctime claim. Pytest emitted only the documented unknown cache_dir option warning with cacheprovider disabled;3passed.
+>
+> Next scoped zero-update diagnostic: critic parameter-gradient alignment by terminal reason (including time_limit) versus ordinary nonterminal Bellman loss, to understand why earlier terminal calibration worsened general estimates. Inspect existing harness before loading; no optimizer updates, runtime promotion, architecture changes or blind coefficient grid. ACTIVE5min; full SD BLOCKED.
+
 > Update 2026-10-08 06:57 UTC — terminal-history observability audit COMPLETE; zero optimizer/runtime updates.
 >
 > Frozen coordinator intentionally retains only behavior entropy in online replay info. First diagnostic found all terminal-reason/history metadata absent; its output is preserved. Extended diagnostic joins all130 terminal rows to train/episode events by exact episode name and asserts episode steps=row step+1. Previous transition links/episode/step continuity also PASS, but causal pre-action progress counters are absent from replay, so no counter-conditioned fit is claimed.
