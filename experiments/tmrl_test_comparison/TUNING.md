@@ -1,3 +1,13 @@
+## 2026-10-08 — intermediate actor-margin trajectories pending
+
+A bounded CPU single-thread diagnostic is running on disposable saved-Adam actor copies: ordinary fitting, 0.25 start-loss mixture and start-only fitting, seeds17/29, 64 steps each (384 total), fixed 300-second copy-compute cap. It records intermediate held start margins against actions8/56 and general held calibration at steps0/1/4/8/16/32/48/64. The endpoints already have evidence; the new purpose is to locate the reversal that the zero-update direction audit cannot explain. No new mixture fraction, runtime setting, controller, critic update or persisted model is introduced. Result PENDING; no pilot promotion from partial fitting.
+
+## 2026-10-08 — saved-Adam direction and start-margin audit
+
+The zero-update CPU audit completed in 8.67 seconds. The analytic Adam displacement matches PyTorch on eight numerical controls (saved/fresh state, weight decay and AMSGrad). With ordinary fitting, saved Adam gives a negative local target35-versus8 margin derivative (-0.000995); fresh Adam and clearing only the first moment make it positive (+0.04402/+0.00740). However, all six combinations of ordinary/start-only fitting and saved/fresh/cleared-first-moment Adam worsen target35 versus action56 locally. Even start-only fitting does so initially, although the completed 64-step start-only probe eventually selects35. Lower held start loss therefore does not imply an immediate greedy-margin improvement. These are first-order directional measurements, not actual finite-step outcomes, and do not justify resetting Adam or launching a pilot.
+
+Original checkpoint SHA, model and Adam remain unchanged; all captured exact identities are closed, episode rows match, pins and STOP pass. Evidence: `evidence/sd-projlr08-final/adam-directions.json` and verification. Full SD remains BLOCKED. Next inspect intermediate finite-step margins on matched ordinary, 0.25-mixture and start-only disposable copies to locate the reversal and interference; do not expand the mixture grid blindly.
+
 ## 2026-10-08 — zero-update actor gradient audit
 
 The CPU single-thread audit completed in 7.05 seconds with zero optimizer steps. At the original saved actor, tangent gradient cosine is +0.44116 for ordinary fit versus fit starts, +0.42375 for fit starts versus general held rows, and approximately 1 for fit versus held starts. Nine parameter tensors nevertheless have negative tangent dot products (listed in verification); the aggregate result does not support a global initial gradient-conflict explanation. These local gradients are not saved-Adam steps and do not establish compatibility after finite updates or driving quality.

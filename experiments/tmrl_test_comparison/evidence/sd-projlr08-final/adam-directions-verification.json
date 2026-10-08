@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-10-08T05:56:10.317524+00:00",
+  "status": "COMPLETE",
+  "all_owned_exact_identities_closed": true,
+  "processes": [
+    {
+      "pid": 67120,
+      "created_time": 1791438897.24418
+    },
+    {
+      "pid": 79324,
+      "created_time": 1791438897.2542078
+    },
+    {
+      "pid": 62604,
+      "created_time": 1791438897.3108678
+    }
+  ],
+  "actual_checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "immutable_pins_valid": true,
+  "new_stop": false,
+  "original_model_adam_unchanged": true,
+  "matched_episode_rows": true,
+  "analytic_adam_numerical_reference_cases_passed": 8,
+  "decision": "Mixed saved-Adam direction lowers held start loss but worsens target35 margins against actions8 and56. Fresh/zero-first-moment improves margin vs8 but worsens vs56; all six directions worsen vs56, including start-only which later fits. No optimizer reset or new pilot justified by local derivatives. Need finite-step trajectory diagnosis."
+}
