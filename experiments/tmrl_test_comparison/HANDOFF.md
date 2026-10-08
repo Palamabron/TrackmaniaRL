@@ -1,3 +1,13 @@
+## 8 October 2026 05:01 UTC - mean/min and target-clipping audit
+
+Completed zero-update CPU idle/single-thread inference on both immutable projected checkpoints. The current mean-Q actor target ranks action35 (gas1) first on all131 saved starts; Q1 and Q2 individually rank no-gas actions56/62 first. Therefore the preceding no-gas finding for the individual critics does not mean their averaged actor target also prefers no gas. Mean-Q gas mass56.03%,best-gas advantage0.00213; min-Q gas mass51.00%,best-gas advantage-0.00176. Predecessor mean-Q gas mass93.77%,advantage0.02486. These are different saved replay states,not a paired causal comparison. Switching actor targets to min-Q is not supported as a fix for this failed start behavior.
+
+Terminal clipping blocks the selected loss branch for only1/130 samples per critic (0.77%) in the current checkpoint,versus0/181 and1/181 previously. Nonterminal blocked fractions0%. This checkpoint snapshot does not explain terminal MAE5.53 through pervasive clipped gradients and cannot reconstruct historical gradients. Terminal bootstrap and mean-minus-min target gap are exactly0; terminal targets match immediate rewards. Nonterminal mean-minus-min target gap0.01718 on1024 rows,entropy bootstrap0.03785. These counterfactual targets do not establish true Q values.
+
+New runnable audit: audit_sd_sac_target_calibration.py. Ruff and boundary-scoped mypy pass; two real CPU inference executions pass fingerprint/SHA/model immutability checks. Terminal-zero-bootstrap,target-equals-reward,and mean>=min invariants pass. No optimizer/controller/training run created. Evidence: [current](evidence/sd-projlr08-final/target-calibration.json),[predecessor](evidence/sd-projlr08-final/predecessor-target-calibration.json).
+
+Next diagnostic remains offline: test whether projected disposable critic+savedAdam copies can reduce episode-held terminal error while preserving fixed nonterminal Bellman targets under a relative20% drift guard; include an unmodified-loss baseline and paired seeds. Earlier unprojected checkpoint weighting probes failed the guard; do not promote terminal weighting or claim an architecture bottleneck. Only a positive,repeatable scoped result can justify a fresh pilot. Current sd-projlr08 remains closed;full BLOCKED;automationACTIVE5min. No new controller launched.
+
 ## 8 October 2026 04:55 UTC - fast actor pilot failed; offline diagnosis
 
 sd-projlr08 completed normally at04:50:06 UTC. Real evaluation: **0/10 finishes, mean progress1.060849%**, versus predecessor2/10 and51.558708%. All other gate checks passed: ten complete correct-UID trials,1446 valid timing measurements,max50ms,no controller/telemetry errors; skipped frames2906,max6. Full training remains BLOCKED. No next pilot launched.
