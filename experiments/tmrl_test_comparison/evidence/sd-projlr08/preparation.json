@@ -1,0 +1,15 @@
+{
+  "status": "PREPARED_NOT_LAUNCHED",
+  "prepared_at": "2026-10-08T02:17:11.029961+00:00",
+  "run_id": "tmrl-sd-sac-projected-fastactor-s17",
+  "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+  "source_commit": "9821c23eabfacc989869a71e7b97e99ce006deca",
+  "run_fingerprint": "c022d63558596fe1a341d616f4d83681b2d9435ad90d966ea645cd6fe2cc0fb7",
+  "not_before": "2026-10-08T02:15:00+00:00",
+  "latest_start": "2026-10-08T02:45:00+00:00",
+  "source_pin_count": 1883,
+  "original_checkpoint_sha256": "333522bce19b998118da2ca3acde864c17e092f2d821f82d54d861d16256e8dc",
+  "controller_created": false,
+  "run_directory_created": false,
+  "live_preflight": "Deferred until scheduled launch; game readiness unverified"
+}

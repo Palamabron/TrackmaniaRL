@@ -1,0 +1,213 @@
+{
+  "at": "2026-10-08T02:10:38.615134+00:00",
+  "all_owned_closed": true,
+  "mutex_free": true,
+  "immutable_pins_valid": true,
+  "pin_count": 1865,
+  "owned_processes": [
+    {
+      "pid": 69244,
+      "created_time": 1791415815.4966652
+    },
+    {
+      "pid": 80912,
+      "created_time": 1791424696.6915014
+    },
+    {
+      "pid": 49372,
+      "created_time": 1791424701.6021416
+    },
+    {
+      "pid": 78432,
+      "created_time": 1791424703.9402256
+    },
+    {
+      "pid": 71348,
+      "created_time": 1791424712.020326
+    },
+    {
+      "pid": 36900,
+      "created_time": 1791424713.7691603
+    },
+    {
+      "pid": 76480,
+      "created_time": 1791424690.1621587
+    },
+    {
+      "pid": 45184,
+      "created_time": 1791424693.0582883
+    },
+    {
+      "pid": 43460,
+      "created_time": 1791415824.2205243
+    },
+    {
+      "pid": 49440,
+      "created_time": 1791415815.436516
+    },
+    {
+      "pid": 61764,
+      "created_time": 1791415824.4001553
+    },
+    {
+      "pid": 14096,
+      "created_time": 1791415824.4130433
+    },
+    {
+      "pid": 23880,
+      "created_time": 1791415824.2320411
+    },
+    {
+      "pid": 36876,
+      "created_time": 1791415827.4602108
+    },
+    {
+      "pid": 71012,
+      "created_time": 1791415831.485872
+    },
+    {
+      "pid": 32052,
+      "created_time": 1791415831.498961
+    },
+    {
+      "pid": 64212,
+      "created_time": 1791415835.0901017
+    },
+    {
+      "pid": 52132,
+      "created_time": 1791415835.101617
+    },
+    {
+      "pid": 29344,
+      "created_time": 1791415842.3867807
+    },
+    {
+      "pid": 81692,
+      "created_time": 1791415845.0018609
+    },
+    {
+      "pid": 80212,
+      "created_time": 1791415845.009004
+    },
+    {
+      "pid": 66616,
+      "created_time": 1791415844.7768004
+    },
+    {
+      "pid": 18288,
+      "created_time": 1791415845.0354447
+    },
+    {
+      "pid": 67032,
+      "created_time": 1791415848.5371854
+    },
+    {
+      "pid": 82780,
+      "created_time": 1791415848.549484
+    },
+    {
+      "pid": 35448,
+      "created_time": 1791415850.3876052
+    },
+    {
+      "pid": 34264,
+      "created_time": 1791415850.3977983
+    },
+    {
+      "pid": 39308,
+      "created_time": 1791415852.6543968
+    },
+    {
+      "pid": 28404,
+      "created_time": 1791424681.7852392
+    },
+    {
+      "pid": 45908,
+      "created_time": 1791424681.8009627
+    },
+    {
+      "pid": 35708,
+      "created_time": 1791424690.1497002
+    },
+    {
+      "pid": 83472,
+      "created_time": 1791424696.676999
+    },
+    {
+      "pid": 80416,
+      "created_time": 1791424701.077658
+    },
+    {
+      "pid": 71164,
+      "created_time": 1791424701.0836642
+    },
+    {
+      "pid": 75840,
+      "created_time": 1791424711.92021
+    },
+    {
+      "pid": 79804,
+      "created_time": 1791424711.9351766
+    },
+    {
+      "pid": 11536,
+      "created_time": 1791424712.1733484
+    },
+    {
+      "pid": 75880,
+      "created_time": 1791424712.1866808
+    },
+    {
+      "pid": 77992,
+      "created_time": 1791424712.8820803
+    },
+    {
+      "pid": 39144,
+      "created_time": 1791424713.5746784
+    },
+    {
+      "pid": 77536,
+      "created_time": 1791424713.5844505
+    },
+    {
+      "pid": 44820,
+      "created_time": 1791415850.1668484
+    },
+    {
+      "pid": 39640,
+      "created_time": 1791415850.6815684
+    }
+  ],
+  "normal_closure": {
+    "at": "2026-10-08T02:07:38.482862+00:00",
+    "forced_owned_pids": [],
+    "reason": "Owned processes closed normally"
+  },
+  "new_or_changed_STOP_present": false,
+  "finishes": 2,
+  "decision": {
+    "gate_passed": false,
+    "checks": {
+      "complete_accounted_drained_finite_checkpoint": true,
+      "matching_checkpoint_sha": true,
+      "ten_complete_trials": true,
+      "all_map_uids_valid": true,
+      "all_timing_valid_max100ms": true,
+      "no_controller_or_telemetry_errors": true,
+      "telemetry_skips_reported": true,
+      "at_least_eight_finishes": false
+    },
+    "finishes": 2,
+    "trials": 10,
+    "median_finish_time_s": 87.675,
+    "checkpoint_sha256": "333522bce19b998118da2ca3acde864c17e092f2d821f82d54d861d16256e8dc",
+    "diagnostic_only": true,
+    "full_training_complete": false,
+    "automatic_full_training": false,
+    "three_seed_training_qualified": false,
+    "full_training_blocked": true
+  },
+  "artifact": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-projected-s17-eval10-benchmark-20261008T015819987010\\evaluation.json",
+  "mean_progress_pct": 51.558708191354754,
+  "previous_checkpoint_sha256": "a243b4f50d210d882860b74e4626ff42b369c3f1c2fd78a25fe81068d05906d7"
+}

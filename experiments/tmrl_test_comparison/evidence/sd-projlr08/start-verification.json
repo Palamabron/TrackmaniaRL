@@ -1,0 +1,73 @@
+{
+  "checked_at": "2026-10-08T02:20:22.859382+00:00",
+  "stage": "training_warmup",
+  "identities": {
+    "runner": {
+      "pid": 74772,
+      "created_time": 1791425915.08237
+    },
+    "guard": {
+      "pid": 8472,
+      "created_time": 1791425925.4875467
+    },
+    "learner": {
+      "pid": 7632,
+      "created_time": 1791425935.6730132
+    },
+    "actor": {
+      "pid": 66896,
+      "created_time": 1791425935.6848211
+    }
+  },
+  "last_ingest": {
+    "timestamp_utc": "2026-10-08T02:19:23.772516+00:00",
+    "transitions": 205,
+    "updates": 0
+  },
+  "errors": [],
+  "issues": [],
+  "consecutive_healthy_checks": 0,
+  "first_healthy_at": null,
+  "cadence_minutes": 5,
+  "checkpoint": null,
+  "launch": {
+    "started": "2026-10-08T02:18:45.468189+00:00",
+    "save_deadline": "2026-10-08T06:08:45.468189+00:00",
+    "hard_deadline": "2026-10-08T06:18:45.468189+00:00",
+    "maximum_seconds": 14400.0,
+    "save_margin_seconds": 600,
+    "pid": 74772,
+    "created_time": 1791425915.08237,
+    "entries": [
+      {
+        "name": "sd-sac",
+        "kind": "train",
+        "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+        "source_commit": "9821c23eabfacc989869a71e7b97e99ce006deca",
+        "config": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\sd-sac.yaml",
+        "run_id": "tmrl-sd-sac-projected-fastactor-s17",
+        "max_seconds": 11400,
+        "target_transitions": 145408
+      },
+      {
+        "name": "eval-sd-sac",
+        "kind": "benchmark",
+        "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+        "source_commit": "9821c23eabfacc989869a71e7b97e99ce006deca",
+        "config": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\eval.yaml",
+        "run_id": "tmrl-sd-sac-projected-fastactor-s17-eval10",
+        "max_seconds": 2100,
+        "trials": 10,
+        "config_from_train": "sd-sac",
+        "checkpoint_from_train": "sd-sac"
+      }
+    ],
+    "plan_sha256": "741d5c9597fa799b9df0499756eac510deba61dc6f30337296d131bb1ce1aede",
+    "fresh_start": true,
+    "automatic_full_training": false
+  },
+  "ingest_age_seconds": 0.707984,
+  "run_failure_events": [],
+  "immutable_pins_valid": true,
+  "new_or_changed_STOP_present": false
+}

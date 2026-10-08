@@ -1,3 +1,19 @@
+## Aktualizacja 2026-10-08 02:20UTC: nowy projected actor-LR pilot działa
+
+sd-projlr08 wystartował02:18:45.468189UTC=04:18Warsaw, run tmrl-sd-sac-projected-fastactor-s17,W&Bryzo37yc. Aktor registered i świeży ingest205/0updates02:19:23UTC; warmup nie ocenia jazdy. SAVE06:08:45UTC/HARD06:18:45UTC,cap14400s,targetCAŁKOWITY145408/max11400+10greedy/max2100. Runner74772/guard8472/learner7632/actor66896 exactctimes w receipts. Preflight10ms/33fields/57reads/correctUID. Frozen projection runtime9821c23e unchanged;1883pins,fingerprintc022d63558596fe1a341d616f4d83681b2d9435ad90d966ea645cd6fe2cc0fb7.
+
+Jedyna zmiana learning setting względem sd-proj08: actorLR.0001→.0009. Fresh odzera,noresume; reward/model/GNN/replay/UTD/alpha.01/beta.0005/criticLR/objective/projection bez zmian. Uzasadnienie: completed paired64step disposable savedAdam actorcopies,fixedaverageQ,CPUidle1thread. HeldKL .6118/.6125→.2123/.2094,regret .001408/.001304→.000575/.000330,agreement85.16/85.74%→89.26/88.87%; wszystkie LR variants poprawiły starts agreement0→100%. LR.0003 również poprawiał fitting; wybór.0009 bada szybsze tracking movingQ,nie izoluje prawdziwości Q i nie dowodzi poprawy jazdy. Saved model/Adam/CP unchanged; brak zapisania kopii policy.
+
+27testówPASS:8nowychscope/window +19applicableguards; validate-only,Ruff i mypy z pominięciem zewnętrznych/importowanych boundariesPASS. Pierwsze wywołanie obejmowało legacy validate_plan oczekujący auth-path zamiast aktualnego prose-auth (27PASS/1FAIL),zachowano diagnostykę;łącznie5legacy actorLR/auth-plan przypadków nie stosuje się do nowego launchera. Nowe scope tests weryfikują dokładną zmianęactorLR,zakazreward/training/entropy/full/stale/reuse. Bez edycji starych helpers/frozen. MonitoringACTIVE5min do>=15min zdrowych learned checks,potemgodzinny tylko daleko odSAVE. Gate>=8/10 i pełne kontrole,fullBLOCKED; nigdyrestart/extend/nowySTOPoverride.
+
+## Aktualizacja 2026-10-08: sd-proj08 zakończony, dalsza diagnoza offline
+
+Świeży projected pilot zakończył się normalnie 02:07:37UTC; guard closure 02:07:38UTC, forced[]. Wszystkie zaobserwowane exactPID/ctime zamknięte, mutex wolny, 1865 immutable pins i poprzedni CP niezmienione. Final CP33866 SHA333522bce19b998118da2ca3acde864c17e092f2d821f82d54d861d16256e8dc:145466 transitions/33866 updates/credit0.5, finite/accounted/drained/complete.
+
+Rzeczywista ocena FAIL2/10, średni postęp51.558708%, mediana dwóch met87.675s. Dziesięć kompletnych prób z prawidłowym UID,10404/10404 pomiarów timing valid,max50ms,bez błędów kontrolera/telemetrii; skips2262,max7. Wszystkie kontrole poza>=8finishes PASS. Lepszy wynik niż bezpośredni actorfit0/10 nie oznacza lepszej niezawodności od wcześniejszego slow3/10; pełne treningi nadal BLOCKED.
+
+Offline CPU idle/single-thread,zero learner/controller updates:181 terminali MAE2.0858,978 analizowanych nonterminali Bellman MAE0.08369; behavior-return proxy ma ograniczenia off-policy. Na182 zapisanych startach oba krytyki wybierają akcję5,aktor akcję65 (agreement0%,regret minQ0.02737),entropia aktora3.9276 vs soft-target2.7918. Normy hyperspherical0.99999982–1.00000012: projekcja działa,nie dowodzi poprawności krytyka. Rozpoczęto bounded disposable actor+savedAdam LR probe64steps,seeds17/29,LR.0001/.0003/.0009 przy fixed averageQ/alpha.01/beta unchanged/projection. Wynik jeszcze nieznany; brak nowego pilota lub zmiany savedpolicy. Autoryzowana pętla pozostaje ACTIVE5min; kolejny świeży pilot wymaga konkretnego uzasadnienia,nowego planu/predecessor/pins/STOP,bez restartu sd-proj08.
+
 ## 8 October 2026 01:32 Warsaw — projection pilot running
 
 Following the direct human go, sd-proj08 started at01:30:24 Warsaw on frozen9821c23e.

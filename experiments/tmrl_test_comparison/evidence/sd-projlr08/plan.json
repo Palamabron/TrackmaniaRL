@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "maximum_seconds": 14400,
+  "entries": [
+    {
+      "name": "sd-sac",
+      "kind": "train",
+      "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+      "source_commit": "9821c23eabfacc989869a71e7b97e99ce006deca",
+      "config": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\sd-sac.yaml",
+      "run_id": "tmrl-sd-sac-projected-fastactor-s17",
+      "max_seconds": 11400,
+      "target_transitions": 145408
+    },
+    {
+      "name": "eval-sd-sac",
+      "kind": "benchmark",
+      "runtime": "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania",
+      "source_commit": "9821c23eabfacc989869a71e7b97e99ce006deca",
+      "config": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\eval.yaml",
+      "run_id": "tmrl-sd-sac-projected-fastactor-s17-eval10",
+      "max_seconds": 2100,
+      "trials": 10,
+      "config_from_train": "sd-sac",
+      "checkpoint_from_train": "sd-sac"
+    }
+  ],
+  "authorization": "Dobra to przygotuj odpelenie dalszych pilot\u00f3w i test\u00f3w SD SAC od 1:30 dzisiaj i od odpalenia monitoruj co 5-10 min stan i je\u015bli wszystko b\u0119dzie git to co godzin\u0119",
+  "not_before": "2026-10-08T02:15:00+00:00",
+  "latest_start": "2026-10-08T02:45:00+00:00",
+  "fresh_start": true,
+  "automatic_full_training": false,
+  "predecessor": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-proj08",
+  "original_checkpoint": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\tmrl-sd-sac-projected-s17\\checkpoints\\distributed-update-00033866.pt",
+  "stop_sources": [
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-actorfit-runtime\\AITrackmania\\artifacts\\STOP",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-actorfit-runtime\\AITrackmania\\artifacts\\STOP-sd-sac",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-actorfit-runtime\\AITrackmania\\STOP",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania\\artifacts\\STOP",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania\\artifacts\\STOP-sd-sac",
+    "C:\\Users\\szulc\\.codex\\worktrees\\tmrl-sd-sac-projection-runtime\\AITrackmania\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\STOP-discrete-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\STOP-dsac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\STOP-ppo",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\STOP-qr",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\STOP-qr-dqn",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-continuous-sac-20261004\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-overnight-ppo-recovery-20261004\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-overnight-tuning-20261005\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-ppo-sd-sac-repair-20261005\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-qr-repair-20261005\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-qr-repair-retry02-20261005\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-anchor0005-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-anchor005-20261005\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-anchor005-recovery01-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-anchor005-retry02-20261005\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-comprehensive-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-comprehensive-20261006\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-comprehensive-20261006\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-comprehensive-resume02-20261007\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-comprehensive-resume02-20261007\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-comprehensive-resume02-20261007\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-refit-20261007\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-refit-20261007\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-refit-20261007\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-stability-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-stability-20261006\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-stability-20261006\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-stability-eval-recovery01-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-stability-eval-recovery01-20261006\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-stability-eval-recovery01-20261006\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-target120-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-target120-eval-fresh02-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-target120-eval-recovery01-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-terminal-20261006\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-terminal-20261006\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-terminal-20261006\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-status-recovery-20261004\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-af07\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-c07\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-c07\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-c07\\STOP-resume-validation",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-c07\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-e08\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-e08\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07b\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07b\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07b\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07c\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07c\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07c\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07d\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07d\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-fit07d\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-proj08\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-proj08\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-proj08\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\STOP-eval-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-projlr08\\STOP-sd-sac",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-r07\\resume-artifacts\\tmrl-sd-sac-resume02-s17\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-r07\\STOP",
+    "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-r07\\STOP-resume"
+  ],
+  "superseded_stops": [
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\STOP",
+      "sha256": "b6916cdf60cde4f434b8c3e134b92bca41878a0f68b9a9183dae1eeda0f116eb",
+      "mtime_ns": 1791213276101971600
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-qr-repair-retry01-20261005\\STOP",
+      "sha256": "b6916cdf60cde4f434b8c3e134b92bca41878a0f68b9a9183dae1eeda0f116eb",
+      "mtime_ns": 1791213276102971900
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-actorlr0009-20261006\\STOP",
+      "sha256": "cacaaa03161a54ed166f80f1fc62b4d5ee0dfc650dc43ae74b54cccdb2d7d93f",
+      "mtime_ns": 1791288490687730100
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-actorlr0009-20261006\\STOP-sd-sac",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mtime_ns": 1791288491034144400
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-actorslow-20261007\\STOP",
+      "sha256": "79834e8c8bbb81e7b0fcd22f1f3759803d3c2b337869517f49852e3cde89d7ad",
+      "mtime_ns": 1791360672274689900
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-actorslow-20261007\\STOP-sd-sac",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mtime_ns": 1791360672437842100
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-sd-sac-anchor005-retry01-20261005\\STOP",
+      "sha256": "b6916cdf60cde4f434b8c3e134b92bca41878a0f68b9a9183dae1eeda0f116eb",
+      "mtime_ns": 1791213276103971400
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\queue-tuning-20261004\\STOP",
+      "sha256": "fe89468816a48b202ead847534783591690c9b9b563e2140211aee9d15c56b77",
+      "mtime_ns": 1791128438094579700
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-af07\\STOP",
+      "sha256": "eadd6635631f33768dffeff142940d6075bdb1283d92ea57b43be60b563f0a40",
+      "mtime_ns": 1791374417365587300
+    },
+    {
+      "path": "H:\\Studia\\inzynierskie\\inzynierkav2\\AITrackmania\\artifacts\\tmrl-test-comparison\\sd-af07\\STOP-sd-sac",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mtime_ns": 1791374417622047400
+    }
+  ],
+  "hypothesis": "Only actor LR .0001 to .0009 on unchanged projected runtime. Paired64step fixed-Q copies reduce held KL .612 to .211 and regret .00136 to .00045; no critic truth/driving claim."
+}
