@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-10-08T05:25:15.931518+00:00",
+  "status": "COMPLETE",
+  "all_probe_owned_closed": true,
+  "checkpoint_sha256": "f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53",
+  "immutable_pins_valid": true,
+  "new_or_changed_STOP_present": false,
+  "decision": "Fresh Adam removes much of SAC fitting deficit but neither objective selects mean-Q greedy start action35; both choose no-gas action56 at LR.0009. No objective change justified for runtime.",
+  "next_diagnostic": "Zero-update audit of initial-state fit coverage, observation aliasing and actor/soft-target top-action probability margins on saved replay. Distinguish sampling/generalization from ability to fit identical starts before another optimizer probe."
+}

@@ -1,3 +1,11 @@
+## 8 October 2026 05:25 UTC - fresh-Adam control complete; no objective promotion
+
+The paired fresh-Adam control completed512 projected actor-copy steps in113.53s. AtLR.0009,SAC held reverseKL.078282/.072759 is close to forward-KL.075557/.074223; SAC greedy agreement64.65/64.84% remains below forward76.76/76.37%,and greedy regret.000963/.000879 exceeds forward.000522/.000596. Resetting disposable optimizer history removes much of the saved-Adam SAC deficit,so the earlier inherited-Adam comparison cannot establish that SAC is intrinsically worse.
+
+Both fresh objectives atLR.0009 choose action56(no gas) on all131 saved starts,with zero agreement against mean-Q greedy action35(gas1) and regret.002131; atLR.0001 both choose action3,also zero agreement. Neither comparison supports an objective-only runtime fix or another identical fast-actor pilot. Reused replay,frozen critics and only64 steps limit interpretation; no capacity/architecture conclusion or claim about driving.
+
+Original CP/model/Adam unchanged,all exact probe processes closed,actual CP SHA f2b0d4aa942606c1b6c0c058942d7e4e0f816a909ea17733635bf38ab0d40f53,immutable pins valid,no changed STOP. Evidence: evidence/sd-projlr08-final/actor-objectives-fresh-adam.json and actor-objectives-fresh-adam-verification.json. No offline process remains,no new pilot launched,fullBLOCKED,automationACTIVE5min. Next zero-update diagnostic: quantify start-state fit coverage,observation aliasing and actor/soft-target top-action probability margins; distinguish sampling/generalization from fitting ability before another optimizer probe.
+
 ## 8 October 2026 05:20 UTC - saved-Adam actor objective result and fresh control
 
 All512 projected actor-copy steps completed in113.14s; original checkpoint/model/saved Adam unchanged,all exact probe identities closed,actual CP SHA and immutable pins valid,no changed STOP. On held episodes,forward-KL atLR.0009 gives agreement76.95/77.15%,regret.000536/.000518,reverseKL.124906/.124686. Canonical SAC at the same LR and inherited Adam gives agreement21.68/22.27%,regret.007336/.007167,reverseKL.653937/.608725 versus baseline.471377. AtLR.0001,SAC reverseKL.469171/.468223 barely improves baseline. All variants still have zero mean-Q greedy agreement on saved starts; no objective promoted and no new runtime pilot.
