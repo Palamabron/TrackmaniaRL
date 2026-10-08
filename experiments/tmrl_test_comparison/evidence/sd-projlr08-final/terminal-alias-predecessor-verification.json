@@ -1,0 +1,48 @@
+{
+  "status": "COMPLETE",
+  "verified_at": "2026-10-08T06:49:25.103045+00:00",
+  "actual_checkpoint_sha256": "333522bce19b998118da2ca3acde864c17e092f2d821f82d54d861d16256e8dc",
+  "pins_valid": true,
+  "no_new_stop": true,
+  "offline_process_inventory": [],
+  "identity_capture": "Short foreground audit completed before capture; no exact PID/ctime claim.",
+  "original_model_all_optimizers_unchanged": true,
+  "optimizer_steps": 0,
+  "exact_alias_pairs": 0,
+  "neighbor_sample_size": 4269,
+  "neighbor_distance_summary": {
+    "any": {
+      "count": 181,
+      "min_median_p95_max": [
+        0.006094238518751148,
+        0.17414091032688483,
+        0.4182240273424451,
+        0.816793082478219
+      ]
+    },
+    "different_episode": {
+      "count": 181,
+      "min_median_p95_max": [
+        0.04391403799338101,
+        0.21311301693049411,
+        0.5457563384129311,
+        0.9749795346019092
+      ]
+    },
+    "same_action_different_episode": {
+      "count": 181,
+      "min_median_p95_max": [
+        0.13179228903923648,
+        0.5060559944598149,
+        1.0143408668181961,
+        1.7058391495726224
+      ]
+    }
+  },
+  "limitations": [
+    "Neighbors use a fixed sample plus predecessors; distances are not exhaustive.",
+    "Branch-scaled RMS is descriptive and is not a learned separability classifier.",
+    "Current observations precede actions; outcomes may depend on hidden history.",
+    "An observation/action alias alone does not establish an incorrect label."
+  ]
+}

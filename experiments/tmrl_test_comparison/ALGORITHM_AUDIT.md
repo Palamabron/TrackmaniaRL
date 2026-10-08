@@ -1,3 +1,13 @@
+> Update 2026-10-08 06:50 UTC — terminal observation alias / neighbor audit COMPLETE; zero updates.
+>
+> Exact decoded current-observation hashes cover all145424 current and145466 predecessor replay rows. No terminal/nonterminal exact aliases in either snapshot (130/181 terminal rows). Nearest-neighbor audit uses fixed4096 random nonterminals plus all immediate terminal predecessors, giving4224/4269 candidates. Episode/step/action/reward/termination metadata and per-branch raw RMS differences are preserved. Current median branch-scaled distance .20932 for any neighbor, .25456 across episodes, .65917 for the same action across episodes; predecessor .17414/.21311/.50606. These are different populations with separately scaled distances, not paired causal evidence or a classifier.
+>
+> Similar states exist, including near-adjacent episode steps, but no exact observation conflict or incorrect terminal label is established. Current observations precede actions; termination can depend on next state and progress history. No architecture, label, replay or runtime change is justified by proximity alone. Existing return audit remains sufficient; do not repeat it.
+>
+> Both actual CP SHA/fingerprint/model/all-optimizer invariants PASS; immutable pins valid, no new STOP, no remaining offline process. Short foreground audits completed before capture; no exact PID/ctime claim. Runtime9.36/11.30s, CPU IDLE single thread, optimizer0/controller false. Source audit_sd_sac_terminal_alias.py and current/predecessor JSON plus verifications saved under evidence/sd-projlr08-final; Ruff/mypy PASS.
+>
+> Next: inspect terminal-reason / progress-history observability using existing replay metadata and observation schema before another critic optimization probe. No further actor-loss grid or guard waiver. Full SD BLOCKED; ACTIVE5min, no new pilot.
+
 > Update 2026-10-08 06:43 UTC — critic feature/head geometry audit COMPLETE; no optimizer/runtime updates.
 >
 > Current and predecessor actual checkpoint SHA/fingerprint/model/all-optimizer invariants PASS; immutable pins/STOP valid. Linear-head reconstruction and Cauchy output bounds PASS on all sampled rows/actions. All terminal rewards lie inside the observed feature-norm head envelopes. No output-range impossibility or architecture fix is established. Short foreground audits completed before identity capture; no exactID receipt claimed. First current attempt aborted on encoded replay actions and was corrected with the existing decode_tree helper, with zero updates throughout.
